@@ -9,6 +9,7 @@ import numpy as np
 import utm
 
 from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format import \
     IntermediateFormat
@@ -20,7 +21,6 @@ from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.cleanup im
 # CommonRoad python tools are imported
 from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
-from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.scenario import Scenario, Lanelet, Tag, Location
 
 
@@ -267,7 +267,7 @@ def view_xml(filename: str, ax=None) -> None:
     :return: None
     """
     print("loading scenario from XML")
-    scenario, problem = CommonRoadFileReader(filename).open()
+    scenario, problem = CRDesignerFileReader(filename).open()
     print("drawing scenario")
     if len(scenario.lanelet_network.lanelets) == 0:
         print("empty scenario")

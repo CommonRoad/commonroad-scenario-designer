@@ -5,8 +5,9 @@ import logging
 
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad.common.file_reader import CommonRoadFileReader, FileFormat
+from commonroad.common.file_reader import FileFormat
 
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 
 if SUMO_AVAILABLE:
@@ -45,9 +46,9 @@ def open_path(mwindow, path):
     """ """
     try:
         if ".pb" in path:
-            commonroad_reader = CommonRoadFileReader(path, file_format=FileFormat.PROTOBUF)
+            commonroad_reader = CRDesignerFileReader(path, file_format=FileFormat.PROTOBUF)
         else:
-            commonroad_reader = CommonRoadFileReader(path, file_format=FileFormat.XML)
+            commonroad_reader = CRDesignerFileReader(path, file_format=FileFormat.XML)
         scenario, pps = commonroad_reader.open()
     except Exception as e:
         QMessageBox.warning(mwindow.mwindow_ui, "CommonRoad XML error",

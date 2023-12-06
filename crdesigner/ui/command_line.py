@@ -3,7 +3,6 @@ from pathlib import Path
 import typer
 import inspect
 
-from commonroad.common.file_reader import CommonRoadFileReader
 from typing_extensions import Annotated
 
 from commonroad.planning.planning_problem import PlanningProblemSet
@@ -11,6 +10,7 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.scenario.scenario import Tag
 from commonroad.scenario.scenario import Scenario
 
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.ui.gui.start_gui import start_gui
 from crdesigner.map_conversion.map_conversion_interface import commonroad_to_lanelet, lanelet_to_commonroad, \
@@ -72,7 +72,7 @@ def gui(ctx: typer.Context):
 
 @cli.command()
 def verify_map(ctx: typer.Context):
-    sc, pp = CommonRoadFileReader(ctx.obj["input_file"]).open()
+    sc, pp = CRDesignerFileReader(ctx.obj["input_file"]).open()
     sc, valid = verify_and_repair_scenario(sc)
     if not valid:
         writer = CommonRoadFileWriter(scenario=sc, planning_problem_set=pp)

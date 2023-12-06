@@ -37,7 +37,6 @@ except TypeError:
     warnings.warn(
         f"Unable to import commonroad_dc.pycrccosy, converting static scenario into interactive is not supported!")
 
-from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.solution import VehicleType as VehicleTypeParam
 from commonroad.common.util import Interval
 from commonroad.prediction.prediction import TrajectoryPrediction
@@ -55,6 +54,7 @@ from crdesigner.map_conversion.sumo_map.sumolib_net import (TLS, Connection, Cro
                                                             Node, NodeType, RightOfWay,
                                                             VehicleType, SpreadType, sumo_net_from_xml, Net, Roundabout)
 
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.map_conversion.sumo_map.errors import ScenarioException
 from crdesigner.map_conversion.sumo_map.util import (_find_intersecting_edges,
                                                      get_total_lane_length_from_netfile, max_lanelet_network_id,
@@ -165,7 +165,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
     @classmethod
     def from_file(cls, file_path_cr, conf: SumoConfig):
-        scenario, _ = CommonRoadFileReader(file_path_cr).open()
+        scenario, _ = CRDesignerFileReader(file_path_cr).open()
         return cls(scenario, conf)
 
     def _convert_map(self):

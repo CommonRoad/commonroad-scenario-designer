@@ -8,9 +8,9 @@ from typing import List
 
 import numpy as np
 import pytest
-from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.obstacle import ObstacleType
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.map_conversion.sumo_map.config import SumoConfig
 from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
 from parameterized import parameterized
@@ -46,7 +46,7 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
 
         self.path = os.path.join(self.cwd_path, folder, cr_file_name + ".xml")
 
-        self.scenario, planning_problem = CommonRoadFileReader(self.path).open()
+        self.scenario, planning_problem = CRDesignerFileReader(self.path).open()
 
         # translate scenario to center
         centroid = np.mean(np.concatenate([la.center_vertices for la in self.scenario.lanelet_network.lanelets]),

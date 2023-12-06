@@ -5,7 +5,7 @@ from lxml import etree
 from typing import Tuple
 
 import crdesigner.map_conversion.osm2cr.converter_modules.converter as converter
-from commonroad.common.file_reader import CommonRoadFileReader
+from crdesigner.common.file_reader import CRDesignerFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.scenario import Scenario
 from commonroad.planning.planning_problem import PlanningProblemSet
@@ -27,7 +27,7 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
         # create and save converter scenario
         graph_scenario = converter.GraphScenario(path)
         graph_scenario.save_as_cr(converted_path)
-        cr_scenario, cr_planning_problem = CommonRoadFileReader(converted_path).open()
+        cr_scenario, cr_planning_problem = CRDesignerFileReader(converted_path).open()
 
         return cr_scenario, cr_planning_problem, converted_path
 

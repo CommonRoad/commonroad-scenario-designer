@@ -3,10 +3,10 @@ import numpy as np
 from lxml import etree
 import uuid
 
-from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.visualization.mp_renderer import MPRenderer
 
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.map_conversion.map_conversion_interface import commonroad_to_sumo
 
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
@@ -21,14 +21,14 @@ output_folder = ""  # replace empty string
 scenario_name = ""  # replace empty string
 input_file = os.path.join(output_folder, scenario_name + '.xml')
 
-scenario, planning_problem = CommonRoadFileReader(input_file).open()
+scenario, planning_problem = CRDesignerFileReader(input_file).open()
 
 # ----------------------------------------------- Option 1: General API ------------------------------------------------
 commonroad_to_sumo(input_file, output_folder)
 
 # ------------------------------------------ Option 2: SUMO conversion APIs --------------------------------------------
 try:
-    commonroad_reader = CommonRoadFileReader(input_file)
+    commonroad_reader = CRDesignerFileReader(input_file)
     scenario, _ = commonroad_reader.open()
 except etree.XMLSyntaxError as xml_error:
     print(f"SyntaxError: {xml_error}")

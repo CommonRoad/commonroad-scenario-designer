@@ -3,8 +3,7 @@ from typing import List
 import unittest
 import os
 
-from commonroad.common.file_reader import CommonRoadFileReader
-
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.verification_repairing.verification.formula_ids import FormulaID
 from crdesigner.verification_repairing.verification.hol.mapping import HOLMapping
 from crdesigner.verification_repairing.verification.hol.satisfaction import HOLVerificationChecker
@@ -17,7 +16,7 @@ class TestAll(unittest.TestCase):
 
     def verify(self, formula_ids: List[FormulaID]):
         for sc_name in self.network_names:
-            sc, _ = CommonRoadFileReader(str(self.network_path) + "/test_maps/" + sc_name + ".xml").open()
+            sc, _ = CRDesignerFileReader(str(self.network_path) + "/test_maps/" + sc_name + ".xml").open()
             config = MapVerParams()
             config.verification.formulas = formula_ids
             sc, _ = verify_and_repair_scenario(sc, config)

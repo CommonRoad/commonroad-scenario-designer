@@ -6,11 +6,12 @@ from commonroad.common.common_lanelet import LaneletType, RoadUser
 from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from commonroad.scenario.lanelet import Lanelet, StopLine, LineMarking
-from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany
 from commonroad.scenario.traffic_light import (TrafficLightCycleElement, TrafficLight, TrafficLightState,
                                                TrafficLightCycle)
 from pyproj import CRS, Transformer
+
+from crdesigner.common.file_reader import CRDesignerFileReader
 
 # creating a testing vertices and a testing scenario from a test file (xml)
 right_vertices = np.array([[0, 0], [1, 0], [2, 0]])
@@ -25,7 +26,7 @@ z_lanelet = Lanelet(z_left_vertices, z_center_vertices, z_right_vertices, 200)
 
 
 # loading a file for a scenario
-commonroad_reader = CommonRoadFileReader(
+commonroad_reader = CRDesignerFileReader(
             f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/merging_lanelets_utm.xml"
         )
 
@@ -527,7 +528,7 @@ class TestCR2LaneletConverter(unittest.TestCase):
         """
         """
         # working with the local scenario as it reflects the entire file if I change it globally
-        commonroad_reader = CommonRoadFileReader(
+        commonroad_reader = CRDesignerFileReader(
             f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/merging_lanelets_utm.xml"
         )
         scenario, _ = commonroad_reader.open()
@@ -601,7 +602,7 @@ class TestCR2LaneletConverter(unittest.TestCase):
 
     def test__convert_traffic_light(self):
         # working with the local scenario as it reflects the entire file if I change it globally
-        commonroad_reader = CommonRoadFileReader(
+        commonroad_reader = CRDesignerFileReader(
             f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/merging_lanelets_utm.xml"
         )
         scenario, _ = commonroad_reader.open()
@@ -668,7 +669,7 @@ class TestCR2LaneletConverter(unittest.TestCase):
 
     def test_convert_traffic_light_with_z_coordinate(self):
         # working with the local scenario as it reflects the entire file if I change it globally
-        commonroad_reader = CommonRoadFileReader(
+        commonroad_reader = CRDesignerFileReader(
                 f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/merging_lanelets_utm.xml")
         scenario, _ = commonroad_reader.open()
         cr1 = CR2LaneletConverter()
@@ -706,7 +707,7 @@ class TestCR2LaneletConverter(unittest.TestCase):
 
     def test__add_regulatoryElementForTrafficLights(self):
         # working with the local scenario as it reflects the entire file if I change it globally
-        commonroad_reader = CommonRoadFileReader(
+        commonroad_reader = CRDesignerFileReader(
             f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/merging_lanelets_utm.xml"
         )
         scenario, _ = commonroad_reader.open()
