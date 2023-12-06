@@ -5,6 +5,8 @@
 ### Added
 - Test cases for GUI
 - Logging actions of users
+- Optional functionality to get geonamesID locally without API-call
+- Test Case for local geonamesID functionality
 - OpenDRIVE to CommonRoad conversion: considering line markings of inner shared lanelet boundaries
 - Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
 

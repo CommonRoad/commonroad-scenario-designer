@@ -44,6 +44,12 @@ def convert_line_marking(plane_line_marking: RoadMark) -> LineMarking:
     elif plane_line_marking.type == "none":
         mark = LineMarking.NO_MARKING
 
+    elif plane_line_marking.type == "solid_dashed":
+        mark = LineMarking.SOLID_DASHED
+
+    elif plane_line_marking.type == "dashed_solid":
+        mark = LineMarking.DASHED_SOLID
+
     return mark
 
 
