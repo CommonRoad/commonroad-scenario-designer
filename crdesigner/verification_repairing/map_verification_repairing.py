@@ -10,8 +10,8 @@ from commonroad.common.file_reader import FileFormat
 from commonroad.common.file_writer import OverwriteExistingFile, CommonRoadFileWriter
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import ScenarioID, Scenario
+from commonroad.common.file_reader import CommonRoadFileReader
 
-from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.verification_repairing.verification.verification_result import VerificationResult, \
     initial_map_verification, update_map_verification
 from crdesigner.verification_repairing.verification.formula_ids import extract_formula_ids, FormulaID, GeneralFormulaID
@@ -229,7 +229,7 @@ def verify_and_repair_dir_maps(scenarios_dir_path: Path, config: MapVerParams = 
     assert Path.exists(scenarios_dir_path), 'The path to configuration file is not existent!'
 
     file_paths = collect_scenario_paths(scenarios_dir_path)
-    scenarios_pp = [CRDesignerFileReader(join(scenarios_dir_path, name)).open() for name in file_paths]
+    scenarios_pp = [CommonRoadFileReader(join(scenarios_dir_path, name)).open() for name in file_paths]
 
     repaired_networks, verification_result = \
         verify_and_repair_maps(list(zip(*scenarios_pp))[0], config)
