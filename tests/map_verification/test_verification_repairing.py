@@ -36,10 +36,13 @@ class TestAll(unittest.TestCase):
         self.assertEqual(invalid_states, [{}])
 
     def setUp(self) -> None:
-        self.network_names = ["paper_test_maps/DEU_BadEssen-3_1_T-1",
-                              "paper_test_maps/DEU_Guetersloh-20_1_T-1",
-                              "paper_test_maps/DEU_Reutlingen-1_1_T-1",
-                              "DEU_AachenBendplatz-1"]
+        self.network_names = [
+            "paper_test_maps/DEU_BadEssen-3_1_T-1",
+            "paper_test_maps/DEU_Guetersloh-20_1_T-1",
+            "paper_test_maps/DEU_Reutlingen-1_1_T-1",
+            "DEU_AachenBendplatz-1",
+            "DEU_TrafficLightTest-1"  # traffic light cycle has no ID-> unique ID check fails if cycle in overall set
+                              ]
         self.network_path = Path(__file__).parent
         self.base_formula_ids = []
 
@@ -48,10 +51,10 @@ class TestAll(unittest.TestCase):
         self.verify(formula_ids)
 
     def test_path_collection(self):
-        self.assertEqual(7, len(collect_scenario_paths(Path(
+        self.assertEqual(8, len(collect_scenario_paths(Path(
                 f"{os.path.dirname(os.path.realpath(__file__))}/../map_verification/test_maps"),
                 subdir=False)))
 
-        self.assertEqual(10, len(collect_scenario_paths(
+        self.assertEqual(11, len(collect_scenario_paths(
                 Path(f"{os.path.dirname(os.path.realpath(__file__))}/../map_verification/test_maps"),
                 subdir=True)))
