@@ -225,6 +225,19 @@ class ScenarioModel(QObject):
         @param lanelet_id: Id of the lanelet which should be deleted
         """
         self._update_scenario()
+        removed_lanelet = self.find_lanelet_by_id(lanelet_id)
+        traffic_lights = removed_lanelet.traffic_lights
+        traffic_signs = removed_lanelet.traffic_signs
+
+        for traffic_sign_id in traffic_signs:
+            if len(self._current_scenario().lanelet_network.get_traffic_sign_referenced_lanelets(traffic_sign_id)) == 1:
+                self._current_scenario().remove_traffic_sign(self.find_traffic_sign_by_id(traffic_sign_id))
+
+        for traffic_light_id in traffic_lights:
+            if len(self._current_scenario().lanelet_network
+                           .get_traffic_lights_referenced_lanelets(traffic_light_id)) == 1:
+                self._current_scenario().remove_traffic_light(self.find_traffic_light_by_id(traffic_light_id))
+
         MapCreator.remove_lanelet(lanelet_id, self._current_scenario().lanelet_network)
         self.notify_all()
 
@@ -294,7 +307,7 @@ class ScenarioModel(QObject):
     @logger.log
     def merge_lanelets_dynamic_canvas(self, neighboured_lanelets: List[Lanelet]):
         """
-        Merges the lanelets of the the function merge_lanelets of the dynamic canvas
+        Merges the lanelets of the function merge_lanelets of the dynamic canvas
 
         @param neighboured_lanelets: List of lanelets which should be merged
         """
