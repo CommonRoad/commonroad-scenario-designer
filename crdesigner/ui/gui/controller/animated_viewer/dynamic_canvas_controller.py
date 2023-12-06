@@ -1026,15 +1026,13 @@ class DynamicCanvasController(FigureCanvas):
 
     @logger.log
     def display_curved_lanelet(self, is_checked: bool, new_lanelet: bool = True,
-                            mouse_event: QMouseEvent = None) -> None:
+                               mouse_event: QMouseEvent = None) -> None:
         """
-        Initializes the show of the curved_lanlet preview or disables it.
+        Initializes the show of the curved_lanelet preview or disables it.
 
         :param is_checked: boolean if the button is checked and therefore the lanelet view should be shown
-        :param ui_button: ui_button of the curved_lanelet checkbox
         :param new_lanelet: Indicator if the lanelet already exists or is added as a new lanelet
         :param mouse_event: Mouse parameters -> to prevent if you select a lanelet in the GUI to click twice to deselect
-        @param selected_lanelet: Selected Lanelet of the UI
         """
         if self.parent().play_activated:
             self.parent().road_network_toolbox.text_browser.append("Please stop the animation")
