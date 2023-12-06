@@ -18,6 +18,7 @@
 - Bug when editing curved lanelets in the canvas
 - lanelet2cr wrong final vertice assignment 
 - Deleting unreferenced traffic signs/lights after deleting lanelet
+- Map verification/repairing: Checking unique ID of traffic light cycle element
 
 ## [0.8.0] - 2023-10-31
 
