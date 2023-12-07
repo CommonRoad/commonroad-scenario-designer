@@ -1,6 +1,6 @@
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.traffic_sign import *
@@ -58,8 +58,7 @@ class RoadNetworkController(QDockWidget, ):
     def adjust_ui(self):
         """Updates GUI properties like width, etc."""
         self.setFloating(True)
-        self.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.setAllowedAreas(Qt.LeftDockWidgetArea)
+        self.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea)
         self.setWidget(self.road_network_toolbox_ui)
         self.road_network_toolbox_ui.setMinimumWidth(375)
 

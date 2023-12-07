@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMessageBox
 
 from commonroad.common.util import Interval
 from commonroad.scenario.obstacle import ObstacleType

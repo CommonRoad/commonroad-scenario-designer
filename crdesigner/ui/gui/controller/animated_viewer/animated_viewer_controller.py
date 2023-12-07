@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 import numpy as np
 
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
@@ -193,8 +193,7 @@ class AnimatedViewerController:
     def save_animation(self):
         path, _ = QFileDialog.getSaveFileName(caption="QFileDialog.getSaveFileName()",
                                               directory=self.scenario_model.get_scenario_id().__str__() + ".mp4",
-                                              filter="MP4 (*.mp4);;GIF (*.gif);; AVI (*avi)",
-                                              options=QFileDialog.Options(), )
+                                              filter="MP4 (*.mp4);;GIF (*.gif);; AVI (*avi)", )
         if not path:
             return
 
@@ -210,7 +209,7 @@ class AnimatedViewerController:
         except IOError as e:
             QMessageBox.critical(self, "CommonRoad file not created!",
                                  "The CommonRoad scenario was not saved as video due to an error.\n\n{}".format(e),
-                                 QMessageBox.Ok, )
+                                 QMessageBox.StandardButton.Ok, )
             return
 
     def _calc_max_timestep(self) -> int:

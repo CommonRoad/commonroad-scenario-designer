@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
 import os
 import logging
 
@@ -40,8 +40,7 @@ def open_commonroad_file(mwindow, path=None):
         path, _ = QFileDialog.getOpenFileName(mwindow.mwindow_ui, "Open a CommonRoad scenario", "",
                                               "CommonRoad scenario *.xml file (*.xml);; "
                                               "CommonRoad scenario *-SC.pb file (*-SC.pb);; "
-                                              "CommonRoad map *.pb file (*.pb);; ",
-                                              options=QFileDialog.Options(), )
+                                              "CommonRoad map *.pb file (*.pb);; ", )
     if not path:
         return
     open_path(mwindow=mwindow, path=path)
@@ -67,7 +66,7 @@ def open_path(mwindow, path):
     except Exception as e:
         QMessageBox.warning(mwindow.mwindow_ui, "CommonRoad opening error",
                             "There was an error during the loading of the selected CommonRoad file.\n\n" +
-                            "Syntax Error: {}".format(e), QMessageBox.Ok, )
+                            "Syntax Error: {}".format(e), QMessageBox.StandardButton.Ok, )
         return
 
     filename = os.path.splitext(os.path.basename(path))[0]
@@ -104,7 +103,8 @@ def file_save(mwindow):
     """Function to save a CR .xml file."""
     if not mwindow.scenario_model.scenario_created():
         messbox = QMessageBox()
-        messbox.warning(mwindow.mwindow_ui, "Warning", "There is no file to save!", QMessageBox.Ok, QMessageBox.Ok)
+        messbox.warning(mwindow.mwindow_ui, "Warning", "There is no file to save!",
+                        QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Ok)
         messbox.close()
         return
 
@@ -122,7 +122,8 @@ def close_window(mwindow):
     """
         For closing the window.
     """
-    reply = QMessageBox.warning(mwindow, "Warning", "Do you really want to quit?", QMessageBox.Yes | QMessageBox.No,
-                                QMessageBox.Yes)
-    if reply == QMessageBox.Yes:
-        qApp.quit()
+    reply = QMessageBox.warning(mwindow, "Warning", "Do you really want to quit?",
+                                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                                QMessageBox.StandardButton.Yes)
+    if reply == QMessageBox.StandardButton.Yes:
+        QApplication.quit()

@@ -30,12 +30,8 @@ commonroad-io = {git = "git@gitlab.lrz.de:cps/commonroad-io.git", rev = "release
 commonroad-drivability-checker = [
     {version = "2023.1", python = "<3.11"},
     {git = "git@gitlab.lrz.de:cps/commonroad-drivability-checker.git", rev = "development", python = ">=3.11"}
-]
-pyqt5 = ">=5.15.9"
-PyQt5-Qt5 = [
-    {version = "<5.15.11", platform = 'linux'},
-    {version = "<5.15.11", platform = 'win64'},
-    {version = "=5.15.11", platform = 'darwin'}]
+    ]
+pyqt6 = ">=6.6.0"
 matplotlib = ">=3.6.0"
 numpy = [
     {version = ">=1.22, <1.26", python = "3.8"},

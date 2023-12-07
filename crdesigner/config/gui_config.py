@@ -142,8 +142,8 @@ class GuiConfig(BaseConfig):
         ["Appearance", DARKMODE, MODERN_LOOK, AXIS_VISIBLE, LEGEND, "Obstacle visualization", DRAW_DYNAMIC_OBSTACLES,
          DRAW_TRAJECTORY, DRAW_OBSTACLE_LABELS,DRAW_OBSTACLE_ICONS, DRAW_OBSTACLE_DIRECTION, DRAW_OBSTACLE_SIGNALS,
          "Intersection visualization",DRAW_INCOMING_LANELETS, DRAW_OUTGOINGS, DRAW_INTERSECTION_LABELS, ],
-        ["Other", ENABLE_EDITING_CURVED_LANELETS, ENABLE_UNDETAILED_DISPLAY, DRAW_OCCUPANCY, DRAW_TRAFFIC_SIGNS, DRAW_TRAFFIC_LIGHTS, BING_MAPS_KEY,
-         LDBV_USERNAME, LDBV_PASSWORD, LOG_ACTIONS_OF_THE_USER]]
+        ["Other", ENABLE_EDITING_CURVED_LANELETS, ENABLE_UNDETAILED_DISPLAY, DRAW_OCCUPANCY, DRAW_TRAFFIC_SIGNS,
+         DRAW_TRAFFIC_LIGHTS, BING_MAPS_KEY, LDBV_USERNAME, LDBV_PASSWORD, LOG_ACTIONS_OF_THE_USER]]
 
     def get_draw_params(self) -> DrawParamsCustom:
         """
@@ -158,12 +158,12 @@ class GuiConfig(BaseConfig):
                 traffic_light=TrafficLightParams(draw_traffic_lights=self.DRAW_TRAFFIC_LIGHTS)),
                                 trajectory=TrajectoryParams(draw_trajectory=self.DRAW_TRAJECTORY),
                                 occupancy=OccupancyParams(draw_occupancies=self.DRAW_OCCUPANCY),
-                dynamic_obstacle=DynamicObstacleParams(trajectory=TrajectoryParams(
-                        draw_trajectory=self.DRAW_TRAJECTORY),
-                        draw_icon=self.DRAW_OBSTACLE_ICONS,
-                        draw_direction=self.DRAW_OBSTACLE_DIRECTION,
-                        draw_signals=self.DRAW_OBSTACLE_SIGNALS,
-                        show_label=self.DRAW_OBSTACLE_LABELS))
+                                dynamic_obstacle=DynamicObstacleParams(trajectory=TrajectoryParams(
+                                        draw_trajectory=self.DRAW_TRAJECTORY),
+                                        draw_icon=self.DRAW_OBSTACLE_ICONS,
+                                        draw_direction=self.DRAW_OBSTACLE_DIRECTION,
+                                        draw_signals=self.DRAW_OBSTACLE_SIGNALS,
+                                        show_label=self.DRAW_OBSTACLE_LABELS))
 
     def show_dynamic_obstacles(self) -> bool:
         """
@@ -226,7 +226,7 @@ class GuiConfig(BaseConfig):
             colorscheme = ColorSchema(axis=gui_config.AXIS_VISIBLE, background='#303030', color='#f0f0f0',
                                       highlight='#1e9678', second_background='#2c2c2c')
         else:
-            colorscheme = ColorSchema(axis=gui_config.AXIS_VISIBLE)
+            colorscheme = ColorSchema(axis=gui_config.AXIS_VISIBLE, background='#f0f0f0')
 
         return colorscheme
 
@@ -315,6 +315,7 @@ class GuiConfig(BaseConfig):
                                         background-color: 	#FFFFFF;  /* White */
                                         font-family: "Verdana";
                                         font-size: 10pt;
+                                        color: #000000
                                     }
                                     QPushButton {
                                         background-color: #0000FF;  /* Blue */
@@ -364,10 +365,21 @@ class GuiConfig(BaseConfig):
                                     QComboBox::drop-down {
                                         border: none;
                                     }
+                                    QLineEdit {
+                                    color: #000000;
+                                    }
+                                    QAction {
+                                    color: #000000;
+                                    }
+                                    QToolTip {
+                                    color: #000000;
+                                    }                                  
+                                    
 
                                 """
             return stylesheet
         else:
             return ""
+
 
 gui_config = GuiConfig()

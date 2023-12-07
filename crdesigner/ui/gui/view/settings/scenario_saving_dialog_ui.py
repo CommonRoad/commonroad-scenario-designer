@@ -1,6 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 from commonroad.common.common_scenario import TimeOfDay, Weather, Underground
 from commonroad.scenario.scenario import Tag
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
@@ -14,10 +14,10 @@ class ScenarioSavingDialogUI(QWidget):
         super().__init__()
 
         self.label_benchmark_id = QLabel("")
-        self.label_benchmark_id.setFont(QFont("Arial", 10, QFont.Bold))
+        self.label_benchmark_id.setFont(QFont("Arial", 10, QFont.Weight.Bold))
 
         self.label_directory = QLabel("")
-        self.label_directory.setFont(QFont("Arial", 10, QFont.Bold))
+        self.label_directory.setFont(QFont("Arial", 10, QFont.Weight.Bold))
         self.button_directory = QPushButton("Change Directory")
 
         self.country = QComboBox()
@@ -25,7 +25,7 @@ class ScenarioSavingDialogUI(QWidget):
         self.country.addItems(country_list)
 
         self.scenario_scene_name = QLineEdit()
-        self.scenario_scene_name.setAlignment(Qt.AlignRight)
+        self.scenario_scene_name.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_scene_id = QSpinBox()
         self.scenario_scene_id.setMinimum(1)
@@ -52,30 +52,30 @@ class ScenarioSavingDialogUI(QWidget):
         self.scenario_time_step_size = QLineEdit()
         self.scenario_time_step_size.setValidator(QDoubleValidator())
         self.scenario_time_step_size.setMaxLength(4)
-        self.scenario_time_step_size.setAlignment(Qt.AlignRight)
+        self.scenario_time_step_size.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_author = QLineEdit()
-        self.scenario_author.setAlignment(Qt.AlignRight)
+        self.scenario_author.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_affiliation = QLineEdit()
-        self.scenario_affiliation.setAlignment(Qt.AlignRight)
+        self.scenario_affiliation.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_source = QLineEdit()
-        self.scenario_source.setAlignment(Qt.AlignRight)
+        self.scenario_source.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.location_storage_selection = QCheckBox("Store Location")
 
         self.scenario_geo_anme_id = QLineEdit()
         self.scenario_geo_anme_id.setValidator(QIntValidator())
-        self.scenario_geo_anme_id.setAlignment(Qt.AlignRight)
+        self.scenario_geo_anme_id.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_latitude = QLineEdit()
         self.scenario_latitude.setValidator(QDoubleValidator())
-        self.scenario_latitude.setAlignment(Qt.AlignRight)
+        self.scenario_latitude.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_longitude = QLineEdit()
         self.scenario_longitude.setValidator(QDoubleValidator())
-        self.scenario_longitude.setAlignment(Qt.AlignRight)
+        self.scenario_longitude.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_time_of_day = QComboBox()
         time_of_day_list = [e.value for e in TimeOfDay]
