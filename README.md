@@ -142,6 +142,15 @@ For many conversions we provide further APIs, e.g., for downloading a map from O
 The GUI provides a toolbox with which contains functionality to load maps given in formats other the CommonRoad format   
 and to convert CommonRoad maps to other formats or the other formats to the CommonRoad format.
 
+#### Saving Video
+
+Provides the functionality to save the animation of the scenario as a mp4 file.
+
+For error: "MovieWriter ffmpeg unavailable; using Pillow instead." try to install ffmpeg. This should solve the problem.
+```bash
+sudo apt-install ffmpeg
+```
+
 #### Important information
 
 When converting OSM maps, missing information such as the course of individual lanes is estimated during the process.  
