@@ -2,28 +2,28 @@ import copy
 import math
 import warnings
 from typing import List, Union
+import numpy as np
 
-from commonroad.geometry.shape import Circle, Rectangle
 from matplotlib import patches, pyplot as plt
 from matplotlib.backend_bases import MouseButton
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+
 import PyQt6
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import QSizePolicy
 from PyQt6 import QtCore
-import numpy as np
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
 
+from commonroad.geometry.shape import Circle, Rectangle
 from commonroad.planning.planning_problem import PlanningProblem
 from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.visualization.draw_params import StaticObstacleParams, DynamicObstacleParams
-from crdesigner.config.gui_config import gui_config, DrawParamsCustom
-from numpy import ndarray
-
 from commonroad.scenario.obstacle import StaticObstacle, DynamicObstacle
-from commonroad.scenario.lanelet import LaneletType, Lanelet
+from commonroad.scenario.lanelet import LaneletType
+from commonroad.scenario.scenario import Scenario
 
+from crdesigner.config.gui_config import gui_config, DrawParamsCustom
 from crdesigner.config.logging import logger
 from crdesigner.ui.gui.utilities.aerial_data import get_aerial_image_bing, get_aerial_image_ldbv, \
     get_aerial_image_limits
@@ -31,7 +31,7 @@ from crdesigner.ui.gui.utilities.helper import _merge_dict, calculate_closest_ve
     angle_between, draw_lanelet_polygon
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 from crdesigner.ui.gui.utilities.scenario_resizer import resize_lanelet_network
-from crdesigner.ui.gui.utilities.toolbox_ui import PosB, CollapsibleCheckBox
+from crdesigner.ui.gui.utilities.toolbox_ui import PosB
 
 ZOOM_FACTOR = 1.2
 
@@ -44,7 +44,8 @@ class DynamicCanvasController(FigureCanvas):
     control_key = False
     show_aerial = False
 
-    def __init__(self, parent=None, scenario_model=None, width=5, height=5, dpi=100, animated_viewer=None):
+    def __init__(self, parent=None, scenario_model: Scenario = None, width: float = 5, height: float = 5,
+                 dpi: int = 100, animated_viewer=None):
         self.scenario_model = scenario_model
         self.image_limits = None
         self.current_aerial_image = None
@@ -58,7 +59,8 @@ class DynamicCanvasController(FigureCanvas):
         self.drawer.set_facecolor('None')
         self.drawer.set_edgecolor('None')
         self.rnd = MPRenderer(ax=self.ax)
-        #Ignore the warning which shows up if the figure layout has changed produced by the method drawer.tight_layout()
+        # Ignore the warning which shows up if the figure layout has changed produced
+        # by the method drawer.tight_layout()
         warnings.filterwarnings("ignore", message="The figure layout has changed to tight")
 
         self._handles = {}
@@ -113,7 +115,7 @@ class DynamicCanvasController(FigureCanvas):
 
         self.clear_axes()
 
-        #Parameters for curved lanlet adding
+        # Parameters for curved lanlet adding
         self.button_is_checked = False
         self.current_curved_lanelet_scenario = None
         self.temp_curved_lanelet = None
@@ -122,7 +124,6 @@ class DynamicCanvasController(FigureCanvas):
         self.new_lanelet = False
 
         gui_config.sub_curved(self.enable)
-
 
     def parent(self):
         return self._parent
@@ -1377,8 +1378,8 @@ class DynamicCanvasController(FigureCanvas):
         self.draw_curved_lanelet()
         self.motion_notify_event_cid = self.mpl_connect('motion_notify_event', self.move_cursor_curved_lanelet)
 
-    def calc_angle(self, left_vertice_point_one: ndarray, right_vertice_point_one: ndarray,
-                    left_vertice_point_two: ndarray, right_vertice_point_two: ndarray) -> float:
+    def calc_angle(self, left_vertice_point_one: np.ndarray, right_vertice_point_one: np.ndarray,
+                   left_vertice_point_two: np.ndarray, right_vertice_point_two: np.ndarray) -> float:
         """
         Calculates the angle between two given lines
 
