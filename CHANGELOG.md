@@ -12,6 +12,7 @@
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
 - osm2cr: virtual traffic sign have position assigned
+- PyQt6 instead of PyQt5 as GUI backend
 
 ### Fixed
 - Adding existing obstacles again

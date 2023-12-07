@@ -5,7 +5,7 @@ This module contains the GUI of the osm -> CR converter
 
 import os
 
-from PyQt5.QtWidgets import QMainWindow
+from PyQt6.QtWidgets import QMainWindow
 from matplotlib.pyplot import close
 
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations import export

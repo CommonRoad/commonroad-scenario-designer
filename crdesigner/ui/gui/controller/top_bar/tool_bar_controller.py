@@ -1,5 +1,5 @@
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QMessageBox
 
 from crdesigner.config.gui_config import gui_config as config, gui_config
 from crdesigner.config.logging import logger
@@ -85,14 +85,16 @@ class ToolBarController:
             messagebox = QMessageBox()
             reply = messagebox.warning(self.mwindow_ui, "Warning",
                                        "Please load or create a CommonRoad scenario before attempting to play",
-                                       QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
-            if reply == QMessageBox.Ok:
+                                       QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.No,
+                                       QMessageBox.StandardButton.Ok)
+            if reply == QMessageBox.StandardButton.Ok:
                 open_cr_file(self.mwindow)
             return
         if not gui_config.show_dynamic_obstacles():
             messagebox = QMessageBox()
             messagebox.warning(self.mwindow_ui, "Warning",
-                               "Please enable the display of dynamic obstacles in the settings ", QMessageBox.Ok)
+                               "Please enable the display of dynamic obstacles in the settings ",
+                               QMessageBox.StandardButton.Ok)
 
             return
         if not self.mwindow.play_activated:
@@ -141,10 +143,10 @@ class ToolBarController:
         """Function connected with the save button in the Toolbar."""
         if not self.mwindow.scenario_model.scenario_created():
             messbox = QMessageBox()
-            reply = messbox.warning(self.mwindow, "Warning",
+            reply = messbox.warning(self.mwindow.mwindow_ui, "Warning",
                                     "Please load or create a CommonRoad scenario before saving a video",
-                                    QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
-            if reply == QMessageBox.Ok:
+                                    QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Ok)
+            if reply == QMessageBox.StandardButton.Ok:
                 open_cr_file(self.mwindow)
             else:
                 messbox.close()

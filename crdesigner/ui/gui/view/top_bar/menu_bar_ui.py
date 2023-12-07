@@ -1,6 +1,6 @@
-from PyQt5.QtCore import QUrl
-from PyQt5.QtGui import QIcon, QKeySequence, QDesktopServices
-from PyQt5.QtWidgets import QAction
+from PyQt6.QtCore import QUrl
+from PyQt6.QtGui import QIcon, QKeySequence, QDesktopServices
+from PyQt6.QtGui import QAction
 
 from crdesigner.ui.gui.utilities.file_actions import file_new, open_commonroad_file, file_save
 
@@ -33,12 +33,12 @@ class MenuBarUI:
         # create new file
         self.action_new = self.create_action(text="New", icon=QIcon(":/icons/new_file.png"), checkable=False,
                                              slot=lambda: file_new(mwindow), tip="New CommonRoad File",
-                                             shortcut=QKeySequence.New)
+                                             shortcut=QKeySequence.StandardKey.New)
         self.menu_file.addAction(self.action_new)
         # open a file
         self.action_open = self.create_action(text="Open", icon=QIcon(":/icons/open_file.png"), checkable=False,
                                               slot=lambda: open_commonroad_file(mwindow), tip="Open CommonRoad File",
-                                              shortcut=QKeySequence.Open)
+                                              shortcut=QKeySequence.StandardKey.Open)
         self.menu_file.addAction(self.action_open)
         # seperator
         self.separator = QAction(self.mwindow_ui)
@@ -46,14 +46,14 @@ class MenuBarUI:
         # save a file
         self.action_save = self.create_action(text="Save", icon=QIcon(":/icons/save_file.png"), checkable=False,
                                               slot=lambda: file_save(mwindow), tip="Save CommonRoad File",
-                                              shortcut=QKeySequence.Save)
+                                              shortcut=QKeySequence.StandardKey.Save)
         self.menu_file.addAction(self.action_save)
         self.separator.setSeparator(True)
 
         # exit action
         self.exit_action = self.create_action(text="Quit", icon=QIcon(":/icons/close.png"), checkable=False,
                                               slot=lambda: mwindow.close_window(), tip="Quit",
-                                              shortcut=QKeySequence.Close)
+                                              shortcut=QKeySequence.StandardKey.Close)
         self.menu_file.addAction(self.exit_action)
 
         # add menu 'Setting'

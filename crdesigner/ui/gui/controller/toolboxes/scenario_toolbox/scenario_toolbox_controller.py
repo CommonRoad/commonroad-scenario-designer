@@ -3,8 +3,8 @@ from __future__ import annotations
 import math
 
 import numpy as np
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDockWidget, QTableWidgetItem
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QDockWidget, QTableWidgetItem
 from commonroad.common.util import Interval
 from commonroad.geometry.shape import ShapeGroup, Circle, Rectangle, Polygon, Shape
 from commonroad.planning.goal import GoalRegion
@@ -64,8 +64,7 @@ class ScenarioToolboxController(QDockWidget):
     def adjust_ui(self) -> None:
         """Updates GUI properties like width, etc."""
         self.setFloating(True)
-        self.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.setAllowedAreas(Qt.RightDockWidgetArea)
+        self.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea)
         self.setWidget(self.scenario_toolbox_ui)
         self.scenario_toolbox_ui.setMinimumWidth(450)
 

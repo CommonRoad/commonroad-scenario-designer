@@ -6,7 +6,7 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Net
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from lxml import etree
 
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMessageBox
 
 
 def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:

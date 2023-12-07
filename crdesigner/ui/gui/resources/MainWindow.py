@@ -6,7 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 
 class Ui_mainWindow(object):
@@ -14,7 +14,7 @@ class Ui_mainWindow(object):
         mainWindow.setObjectName("mainWindow")
         #mainWindow.resize(1920, 1080)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/Icon/icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(":/Icon/icon.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         mainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(mainWindow)
         self.centralwidget.setObjectName("centralwidget")

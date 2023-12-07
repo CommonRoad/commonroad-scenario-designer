@@ -1,9 +1,9 @@
 import math
 from typing import Optional
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
@@ -47,7 +47,7 @@ class ObstacleToolboxUI(Toolbox):
         widget_obstacles.setLayout(self.layout_obstacles)
 
         label_general = QLabel("Obstacle Attributes")
-        label_general.setFont(QFont("Arial", 11, QFont.Bold))
+        label_general.setFont(QFont("Arial", 11, QFont.Weight.Bold))
 
         self.obstacle_dyn_stat = QComboBox()
         self.obstacle_dyn_stat.addItem("Static")
@@ -74,7 +74,7 @@ class ObstacleToolboxUI(Toolbox):
 
         self.vis_settings_container = QFormLayout()
         self.vis_settings_label = QLabel("Visualization settings")
-        self.vis_settings_label.setFont(QFont("Arial", 11, QFont.Bold))
+        self.vis_settings_label.setFont(QFont("Arial", 11, QFont.Weight.Bold))
         self.vis_settings_container.addRow(self.vis_settings_label)
 
         self.color_container = QHBoxLayout()
@@ -104,7 +104,7 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_shape_groupbox = QFormLayout()
         self.shape_groupbox.setLayout(self.layout_shape_groupbox)
         self.shape_label = QLabel("Shape attributes")
-        self.shape_label.setFont(QFont("Arial", 9, QFont.Bold))
+        self.shape_label.setFont(QFont("Arial", 9, QFont.Weight.Bold))
         self.layout_shape_groupbox.insertRow(0, self.shape_label)
         self.layout_shape_groupbox.insertRow(1, "Shape", self.obstacle_shape)
 
@@ -295,17 +295,17 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_length = QLineEdit()
         self.obstacle_length.setValidator(self.float_validator)
         self.obstacle_length.setMaxLength(6)
-        self.obstacle_length.setAlignment(Qt.AlignRight)
+        self.obstacle_length.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.obstacle_width = QLineEdit()
         self.obstacle_width.setValidator(self.float_validator)
         self.obstacle_width.setMaxLength(4)
-        self.obstacle_width.setAlignment(Qt.AlignRight)
+        self.obstacle_width.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.obstacle_orientation = QLineEdit()
         self.obstacle_orientation.setValidator(QIntValidator())
         self.obstacle_orientation.setMaxLength(4)
-        self.obstacle_orientation.setAlignment(Qt.AlignRight)
+        self.obstacle_orientation.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.layout_shape_groupbox.insertRow(2, "Width [m]", self.obstacle_width)
         self.layout_shape_groupbox.insertRow(3, "Length [m]", self.obstacle_length)
@@ -329,7 +329,7 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_radius = QLineEdit()
         self.obstacle_radius.setValidator(self.float_validator)
         self.obstacle_radius.setMaxLength(4)
-        self.obstacle_radius.setAlignment(Qt.AlignRight)
+        self.obstacle_radius.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.layout_shape_groupbox.insertRow(2, "Radius [m]", self.obstacle_radius)
 
@@ -363,12 +363,12 @@ class ObstacleToolboxUI(Toolbox):
             self.obstacle_x_Position = QLineEdit()
             self.obstacle_x_Position.setValidator(self.float_validator)
             self.obstacle_x_Position.setMaxLength(4)
-            self.obstacle_x_Position.setAlignment(Qt.AlignRight)
+            self.obstacle_x_Position.setAlignment(Qt.AlignmentFlag.AlignRight)
 
             self.obstacle_y_Position = QLineEdit()
             self.obstacle_y_Position.setValidator(self.float_validator)
             self.obstacle_y_Position.setMaxLength(4)
-            self.obstacle_y_Position.setAlignment(Qt.AlignRight)
+            self.obstacle_y_Position.setAlignment(Qt.AlignmentFlag.AlignRight)
 
             if self.obstacle_shape.currentText() == "Rectangle":
                 self.layout_obstacle_information_groupbox.insertRow(4, "X-Position", self.obstacle_x_Position)
@@ -422,12 +422,12 @@ class ObstacleToolboxUI(Toolbox):
         self.vertices_x.append(QLineEdit())
         self.vertices_x[i].setValidator(self.float_validator)
         self.vertices_x[i].setMaxLength(6)
-        self.vertices_x[i].setAlignment(Qt.AlignRight)
+        self.vertices_x[i].setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.vertices_y.append(QLineEdit())
         self.vertices_y[i].setValidator(self.float_validator)
         self.vertices_y[i].setMaxLength(6)
-        self.vertices_y[i].setAlignment(Qt.AlignRight)
+        self.vertices_y[i].setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.polygon_row[i].addWidget(self.polygon_label[i])
         self.polygon_row[i].addWidget(self.vertices_x[i])

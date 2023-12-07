@@ -6,16 +6,16 @@ from typing import List, Union
 from commonroad.geometry.shape import Circle, Rectangle
 from matplotlib import patches, pyplot as plt
 from matplotlib.backend_bases import MouseButton
-import PyQt5
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QSizePolicy
-from PyQt5 import QtCore
+import PyQt6
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import QSizePolicy
+from PyQt6 import QtCore
 import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from commonroad.planning.planning_problem import  PlanningProblem
+from commonroad.planning.planning_problem import PlanningProblem
 from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.visualization.draw_params import StaticObstacleParams, DynamicObstacleParams
 from crdesigner.config.gui_config import gui_config, DrawParamsCustom
@@ -94,10 +94,10 @@ class DynamicCanvasController(FigureCanvas):
 
         self._parent = parent
         self.setParent(parent)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         # Set focus on canvas to detect key press events
-        self.setFocusPolicy(QtCore.Qt.ClickFocus)
+        self.setFocusPolicy(QtCore.Qt.FocusPolicy.ClickFocus)
         self.setFocus()
         # any callbacks for interaction per mouse
         self.button_press_event_cid = self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
@@ -380,7 +380,7 @@ class DynamicCanvasController(FigureCanvas):
                 # if lanelet selected
                 if self._parent.road_network_toolbox.selected_lanelet() != None:
                     # create menu
-                    menu = PyQt5.QtWidgets.QMenu()
+                    menu = PyQt6.QtWidgets.QMenu()
                     edit = menu.addAction("Edit Attributes")
                     remove = menu.addAction("Remove Lanelet")
                     # open menu at mouse coordinates
