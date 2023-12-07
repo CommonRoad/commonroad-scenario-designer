@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 
 from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
@@ -16,7 +16,7 @@ class RequestRunnable(QRunnable):
 
     def run(self):
         self.fun()
-        QMetaObject.invokeMethod(self.roadNetworkController, "stopSpinner", Qt.QueuedConnection,
+        QMetaObject.invokeMethod(self.roadNetworkController, "stopSpinner", Qt.ConnectionType.QueuedConnection,
                                 Q_ARG(str, "Conversion Ended"))
 
 

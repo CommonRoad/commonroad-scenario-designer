@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QTableWidgetItem, QComboBox
+from PyQt6.QtWidgets import QTableWidgetItem, QComboBox
 from commonroad.scenario.traffic_sign import *
 
 from crdesigner.config.logging import logger

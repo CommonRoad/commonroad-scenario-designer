@@ -1,8 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QDoubleValidator
-from PyQt5.QtWidgets import QFrame, QVBoxLayout, QGroupBox, QFormLayout, QButtonGroup, QRadioButton, QPushButton, \
+from PyQt6.QtCore import *
+from PyQt6.QtGui import QDoubleValidator
+from PyQt6.QtWidgets import QFrame, QVBoxLayout, QGroupBox, QFormLayout, QButtonGroup, QRadioButton, QPushButton, \
     QGridLayout, QLineEdit, QSpinBox
 
 from crdesigner.ui.gui.utilities.toolbox_ui import Toolbox
@@ -132,11 +130,11 @@ class MapConversionToolboxUI(Toolbox):
         if self.download_file.isChecked():
             self.osm_conversion_coordinate_latitude = QLineEdit()
             self.osm_conversion_coordinate_latitude.setValidator(QDoubleValidator())
-            self.osm_conversion_coordinate_latitude.setAlignment(Qt.AlignRight)
+            self.osm_conversion_coordinate_latitude.setAlignment(Qt.AlignmentFlag.AlignRight)
             self.osm_conversion_coordinate_latitude.setText("48.262545")
             self.osm_conversion_coordinate_longitude = QLineEdit()
             self.osm_conversion_coordinate_longitude.setValidator(QDoubleValidator())
-            self.osm_conversion_coordinate_longitude.setAlignment(Qt.AlignRight)
+            self.osm_conversion_coordinate_longitude.setAlignment(Qt.AlignmentFlag.AlignRight)
             self.osm_conversion_coordinate_longitude.setText("11.668124")
             self.osm_download_map_range = QSpinBox()
             self.osm_download_map_range.setMinimum(0)

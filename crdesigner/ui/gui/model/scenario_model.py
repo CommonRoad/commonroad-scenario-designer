@@ -1,6 +1,6 @@
 from typing import Callable, Optional
 
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal
 import copy
 
 from commonroad.scenario.intersection import Intersection

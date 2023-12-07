@@ -19,9 +19,9 @@ from crdesigner.config.osm_config import osm_config
 from crdesigner.ui.gui.utilities.waitingspinnerwidget import QtWaitingSpinner
 from crdesigner.ui.gui.view.toolboxes.converter_toolbox.converter_toolbox_ui import \
     MapConversionToolboxUI
-from PyQt5.QtCore import Qt, QRunnable, QThreadPool, QMetaObject, Q_ARG, pyqtSlot
+from PyQt6.QtCore import Qt, QRunnable, QThreadPool, QMetaObject, Q_ARG, pyqtSlot
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
-from PyQt5.QtWidgets import QDockWidget, QMainWindow, QFileDialog, QMessageBox
+from PyQt6.QtWidgets import QDockWidget, QMainWindow, QFileDialog, QMessageBox
 from crdesigner.map_conversion.osm2cr.converter_modules import converter
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 if SUMO_AVAILABLE:
@@ -38,7 +38,7 @@ class RequestRunnable(QRunnable):
 
     def run(self):
         self.fun()
-        QMetaObject.invokeMethod(self.mapConversionToolboxController, "stop_spinner", Qt.QueuedConnection,
+        QMetaObject.invokeMethod(self.mapConversionToolboxController, "stop_spinner", Qt.ConnectionType.QueuedConnection,
                                  Q_ARG(str, "Conversion Ended"))
 
 
@@ -74,8 +74,7 @@ class MapConversionToolboxController(QDockWidget):
     def adjust_ui(self):
         """Updates GUI properties like width, etc."""
         self.setFloating(True)
-        self.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.setAllowedAreas(Qt.RightDockWidgetArea)
+        self.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea)
         self.setWidget(self.converter_toolbox_ui)
         self.converter_toolbox_ui.setMinimumWidth(450)
 
@@ -95,9 +94,9 @@ class MapConversionToolboxController(QDockWidget):
                                                                                     self.convert_cr_to_lanelet2())
         elif self.converter_toolbox_ui.osm.isChecked():
             self.converter_toolbox_ui.button_start_osm_conversion.clicked.connect(
-                    lambda: self.convert_osm_with_spinner(self.convert_osm_to_cr))
+                    lambda:self.convert_osm_to_cr())
             self.converter_toolbox_ui.button_start_osm_conversion_with_sumo_parser.clicked.connect(
-                    lambda: self.convert_osm_with_spinner(self.convert_osm_to_cr_with_sumo))
+                    lambda: self.convert_osm_to_cr_with_sumo())
         elif self.converter_toolbox_ui.sumo.isChecked():
             self.converter_toolbox_ui.button_convert_sumo_to_cr.clicked.connect(lambda: self.load_sumo())
             self.converter_toolbox_ui.button_convert_cr_to_sumo.clicked.connect(lambda: self.convert_cr_to_sumo())
@@ -133,13 +132,13 @@ class MapConversionToolboxController(QDockWidget):
             graph = converter.step_collection_3(graph)
         except Exception as e:
             QMessageBox.warning(self, "Internal Error", "There was an error during the processing of the graph.\n\n{}"
-                                .format(e), QMessageBox.Ok)
+                                .format(e), QMessageBox.StandardButton.Ok)
             return
         converted_to_scenario = convert_to_scenario(graph)
         self.scenario_model.add_converted_scenario(converted_to_scenario)
 
     @logger.log
-    def convert_osm_with_spinner(self, convert_function: Callable[[], None]) -> None:
+    def convert_with_spinner(self, convert_function: Callable[[], None]) -> None:
         """
         Calls function in new thread ands shows spinner.
         :param convert_function: Function which should be called
@@ -178,7 +177,7 @@ class MapConversionToolboxController(QDockWidget):
                     self,
                     "Warning",
                     "No file selected.",
-                    QMessageBox.Ok)
+                    QMessageBox.StandardButton.Ok)
 
                 return
         except ValueError as e:
@@ -187,8 +186,15 @@ class MapConversionToolboxController(QDockWidget):
                 self,
                 "Warning",
                 "Map unreadable: " + str(e),
-                QMessageBox.Ok)
+                QMessageBox.StandardButton.Ok)
 
+        self.convert_with_spinner(self.convert_osm_to_cr_with_spinner)
+
+    def convert_osm_to_cr_with_spinner(self):
+        """
+        Function for osm convertion that can be executed in another thread to show the spinner widget to
+        indicate the loading of the scenario
+        """
         self.hidden_osm_conversion(self.graph)
         self.osm_file = None
 
@@ -202,30 +208,37 @@ class MapConversionToolboxController(QDockWidget):
         else:
             self.download_osm_map()
 
-        try:
-            if self.osm_file is not None:
-                osm_to_commonroad_using_sumo_ = osm_to_commonroad_using_sumo(self.osm_file)
-                self.scenario_model.add_converted_scenario(osm_to_commonroad_using_sumo_)
+        if self.osm_file is None:
+            QMessageBox.warning(self, "Warning", "No file selected.", QMessageBox.StandardButton.Ok)
+            return
 
-            else:
-                QMessageBox.warning(
-                    self,
-                    "Warning",
-                    "No file selected.",
-                    QMessageBox.Ok)
+        self.convert_with_spinner(self.convert_osm_to_cr_with_sumo_spinner)
+
+    def convert_osm_to_cr_with_sumo_spinner(self):
+        """
+        Function for osm convertion with sumo that can be executed in another thread to show the spinner widget to
+        indicate the loading of the scenario
+        """
+        try:
+            osm_to_commonroad_using_sumo_ = osm_to_commonroad_using_sumo(self.osm_file)
+            if osm_to_commonroad_using_sumo_ is None:
+                self.text_browser.append("The file could not be converted. Try again!")
                 return
+            self.scenario_model.add_converted_scenario(osm_to_commonroad_using_sumo_)
+
         except ValueError as e:
             QMessageBox.critical(
-                self,
+                None,
                 "Warning",
                 "Map unreadable: " + str(e),
-                QMessageBox.Ok)
+                QMessageBox.StandardButton.Ok)
             return
         self.osm_file = None
 
     @pyqtSlot(str)
     def stop_spinner(self, data):
-        self.scenario_model.notify_all()
+        if self.scenario_model.scenario_created():
+            self.scenario_model.notify_all()
         self.converter_toolbox_ui.Spinner.stop()
 
     def verify_osm_coordinate_input(self) -> bool:
@@ -258,7 +271,7 @@ class MapConversionToolboxController(QDockWidget):
                 self,
                 "Warning",
                 "cannot download, coordinates invalid",
-                QMessageBox.Ok)
+                QMessageBox.StandardButton.Ok)
             return None
         else:
             download_around_map(
@@ -283,18 +296,6 @@ class MapConversionToolboxController(QDockWidget):
     def open_osm_settings(self):
         osm_interface = OSMInterface(self)
         osm_interface.show_settings()
-
-    def convert_open_drive_to_cr_with_spinner(self) -> None:
-        """
-        Starts the OpenDRIVE conversion process by picking a file and converting it while showing a spinner.
-        """
-        if self.open_drive_file is not None:
-            start_spinner(self.converter_toolbox_ui.Spinner)
-            runnable = RequestRunnable(self.convert_open_drive_to_cr, self)
-            QThreadPool.globalInstance().start(runnable)
-        else:
-            QMessageBox.warning(self, "Warning", "No file selected.", QMessageBox.Ok)
-            return
 
     def convert_open_drive_to_cr(self):
         """
@@ -325,20 +326,19 @@ class MapConversionToolboxController(QDockWidget):
             self.text_browser.append("Please stop the animation first.")
             return
 
-        file_path = select_local_file(self, "OpenDRIVE", "xodr")
-        if not file_path:
+        self.open_drive_file_path = select_local_file(self, "OpenDRIVE", "xodr")
+        if not self.open_drive_file_path:
             return
 
-        # Load road network and print some statistics
         try:
-            self.open_drive_file = parse_opendrive(Path(file_path))
+            self.open_drive_file = parse_opendrive(Path(self.open_drive_file_path))
         except etree.XMLSyntaxError as e:
             error_message = "XML Syntax Error: {}".format(e)
             QMessageBox.warning(
                 self,
                 "OpenDRIVE error",
                 "There was an error during the loading of the selected OpenDRIVE file.\n\n{}".format(error_message),
-                QMessageBox.Ok,
+                QMessageBox.StandardButton.Ok,
             )
             return
         except (TypeError, AttributeError, ValueError) as e:
@@ -347,11 +347,10 @@ class MapConversionToolboxController(QDockWidget):
                 self,
                 "OpenDRIVE error",
                 "There was an error during the loading of the selected OpenDRIVE file.\n\n{}".format(error_message),
-                QMessageBox.Ok,
+                QMessageBox.StandardButton.Ok,
             )
             return
-
-        self.convert_open_drive_to_cr_with_spinner()
+        self.convert_with_spinner(self.convert_open_drive_to_cr)
 
     @logger.log
     def load_lanelet2(self):
@@ -362,13 +361,13 @@ class MapConversionToolboxController(QDockWidget):
             self.text_browser.append("Please stop the animation first.")
             return
 
-        file_path = select_local_file(self, "Lanelet/Lanelet2", "osm")
-        if not file_path:
+        self.lanelet2_file = select_local_file(self, "Lanelet/Lanelet2", "osm")
+        if not self.lanelet2_file:
             return
 
         # Load road network and print some statistics
         try:
-            with open(file_path, "r") as fd:
+            with open(self.lanelet2_file, "r") as fd:
                 parser = Lanelet2Parser(etree.parse(fd).getroot())
                 self.lanelet2_file = parser.parse()
         except etree.XMLSyntaxError as e:
@@ -378,7 +377,7 @@ class MapConversionToolboxController(QDockWidget):
                 "Lanelet/Lanelet2 error",
                 "There was an error during the loading of the "
                 "selected Lanelet/Lanelet2 file.\n\n{}".format(error_message),
-                QMessageBox.Ok,
+                QMessageBox.StandardButton.Ok,
             )
             return
         except (TypeError, AttributeError, ValueError) as e:
@@ -388,11 +387,11 @@ class MapConversionToolboxController(QDockWidget):
                 "Lanelet/Lanelet2 error",
                 "There was an error during the loading of the selected "
                 "Lanelet/Lanelet2 file.\n\n{}".format(error_message),
-                QMessageBox.Ok,
+                QMessageBox.StandardButton.Ok,
             )
             return
 
-        self.convert_lanelet2_to_cr()
+        self.convert_with_spinner(self.convert_lanelet2_to_cr)
 
     def convert_lanelet2_to_cr(self):
         """
@@ -400,7 +399,7 @@ class MapConversionToolboxController(QDockWidget):
         """
         try:
             if self.lanelet2_file is None:
-                QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.Ok)
+                QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.StandardButton.Ok)
                 return
             scenario = self.lanelet2_to_cr_converter(self.lanelet2_file)
             self.lanelet2_file = None
@@ -418,7 +417,7 @@ class MapConversionToolboxController(QDockWidget):
             self.text_browser.append("Please stop the animation first.")
             return
 
-        directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Options())
+        directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Option.ShowDirsOnly)
 
         if not self.scenario_model.scenario_created or directory == "":
             return
@@ -463,7 +462,7 @@ class MapConversionToolboxController(QDockWidget):
             return
 
         if SUMO_AVAILABLE:
-            directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Options())
+            directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Option.ShowDirsOnly)
             if not directory:
                 return
             self.sumo_simulation.convert(directory)
@@ -489,7 +488,7 @@ class MapConversionToolboxController(QDockWidget):
             except Exception as e:
                 QMessageBox.warning(self, "Internal Error",
                                     "There was an error during the processing of the graph.\n\n{}".format(e),
-                                    QMessageBox.Ok)
+                                    QMessageBox.StandardButton.Ok)
                 return
         else:
             logging.warning("Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "

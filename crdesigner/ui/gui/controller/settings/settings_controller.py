@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
 from crdesigner.config.gui_config import gui_config as gui_settings_model, gui_config
 from crdesigner.config.logging import logger

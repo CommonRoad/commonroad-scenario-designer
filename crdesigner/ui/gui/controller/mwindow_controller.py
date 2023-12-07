@@ -2,8 +2,9 @@ from datetime import datetime
 import os
 import pathlib
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6.QtGui import QGuiApplication
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 
 from crdesigner.config.logging import logger
 from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_wrapper_controller import \
@@ -80,19 +81,19 @@ class MWindowController:
         self.mwindow_ui.crdesigner_console_wrapper = self.crdesigner_console_wrapper
 
         self.road_network_toolbox = RoadNetworkController(mwindow=self)
-        self.mwindow_ui.addDockWidget(Qt.LeftDockWidgetArea, self.road_network_toolbox)
+        self.mwindow_ui.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.road_network_toolbox)
         self.mwindow_ui.road_network_toolbox = self.road_network_toolbox
 
         self.obstacle_toolbox = ObstacleController(mwindow=self)
-        self.mwindow_ui.addDockWidget(Qt.RightDockWidgetArea, self.obstacle_toolbox)
+        self.mwindow_ui.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.obstacle_toolbox)
         self.mwindow_ui.obstacle_toolbox = self.obstacle_toolbox
 
         self.map_converter_toolbox = MapConversionToolboxController(mwindow=self)
-        self.mwindow_ui.addDockWidget(Qt.RightDockWidgetArea, self.map_converter_toolbox)
+        self.mwindow_ui.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.map_converter_toolbox)
         self.mwindow_ui.map_converter_toolbox = self.map_converter_toolbox
 
         self.scenario_toolbox = ScenarioToolboxController(mwindow=self)
-        self.mwindow_ui.addDockWidget(Qt.RightDockWidgetArea, self.scenario_toolbox)
+        self.mwindow_ui.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.scenario_toolbox)
         self.mwindow_ui.scenario_toolbox = self.scenario_toolbox
 
         self.mwindow_ui.top_bar = TopBarController(self)
@@ -115,9 +116,9 @@ class MWindowController:
         """
         if os.path.exists(self.path_autosave):
             reply = self.mwindow_ui.ask_for_autosaved_file()
-            if reply == QMessageBox.Save:
+            if reply == QMessageBox.StandardButton.Save:
                 self.directory = QFileDialog.getExistingDirectory(self.scenario_saving_dialog.save_window, "Dir",
-                                                                  options=QFileDialog.Options())
+                                                                  options=QFileDialog.Option.ShowDirsOnly)
                 if self.directory:
                     if os.path.exists(self.path_logging):
                         time = datetime.now()
@@ -127,11 +128,11 @@ class MWindowController:
                             fp2.write(results)
                 reply = self.mwindow_ui.ask_for_autosaved_file(False)
 
-            if reply == QMessageBox.Yes:
+            if reply == QMessageBox.StandardButton.Yes:
                 open_commonroad_file(self, self.path_autosave)
                 self.road_network_toolbox.initialize_road_network_toolbox()
                 self.obstacle_toolbox.obstacle_toolbox_ui.initialize_obstacle_information()
-            elif reply == QMessageBox.No:
+            elif reply == QMessageBox.StandardButton.No:
                 os.remove(self.path_autosave)
 
         if os.path.exists(self.path_logging):
@@ -151,7 +152,7 @@ class MWindowController:
 
     def center(self):
         """Function that makes sure the main window is in the center of screen."""
-        screen = QDesktopWidget().screenGeometry()
+        screen = QGuiApplication.primaryScreen().availableGeometry()
         size = self.mwindow_ui.geometry()
         self.mwindow_ui.move(int((screen.width() - size.width()) / 2), int((screen.height() - size.height()) / 2))
 
@@ -196,7 +197,7 @@ class MWindowController:
                     "invalid traffic light refs: " + str(found_ids))
             QMessageBox.critical(self.mwindow_ui, "CommonRoad XML error",
                                  "Scenario contains invalid traffic light refenence(s): " + str(found_ids),
-                                 QMessageBox.Ok, )
+                                 QMessageBox.StandardButton.Ok, )
 
         found_ids = find_invalid_ref_of_traffic_signs(scenario)
         if found_ids and verbose:
@@ -205,7 +206,7 @@ class MWindowController:
                     "invalid traffic sign refs: " + str(found_ids))
             QMessageBox.critical(self.mwindow_ui, "CommonRoad XML error",
                                  "Scenario contains invalid traffic sign refenence(s): " + str(found_ids),
-                                 QMessageBox.Ok, )
+                                 QMessageBox.StandardButton.Ok, )
 
         if error_score >= fatal_error:
             return error_score
@@ -218,7 +219,7 @@ class MWindowController:
                     "Warning: Lanelet(s) with invalid polygon:" + str(found_ids))
             QMessageBox.warning(self.mwindow_ui, "CommonRoad XML error",
                                 "Scenario contains lanelet(s) with invalid polygon: " + str(found_ids),
-                                QMessageBox.Ok, )
+                                QMessageBox.StandardButton.Ok, )
 
         return error_score
 
@@ -231,4 +232,4 @@ class MWindowController:
         if close_app:
             if os.path.exists(self.path_autosave):
                 os.remove(self.path_autosave)
-            qApp.quit()
+            QApplication.quit()

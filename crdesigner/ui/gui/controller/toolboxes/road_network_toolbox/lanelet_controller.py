@@ -8,7 +8,6 @@ from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.lanelet_ui import Add
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 import math
 
-
 from commonroad.scenario.lanelet import LineMarking, LaneletType, RoadUser, StopLine, Lanelet
 from commonroad.scenario.traffic_sign import *
 
