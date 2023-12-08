@@ -11,6 +11,7 @@ from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_
 
 from commonroad.scenario.traffic_sign import *
 
+
 class AddIntersectionUI:
 
     def __init__(self, scenario_model: ScenarioModel, road_network_toolbox_ui: RoadNetworkToolboxUI):
@@ -51,7 +52,7 @@ class AddIntersectionUI:
             if row != self.road_network_toolbox_ui.intersection_incomings_table.rowCount() - 1:
                 index = self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).findText(
                         self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).currentText(),
-                        Qt.MatchFixedString)
+                        Qt.MatchFlag.MatchFixedString)
             else:
                 index = -1
             self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(row, 5, combo_box_left_of)

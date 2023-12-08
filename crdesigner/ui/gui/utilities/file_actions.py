@@ -54,7 +54,7 @@ def open_path(mwindow, path):
         if "-SC.pb" in path:
             commonroad_reader = CommonRoadReadAll(path, file_format=FileFormat.PROTOBUF)
             scenario, pps, _ = commonroad_reader.open()
-        elif "-SC.pb" not in path and path.split("/")[-1].count("_") == 1 and not ".xml in path":
+        elif "-SC.pb" not in path and path.split("/")[-1].count("_") == 1 and ".xml" not in path:
             commonroad_reader = CommonRoadMapFileReader(path, file_format=FileFormat.PROTOBUF)
             scenario.replace_lanelet_network(commonroad_reader.open())
         elif ".xml" in path:
