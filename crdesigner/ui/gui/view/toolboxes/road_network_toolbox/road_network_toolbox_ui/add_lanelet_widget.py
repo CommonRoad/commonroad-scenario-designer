@@ -54,6 +54,14 @@ class AddLaneletWidget():
         font.setBold(True)
         self.toolbox.connect_to_successors_selection.setFont(font)
 
+        # connect to selected lanelet
+        self.toolbox.connect_to_selected_section = QRadioButton("Connect to selected")
+        self.toolbox.connect_to_selected_section.setChecked(False)
+        self.toolbox.connecting_radio_button_group.addButton(self.toolbox.connect_to_selected_section)
+        font = self.toolbox.connect_to_selected_section.font()
+        font.setBold(True)
+        self.toolbox.connect_to_selected_section.setFont(font)
+
         self.toolbox.adding_method = ""
 
         self.toolbox.lanelet_adding_groupbox = QGroupBox()
@@ -64,6 +72,7 @@ class AddLaneletWidget():
         self.toolbox.layout_lanelet_adding_groupbox.addRow(self.toolbox.connect_to_previous_selection)
         self.toolbox.layout_lanelet_adding_groupbox.addRow(self.toolbox.connect_to_predecessors_selection)
         self.toolbox.layout_lanelet_adding_groupbox.addRow(self.toolbox.connect_to_successors_selection)
+        self.toolbox.layout_lanelet_adding_groupbox.addRow(self.toolbox.connect_to_selected_section)
 
         # Add button
         self.toolbox.button_add_lanelet = QPushButton("Add")
@@ -96,6 +105,9 @@ class AddLaneletWidget():
         elif self.toolbox.connect_to_successors_selection.isChecked():
             self.toolbox.adding_method = "connect_to_successors_selection"
             self.init_connect_to_successors_selection_fields()
+        elif self.toolbox.connect_to_selected_section.isChecked():
+            self.toolbox.adding_method = "connect_to_selected"
+            self.init_connect_to_selected_section_fields()
 
     def init_place_at_position_fields(self):
         self.toolbox.line1 = QFrame()
@@ -382,6 +394,46 @@ class AddLaneletWidget():
         self.toolbox.line2.setFrameShape(QFrame.Shape.HLine)
         self.toolbox.layout_lanelet_adding_groupbox.insertRow(16, self.toolbox.line2)
 
+    def init_connect_to_selected_section_fields(self):
+        self.toolbox.line1 = QFrame()
+        self.toolbox.line1.setFrameShape(QFrame.Shape.HLine)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(3, self.toolbox.line1)
+
+        # Lanelet Length and Width
+        self.init_length_width()
+
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(6, "Length [m]", self.toolbox.lanelet_length)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(7, "Width [m]", self.toolbox.lanelet_width)
+
+        self.toolbox.connecting_radio_button_group_connect_to_selected = QButtonGroup()
+
+        # place as predecessor
+        self.toolbox.connect_as_predecessor = QRadioButton("Connect as predecessor")
+        self.toolbox.connect_as_predecessor.setChecked(False)
+        self.toolbox.connecting_radio_button_group_connect_to_selected.addButton(self.toolbox.connect_as_predecessor)
+
+        # place as successor
+        self.toolbox.connect_as_successor = QRadioButton("Connect as successor")
+        self.toolbox.connect_as_successor.setChecked(True)
+        self.toolbox.connecting_radio_button_group_connect_to_selected.addButton(self.toolbox.connect_as_successor)
+
+        self.toolbox.connect_as = QGroupBox()
+        self.toolbox.connect_as = QFormLayout()
+        self.toolbox.connect_as.setLayout(self.toolbox.connect_as)
+
+        self.toolbox.connect_as.addRow(self.toolbox.connect_as_predecessor)
+        self.toolbox.connect_as.addRow(self.toolbox.connect_as_successor)
+
+        self.add_curved_fields(8)
+        self.add_line_marking_fields(10)
+        self.add_neighboring_lanelets_fields(12)
+        self.add_advanced_fields(14)
+
+        # seperation line at the end of place at position block
+        self.toolbox.line2 = QFrame()
+        self.toolbox.line2.setFrameShape(QFrame.Shape.HLine)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(16, self.toolbox.line2)
+
     def remove_adding_method_fields(self):
         if self.toolbox.adding_method == "place_at_position":
             self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.line1)
@@ -427,6 +479,19 @@ class AddLaneletWidget():
 
         elif self.toolbox.adding_method == "connect_to_successors_selection":
             self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.successors)
+            self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.line1)
+            self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.lanelet_length)
+            self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.lanelet_width)
+            self.toolbox.curved_check_button.remove()
+            # del self.toolbox.curved_check_button
+            self.toolbox.line_marking_box.remove()
+            self.toolbox.neighboring_lanelets_button.remove()
+            self.toolbox.advanced_button.remove()
+            self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.line2)
+
+        elif self.toolbox.adding_method == "connect_to_selected":
+            self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.connect_as_successor)
+            self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.connect_as_predecessor)
             self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.line1)
             self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.lanelet_length)
             self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.lanelet_width)
