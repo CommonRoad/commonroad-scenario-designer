@@ -1,23 +1,26 @@
 from typing import Union
 import matplotlib as mpl
-from PyQt5.QtWidgets import *
-from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-from commonroad.prediction.prediction import TrajectoryPrediction
+from PyQt6.QtWidgets import *
+
+from crdesigner.config.logging import logger
+
+from commonroad.prediction.prediction import TrajectoryPrediction, SetBasedPrediction
 from commonroad.geometry.polyline_util import *
 from commonroad.geometry.shape import Rectangle, Circle, Polygon
 from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
 from commonroad.scenario.trajectory import Trajectory
 from commonroad.scenario.state import InitialState, State, ExtendedPMState
 
-from PyQt5.QtCore import *
+from PyQt6.QtCore import *
 from crdesigner.ui.gui.view.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
 
 
- #TODO to change the call
+# TODO to change the call
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import  SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMOSimulation
 from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import DynamicCanvasController
+
 
 class ObstacleController(QDockWidget, ):
 
@@ -49,7 +52,6 @@ class ObstacleController(QDockWidget, ):
         else:
             self.sumo_simulation = None
 
-
     def init_canvas(self):
         """
         so profile visualization canvas can handle events
@@ -58,22 +60,22 @@ class ObstacleController(QDockWidget, ):
         self.obstacle_toolbox_ui.canvas.mpl_connect('button_release_event', self.on_button_release)
         self.obstacle_toolbox_ui.canvas.mpl_connect('motion_notify_event', self.on_mouse_move)
 
-
     def adjust_ui(self):
         """
         Updates GUI properties like width, etc.
         """
         self.setFloating(True)
-        self.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.setAllowedAreas(Qt.RightDockWidgetArea)
+        self.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea)
         self.setWidget(self.obstacle_toolbox_ui)
         self.obstacle_toolbox_ui.setMinimumWidth(450)
-
 
     def connect_gui_elements(self):
         """
         adds functionality to gui elements like buttons, menus etc
         """
+        self.obstacle_toolbox_ui.obstacle_type.currentTextChanged.connect(
+                lambda :self.obstacle_toolbox_ui.init_obstacle_defaults())
+
         self.obstacle_toolbox_ui.initialize_obstacle_information()
 
         self.obstacle_toolbox_ui.selected_obstacle.currentTextChanged.connect(
@@ -102,6 +104,7 @@ class ObstacleController(QDockWidget, ):
         if SUMO_AVAILABLE:
             self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(lambda: self.start_sumo_simulation())
 
+    @logger.log
     def toggle_sections(self):
         """
         Depending on the selected shape of the obstacle the specific fields of the toolbox are displayed 
@@ -134,6 +137,9 @@ class ObstacleController(QDockWidget, ):
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
             self.toggle_dynamic_static()
 
+        self.obstacle_toolbox_ui.init_obstacle_defaults()
+
+    @logger.log
     def toggle_dynamic_static(self):
         """
         adds/removes fields unique for the dynamic obstacle
@@ -142,6 +148,8 @@ class ObstacleController(QDockWidget, ):
             self.obstacle_toolbox_ui.remove_position()
         elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
             self.obstacle_toolbox_ui.init_position()
+
+        self.obstacle_toolbox_ui.init_obstacle_defaults()
 
     def static_obstacle_details(self, obstacle_id: int):
         """
@@ -380,6 +388,7 @@ class ObstacleController(QDockWidget, ):
         else:
             return None
 
+    @logger.log
     def add_obstacle(self):
         """
         generates an object_id (id for obstacle) and then calls function
@@ -411,6 +420,7 @@ class ObstacleController(QDockWidget, ):
             self.text_browser.append("Warning: Scenario does not exist yet. Please create or load a scenario first.")
         self.obstacle_toolbox_ui.initialize_obstacle_information()
 
+    @logger.log
     def update_obstacle(self):
         """
         updates obstacle by deleting it and then adding it again with same id
@@ -445,6 +455,8 @@ class ObstacleController(QDockWidget, ):
             except Exception as e:
                 self.text_browser.append("Error when updating dynamic obstacle")
         self.temp_obstacle = None
+
+
 
     def calc_velocity(self, point1: float, point2: float) -> float:
         """
@@ -484,7 +496,7 @@ class ObstacleController(QDockWidget, ):
 
         self.sel_point = None
 
-
+    @logger.log
     def on_button_press(self, event):
         """"
         when left or right mouse button is pressed
@@ -509,7 +521,7 @@ class ObstacleController(QDockWidget, ):
         if event.button == 3:
             self.delete_point()
 
-
+    @logger.log
     def on_button_release(self, event):
         """
         Updates obstacle when left mouse button is released
@@ -574,7 +586,7 @@ class ObstacleController(QDockWidget, ):
 
         self.sel_point = None
 
-
+    @logger.log
     def on_mouse_move(self, event):
         """
         update position of selected point by moving mouse
@@ -609,7 +621,6 @@ class ObstacleController(QDockWidget, ):
             profile.append(i[1])
 
         self.draw_plot(time, profile, self.xmin, self.xmax, self.ymin, self.ymax)
-
 
     def calculate_xyova(self):
         """
@@ -807,7 +818,6 @@ class ObstacleController(QDockWidget, ):
             if k < len(selected_obstacle.prediction.trajectory.state_list):
                 k += 1
 
-
     def calculate_pos(self):
         """
         calculates the self.pos array which is the array that
@@ -877,7 +887,6 @@ class ObstacleController(QDockWidget, ):
     def on_ylim_change(self, event):
         self.ymin, self.ymax = event.get_ylim()
 
-
     def selected_point(self, event) -> List[float]:
         """
         get the time step of the where the point is located
@@ -900,7 +909,7 @@ class ObstacleController(QDockWidget, ):
                 sel_point = self.pos[i]
         return sel_point
 
-
+    @logger.log
     def plot_obstacle_state_profile(self):
         """
         Gets the values based on which profile is selected.
@@ -911,6 +920,8 @@ class ObstacleController(QDockWidget, ):
             obstacle = self.get_current_obstacle()
             state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
             message = "This Graph is only available for dynamic obstacles"
+            if isinstance(obstacle.prediction, SetBasedPrediction):
+                return
             if state_variable_name == "x-position":
                 if isinstance(obstacle, StaticObstacle):
                     profile = [obstacle.initial_state.__getattribute__("position")[0]]
@@ -1020,6 +1031,7 @@ class ObstacleController(QDockWidget, ):
         else:
             return ""
 
+    @logger.log
     def update_obstacle_information(self):
         """
         retrieves obstacle details to the gui when an obstacle is pressed or the id
@@ -1057,11 +1069,13 @@ class ObstacleController(QDockWidget, ):
             self.obstacle_toolbox_ui.figure.clear()
             self.obstacle_toolbox_ui.canvas.draw()
 
+    @logger.log
     def start_sumo_simulation(self):
         num_time_steps = self.obstacle_toolbox_ui.sumo_simulation_length.value()
         self.sumo_simulation.set_simulation_length(num_time_steps)
         self.sumo_simulation.simulate()
 
+    @logger.log
     def remove_obstacle(self):
         """
         Removes the selected obstacle from the scenario.
@@ -1113,14 +1127,15 @@ class ObstacleController(QDockWidget, ):
         ax.set_ylim([min(profile)-0.5, max(profile)+0.5])
         # if zoomed in the new plot should be drawn with previous x and y limits
         # (so it doesnt zoom out on mouse event if zoomed in)
-        if (self.xmin and self.xmax and self.ymin and self.ymax):
+        if self.xmin and self.xmax and self.ymin and self.ymax:
             ax.set_xlim([self.xmin, self.xmax])
             ax.set_ylim([self.ymin, self.ymax])
         # refresh canvas
         self.obstacle_toolbox_ui.canvas.draw()
-        #ax.callbacks.connect('xlim_changed', self.on_xlim_change)
-        #ax.callbacks.connect('ylim_changed', self.on_ylim_change)
+        # ax.callbacks.connect('xlim_changed', self.on_xlim_change)
+        # ax.callbacks.connect('ylim_changed', self.on_ylim_change)
 
+    @logger.log
     def color_picker(self):
         """
         opens color dialogue window

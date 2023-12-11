@@ -3,8 +3,8 @@ import os
 from typing import TypeVar, Generic, Optional, Callable, Union, Tuple, List, Dict, Type
 
 import yaml
-from PyQt5.QtCore import QObject, pyqtSignal
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtWidgets import QMessageBox
 
 from crdesigner.ui.gui.utilities.custom_yaml import add_custom_interval_interpreter
 
@@ -114,6 +114,9 @@ class Attribute(Generic[T], QObject):
         """
         self.attribute_changed.connect(lambda: callback(self.value))
 
+    def disconnect_methods(self):
+        self.attribute_changed.disconnect()
+
     def notify(self):
         """Notifies all subscribers of this Attribute that the value has changed."""
         self.attribute_changed.emit()
@@ -128,8 +131,8 @@ class Attribute(Generic[T], QObject):
 
     def _warning_wrong_setting(self):
         warning_dialog = QMessageBox()
-        warning_dialog.warning(None, "Warning", f"Setting {self.display_name} contains invalid value!", QMessageBox.Ok,
-                               QMessageBox.Ok)
+        warning_dialog.warning(None, "Warning", f"Setting {self.display_name} contains invalid value!", QMessageBox.StandardButton.Ok,
+                               QMessageBox.StandardButton.Ok)
         warning_dialog.close()
         self.reset()
 

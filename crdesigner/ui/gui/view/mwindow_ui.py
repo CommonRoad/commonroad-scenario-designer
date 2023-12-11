@@ -1,9 +1,9 @@
 import logging
 
-from PyQt5 import QtGui
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import *
+from PyQt6 import QtGui, QtWidgets
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import *
 
 from crdesigner.config.gui_config import gui_config, ColorSchema
 from crdesigner.ui.gui.resources.MainWindow import Ui_mainWindow
@@ -16,7 +16,7 @@ if SUMO_AVAILABLE:
 class MWindowUI(QMainWindow, Ui_mainWindow):
     """The Main window of the CR Scenario Designer."""
 
-    def __init__(self, path=None):
+    def __init__(self):
         super().__init__()
         self.setup_mwindow()
         self.obstacle_toolbox = None
@@ -44,7 +44,7 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         self.setWindowIcon(QIcon(':/icons/cr.ico'))
         self.setWindowTitle("CommonRoad Scenario Designer")
         self.centralwidget.setStyleSheet('background-color:rgb(150,150,150)')
-        self.setWindowFlag(Qt.Window)
+        self.setWindowFlag(Qt.WindowType.Window)
 
     def update_max_step(self, value: int = -1):
         """ Redirect to the service layer. """
@@ -93,8 +93,8 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         """
         For closing the window.
         """
-        message_box = QMessageBox(QMessageBox.Warning, "Warning", "Do you really want to quit?",
-                                  buttons=QMessageBox.Yes | QMessageBox.No, parent=self)
+        message_box = QMessageBox(QMessageBox.Icon.Warning, "Warning", "Do you really want to quit?",
+                                  buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, parent=self)
 
         p = QtGui.QPalette()
         p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.colorscheme().background))
@@ -105,21 +105,24 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.colorscheme().color))
         message_box.setPalette(p)
 
-        message_box.exec_()
+        message_box.exec()
         reply = message_box.standardButton(message_box.clickedButton())
-        if reply == message_box.Yes:
+        if reply == message_box.StandardButton.Yes:
             return True
         else:
             return False
 
-    def ask_for_autosaved_file(self):
+    def ask_for_autosaved_file(self, save_log_enabled: bool = True):
         """
         Asking if the user wants to restore the old scenario
 
         @return: Boolean with the answer of the user
         """
-        message_box = QMessageBox(QMessageBox.Warning, "Warning", "Do you want to restore the last project?",
-                                  buttons=QMessageBox.Yes | QMessageBox.No, parent=self)
+        message_box = QMessageBox(QMessageBox.Icon.Warning, "Warning", "Do you want to restore the last project? \n \n Do you want to save the logging file?",
+                                  buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Save | QMessageBox.StandardButton.No, parent=self)
+
+        if not save_log_enabled:
+            message_box.button(QMessageBox.StandardButton.Save).setEnabled(False)
 
         p = QtGui.QPalette()
         p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.colorscheme().background))
@@ -130,18 +133,15 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.colorscheme().color))
         message_box.setPalette(p)
 
-        message_box.exec_()
+        message_box.exec()
         reply = message_box.standardButton(message_box.clickedButton())
 
-        if reply == message_box.Yes:
-            return True
-        else:
-            return False
+        return reply
 
     def set_stylesheet(self, sheet: str):
         """
         Sets the stylesheet to a modern look or the old look
 
-        @param sheet: new staylesheet which should be set
+        @param sheet: new stylesheet which should be set
         """
-        qApp.setStyleSheet(sheet)
+        QApplication.setStyleSheet(QApplication.instance(), sheet)

@@ -1,8 +1,10 @@
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
     RoadNetworkToolboxUI
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.traffic_signs_ui import AddTrafficSignUI
 from commonroad.scenario.traffic_sign import *
+
 
 class AddTrafficSignController:
 
@@ -24,6 +26,7 @@ class AddTrafficSignController:
         self.road_network_toolbox_ui.selected_traffic_sign.currentTextChanged.connect(
                 lambda: self.traffic_sign_ui.update_traffic_sign_information(self.road_network_controller.text_browser))
 
+    @logger.log
     def remove_traffic_sign_element(self):
         """
         Removes last entry in traffic sign element table of a traffic sign.
@@ -35,6 +38,7 @@ class AddTrafficSignController:
         num_rows = self.road_network_toolbox_ui.traffic_sign_element_table.rowCount()
         self.road_network_toolbox_ui.traffic_sign_element_table.removeRow(num_rows - 1)
 
+    @logger.log
     def add_traffic_sign(self, traffic_sign_id: int = None):
         """
         Adds a traffic sign to a CommonRoad scenario.
@@ -92,6 +96,7 @@ class AddTrafficSignController:
         self.scenario_model.add_traffic_sign(new_sign, referenced_lanelets)
         self.road_network_controller.set_default_road_network_list_information()
 
+    @logger.log
     def remove_traffic_sign(self):
         """
        Removes selected traffic sign from scenario.
@@ -111,6 +116,7 @@ class AddTrafficSignController:
         self.scenario_model.remove_traffic_sign(selected_traffic_sign_id)
         self.road_network_controller.set_default_road_network_list_information()
 
+    @logger.log
     def update_traffic_sign(self):
         """
         Updates information of selected traffic sign.

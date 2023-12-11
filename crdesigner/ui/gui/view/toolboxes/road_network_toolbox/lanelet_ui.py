@@ -1,6 +1,6 @@
 import math
 
-from PyQt5.QtCore import *
+from PyQt6.QtCore import *
 from commonroad.geometry.polyline_util import compute_polyline_curvatures, compute_polyline_orientations, \
     compute_polyline_initial_orientation
 
@@ -8,6 +8,7 @@ from commonroad.scenario.lanelet import LineMarking, LaneletType, RoadUser, Stop
 from commonroad.scenario.traffic_sign import *
 from numpy import ndarray
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.helper import angle_between
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
@@ -23,7 +24,7 @@ class AddLaneletUI:
     #TODO check for deletion
     # def lanelet_selection_changed(self):
     #     return
-
+    @logger.log
     def initialize_basic_lanelet_information(self, last_added_lanelet_id):
         """
         Initializes lanelet GUI elements with lanelet information.
@@ -79,27 +80,27 @@ class AddLaneletUI:
                     self.road_network_toolbox_ui.road_user_bidirectional.addItem(road_user_list[i])
                     item = self.road_network_toolbox_ui.road_user_bidirectional.model().item(i, 0)
                     if road_user_list[i] in list_bidirectional:
-                        item.setCheckState(Qt.Checked)
+                        item.setCheckState(Qt.CheckState.Checked)
                     else:
-                        item.setCheckState(Qt.Unchecked)
+                        item.setCheckState(Qt.CheckState.Unchecked)
 
                 list_oneway = [e.value for e in last_lanelet.user_one_way]
                 for i in range(0, len(road_user_list) - 1):
                     self.road_network_toolbox_ui.road_user_oneway.addItem(road_user_list[i])
                     item = self.road_network_toolbox_ui.road_user_oneway.model().item(i, 0)
                     if road_user_list[i] in list_oneway:
-                        item.setCheckState(Qt.Checked)
+                        item.setCheckState(Qt.CheckState.Checked)
                     else:
-                        item.setCheckState(Qt.Unchecked)
+                        item.setCheckState(Qt.CheckState.Unchecked)
 
                 list_types = [e.value for e in last_lanelet.lanelet_type]
                 for i in range(0, len(lanelet_type_list) - 1):
                     self.road_network_toolbox_ui.lanelet_type.addItem(lanelet_type_list[i])
                     item = self.road_network_toolbox_ui.lanelet_type.model().item(i, 0)
                     if lanelet_type_list[i] in list_types:
-                        item.setCheckState(Qt.Checked)
+                        item.setCheckState(Qt.CheckState.Checked)
                     else:
-                        item.setCheckState(Qt.Unchecked)
+                        item.setCheckState(Qt.CheckState.Unchecked)
 
             else:
                 self.road_network_toolbox_ui.previous_lanelet.addItem("None")
@@ -108,24 +109,24 @@ class AddLaneletUI:
             # Length and width
             self.road_network_toolbox_ui.lanelet_length.setText("10.0")
             self.road_network_toolbox_ui.lanelet_width.setText("3.0")
-            self.road_network_toolbox_ui.line_marking_right.setCurrentIndex(4)
-            self.road_network_toolbox_ui.line_marking_left.setCurrentIndex(4)
+            self.road_network_toolbox_ui.line_marking_right.setCurrentIndex(10)
+            self.road_network_toolbox_ui.line_marking_left.setCurrentIndex(10)
 
             # Advanced fields
             for i in range(0, len(road_user_list) - 1):
                 self.road_network_toolbox_ui.road_user_bidirectional.addItem(road_user_list[i])
                 item = self.road_network_toolbox_ui.road_user_bidirectional.model().item(i, 0)
-                item.setCheckState(Qt.Unchecked)
+                item.setCheckState(Qt.CheckState.Unchecked)
 
             for i in range(0, len(road_user_list) - 1):
                 self.road_network_toolbox_ui.road_user_oneway.addItem(road_user_list[i])
                 item = self.road_network_toolbox_ui.road_user_oneway.model().item(i, 0)
-                item.setCheckState(Qt.Unchecked)
+                item.setCheckState(Qt.CheckState.Unchecked)
 
             for i in range(0, len(lanelet_type_list) - 1):
                 self.road_network_toolbox_ui.lanelet_type.addItem(lanelet_type_list[i])
                 item = self.road_network_toolbox_ui.lanelet_type.model().item(i, 0)
-                item.setCheckState(Qt.Unchecked)
+                item.setCheckState(Qt.CheckState.Unchecked)
 
         line_markings_stop_line = [e.value for e in LineMarking if
                                    e.value not in [LineMarking.UNKNOWN.value, LineMarking.NO_MARKING.value]]
@@ -333,35 +334,7 @@ class AddLaneletUI:
         self.road_network_toolbox_ui.selected_lanelet_angle.setText("90.0")
         self.road_network_toolbox_ui.selected_number_vertices.setText(str(len(lanelet.center_vertices)))
 
-        if not self.lanelet_is_straight(lanelet):
-            if self.lanelet_has_constant_curvature(lanelet):
-                angle = self.calculate_angle(lanelet)
-                self.road_network_toolbox_ui.selected_curved_checkbox.button.setEnabled(True)
-                self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(True)
-                self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(1000, 1000)
-                radius = self.calculate_curve_radius(angle, lanelet.center_vertices[0], lanelet.center_vertices[-1])
-                self.road_network_toolbox_ui.selected_lanelet_radius.setText(str(radius))
-                self.road_network_toolbox_ui.selected_lanelet_angle.setText(str(angle))
-                self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic \
-                    .display_curved_lanelet(True, self.road_network_toolbox_ui.selected_curved_checkbox, False,
-                                            selected_lanelet=lanelet)
-            else:
-                self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(True)
-                self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(0, 0)
-                self.road_network_toolbox_ui.selected_curved_checkbox.button.setDisabled(True)
-                self.road_network_toolbox_ui.selected_lanelet_start_position_x.setDisabled(True)
-                self.road_network_toolbox_ui.selected_lanelet_start_position_y.setDisabled(True)
-                self.road_network_toolbox_ui.selected_lanelet_end_position_x.setDisabled(True)
-                self.road_network_toolbox_ui.selected_lanelet_end_position_y.setDisabled(True)
-                self.road_network_toolbox_ui.selected_lanelet_width.setDisabled(True)
-                self.road_network_toolbox_ui.selected_lanelet_length.setDisabled(True)
 
-        else:
-            self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic \
-                .display_curved_lanelet(False, None)
-            self.road_network_toolbox_ui.selected_curved_checkbox.button.setEnabled(True)
-            self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(False)
-            self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(0, 0)
 
         self.road_network_toolbox_ui.selected_line_marking_left.setCurrentText(lanelet.line_marking_left_vertices.value)
         self.road_network_toolbox_ui.selected_line_marking_right.setCurrentText(
@@ -390,6 +363,36 @@ class AddLaneletUI:
                 [str(sign) for sign in lanelet.traffic_signs])
         self.road_network_toolbox_ui.selected_lanelet_referenced_traffic_light_ids.set_checked_items(
                 [str(light) for light in lanelet.traffic_lights])
+
+        if not self.lanelet_is_straight(lanelet):
+            if self.lanelet_has_constant_curvature(lanelet):
+                angle = self.calculate_angle(lanelet)
+                self.road_network_toolbox_ui.selected_curved_checkbox.button.setEnabled(True)
+                self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(True)
+                self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(1000, 1000)
+                radius = self.calculate_curve_radius(angle, lanelet.center_vertices[0], lanelet.center_vertices[-1])
+                self.road_network_toolbox_ui.selected_lanelet_radius.setText(str(radius))
+                self.road_network_toolbox_ui.selected_lanelet_angle.setText(str(angle))
+                self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic \
+                    .display_curved_lanelet(True, False)
+
+            else:
+                self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(True)
+                self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(0, 0)
+                self.road_network_toolbox_ui.selected_curved_checkbox.button.setDisabled(True)
+                self.road_network_toolbox_ui.selected_lanelet_start_position_x.setDisabled(True)
+                self.road_network_toolbox_ui.selected_lanelet_start_position_y.setDisabled(True)
+                self.road_network_toolbox_ui.selected_lanelet_end_position_x.setDisabled(True)
+                self.road_network_toolbox_ui.selected_lanelet_end_position_y.setDisabled(True)
+                self.road_network_toolbox_ui.selected_lanelet_width.setDisabled(True)
+                self.road_network_toolbox_ui.selected_lanelet_length.setDisabled(True)
+
+        else:
+            self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic \
+                .display_curved_lanelet(False)
+            self.road_network_toolbox_ui.selected_curved_checkbox.button.setEnabled(True)
+            self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(False)
+            self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(0, 0)
 
         if lanelet.stop_line is not None:
             self.road_network_toolbox_ui.selected_stop_line_box.setChecked(True)
@@ -454,7 +457,7 @@ class AddLaneletUI:
         curvature = compute_polyline_curvatures(lanelet.right_vertices)
         ang = compute_polyline_orientations(lanelet.center_vertices)
         curvature = curvature[2:-2]  # Ignore the first 2 and las 2 Entries
-        rounded_values_curvature = [round(x, 2) for x in curvature]
+        rounded_values_curvature = [round(x, 3) for x in curvature]
         if len(set(rounded_values_curvature)) == 1:
             return True
         else:

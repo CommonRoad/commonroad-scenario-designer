@@ -2,39 +2,44 @@
 This module is used to retrieve a geonamesID for a given coordinate.
 An Internet connection is needed and a valid geonames username has to be provided in the osm_config.py file
 """
-
+import crdesigner
 import json
 import logging
+import pandas as pd
+import kdtree
 from urllib.request import urlopen
 from urllib.error import URLError
 from crdesigner.config.osm_config import osm_config as config
+from crdesigner.map_conversion.osm2cr.converter_modules.utility.labeling_create_tree import find_nearest_neighbor
 
-
-def get_geonamesID(lat: float, lng: float):
+def get_geonamesID(lat: float, lng: float, cities_kdtree: kdtree.KDNode = None) -> str:
     """
-    Retrive a geonamesID for a given scenario coordinate center
+    Retrieve a geonamesID for a given scenario coordinate center
 
     :param1 lat: Latitude of scenario center
     :param2 lng: Longitude of scenario center
+    :param3 cities_kdtree: None → use API, kdtree.KDNode → use offline implementation
     :return: GeonamesID for scenario
     """
-
     # try to request information for the given scenario center
     try:
-        if config.GEONAMES_USERNAME == 'demo':
-            raise ValueError('geonames demo ID used')
+        if cities_kdtree is not None:
+            return find_nearest_neighbor(cities_kdtree, (lat, lng)).getLabel()
+        else:
+            if config.GEONAMES_USERNAME == 'demo':
+                raise ValueError('geonames demo ID used')
 
-        query = "http://api.geonames.org/findNearbyPlaceNameJSON?lat={}&lng={}&username={}".format(
-            lat, lng, config.GEONAMES_USERNAME
-        )
-        data = urlopen(query).read().decode('utf-8')
-        response = json.loads(data)
+            query = "http://api.geonames.org/findNearbyPlaceNameJSON?lat={}&lng={}&username={}".format(
+                lat, lng, config.GEONAMES_USERNAME
+            )
+            data = urlopen(query).read().decode('utf-8')
+            response = json.loads(data)
 
-        # choose the first entry's geonameID to get the closest location
-        code = response['geonames'][0]['geonameId']
+            # choose the first entry's geonameID to get the closest location
+            code = response['geonames'][0]['geonameId']
 
-        return code
-
+            return code
+        
     # catch connection error
     except ValueError:
         logging.error("Fallback GeonamesID used.")

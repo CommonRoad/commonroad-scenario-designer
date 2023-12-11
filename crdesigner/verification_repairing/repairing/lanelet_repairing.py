@@ -14,7 +14,10 @@ from crdesigner.verification_repairing.repairing.repairing import ElementRepairi
 from crdesigner.verification_repairing.repairing.tools.geometry_tools import insert_vertices, \
     check_intersected_lines, fill_number_of_vertices, average_vertices, check_line_intersection_efficient
 
-from commonroad_dc.geometry.util import compute_orientation_from_polyline
+try:
+    from commonroad_dc.geometry.util import compute_orientation_from_polyline
+except ModuleNotFoundError:
+    logging.error("MapVerification: Please install CommonRoad Drivability Checker manually!")
 
 
 class LaneletRepairing(ElementRepairing):

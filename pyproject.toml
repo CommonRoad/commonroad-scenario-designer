@@ -10,7 +10,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
-#    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.11",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
@@ -25,22 +25,28 @@ Forum = "https://commonroad.in.tum.de/forum/c/scenario-designer/"
 Source = "https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = "^3.8"
 commonroad-io = {git = "git@gitlab.lrz.de:cps/commonroad-io.git", rev = "release-2024-1"}
-commonroad-drivability-checker = "2023.1"
-pyqt5 = ">=5.15.9"
-PyQt5-Qt5 = [
-    {version = "<5.15.11", platform = 'linux'},
-    {version = "<5.15.11", platform = 'win64'},
-    {version = "=5.15.11", platform = 'darwin'}]
+commonroad-drivability-checker = [
+    {version = "2023.1", python = "<3.11"},
+    {git = "git@gitlab.lrz.de:cps/commonroad-drivability-checker.git", rev = "development", python = ">=3.11"}
+    ]
+pyqt6 = ">=6.6.0"
 matplotlib = ">=3.6.0"
-numpy = "^1.24.2"
+numpy = [
+    {version = ">=1.22, <1.26", python = "3.8"},
+    {version = "^1.26", python = ">=3.9,<3.13"}
+]
+scipy = [
+    {version = ">=1.5.2,<1.11", python = "3.8"},
+    {version = "^1.11", python = ">=3.9,<3.13"}
+]
 lxml = "^4.9.2"
 pyproj = "^3.4.1"
 utm = "^0.7.0"
 shapely = ">=2.0.1"
 ordered-set = "^4.1.0"
-sumocr = "2023.2"
+# sumocr = "^2023.4"  TODO activate sumo test case again and activate odr validation in osm2cr conversion via sumo
 iso3166 = "^2.1.1"
 networkx = "^3.0"
 omegaconf = "^2.3.0"
@@ -51,8 +57,14 @@ urllib3 = "^2.0.3"
 typer = "^0.9.0"
 typing-extensions = "^4.8.0"
 antlr4-python3-runtime = "4.9.3"
-pymetis = ">=2020.1"
+pymetis = [
+    {version = ">=2020.1", platform = 'linux'}
+     ]
 similaritymeasures = ">=0.4.4"
+kdtree = "^0.16"
+pandas = "2.0.2"
+requests = "^2.31.0 "
+
 
 [tool.poetry.group.docs]
 optional = true

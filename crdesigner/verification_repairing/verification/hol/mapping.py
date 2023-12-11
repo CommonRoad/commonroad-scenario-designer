@@ -100,7 +100,7 @@ class HOLMapping(Mapping):
                    DomainName.TRAFFIC_SIGNS.value: self._network.traffic_signs,
                    DomainName.TRAFFIC_LIGHTS.value: self._network.traffic_lights,
                    DomainName.INTERSECTIONS.value: self._network.intersections,
-                   DomainName.TRAFFIC_LIGHT_CYCLE_ELEMENTS.value: cycle_elements,
+                   # DomainName.TRAFFIC_LIGHT_CYCLE_ELEMENTS.value: cycle_elements,
                    # DomainName.INCOMING_GROUPS.value: incoming_groups,
                    # DomainName.OUTGOING_GROUPS.value: outgoing_groups,
                    # DomainName.STOP_LINES.value: self._network.stop_lines,

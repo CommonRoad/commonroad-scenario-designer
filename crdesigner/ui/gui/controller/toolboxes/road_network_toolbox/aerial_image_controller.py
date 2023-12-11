@@ -1,6 +1,7 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
     RoadNetworkToolboxUI
@@ -15,7 +16,7 @@ class RequestRunnable(QRunnable):
 
     def run(self):
         self.fun()
-        QMetaObject.invokeMethod(self.roadNetworkController, "stopSpinner", Qt.QueuedConnection,
+        QMetaObject.invokeMethod(self.roadNetworkController, "stopSpinner", Qt.ConnectionType.QueuedConnection,
                                 Q_ARG(str, "Conversion Ended"))
 
 
@@ -31,6 +32,7 @@ class AddAerialImageController:
         self.road_network_toolbox_ui.button_add_aerial_image.clicked.connect(lambda: self.show_aerial_image())
         self.road_network_toolbox_ui.button_remove_aerial_image.clicked.connect(lambda: self.remove_aerial_image())
 
+    @logger.log
     def show_aerial_image(self):
         if self.road_network_controller.mwindow.play_activated:
             self.road_network_controller.text_browser.append("Please stop the animation first.")
@@ -102,6 +104,7 @@ class AddAerialImageController:
         runnable = RequestRunnable(self.activate_aerial_image, self.road_network_controller)
         QThreadPool.globalInstance().start(runnable)
 
+    @logger.log
     def remove_aerial_image(self):
         self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.deactivate_aerial_image()
         self.scenario_model.notify_all()

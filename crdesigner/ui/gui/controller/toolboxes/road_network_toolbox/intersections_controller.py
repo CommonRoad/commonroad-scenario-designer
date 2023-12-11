@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QTableWidgetItem, QComboBox
 from commonroad.scenario.intersection import IncomingGroup, Intersection
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.intersections_ui import AddIntersectionUI
@@ -26,10 +27,9 @@ class AddIntersectionController:
                 lambda: self.add_three_way_intersection())
         self.road_network_toolbox_ui.selected_intersection.currentTextChanged.connect(
                 lambda: self.intersection_ui.update_intersection_information())
-        self.road_network_toolbox_ui.button_add_incoming.clicked.connect(
-            lambda: self.intersection_ui.add_incoming_to_table())
+        self.road_network_toolbox_ui.button_add_incoming.clicked.connect(lambda: self.intersection_ui.add_incoming_to_table())
         self.road_network_toolbox_ui.button_remove_incoming.clicked.connect(
-                lambda: self.intersection_ui.remove_incoming())
+            lambda: self.intersection_ui.remove_incoming())
         self.road_network_toolbox_ui.button_fit_intersection.clicked.connect(lambda: self.fit_intersection())
         self.road_network_toolbox_ui.button_add_intersection.clicked.connect(lambda: self.add_intersection())
         self.road_network_toolbox_ui.button_remove_intersection.clicked.connect(lambda: self.remove_intersection())
@@ -53,7 +53,7 @@ class AddIntersectionController:
         add_traffic_lights = self.road_network_toolbox_ui.intersection_with_traffic_lights.isChecked()
 
         self.scenario_model.create_four_way_intersection(width, diameter, incoming_length, add_traffic_signs,
-                                                         add_traffic_lights)
+                                                          add_traffic_lights)
         self.road_network_controller.set_default_road_network_list_information()
 
     def add_three_way_intersection(self):
@@ -77,6 +77,7 @@ class AddIntersectionController:
                                                           add_traffic_lights)
         self.road_network_controller.set_default_road_network_list_information()
 
+    @logger.log
     def fit_intersection(self):
         """
          Rotates and translates a complete intersection so that it is attached to a user-defined lanelet.
@@ -85,16 +86,16 @@ class AddIntersectionController:
             self.road_network_controller.text_browser.append("Please stop the animation first.")
             return
 
-        if (self.road_network_toolbox_ui.selected_intersection.currentText() not in ["",
-                                                                                    "None"] and
-                self.road_network_toolbox_ui.other_lanelet_to_fit.currentText() not in [
-            "", "None"] and self.road_network_toolbox_ui.intersection_lanelet_to_fit.currentText() not in ["", "None"]):
+        if self.road_network_toolbox_ui.selected_intersection.currentText() not in ["","None"] \
+                and self.road_network_toolbox_ui.other_lanelet_to_fit.currentText() not in ["", "None"] \
+                and self.road_network_toolbox_ui.intersection_lanelet_to_fit.currentText() not in ["", "None"]:
             selected_intersection_id = int(self.road_network_toolbox_ui.selected_intersection.currentText())
             predecessor_id = int(self.road_network_toolbox_ui.other_lanelet_to_fit.currentText())
             successor_id = int(self.road_network_toolbox_ui.intersection_lanelet_to_fit.currentText())
 
             self.scenario_model.fit_intersection(selected_intersection_id, predecessor_id, successor_id)
 
+    @logger.log
     def add_intersection(self, intersection_id: int = None):
         """
         Adds an intersection to the scenario.
@@ -113,31 +114,32 @@ class AddIntersectionController:
         for row in range(self.road_network_toolbox_ui.intersection_incomings_table.rowCount()):
             incoming_id = int(self.road_network_toolbox_ui.intersection_incomings_table.item(row, 0).text())
             incoming_lanelets = {int(item) for item in
-                                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row,
-                                                                                                      1).get_checked_items()}
+                                 self.road_network_toolbox_ui.intersection_incomings_table .cellWidget(row,1)
+                                 .get_checked_items()}
             if len(incoming_lanelets) < 1:
-                self.road_network_controller.text_browser.append(
-                    "_Warning:_ An incoming must consist at least of one lanelet.")
+                self.road_network_controller.text_browser\
+                    .append("_Warning:_ An incoming must consist at least of one lanelet.")
                 print("intersections_controller.py/add_intersection: An incoming must consist at least of one lanelet.")
                 return
             successor_left = {int(item) for item in
                               self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row,
-                                                                                                   2).get_checked_items()}
+                                      2).get_checked_items()}
             successor_straight = {int(item) for item in
                                   self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row,
-                                                                                                       3).get_checked_items()}
+                                          3).get_checked_items()}
             successor_right = {int(item) for item in
                                self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row,
-                                                                                                    4).get_checked_items()}
+                                       4).get_checked_items()}
             if len(successor_left) + len(successor_right) + len(successor_straight) < 1:
                 print("An incoming must consist at least of one successor")
                 return
-            left_of = int(self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row,
-                                                                                               5).currentText()) if (
-                    self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
-                row, 5).currentText() != "") else None
-            incoming = IncomingGroup(incoming_id=incoming_id, incoming_lanelets=incoming_lanelets,
-                                     outgoing_right=successor_right, outgoing_straight=successor_straight,
+            left_of = int(self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row,5)
+                          .currentText()) if self.road_network_toolbox_ui.intersection_incomings_table\
+                                                                       .cellWidget(row, 5).currentText() != "" else None
+            incoming = IncomingGroup(incoming_id=incoming_id,
+                                     incoming_lanelets=incoming_lanelets,
+                                     outgoing_right=successor_right,
+                                     outgoing_straight=successor_straight,
                                      outgoing_left=successor_left)
             incomings.append(incoming)
         crossings = {int(item) for item in self.road_network_toolbox_ui.intersection_crossings.get_checked_items()}
@@ -147,8 +149,8 @@ class AddIntersectionController:
             self.scenario_model.add_intersection(intersection)
             self.road_network_controller.set_default_road_network_list_information()
         else:
-            self.road_network_controller.text_browser.append(
-                "_Warning:_ An intersection must consist at least of two incomings.")
+            self.road_network_controller.text_browser \
+                .append("_Warning:_ An intersection must consist at least of two incomings.")
             print("intersections_controller.py/add_intersection: An intersection must consist at least of two "
                   "incomings.")
 
@@ -176,6 +178,7 @@ class AddIntersectionController:
             self.scenario_model.remove_intersection(selected_intersection_id)
             self.road_network_controller.set_default_road_network_list_information()
 
+    @logger.log
     def collect_traffic_lights_of_intersection(self, lanelet_ids: Set[int]) -> Set[int]:
         traffic_lights = set()
         for lanelet_ID in lanelet_ids:

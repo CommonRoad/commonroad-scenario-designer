@@ -1,6 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 import math
 
 from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox
@@ -18,22 +18,22 @@ class IntersectionsWidget():
         layout_intersection = QVBoxLayout(widget_intersection)
 
         label_intersection_templates = QLabel("Intersection Templates")
-        label_intersection_templates.setFont(QFont("Arial", 11, QFont.Bold))
+        label_intersection_templates.setFont(QFont("Arial", 11, QFont.Weight.Bold))
 
         self.toolbox.intersection_diameter = QLineEdit()
         self.toolbox.intersection_diameter.setValidator(QIntValidator())
         self.toolbox.intersection_diameter.setMaxLength(2)
-        self.toolbox.intersection_diameter.setAlignment(Qt.AlignRight)
+        self.toolbox.intersection_diameter.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.toolbox.intersection_lanelet_width = QLineEdit()
         self.toolbox.intersection_lanelet_width.setValidator(QDoubleValidator())
         self.toolbox.intersection_lanelet_width.setMaxLength(4)
-        self.toolbox.intersection_lanelet_width.setAlignment(Qt.AlignRight)
+        self.toolbox.intersection_lanelet_width.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.toolbox.intersection_incoming_length = QLineEdit()
         self.toolbox.intersection_incoming_length.setValidator(QDoubleValidator())
         self.toolbox.intersection_incoming_length.setMaxLength(4)
-        self.toolbox.intersection_incoming_length.setAlignment(Qt.AlignRight)
+        self.toolbox.intersection_incoming_length.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.toolbox.intersection_with_traffic_signs = QCheckBox("Add Traffic Signs")
         self.toolbox.intersection_with_traffic_lights = QCheckBox("Add Traffic Lights")
@@ -42,7 +42,7 @@ class IntersectionsWidget():
         self.toolbox.button_four_way_intersection = QPushButton("Add Four-way Intersection")
 
         label_update_intersection = QLabel("Add/Update/Remove Intersection")
-        label_update_intersection.setFont(QFont("Arial", 11, QFont.Bold))
+        label_update_intersection.setFont(QFont("Arial", 11, QFont.Weight.Bold))
 
         self.toolbox.selected_intersection = QComboBox()
 
@@ -50,7 +50,7 @@ class IntersectionsWidget():
         self.toolbox.intersection_incomings_table = QTableWidget()
         self.toolbox.intersection_incomings_table.setColumnCount(6)
         self.toolbox.intersection_incomings_table.setHorizontalHeaderLabels(
-                ['ID', 'Lanelets', 'Suc. Left', 'Suc. Straight', 'Suc. Right', 'Left Of'])
+                ['ID', 'Lanelets', 'Out. Left', 'Out. Straight', 'Out. Right', 'Left of'])
         self.toolbox.intersection_incomings_table.resizeColumnsToContents()
         self.toolbox.intersection_incomings_table.setMaximumHeight(175)
         self.toolbox.button_add_incoming = QPushButton("Add Incoming")
@@ -63,7 +63,7 @@ class IntersectionsWidget():
         self.toolbox.button_update_intersection = QPushButton("Update Intersection")
 
         label_intersection_fitting = QLabel("Intersection Fitting")
-        label_intersection_fitting.setFont(QFont("Arial", 11, QFont.Bold))
+        label_intersection_fitting.setFont(QFont("Arial", 11, QFont.Weight.Bold))
         self.toolbox.intersection_lanelet_to_fit = QComboBox()
         self.toolbox.other_lanelet_to_fit = QComboBox()
         self.toolbox.button_fit_intersection = QPushButton("Fit to intersection")

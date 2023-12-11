@@ -1,10 +1,10 @@
 import math
 from typing import Tuple
 
-from PyQt5 import QtCore
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6 import QtCore
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 from commonroad.scenario.state import InitialState
 
 from crdesigner.ui.gui.utilities.toolbox_ui import (
@@ -57,13 +57,13 @@ class ScenarioToolboxUI(Toolbox):
         planning_problem_groupbox.setLayout(layout_planning_problem_groupbox)
 
         label_general = QLabel("Planning Problems")
-        label_general.setFont(QFont("Arial", 11, QFont.Bold))
+        label_general.setFont(QFont("Arial", 11, QFont.Weight.Bold))
         layout_planning_problem_groupbox.addRow(label_general)
 
         """"Planning Problem List"""
         self.planning_problem_list_label = QLabel("Planning Problems:")
         self.planning_problems_list_table = QTableWidget()
-        self.planning_problems_list_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.planning_problems_list_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.planning_problems_list_table_row_count = (
             self.planning_problems_list_table.rowCount()
         )
@@ -107,7 +107,7 @@ class ScenarioToolboxUI(Toolbox):
         self.country.addItems(country_list)
 
         self.scenario_scene_name = QLineEdit()
-        self.scenario_scene_name.setAlignment(Qt.AlignRight)
+        self.scenario_scene_name.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_scene_id = QSpinBox()
         self.scenario_scene_id.setMinimum(1)
@@ -134,30 +134,30 @@ class ScenarioToolboxUI(Toolbox):
         self.scenario_time_step_size = QLineEdit()
         self.scenario_time_step_size.setValidator(QDoubleValidator())
         self.scenario_time_step_size.setMaxLength(4)
-        self.scenario_time_step_size.setAlignment(Qt.AlignRight)
+        self.scenario_time_step_size.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_author = QLineEdit()
-        self.scenario_author.setAlignment(Qt.AlignRight)
+        self.scenario_author.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_affiliation = QLineEdit()
-        self.scenario_affiliation.setAlignment(Qt.AlignRight)
+        self.scenario_affiliation.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_source = QLineEdit()
-        self.scenario_source.setAlignment(Qt.AlignRight)
+        self.scenario_source.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.location_storage_selection = QCheckBox("Store Location")
 
         self.scenario_geo_anme_id = QLineEdit()
         self.scenario_geo_anme_id.setValidator(QIntValidator())
-        self.scenario_geo_anme_id.setAlignment(Qt.AlignRight)
+        self.scenario_geo_anme_id.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_latitude = QLineEdit()
         self.scenario_latitude.setValidator(QDoubleValidator())
-        self.scenario_latitude.setAlignment(Qt.AlignRight)
+        self.scenario_latitude.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_longitude = QLineEdit()
         self.scenario_longitude.setValidator(QDoubleValidator())
-        self.scenario_longitude.setAlignment(Qt.AlignRight)
+        self.scenario_longitude.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_time_of_day = QComboBox()
         time_of_day_list = [e.value for e in TimeOfDay]
@@ -185,7 +185,7 @@ class ScenarioToolboxUI(Toolbox):
         scenario_information = QFormLayout()
         # scenario_information_groupbox = QGroupBox()
         label_general = QLabel("Scenario Settings")
-        label_general.setFont(QFont("Arial", 11, QFont.Bold))
+        label_general.setFont(QFont("Arial", 11, QFont.Weight.Bold))
         scenario_information.addRow(label_general)
         scenario_information.addRow("Country:", self.country)
         scenario_information.addRow("Scene Name:", self.scenario_scene_name)
@@ -246,7 +246,7 @@ class ScenarioToolboxUI(Toolbox):
         )
 
         label_general = QLabel("Initial State Attributes")
-        label_general.setFont(QFont("Arial", 11, QFont.Bold))
+        label_general.setFont(QFont("Arial", 11, QFont.Weight.Bold))
         layout_initial_state_information_groupbox.addRow(label_general)
 
         """"Position"""
@@ -254,13 +254,13 @@ class ScenarioToolboxUI(Toolbox):
         self.initial_position_x.setValidator(QDoubleValidator())
         self.initial_position_x.setMaxLength(8)
         self.initial_position_x.setFixedWidth(150)
-        self.initial_position_x.setAlignment(Qt.AlignRight)
+        self.initial_position_x.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.initial_position_y = QLineEdit()
         self.initial_position_y.setValidator(QDoubleValidator())
         self.initial_position_y.setMaxLength(8)
         self.initial_position_y.setFixedWidth(150)
-        self.initial_position_y.setAlignment(Qt.AlignRight)
+        self.initial_position_y.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         lanelet_information_position_layout = QFormLayout()
         lanelet_position_groupbox = QGroupBox()
@@ -279,7 +279,7 @@ class ScenarioToolboxUI(Toolbox):
         self.initial_velocity.setValidator(QDoubleValidator())
         self.initial_velocity.setMaxLength(8)
         self.initial_velocity.setFixedWidth(150)
-        self.initial_velocity.setAlignment(Qt.AlignRight)
+        self.initial_velocity.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         velocity_information = QGridLayout()
         velocity_information.addWidget(QLabel("Velocity [m/s]:"), 1, 0)
@@ -292,7 +292,7 @@ class ScenarioToolboxUI(Toolbox):
         self.initial_orientation.setValidator(QDoubleValidator())
         self.initial_orientation.setMaxLength(8)
         self.initial_orientation.setFixedWidth(150)
-        self.initial_orientation.setAlignment(Qt.AlignRight)
+        self.initial_orientation.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         orientation_information = QGridLayout()
         orientation_information.addWidget(QLabel("Orientation [deg]:"), 1, 0)
@@ -305,7 +305,8 @@ class ScenarioToolboxUI(Toolbox):
         self.initial_yawRate.setValidator(QDoubleValidator())
         self.initial_yawRate.setMaxLength(8)
         self.initial_yawRate.setFixedWidth(150)
-        self.initial_yawRate.setAlignment(Qt.AlignRight)
+        self.initial_yawRate.setAlignment(Qt.AlignmentFlag.AlignRight)
+
 
         yaw_rate_information = QGridLayout()
         yaw_rate_information.addWidget(QLabel("Yaw Rate [deg]:"), 1, 0)
@@ -318,7 +319,7 @@ class ScenarioToolboxUI(Toolbox):
         self.initial_slipAngle.setValidator(QDoubleValidator())
         self.initial_slipAngle.setMaxLength(8)
         self.initial_slipAngle.setFixedWidth(150)
-        self.initial_slipAngle.setAlignment(Qt.AlignRight)
+        self.initial_slipAngle.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         slip_angle_information = QGridLayout()
         slip_angle_information.addWidget(QLabel("Slip Angle [deg]:"), 1, 0)
@@ -331,7 +332,7 @@ class ScenarioToolboxUI(Toolbox):
         self.initial_time.setValidator(QIntValidator())
         self.initial_time.setMaxLength(8)
         self.initial_time.setFixedWidth(150)
-        self.initial_time.setAlignment(Qt.AlignRight)
+        self.initial_time.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         time_information = QGridLayout()
         time_information.addWidget(QLabel("Time [s]:"), 1, 0)
@@ -344,7 +345,7 @@ class ScenarioToolboxUI(Toolbox):
         self.initial_acceleration.setValidator(QDoubleValidator())
         self.initial_acceleration.setMaxLength(8)
         self.initial_acceleration.setFixedWidth(150)
-        self.initial_acceleration.setAlignment(Qt.AlignRight)
+        self.initial_acceleration.setAlignment(Qt.AlignmentFlag.AlignRight)
         acceleration_information = QGridLayout()
         acceleration_information.addWidget(QLabel("Acceleration [m/s2]:"), 1, 0)
         acceleration_information.addWidget(self.initial_acceleration, 1, 2)
@@ -388,16 +389,16 @@ class ScenarioToolboxUI(Toolbox):
             self.layout_goal_state_information_groupbox
         )
         goal_state_information_groupbox.setFixedHeight(900)
-        goal_state_information_groupbox.setAlignment(Qt.AlignTop)
+        goal_state_information_groupbox.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         label_general = QLabel("Goal State Attributes")
-        label_general.setFont(QFont("Arial", 11, QFont.Bold))
+        label_general.setFont(QFont("Arial", 11, QFont.Weight.Bold))
         self.layout_goal_state_information_groupbox.insertRow(0, label_general)
 
         """Goal States List"""
         self.goal_states_list_label = QLabel("Goal States:")
         self.goal_states_list_table = QTableWidget()
-        self.goal_states_list_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.goal_states_list_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.goal_states_list_list_table_row_count = (
             self.goal_states_list_table.rowCount()
         )
@@ -441,13 +442,13 @@ class ScenarioToolboxUI(Toolbox):
         self.goal_time_start.setValidator(QIntValidator())
         self.goal_time_start.setMaxLength(8)
         self.goal_time_start.setFixedWidth(80)
-        self.goal_time_start.setAlignment(Qt.AlignRight)
+        self.goal_time_start.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.goal_time_end = QLineEdit()
         self.goal_time_end.setValidator(QIntValidator())
         self.goal_time_end.setMaxLength(8)
         self.goal_time_end.setFixedWidth(80)
-        self.goal_time_end.setAlignment(Qt.AlignRight)
+        self.goal_time_end.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         time_information = QGridLayout()
         time_information.setColumnMinimumWidth(1, 110)
@@ -457,7 +458,7 @@ class ScenarioToolboxUI(Toolbox):
             1,
             2,
         )
-        time_information.addWidget(QLabel("-"), 1, 3, alignment=Qt.AlignCenter)
+        time_information.addWidget(QLabel("-"), 1, 3, alignment=Qt.AlignmentFlag.AlignCenter)
         time_information.addWidget(self.goal_time_end, 1, 4)
 
         self.layout_goal_state_information_groupbox.insertRow(6, time_information)
@@ -468,14 +469,14 @@ class ScenarioToolboxUI(Toolbox):
         self.goal_velocity_start.setMaxLength(8)
         self.goal_velocity_start.setFixedWidth(80)
         self.goal_velocity_start.setFixedHeight(24)
-        self.goal_velocity_start.setAlignment(Qt.AlignRight)
+        self.goal_velocity_start.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.goal_velocity_end = QLineEdit()
         self.goal_velocity_end.setValidator(QDoubleValidator())
         self.goal_velocity_end.setMaxLength(8)
         self.goal_velocity_end.setFixedWidth(80)
         self.goal_velocity_end.setFixedHeight(24)
-        self.goal_velocity_end.setAlignment(Qt.AlignRight)
+        self.goal_velocity_end.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.goal_velocity_selected = QCheckBox()
 
@@ -485,7 +486,7 @@ class ScenarioToolboxUI(Toolbox):
         velocity_information.addWidget(self.goal_velocity_selected, 1, 0)
         velocity_information.addWidget(QLabel("Velocity [m/s]:"), 1, 1)
         velocity_information.addWidget(self.goal_velocity_start, 1, 2)
-        velocity_information.addWidget(QLabel("-"), 1, 3, alignment=Qt.AlignCenter)
+        velocity_information.addWidget(QLabel("-"), 1, 3, alignment=Qt.AlignmentFlag.AlignCenter)
         velocity_information.addWidget(self.goal_velocity_end, 1, 4)
 
         self.layout_goal_state_information_groupbox.insertRow(7, velocity_information)
@@ -496,14 +497,14 @@ class ScenarioToolboxUI(Toolbox):
         self.goal_orientation_start.setMaxLength(8)
         self.goal_orientation_start.setFixedWidth(80)
         self.goal_orientation_start.setFixedHeight(24)
-        self.goal_orientation_start.setAlignment(Qt.AlignRight)
+        self.goal_orientation_start.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.goal_orientation_end = QLineEdit()
         self.goal_orientation_end.setValidator(QDoubleValidator())
         self.goal_orientation_end.setMaxLength(8)
         self.goal_orientation_end.setFixedWidth(80)
         self.goal_orientation_end.setFixedHeight(24)
-        self.goal_orientation_end.setAlignment(Qt.AlignRight)
+        self.goal_orientation_end.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.goal_orientation_selected = QCheckBox()
 
@@ -513,7 +514,7 @@ class ScenarioToolboxUI(Toolbox):
         orientation_information.addWidget(self.goal_orientation_selected, 1, 0)
         orientation_information.addWidget(QLabel("Orientation [deg]:"), 1, 1)
         orientation_information.addWidget(self.goal_orientation_start, 1, 2)
-        orientation_information.addWidget(QLabel("-"), 1, 3, alignment=Qt.AlignCenter)
+        orientation_information.addWidget(QLabel("-"), 1, 3, alignment=Qt.AlignmentFlag.AlignCenter)
         orientation_information.addWidget(self.goal_orientation_end, 1, 4)
 
         self.layout_goal_state_information_groupbox.insertRow(
@@ -542,7 +543,7 @@ class ScenarioToolboxUI(Toolbox):
         self.goal_states_shape_widget.setLayout(self.goal_states_shape_layout)
 
         self.goal_states_shape_list_table = QTableWidget()
-        self.goal_states_shape_list_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.goal_states_shape_list_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.goal_states_shape_list_table_row_count = (
             self.goal_states_shape_list_table.rowCount()
         )
@@ -633,7 +634,7 @@ class ScenarioToolboxUI(Toolbox):
         self.goal_states_lanelet_widget.setLayout(self.goal_states_lanelet_layout)
 
         self.goal_states_lanelet_list_table = QTableWidget()
-        self.goal_states_lanelet_list_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.goal_states_lanelet_list_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.goal_states_lanelet_list_table_row_count = (
             self.goal_states_lanelet_list_table.rowCount()
         )
@@ -706,31 +707,31 @@ class ScenarioToolboxUI(Toolbox):
         self.rectangle_length.setValidator(QDoubleValidator())
         self.rectangle_length.setMaxLength(8)
         self.rectangle_length.setFixedWidth(50)
-        self.rectangle_length.setAlignment(Qt.AlignRight)
+        self.rectangle_length.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.rectangle_width = QLineEdit()
         self.rectangle_width.setValidator(QDoubleValidator())
         self.rectangle_width.setMaxLength(8)
         self.rectangle_width.setFixedWidth(50)
-        self.rectangle_width.setAlignment(Qt.AlignRight)
+        self.rectangle_width.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.rectangle_x = QLineEdit()
         self.rectangle_x.setValidator(QDoubleValidator())
         self.rectangle_x.setMaxLength(8)
         self.rectangle_x.setFixedWidth(50)
-        self.rectangle_x.setAlignment(Qt.AlignRight)
+        self.rectangle_x.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.rectangle_y = QLineEdit()
         self.rectangle_y.setValidator(QDoubleValidator())
         self.rectangle_y.setMaxLength(8)
         self.rectangle_y.setFixedWidth(50)
-        self.rectangle_y.setAlignment(Qt.AlignRight)
+        self.rectangle_y.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.rectangle_orientation = QLineEdit()
         self.rectangle_orientation.setValidator(QDoubleValidator())
         self.rectangle_orientation.setMaxLength(8)
         self.rectangle_orientation.setFixedWidth(50)
-        self.rectangle_orientation.setAlignment(Qt.AlignRight)
+        self.rectangle_orientation.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.rectangle_widget = QWidget()
         position_information_rec = QGridLayout()
@@ -747,7 +748,7 @@ class ScenarioToolboxUI(Toolbox):
         position_information_rec.addWidget(self.rectangle_y, 2, 5)
         position_information_rec.addWidget(QLabel("[m]"), 2, 6)
         label_orientation = QLabel("Orientation:")
-        label_orientation.setAlignment(QtCore.Qt.AlignTop)
+        label_orientation.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         position_information_rec.addWidget(label_orientation, 3, 1, 3, 4)
         position_information_rec.addWidget(self.rectangle_orientation, 3, 5)
         position_information_rec.addWidget(QLabel("[deg]"), 3, 6)
@@ -767,19 +768,19 @@ class ScenarioToolboxUI(Toolbox):
         self.circle_radius.setValidator(QDoubleValidator())
         self.circle_radius.setMaxLength(8)
         self.circle_radius.setFixedWidth(50)
-        self.circle_radius.setAlignment(Qt.AlignRight)
+        self.circle_radius.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.circle_x = QLineEdit()
         self.circle_x.setValidator(QDoubleValidator())
         self.circle_x.setMaxLength(8)
         self.circle_x.setFixedWidth(50)
-        self.circle_x.setAlignment(Qt.AlignRight)
+        self.circle_x.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.circle_y = QLineEdit()
         self.circle_y.setValidator(QDoubleValidator())
         self.circle_y.setMaxLength(8)
         self.circle_y.setFixedWidth(50)
-        self.circle_y.setAlignment(Qt.AlignRight)
+        self.circle_y.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.circle_widget = QWidget()
         position_information_circle = QGridLayout()
@@ -864,12 +865,12 @@ class ScenarioToolboxUI(Toolbox):
         self.vertices_x.append(QLineEdit())
         self.vertices_x[i].setValidator(QDoubleValidator())
         self.vertices_x[i].setMaxLength(6)
-        self.vertices_x[i].setAlignment(Qt.AlignRight)
+        self.vertices_x[i].setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.vertices_y.append(QLineEdit())
         self.vertices_y[i].setValidator(QDoubleValidator())
         self.vertices_y[i].setMaxLength(6)
-        self.vertices_y[i].setAlignment(Qt.AlignRight)
+        self.vertices_y[i].setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.polygon_row[i].addWidget(self.polygon_label[i])
         self.polygon_row[i].addWidget(self.vertices_x[i])

@@ -1,16 +1,15 @@
 from typing import Optional
 
-from PyQt5 import Qt
-from PyQt5.QtWidgets import QTableWidgetItem, QComboBox
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
     RoadNetworkToolboxUI
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from commonroad.scenario.traffic_sign import *
 
+from commonroad.scenario.traffic_sign import *
 
 
 class AddIntersectionUI:
@@ -29,6 +28,7 @@ class AddIntersectionUI:
         for inc in selected_intersection.incomings:
             self.road_network_toolbox_ui.intersection_incomings_table.setItem(0, 0, inc.incoming_id)
 
+    @logger.log
     def remove_incoming(self):
         """
         Removes a row from the intersection incoming table.
@@ -52,7 +52,7 @@ class AddIntersectionUI:
             if row != self.road_network_toolbox_ui.intersection_incomings_table.rowCount() - 1:
                 index = self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).findText(
                         self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).currentText(),
-                        Qt.MatchFixedString)
+                        Qt.MatchFlag.MatchFixedString)
             else:
                 index = -1
             self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(row, 5, combo_box_left_of)
@@ -105,19 +105,21 @@ class AddIntersectionUI:
                         [str(la_id) for la_id in incoming.outgoing_straight])
                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 4).set_checked_items(
                         [str(la_id) for la_id in incoming.outgoing_right])
-                index = self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 5).findText(
-                        str(incoming.outgoing_left))
-                self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 5).setCurrentIndex(
-                        index)
+                # index =
+                #     self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 5).findText(
+                #         str(incoming.left_of))
+                # self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 5).setCurrentIndex(
+                #         index)
             self.road_network_toolbox_ui.intersection_crossings.set_checked_items(
                     [str(cr) for cr in intersection.crossings])
 
             self.road_network_toolbox_ui.intersection_lanelet_to_fit.clear()
             current_text = self.road_network_toolbox_ui.selected_intersection.currentText()
-            self.road_network_toolbox_ui.intersection_lanelet_to_fit.addItems(["None"] + [str(item) for item in
-                                      self.scenario_model.collect_incoming_lanelet_ids_from_intersection(current_text)])
+            self.road_network_toolbox_ui.intersection_lanelet_to_fit.addItems(["None"] + [
+                str(item) for item in self.scenario_model.collect_incoming_lanelet_ids_from_intersection(current_text)])
             self.road_network_toolbox_ui.intersection_lanelet_to_fit.setCurrentIndex(0)
 
+    @logger.log
     def add_incoming_to_table(self, new_incoming: bool = True, incoming_ids: Optional[List[str]] = None):
         """
         Adds a row to the intersection incoming table.
@@ -135,8 +137,7 @@ class AddIntersectionUI:
         lanelet_ids = [str(la_id) for la_id in self.scenario_model.collect_lanelet_ids()]
         if new_incoming:
             self.road_network_toolbox_ui.intersection_incomings_table.setItem(
-                    num_rows,
-                    0,QTableWidgetItem(str(self.scenario_model.generate_object_id())))
+                    num_rows, 0, QTableWidgetItem(str(self.scenario_model.generate_object_id())))
         combo_box_lanelets = CheckableComboBox()
         combo_box_lanelets.addItems(lanelet_ids)
         self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(num_rows, 1, combo_box_lanelets)

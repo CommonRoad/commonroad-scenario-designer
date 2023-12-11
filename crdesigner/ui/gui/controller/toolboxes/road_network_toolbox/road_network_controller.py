@@ -1,6 +1,6 @@
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.traffic_sign import *
@@ -58,8 +58,7 @@ class RoadNetworkController(QDockWidget, ):
     def adjust_ui(self):
         """Updates GUI properties like width, etc."""
         self.setFloating(True)
-        self.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.setAllowedAreas(Qt.LeftDockWidgetArea)
+        self.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea)
         self.setWidget(self.road_network_toolbox_ui)
         self.road_network_toolbox_ui.setMinimumWidth(375)
 
@@ -126,25 +125,23 @@ class RoadNetworkController(QDockWidget, ):
                                               connect_to_predecessors_selection or connect_to_successors_selection):
             if self.road_network_toolbox_ui.curved_check_button is not None:
                 self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
-                    self.road_network_toolbox_ui.curved_check_button.button.isChecked(),
-                    self.road_network_toolbox_ui.curved_check_button, True)
+                    self.road_network_toolbox_ui.curved_check_button.button.isChecked(), True)
 
         elif button_title == "Lanelet Attributes" and \
                 self.road_network_toolbox_ui.selected_curved_checkbox.button.isChecked() and \
                 self.road_network_toolbox_ui.selected_curved_checkbox.button.isEnabled():
             self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
-                    self.road_network_toolbox_ui.selected_curved_checkbox.button.isChecked(),
-                    self.road_network_toolbox_ui.selected_curved_checkbox, False)
+                    self.road_network_toolbox_ui.selected_curved_checkbox.button.isChecked(), False)
 
         elif place_at_position or connect_to_last_selection or \
                 connect_to_predecessors_selection or connect_to_successors_selection:
             if self.road_network_toolbox_ui.curved_check_button is not None:
                 self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic\
-                    .display_curved_lanelet(False, None)
+                    .display_curved_lanelet(False)
                 self.road_network_toolbox_ui.curved_check_button.setChecked(False)
         else:
             self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic \
-                .display_curved_lanelet(False, None)
+                .display_curved_lanelet(False)
             self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(False)
 
     @pyqtSlot(str)
