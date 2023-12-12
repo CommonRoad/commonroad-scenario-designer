@@ -44,6 +44,7 @@ scipy = [
 lxml = "^4.9.2"
 pyproj = "^3.4.1"
 utm = "^0.7.0"
+mgrs = ">=1.4.5"
 shapely = ">=2.0.1"
 ordered-set = "^4.1.0"
 sumocr = "^2023.4"
