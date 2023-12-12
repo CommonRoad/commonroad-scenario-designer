@@ -3,10 +3,10 @@ import os
 import unittest
 from lxml import etree  # type: ignore
 
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile  # type: ignore
 from commonroad.planning.planning_problem import PlanningProblemSet  # type: ignore
 from commonroad.scenario.scenario import Tag, Scenario  # type: ignore
 
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.config.gui_config import utm_default, pseudo_mercator
 from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.common.utils import generate_unique_id
@@ -73,7 +73,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         with open(cr_file_path, "r", ) as fh:
             parser = etree.XMLParser(remove_blank_text=True)
             tree_import = etree.parse(fh, parser=parser).getroot()
-            writer = CommonRoadFileWriter(scenario=self.load_and_convert(file_name, translate=translate,
+            writer = CRDesignerFileWriter(scenario=self.load_and_convert(file_name, translate=translate,
                                                                          file_path=file_path),
                                           planning_problem_set=PlanningProblemSet(), author="", affiliation="",
                                           source="CommonRoad Scenario Designer", tags={Tag.URBAN, Tag.HIGHWAY}, )

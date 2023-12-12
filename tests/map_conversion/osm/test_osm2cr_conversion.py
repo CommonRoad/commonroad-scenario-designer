@@ -6,7 +6,7 @@ from typing import Tuple
 
 import crdesigner.map_conversion.osm2cr.converter_modules.converter as converter
 from crdesigner.common.file_reader import CRDesignerFileReader
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from commonroad.scenario.scenario import Scenario
 from commonroad.planning.planning_problem import PlanningProblemSet
 
@@ -85,7 +85,7 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
     def osm2cr_scenario_write_validates(self, cr_scenario: Scenario, cr_planning_problem: PlanningProblemSet,
                                         osm_file_name: str):
         """Test if created CommonRoad scenario validates"""
-        fw = CommonRoadFileWriter(
+        fw = CRDesignerFileWriter(
             scenario=cr_scenario,
             planning_problem_set=cr_planning_problem)
         fw.write_to_file(

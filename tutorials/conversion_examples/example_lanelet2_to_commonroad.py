@@ -4,9 +4,9 @@ from lxml import etree
 import os
 
 from commonroad.scenario.scenario import Tag
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.map_conversion_interface import lanelet_to_commonroad
 
@@ -19,7 +19,7 @@ lanelet2_config.adjacencies = True
 scenario = lanelet_to_commonroad(str(input_path))
 
 # store converted file as CommonRoad scenario
-writer = CommonRoadFileWriter(
+writer = CRDesignerFileWriter(
     scenario=scenario,
     planning_problem_set=PlanningProblemSet(),
     author="Sebastian Maierhofer",

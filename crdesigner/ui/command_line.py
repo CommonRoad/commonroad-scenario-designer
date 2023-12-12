@@ -6,10 +6,10 @@ import inspect
 from typing_extensions import Annotated
 
 from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.scenario import Tag
 from commonroad.scenario.scenario import Scenario
 
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.ui.gui.start_gui import start_gui
@@ -35,7 +35,7 @@ def store_scenario(sc: Scenario, output_file: str, force_overwrite: bool, author
     @param tags: Tags of CommonRoad scenario.
     """
     tags = set([Tag(t) for t in tags]) if tags is not None else None
-    writer = CommonRoadFileWriter(scenario=sc, planning_problem_set=PlanningProblemSet(), author=author,
+    writer = CRDesignerFileWriter(scenario=sc, planning_problem_set=PlanningProblemSet(), author=author,
                                   affiliation=affiliation, source="CommonRoad Scenario Designer", tags=tags)
     if force_overwrite:
         writer.write_to_file(output_file, OverwriteExistingFile.ALWAYS)
@@ -75,7 +75,7 @@ def verify_map(ctx: typer.Context):
     sc, pp = CRDesignerFileReader(ctx.obj["input_file"]).open()
     sc, valid = verify_and_repair_scenario(sc)
     if not valid:
-        writer = CommonRoadFileWriter(scenario=sc, planning_problem_set=pp)
+        writer = CRDesignerFileWriter(scenario=sc, planning_problem_set=pp)
 
         file_path = str(ctx.obj["output_file"]) if ctx.obj["output_file"] is not None else str(ctx.obj["input_file"])
 

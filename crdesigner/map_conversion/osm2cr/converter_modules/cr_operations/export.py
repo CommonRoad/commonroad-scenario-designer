@@ -10,6 +10,7 @@ import utm
 
 from crdesigner.config.osm_config import osm_config as config
 from crdesigner.common.file_reader import CRDesignerFileReader
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format import \
     IntermediateFormat
@@ -20,9 +21,7 @@ from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.cleanup im
 
 # CommonRoad python tools are imported
 from commonroad.visualization.mp_renderer import MPRenderer
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.scenario import Scenario, Lanelet, Tag, Location
-
 
 def get_lanelet(lane: rg.Lane) -> Lanelet:
     """
@@ -191,7 +190,7 @@ def export(
                         geo_name_id=get_geonamesID(graph.center_point[0], graph.center_point[1]),
                         geo_transformation=None)
     # in the current commonroad version the following line works
-    file_writer = CommonRoadFileWriter(
+    file_writer = CRDesignerFileWriter(
         scenario, problemset, author, affiliation, source, tags, location, decimal_precision=16)
 
     # write scenario to file with planning problem

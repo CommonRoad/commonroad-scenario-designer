@@ -9,7 +9,7 @@ from commonroad.scenario.scenario import Scenario, Tag, Location
 from crdesigner.verification_repairing.map_verification_repairing import verify_and_repair_scenario
 
 
-class CrDesignerFileWriter(CommonRoadFileWriter):
+class CRDesignerFileWriter(CommonRoadFileWriter):
 
     def __init__(self, scenario: Scenario, planning_problem_set: PlanningProblemSet, author: str = None,
                  affiliation: str = None, source: str = None, tags: Set[Tag] = None, location: Location = None,

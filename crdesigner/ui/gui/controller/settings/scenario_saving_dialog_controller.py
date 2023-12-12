@@ -4,8 +4,8 @@ import sys
 from typing import Optional
 
 from PyQt5.QtWidgets import *
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
@@ -131,7 +131,7 @@ class ScenarioSavingDialogController:
             logging.getLogger().setLevel(logging.ERROR)
             sys.stdout = open(os.devnull, 'w')
             sys.stderr = open(os.devnull, 'w')
-            writer = CommonRoadFileWriter(scenario=scenario,
+            writer = CRDesignerFileWriter(scenario=scenario,
                                           planning_problem_set=self.current_pps,
                                           author="Default Author", affiliation="Default Affiliation",
                                           source="CommonRoad Scenario Designer", tags=set())
@@ -151,7 +151,7 @@ class ScenarioSavingDialogController:
         self.update_scenario_meta_data()
         try:
             self.current_pps = self.current_pps_model.get_pps()
-            writer = CommonRoadFileWriter(scenario=self.current_scenario,
+            writer = CRDesignerFileWriter(scenario=self.current_scenario,
                                           planning_problem_set=self.current_pps,
                                           author=self.current_scenario.author,
                                           affiliation=self.current_scenario.affiliation,

@@ -1,9 +1,9 @@
 import os
 
 from crdesigner.map_conversion.map_conversion_interface import sumo_to_commonroad
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 
 from commonroad.scenario.scenario import Tag
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
@@ -17,7 +17,7 @@ input_file = ""  # replace empty string
 scenario = sumo_to_commonroad(input_file)
 
 # store converted file as CommonRoad scenario
-writer = CommonRoadFileWriter(
+writer = CRDesignerFileWriter(
     scenario=scenario,
     planning_problem_set=PlanningProblemSet(),
     author="Sebastian Maierhofer",
@@ -35,7 +35,7 @@ writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_SU
 scenario = convert_net_to_cr(input_file)
 
 # store converted file as CommonRoad scenario
-writer = CommonRoadFileWriter(
+writer = CRDesignerFileWriter(
     scenario=scenario,
     planning_problem_set=PlanningProblemSet(),
     author="Sebastian Maierhofer",

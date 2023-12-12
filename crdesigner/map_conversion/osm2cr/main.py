@@ -5,10 +5,11 @@ import argparse
 import os
 
 import matplotlib
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+from commonroad.common.file_writer import OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 
+from crdesigner.common.file_writer import CRDesignerFileWriter
 import crdesigner.map_conversion.osm2cr.converter_modules.converter as converter
 import crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export as ex
 from crdesigner.config.osm_config import osm_config as config
@@ -44,7 +45,7 @@ def convert(filename_open, filename_store=None):
         tags.append(Tag[tag_str.upper()])
     file_path = config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
     # in the current commonroad version the following line works
-    file_writer = CommonRoadFileWriter(
+    file_writer = CRDesignerFileWriter(
         scenario_cr, problemset, author, affiliation, source, tags, decimal_precision=16
     )
     # file_writer = CommonRoadFileWriter(scenario, problemset, author, affiliation, source, tags)

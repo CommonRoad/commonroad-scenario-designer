@@ -3,9 +3,9 @@ import numpy as np
 from lxml import etree
 import uuid
 
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.visualization.mp_renderer import MPRenderer
 
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.map_conversion.map_conversion_interface import commonroad_to_sumo
 
@@ -79,7 +79,7 @@ simulation.stop()
 
 # save resulting scenario
 simulated_scenario = simulation.commonroad_scenarios_all_time_steps()
-CommonRoadFileWriter(simulated_scenario,
+CRDesignerFileWriter(simulated_scenario,
                      planning_problem,
                      author=scenario.author,
                      affiliation=scenario.affiliation,

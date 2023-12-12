@@ -1,9 +1,9 @@
 import os
 from pathlib import Path
 from commonroad.scenario.scenario import Tag
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.config.opendrive_config import open_drive_config
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
 
@@ -17,7 +17,7 @@ config.lanelet_types_backwards_compatible = False
 scenario = opendrive_to_commonroad(input_path)
 
 # store converted file as CommonRoad scenario
-writer = CommonRoadFileWriter(
+writer = CRDesignerFileWriter(
     scenario=scenario,
     planning_problem_set=PlanningProblemSet(),
     author="Sebastian Maierhofer",

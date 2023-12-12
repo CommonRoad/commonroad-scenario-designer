@@ -8,8 +8,8 @@ from typing import List
 
 import numpy as np
 import pytest
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.obstacle import ObstacleType
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.map_conversion.sumo_map.config import SumoConfig
 from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
@@ -84,7 +84,7 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
         self.assertIsNotNone(simulated_scenario)
 
         # write simulated scenario to disk
-        CommonRoadFileWriter(simulated_scenario, None, author=self.scenario.author,
+        CRDesignerFileWriter(simulated_scenario, None, author=self.scenario.author,
                 affiliation=self.scenario.affiliation, source=self.scenario.source, tags=self.scenario.tags,
                 location=self.scenario.location).write_scenario_to_file(
                 os.path.join(os.path.dirname(self.path), self.scenario_name + ".simulated.xml"),
