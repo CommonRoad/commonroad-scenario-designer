@@ -207,9 +207,9 @@ class Lanelet2CRConverter:
         self.lanelet_network = None
 
         # Origin of the transformed coordinates
-        # defaults to (0, 0)
+        # if config.translate = False: defaults to (0, 0)
         # if config.translate = True: origin is set to the geo location, and transformed coordinates are translated
-        self.origin_utm = (0, 0)
+        self.origin_utm = None
 
     def __call__(self, osm: OSMLanelet) -> Union[Scenario, None]:
         """
