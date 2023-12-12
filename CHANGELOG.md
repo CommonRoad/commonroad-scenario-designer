@@ -8,6 +8,7 @@
 - Optional functionality to get geonamesID locally without API-call
 - Test Case for local geonamesID functionality
 - Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
+- Optional MGRS tag for nodes in CR to Lanelet2 conversion (comptaibility with Autoware)
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
@@ -20,6 +21,7 @@
 - lanelet2cr wrong final vertice assignment 
 - Deleting unreferenced traffic signs/lights after deleting lanelet
 - Map verification/repairing: Checking unique ID of traffic light cycle element
+- Consider x, y translation for CR-Lanlet (and vice versa) conversion
 
 ## [0.8.0] - 2023-10-31
 
