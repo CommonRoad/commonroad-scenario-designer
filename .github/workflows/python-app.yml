@@ -31,5 +31,5 @@ jobs:
           poetry install --with tests
       - name : Execute tests
         run : |
-          poetry run coverage run tests/run_tests.py
+          poetry run coverage run --source ./crdesigner -m pytest tests/
           poetry run coverage report -m || true
