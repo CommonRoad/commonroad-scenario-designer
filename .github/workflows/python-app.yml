@@ -3,7 +3,7 @@
 
 name: Python test
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -13,6 +13,8 @@ jobs:
       matrix:
         os: [ubuntu-latest] #, macos-latest, windows-latest] # ubuntu-latest, macos-latest, windows-latest
         python-version: ["3.8", "3.9", "3.10"] #, "3.11", "3.12"]
+    env :
+      DISPLAY : ':99.0'
     steps :
       - uses : actions/checkout@v4
       - uses : FedericoCarboni/setup-ffmpeg@v2
@@ -20,20 +22,14 @@ jobs:
         uses : actions/setup-python@v4
         with :
           python-version: ${{ matrix.python-version }}
-      - name : Install apt dependencies (Linux)
+      - name: Set up QT
+        uses: tlambert03/setup-qt-libs@v1
+      - name : Install Scenario Designer apt dependencies (Linux)
         if : runner.os == 'Linux'
         uses: awalsh128/cache-apt-pkgs-action@latest
         with :
-          packages : sumo sumo-tools sumo-doc libegl1
+          packages : sumo sumo-tools sumo-doc
           version : 1.0
-      - name : Setup xvfb (Linux)
-        if : runner.os == 'Linux'
-        run : |
-          # Copied from https://stackoverflow.com/questions/60692711/cant-create-python-qapplication-in-github-action
-          sudo apt-get install -y xvfb libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0 libxcb-shape0 libglib2.0-0 libgl1-mesa-dev
-          sudo apt-get install '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
-          # start xvfb in the background
-          sudo /usr/bin/Xvfb $DISPLAY -screen 0 1280x1024x24 &
       - name : Run image
         uses : abatilo/actions-poetry@v2
       - name : Setup a local virtual environment
