@@ -260,8 +260,8 @@ class Lanelet2CRConverter:
         geo_transformation.y_translation = self.origin_utm[1]
 
         self.lanelet_network = ConversionLaneletNetwork()
-        self.lanelet_network.location = Location(gps_latitude=origin_lat, gps_longitude=origin_lon)
-        scenario.lanelet_network.location.geo_transformation = geo_transformation
+        self.lanelet_network.location = Location(gps_latitude=origin_lat, gps_longitude=origin_lon,
+                                                 geo_transformation=geo_transformation)
 
         speed_limits = {}
         speed_limit_lanelets = {}  # type: ignore
