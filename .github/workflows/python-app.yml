@@ -21,7 +21,10 @@ jobs:
         with :
           python-version: ${{ matrix.python-version }}
       - name : Install QT dependencies
-        run : apt-get update && apt-get install -y sumo sumo-tools sumo-doc libegl1
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with :
+          packages : sumo sumo-tools sumo-doc libegl1
+          version : 1.0
       - name : Run image
         uses : abatilo/actions-poetry@v2
       - name : Setup a local virtual environment
