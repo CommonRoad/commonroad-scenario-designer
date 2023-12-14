@@ -1,6 +1,7 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from lxml import etree  # type: ignore
-from typing import List
+
+from crdesigner.map_conversion.common.utils import create_mgrs_code
 
 
 class Node:
@@ -20,13 +21,17 @@ class Node:
         :param local_x: local x-position instead of latitude/longitude (lon/lat values have no meaning)
         :param local_y: local y-position instead of latitude/longitude (lon/lat values have no meaning)
         """
-        self.id_ = str(id_)
-        self.lat = str(lat)
-        self.lon = str(lon)
-        self.ele = str(ele)
-        self.autoware = autoware
-        self.local_x = local_x
-        self.local_y = local_y
+        self.id_: str = str(id_)
+        self.lat: str = str(lat)
+        self.lon: str = str(lon)
+        self.ele: str = str(ele)
+        self.autoware: bool = autoware
+        self.local_x: Optional[float] = local_x
+        self.local_y: Optional[float] = local_y
+        self.mgrs_code: Optional[str] = None
+
+        if self.autoware:
+            self.mgrs_code = create_mgrs_code(lat, lon)
 
     def serialize_to_xml(self) -> etree:
         """
@@ -53,6 +58,11 @@ class Node:
             ele.set("k", "ele")
             ele.set("v", self.ele)
             node.append(ele)
+        if self.mgrs_code:
+            mgrs_code = etree.SubElement(node, "tag")
+            mgrs_code.set("k", "mgrs_code")
+            mgrs_code.set("v", self.mgrs_code)
+            node.append(mgrs_code)
 
         return node
 

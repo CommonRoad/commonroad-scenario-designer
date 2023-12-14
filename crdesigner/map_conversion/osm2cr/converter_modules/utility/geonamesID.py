@@ -12,7 +12,8 @@ from urllib.error import URLError
 from crdesigner.config.osm_config import osm_config as config
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.labeling_create_tree import find_nearest_neighbor
 
-def get_geonamesID(lat: float, lng: float, cities_kdtree: kdtree.KDNode = None) -> str:
+
+def get_geonamesID(lat: float, lng: float, cities_kdtree: kdtree.KDNode = None) -> int:
     """
     Retrieve a geonamesID for a given scenario coordinate center
 
@@ -24,7 +25,7 @@ def get_geonamesID(lat: float, lng: float, cities_kdtree: kdtree.KDNode = None) 
     # try to request information for the given scenario center
     try:
         if cities_kdtree is not None:
-            return find_nearest_neighbor(cities_kdtree, (lat, lng)).getLabel()
+            return find_nearest_neighbor(cities_kdtree, (lat, lng)).geonameID
         else:
             if config.GEONAMES_USERNAME == 'demo':
                 raise ValueError('geonames demo ID used')

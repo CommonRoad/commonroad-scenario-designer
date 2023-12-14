@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="CommonRoad Scenario Designer" benchmarkID="ZAM_MUC-1" date="2023-06-14">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="CommonRoad Scenario Designer" benchmarkID="ZAM_MUC-1" date="2023-12-12">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>48.16681393543</gpsLatitude>
@@ -7,8 +7,8 @@
     <geoTransformation>
       <geoReference>EPSG:3857</geoReference>
       <additionalTransformation>
-        <xTranslation>0</xTranslation>
-        <yTranslation>0</yTranslation>
+        <xTranslation>1289067.5632208535</xTranslation>
+        <yTranslation>6134651.734050046</yTranslation>
         <zRotation>0</zRotation>
         <scaling>1</scaling>
       </additionalTransformation>
@@ -1101,8 +1101,8 @@
         <y>64.4563</y>
       </point>
     </rightBound>
-    <successor ref="16"/>
     <successor ref="8"/>
+    <successor ref="16"/>
     <successor ref="19"/>
     <adjacentLeft ref="13" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
