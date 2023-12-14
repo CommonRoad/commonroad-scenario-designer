@@ -14,7 +14,7 @@ jobs:
         os: [ubuntu-latest] #, macos-latest, windows-latest] # ubuntu-latest, macos-latest, windows-latest
         python-version: ["3.8", "3.9", "3.10"] #, "3.11", "3.12"]
     env :
-      DISPLAY : ':99.0'
+      QT_QPA_PLATFORM : "offscreen"
     steps :
       - uses : actions/checkout@v4
       - uses : FedericoCarboni/setup-ffmpeg@v2
@@ -24,8 +24,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Set up QT
         uses: tlambert03/setup-qt-libs@v1
-        run: |
-          export QT_QPA_PLATFORM=offscreen
       - name : Install Scenario Designer apt dependencies (Linux)
         if : runner.os == 'Linux'
         uses: awalsh128/cache-apt-pkgs-action@latest
