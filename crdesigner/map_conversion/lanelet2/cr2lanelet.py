@@ -8,7 +8,8 @@ from pyproj import CRS, Transformer
 from commonroad.scenario.lanelet import Lanelet  # type: ignore
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign  # type: ignore
-from commonroad.scenario.scenario import Scenario, Location
+from commonroad.scenario.scenario import Scenario
+from commonroad.common.common_scenario import Location
 
 from crdesigner.config.lanelet2_config import lanelet2_config, Lanelet2Config
 from crdesigner.map_conversion.common.utils import generate_unique_id
