@@ -50,7 +50,7 @@ Python API
     from crdesigner.map_conversion.map_conversion_interface import osm_to_commonroad
 
     from commonroad.scenario.scenario import Tag
-    from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+    from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
     from commonroad.planning.planning_problem import PlanningProblemSet
     from crdesigner.map_conversion.map_conversion_interface import osm_to_commonroad_using_sumo
 
@@ -62,7 +62,7 @@ Python API
     # osm_to_commonroad_using_sumo is also available.
 
     # store converted file as CommonRoad scenario
-    writer = CommonRoadFileWriter(
+    writer = CRDesignerFileWriter(
         scenario=scenario,
         planning_problem_set=PlanningProblemSet(),
         author="Sebastian Maierhofer",
