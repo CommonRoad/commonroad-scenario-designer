@@ -163,7 +163,8 @@ class CR2LaneletConverter:
         if proj_string_from is None:
             proj_string_from = self._config.proj_string_l2
         crs_from = CRS(proj_string_from)
-        crs_to = CRS("ETRF89")
+        # crs_to = CRS("ETRF89")
+        crs_to = CRS.from_epsg(4326)
         self.transformer = Transformer.from_proj(crs_from, crs_to)
 
     @property

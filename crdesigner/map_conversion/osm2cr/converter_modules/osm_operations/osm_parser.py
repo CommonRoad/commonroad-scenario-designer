@@ -10,6 +10,9 @@ from ordered_set import OrderedSet
 from collections import OrderedDict
 import logging
 import numpy as np
+from pyproj import Proj, CRS, Transformer
+from matplotlib import pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 
 from crdesigner.config.osm_config import osm_config as config
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
@@ -53,6 +56,13 @@ def get_points(nodes: Dict[int, ElTree.Element], custom_bounds=None) \
     :return: dict of points
     :rtype: Dict[int, Point]
     """
+
+    print("test")
+    print("test")
+    print("test")
+    print("test")
+
+
     if len(nodes) < 1:
         raise ValueError("Map is empty")
     ids = []
@@ -73,13 +83,51 @@ def get_points(nodes: Dict[int, ElTree.Element], custom_bounds=None) \
     lat_center = (bounds[0] + bounds[2]) / 2
     lons = np.array(lons)
     lats = np.array(lats)
+
+    lons_3857 = []
+    lats_3857 = []
+
+    
+    # crs_from = CRS("EPSG:4326")
+    # crs_to = CRS("EPSG:3857")
+    transformer = Transformer.from_proj(4326, 3857)
+
+    # 3215769.83,5016650.49
+
+    points =[]
+    for i in range(len(lons)):
+        point = (lats[i], lons[i])
+        points.append(point)
+
+    for pt in transformer.itransform(points):
+        x, y = pt
+        lons_3857.append(x)
+        lats_3857.append(y)
+        # print("x: ", x)
+        # print("y: ", y)
+        # print("--------")
+
+
+    lons_m = np.array(lons_3857)
+    lats_m = np.array(lats_3857)
+
+    fig, ax = plt.subplots()
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%2f'))
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%2f'))
+
+    plt.plot(lats_3857, lons_3857)
+    plt.show()
+
+
     lons_d = lons - lon_center
     lats_d = lats - lat_center
     points = OrderedDict()
     lon_constants = np.pi / 180 * config.EARTH_RADIUS * np.cos(np.radians(lats))
     x = lon_constants * lons_d
+    # x = lons_m
     lat_constant = np.pi / 180 * config.EARTH_RADIUS
     y = lat_constant * lats_d
+    # y = lats_m
     for index, point_id in enumerate(ids):
         points[int(point_id)] = Point(int(point_id), x[index], y[index])
     logging.info("{} required nodes found".format(len(points)))
