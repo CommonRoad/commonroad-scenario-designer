@@ -55,6 +55,8 @@ class AddLaneletController:
                 lambda: self.road_network_toolbox_ui.add_lanelet_widget.adjust_add_sections())
         self.road_network_toolbox_ui.connect_to_successors_selection.clicked.connect(
                 lambda: self.road_network_toolbox_ui.add_lanelet_widget.adjust_add_sections())
+        self.road_network_toolbox_ui.connect_to_selected_selection.clicked.connect(
+                lambda: self.road_network_toolbox_ui.add_lanelet_widget.adjust_add_sections())
         self.road_network_toolbox_ui.connecting_radio_button_group.buttonClicked.connect(
                 lambda: self.lanelet_ui.initialize_basic_lanelet_information(
                         self.road_network_controller.last_added_lanelet_id))
@@ -87,11 +89,11 @@ class AddLaneletController:
                 self.road_network_toolbox_ui.connect_to_previous_selection.isChecked() and not \
                 self.road_network_toolbox_ui.connect_to_successors_selection.isChecked() and not \
                 self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked() and not \
-                self.road_network_toolbox_ui.connect_to_selected_section.isChecked():
+                self.road_network_toolbox_ui.connect_to_selected_selection.isChecked():
             self.road_network_controller.text_browser.append("Please select an adding option.")
             return
 
-        if not self.road_network_toolbox_ui.connect_to_selected_section.isChecked():
+        if not self.road_network_toolbox_ui.connect_to_selected_selection.isChecked():
             predecessors = [int(pre) for pre in self.road_network_toolbox_ui.predecessors.get_checked_items()]
             successors = [int(suc) for suc in self.road_network_toolbox_ui.successors.get_checked_items()]
 
@@ -99,7 +101,7 @@ class AddLaneletController:
         connect_to_last_selection = self.road_network_toolbox_ui.connect_to_previous_selection.isChecked()
         connect_to_predecessors_selection = self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked()
         connect_to_successors_selection = self.road_network_toolbox_ui.connect_to_successors_selection.isChecked()
-        connect_to_selected = self.road_network_toolbox_ui.connect_to_selected_section.isChecked()
+        connect_to_selected = self.road_network_toolbox_ui.connect_to_selected_selection.isChecked()
 
         if connect_to_last_selection and self.road_network_controller.last_added_lanelet_id is None:
             self.road_network_controller.text_browser.append("__Warning__: Previously add lanelet does not exist anymore. "
@@ -119,8 +121,10 @@ class AddLaneletController:
         lanelet_start_pos_y = self.get_y_position_lanelet_start(False)
 
         lanelet_width = self.road_network_controller.get_float(self.road_network_toolbox_ui.lanelet_width)
-        line_marking_left = LineMarking(self.road_network_toolbox_ui.line_marking_left.currentText())
-        line_marking_right = LineMarking(self.road_network_toolbox_ui.line_marking_right.currentText())
+        line_marking_left = LineMarking('dashed')
+        line_marking_right = LineMarking('dashed')
+        # line_marking_left = LineMarking(self.road_network_toolbox_ui.line_marking_left.currentText())
+        # line_marking_right = LineMarking(self.road_network_toolbox_ui.line_marking_right.currentText())
         num_vertices = int(self.road_network_toolbox_ui.number_vertices.text())
         adjacent_left = int(
                 self.road_network_toolbox_ui.adjacent_left.currentText()) if \
@@ -202,8 +206,8 @@ class AddLaneletController:
         elif connect_to_selected:
             selected_lanelet = self.selected_lanelet(lanelet_operation=True)
 
-            as_predecessor = self.road_network_toolbox_ui.connect_as_predecessor.isChecked()
-            as_successor = self.road_network_toolbox_ui.connect_as_successor.isChecked()
+            as_predecessor = self.road_network_toolbox_ui.as_predecessor.isChecked()
+            as_successor = self.road_network_toolbox_ui.as_successor.isChecked()
 
             if as_predecessor:
                 lanelet.translate_rotate(np.array([selected_lanelet.center_vertices[-1][0],
