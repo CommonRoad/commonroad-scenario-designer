@@ -1,5 +1,6 @@
 import logging
 from typing import List, Optional, Tuple, Union, Dict
+import warnings
 
 import numpy as np
 from commonroad.common.common_lanelet import LineMarking, LaneletType
@@ -7,6 +8,8 @@ from pyproj import CRS, Transformer
 from commonroad.scenario.lanelet import Lanelet  # type: ignore
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign  # type: ignore
+from commonroad.scenario.scenario import Scenario
+from commonroad.common.common_scenario import Location
 
 from crdesigner.config.lanelet2_config import lanelet2_config, Lanelet2Config
 from crdesigner.map_conversion.common.utils import generate_unique_id
@@ -137,13 +140,27 @@ class CR2LaneletConverter:
         self.lanelet_network = None
         self.origin_utm = (0, 0)
 
-    def _create_transformer(self, scenario):
-        # TODO: currently, we only consider `GeoTransformation.geo_reference`. The other specifications
-        #   there should be used if specified.
-        loc = scenario.lanelet_network.location
+        self.scenario_translation = (0, 0)
+
+    def _create_transformer(self, scenario: Scenario):
+        """
+        Creates a Transformer object for conversion from CR o Lanelet2.
+        The input projection is determined from the geo transformation of the CR scenario if provided, otherwise the
+        projection string from self._config is used,
+        The output projection is set to "ETRF89".
+        Additionally, the x and y translation from the scenario object are considered (if provided).
+        """
+        loc: Location = scenario.lanelet_network.location
         proj_string_from = None
         if loc is not None and loc.geo_transformation is not None:
-            proj_string_from = loc.geo_transformation.geo_reference
+            geo_trans = loc.geo_transformation
+            # get projection string from geo reference
+            proj_string_from = geo_trans.geo_reference
+            # get translation w.r.t. lat/lon location from scenario object
+            self.scenario_translation = (geo_trans.x_translation, geo_trans.y_translation)
+            # TODO: z rotation and scaling are currently ignored
+            if geo_trans.z_rotation != 0.0 or geo_trans.scaling != 1:
+                warnings.warn('<CR2LaneletConverter>: z_rotation and scaling are not considered during transformation')
         if proj_string_from is None:
             proj_string_from = self._config.proj_string_l2
         crs_from = CRS(proj_string_from)
@@ -175,21 +192,12 @@ class CR2LaneletConverter:
         self.last_nodes = {}  # saves last left and right node
         self.left_ways = {}
         self.right_ways = {}
-        if self._config.translate:
-            if scenario.location is not None and not isinstance(scenario.location.gps_longitude, str) and\
-                    abs(scenario.location.gps_longitude) <= 180 and abs(scenario.location.gps_latitude) <= 90:
-                self.origin_utm = self.transformer.transform(scenario.location.gps_latitude,
-                                                             scenario.location.gps_longitude)
-            elif scenario.location is not None and isinstance(scenario.location.gps_longitude, str) and\
-                    abs(float(scenario.location.gps_longitude)) <= 180 \
-                    and abs(float(scenario.location.gps_latitude)) <= 90:
-                self.origin_utm = \
-                    self.transformer.transform(float(scenario.location.gps_latitude),
-                                               float(scenario.location.gps_longitude))
-            else:
-                self.origin_utm = self.transformer.transform(0, 0)
 
-            # convert lanelets
+        # set origin shift according to translation in scenario
+        if self.scenario_translation[0] != 0 and self.scenario_translation[1] != 0:
+            self.origin_utm = self.scenario_translation
+
+        # convert lanelets
         for lanelet in scenario.lanelet_network.lanelets:
             self._convert_lanelet(lanelet)
 
