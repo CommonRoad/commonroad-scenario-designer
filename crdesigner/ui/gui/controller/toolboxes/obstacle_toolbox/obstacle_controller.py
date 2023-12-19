@@ -1165,8 +1165,9 @@ class ObstacleController(QDockWidget, ):
             self.plot_obstacle_state_profile()
             # get axes object current figure
             ax = self.obstacle_toolbox_ui.figure.axes[0]
-            # plot red dot
+            # red dot and vertical line
             if profile and time_stamp < len(profile):
                 ax.plot(time_stamp, profile[time_stamp], 'ro', markersize=4)
+                ax.axvline(x=time_stamp, color='r', linewidth=1)
             # refresh canvas
             self.obstacle_toolbox_ui.canvas.draw()
