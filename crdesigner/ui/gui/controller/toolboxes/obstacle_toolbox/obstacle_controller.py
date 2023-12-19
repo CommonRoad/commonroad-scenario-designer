@@ -935,7 +935,7 @@ class ObstacleController(QDockWidget, ):
             self.xmax = None
             self.ymin = None
             self.ymax = None
-            #if "profile" in locals():
+
             if profile is not None:
                 self.draw_plot(time, profile)
             else:
