@@ -1,3 +1,4 @@
+from commonroad.common.validity import is_natural_number
 from scipy.interpolate import interp1d
 from typing import Tuple, Union, Set, List
 import numpy as np
@@ -12,7 +13,7 @@ from commonroad.scenario.traffic_sign import (
     TrafficSignIDPuertoRico, TrafficSignIDRussia, TrafficSignIDSpain, TrafficSignIDUsa,  TrafficSignIDZamunda)
 from commonroad.scenario.traffic_light import (TrafficLight, TrafficLightCycleElement, TrafficLightState,
                                                TrafficLightCycle)
-from commonroad.common.util import is_natural_number
+
 
 
 # TODO: UNCERTAIN (either controller or model)
