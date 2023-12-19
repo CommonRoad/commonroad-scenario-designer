@@ -24,15 +24,16 @@ class CRDesignerFileReader(CommonRoadFileReader):
         """
         super().__init__(filename, file_format)
 
-    def open(self, verify_repair_scenario: bool = False) -> Tuple[Scenario, PlanningProblemSet]:
+    def open(self, verify_repair_scenario: bool = False, lanelet_assignment: bool = False) -> Tuple[Scenario, PlanningProblemSet]:
         """
         Opens and loads CommonRoad scenario and planning problem set from file.
         If the boolean is set to True, the function verifies and repairs the scenario.
 
         :param verify_repair_scenario: Boolean that indicates if the function will verify and repair the scenario.
+        :param lanelet_assignment: Activates calculation of lanelets occupied by obstacles.
         :return: Scenario and planning problem set.
         """
-        scenario, planning_problem_set = super().open()
+        scenario, planning_problem_set = super().open(lanelet_assignment)
         if verify_repair_scenario is True:
             scenario = verify_and_repair_scenario(scenario)[0]
         return scenario, planning_problem_set
