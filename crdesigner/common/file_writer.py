@@ -1,3 +1,4 @@
+import copy
 from typing import Set, Union
 
 from commonroad.common.file_writer import CommonRoadFileWriter
@@ -29,7 +30,7 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
         :param file_format: Format of file
         :return:
         """
-        super().__init__(scenario, planning_problem_set, author, affiliation, source, tags, location,
+        super().__init__(copy.deepcopy(scenario), planning_problem_set, author, affiliation, source, tags, location,
                          decimal_precision, file_format)
 
     def write_to_file(self, filename: Union[str, None] = None,

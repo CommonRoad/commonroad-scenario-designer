@@ -1,4 +1,4 @@
-import os
+import copy
 import unittest
 from pathlib import Path
 
@@ -17,7 +17,6 @@ class TestCRDesignerFileReaderWriter(unittest.TestCase):
         # reading a scenario
         crdesigner_reader = CRDesignerFileReader(
                 Path(__file__).parent.parent/"map_verification/test_maps/CHN_Merging-1.xml")
-        print("PATH: ", Path(__file__))
         # opening it without verifying and repairing
         scenario = crdesigner_reader.open(verify_repair_scenario=False)[0]
         # opening it with verifying and repairing
@@ -31,25 +30,29 @@ class TestCRDesignerFileReaderWriter(unittest.TestCase):
         crdesigner_reader = CRDesignerFileReader(
                 Path(__file__).parent.parent/"map_verification/test_maps/CHN_Merging-1.xml")
         scenario, pp = crdesigner_reader.open()
+
         # writing it without verifying and repairing
         CRDesignerFileWriter(scenario, pp).write_to_file(str(Path(__file__).parent/"scenario.xml"),
                                                          overwrite_existing_file=OverwriteExistingFile.ALWAYS)
-        # writing it with verifying and repairing, this alters the scenario
-        CRDesignerFileWriter(scenario, pp).write_to_file(str(Path(__file__).parent/"repaired_scenario.xml"),
+        reader_scenario = CRDesignerFileReader(Path(__file__).parent/"scenario.xml").open()[0]
+
+        # testing non verified and repaired scenarios
+        self.assertEqual(scenario, reader_scenario)
+
+        # writing the original scenario with verifying and repairing flag
+        CRDesignerFileWriter(scenario, pp).write_to_file(str(Path(__file__).parent/"writer_repaired_scenario.xml"),
                                                          verify_repair_scenario=True,
                                                          overwrite_existing_file=OverwriteExistingFile.ALWAYS)
-        # reading the original scenario
-        original_scenario = CRDesignerFileReader(Path(__file__).parent/"scenario.xml").open()[0]
 
-        # reading the verified and repaired scenario
-        repaired_scenario, rpp = CRDesignerFileReader(Path(__file__).parent/"repaired_scenario.xml").open()
-        self.assertNotEqual(original_scenario, repaired_scenario)
+        # writing the verified and repaired scenario directly
+        verified_and_repaired_scenario = verify_and_repair_scenario(copy.deepcopy(scenario))[0]
+        CRDesignerFileWriter(verified_and_repaired_scenario, pp).write_to_file(str(Path(__file__).parent/"function_repaired_scenario.xml"),
+                                                                               overwrite_existing_file=OverwriteExistingFile.ALWAYS)
 
-        # writing the repaired original file
-        CRDesignerFileWriter(verify_and_repair_scenario(original_scenario)[0], pp).write_to_file(str(
-                Path(__file__).parent/"original_repaired_scenario.xml"),
-                overwrite_existing_file=OverwriteExistingFile.ALWAYS)
-        # reading the repaired original file
-        original_repaired_scenario = CRDesignerFileReader(Path(__file__).parent/ "original_repaired_scenario.xml").open()[0]
-        self.assertEqual(original_repaired_scenario, repaired_scenario)
+        # compare the two verified and repaired scenarios
+        writer_repaired_scenario = CRDesignerFileReader(Path(__file__).parent / "writer_repaired_scenario.xml").open()[0]
+        function_repaired_scenario = CRDesignerFileReader(Path(__file__).parent / "function_repaired_scenario.xml").open()[0]
+        self.assertNotEqual(scenario, writer_repaired_scenario)
+        self.assertNotEqual(scenario, function_repaired_scenario)
+        self.assertEqual(writer_repaired_scenario, function_repaired_scenario)
 
