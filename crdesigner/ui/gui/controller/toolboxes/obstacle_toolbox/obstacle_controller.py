@@ -1,6 +1,6 @@
 from typing import Union
 import matplotlib as mpl
-from PyQt5.QtWidgets import *
+from PyQt6.QtWidgets import *
 
 from crdesigner.config.logging import logger
 
@@ -11,7 +11,7 @@ from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType,
 from commonroad.scenario.trajectory import Trajectory
 from commonroad.scenario.state import InitialState, State, ExtendedPMState
 
-from PyQt5.QtCore import *
+from PyQt6.QtCore import *
 from crdesigner.ui.gui.view.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
 
 
@@ -65,8 +65,7 @@ class ObstacleController(QDockWidget, ):
         Updates GUI properties like width, etc.
         """
         self.setFloating(True)
-        self.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.setAllowedAreas(Qt.RightDockWidgetArea)
+        self.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea)
         self.setWidget(self.obstacle_toolbox_ui)
         self.obstacle_toolbox_ui.setMinimumWidth(450)
 

@@ -1,6 +1,6 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon, QIntValidator
-from PyQt5.QtWidgets import QAction, QLineEdit, QLabel, QSlider
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon, QIntValidator, QAction
+from PyQt6.QtWidgets import QLineEdit, QLabel, QSlider
 
 from crdesigner.ui.gui.resources.icons import CR_Scenario_Designer
 
@@ -61,7 +61,7 @@ class ToolBarUI:
         self.button_play_pause = QAction(QIcon(":/icons/play.png"), "Play the animation", mwindow_ui)
         self.tb4.addAction(self.button_play_pause)
 
-        self.slider = QSlider(Qt.Horizontal)
+        self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setMaximumWidth(300)
         self.slider.setValue(0)
         self.slider.setMinimum(0)
@@ -77,7 +77,7 @@ class ToolBarUI:
         validator.setBottom(0)
         self.edit.setValidator(validator)
         self.edit.setText('0')
-        self.edit.setAlignment(Qt.AlignRight)
+        self.edit.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.edit.setMaximumWidth(40)
         self.tb4.addWidget(self.edit)

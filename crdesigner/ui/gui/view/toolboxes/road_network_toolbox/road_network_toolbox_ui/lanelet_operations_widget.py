@@ -1,6 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 import math
 
 class LaneletOperationsWidget():
@@ -46,14 +46,14 @@ class LaneletOperationsWidget():
         self.toolbox.x_translation.setMaximumWidth(45)
         self.toolbox.x_translation.setValidator(QDoubleValidator())
         self.toolbox.x_translation.setMaxLength(4)
-        self.toolbox.x_translation.setAlignment(Qt.AlignRight)
+        self.toolbox.x_translation.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.toolbox.translate_x_unit_label = QLabel("[m]")
         self.toolbox.translate_y_label = QLabel("y:")
         self.toolbox.y_translation = QLineEdit()
         self.toolbox.y_translation.setMaximumWidth(45)
         self.toolbox.y_translation.setValidator(QDoubleValidator())
         self.toolbox.y_translation.setMaxLength(4)
-        self.toolbox.y_translation.setAlignment(Qt.AlignRight)
+        self.toolbox.y_translation.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.toolbox.translate_y_unit_label = QLabel("[m]")
 
         lanelet_operations_layout = QFormLayout()

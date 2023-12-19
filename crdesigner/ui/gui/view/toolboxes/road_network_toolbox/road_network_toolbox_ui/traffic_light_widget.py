@@ -1,6 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 from commonroad.scenario.traffic_light import TrafficLightDirection
 
@@ -19,17 +19,17 @@ class TrafficLightWidget:
         layout_traffic_light = QVBoxLayout(widget_traffic_light)
 
         label_general = QLabel("Traffic Light Attributes")
-        label_general.setFont(QFont("Arial", 11, QFont.Bold))
+        label_general.setFont(QFont("Arial", 11, QFont.Weight.Bold))
 
         self.toolbox.x_position_traffic_light = QLineEdit()
         self.toolbox.x_position_traffic_light.setValidator(QDoubleValidator())
         self.toolbox.x_position_traffic_light.setMaxLength(4)
-        self.toolbox.x_position_traffic_light.setAlignment(Qt.AlignRight)
+        self.toolbox.x_position_traffic_light.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.toolbox.y_position_traffic_light = QLineEdit()
         self.toolbox.y_position_traffic_light.setValidator(QDoubleValidator())
         self.toolbox.y_position_traffic_light.setMaxLength(4)
-        self.toolbox.y_position_traffic_light.setAlignment(Qt.AlignRight)
+        self.toolbox.y_position_traffic_light.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         directions = [e.value for e in TrafficLightDirection]
         self.toolbox.traffic_light_directions = QComboBox()
@@ -38,32 +38,32 @@ class TrafficLightWidget:
         self.toolbox.time_offset = QLineEdit()
         self.toolbox.time_offset.setValidator(QIntValidator())
         self.toolbox.time_offset.setMaxLength(4)
-        self.toolbox.time_offset.setAlignment(Qt.AlignRight)
+        self.toolbox.time_offset.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.toolbox.time_red = QLineEdit()
         self.toolbox.time_red.setValidator(QIntValidator())
         self.toolbox.time_red.setMaxLength(4)
-        self.toolbox.time_red.setAlignment(Qt.AlignRight)
+        self.toolbox.time_red.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.toolbox.time_red_yellow = QLineEdit()
         self.toolbox.time_red_yellow.setValidator(QIntValidator())
         self.toolbox.time_red_yellow.setMaxLength(4)
-        self.toolbox.time_red_yellow.setAlignment(Qt.AlignRight)
+        self.toolbox.time_red_yellow.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.toolbox.time_yellow = QLineEdit()
         self.toolbox.time_yellow.setValidator(QIntValidator())
         self.toolbox.time_yellow.setMaxLength(4)
-        self.toolbox.time_yellow.setAlignment(Qt.AlignRight)
+        self.toolbox.time_yellow.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.toolbox.time_green = QLineEdit()
         self.toolbox.time_green.setValidator(QIntValidator())
         self.toolbox.time_green.setMaxLength(4)
-        self.toolbox.time_green.setAlignment(Qt.AlignRight)
+        self.toolbox.time_green.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.toolbox.time_inactive = QLineEdit()
         self.toolbox.time_inactive.setValidator(QIntValidator())
         self.toolbox.time_inactive.setMaxLength(4)
-        self.toolbox.time_inactive.setAlignment(Qt.AlignRight)
+        self.toolbox.time_inactive.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.toolbox.traffic_light_active = QCheckBox("active")
 

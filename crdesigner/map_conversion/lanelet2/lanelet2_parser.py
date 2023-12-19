@@ -28,10 +28,11 @@ class Lanelet2Parser:
         for node in self.xml.xpath("//node[@lat and @lon and @id]"):
             for tag in node.findall("./tag"):
                 if tag.attrib.get("k") == "ele":
-                    osm.add_node(Node(node.get("id"), node.get("lat"), node.get("lon"), tag.attrib.get("v")))
+                    osm.add_node(Node(node.get("id"), node.get("lat"), node.get("lon"), tag.attrib.get("v"), 
+                                      autoware=self.config.autoware))
                     break
             else:
-                osm.add_node(Node(node.get("id"), node.get("lat"), node.get("lon")))
+                osm.add_node(Node(node.get("id"), node.get("lat"), node.get("lon"), autoware=self.config.autoware))
 
         for way in self.xml.xpath("//way[@id]"):
             node_ids = [nd.get("ref") for nd in way.xpath("./nd")]

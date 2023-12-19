@@ -30,12 +30,8 @@ commonroad-io = {git = "https://github.com/CommonRoad/commonroad-io.git", rev = 
 commonroad-drivability-checker = [
     {version = "2023.1", python = "<3.11"},
     {git = "git@gitlab.lrz.de:cps/commonroad-drivability-checker.git", rev = "development", python = ">=3.11"}
-]
-pyqt5 = ">=5.15.9"
-PyQt5-Qt5 = [
-    {version = "<5.15.11", platform = 'linux'},
-    {version = "<5.15.11", platform = 'win64'},
-    {version = "=5.15.11", platform = 'darwin'}]
+    ]
+pyqt6 = ">=6.6.0"
 matplotlib = ">=3.6.0"
 numpy = [
     {version = ">=1.22, <1.26", python = "3.8"},
@@ -48,6 +44,7 @@ scipy = [
 lxml = "^4.9.2"
 pyproj = "^3.4.1"
 utm = "^0.7.0"
+mgrs = ">=1.4.5"
 shapely = ">=2.0.1"
 ordered-set = "^4.1.0"
 sumocr = "^2023.4"
@@ -67,6 +64,8 @@ pymetis = [
 similaritymeasures = ">=0.4.4"
 kdtree = "^0.16"
 pandas = "2.0.2"
+requests = "^2.31.0 "
+
 
 [tool.poetry.group.docs]
 optional = true

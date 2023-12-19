@@ -1,7 +1,7 @@
 from typing import Union, List
 
-from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtWidgets import QMainWindow
+from PyQt6 import QtCore, QtWidgets, QtGui
+from PyQt6.QtWidgets import QMainWindow
 
 from crdesigner.config.config_base import Attribute
 from crdesigner.config.settings_config import settings
@@ -70,8 +70,8 @@ class SettingsUI:
         self.button_set_to_default.setMaximumSize(150, 40)
 
         # spacer
-        spacer_fixed = QtWidgets.QSpacerItem(20, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        spacer_expanding = QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        spacer_fixed = QtWidgets.QSpacerItem(20, 1, QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
+        spacer_expanding = QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
 
         # button select directory
         self.button_select_directory = QtWidgets.QPushButton(self.frame)
@@ -140,7 +140,8 @@ class SettingsUI:
 
         # set colors for elements
         p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.colorscheme().highlight))
-        p.setColor(QtGui.QPalette.ColorRole.Foreground, QtGui.QColor(self.mwindow.colorscheme().highlight_text))
+        #TODO Find solution in pyqt6
+        p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.mwindow.colorscheme().highlight_text))
         p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.mwindow.colorscheme().highlight_text))
 
         # set colors for buttons

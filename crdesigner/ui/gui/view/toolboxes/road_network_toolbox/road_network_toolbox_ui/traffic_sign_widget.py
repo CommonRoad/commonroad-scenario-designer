@@ -1,6 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 import math
 
 from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox, PositionButton
@@ -18,17 +18,17 @@ class TrafficSignWidget():
         layout_traffic_sign = QVBoxLayout(widget_traffic_sign)
 
         label_general = QLabel("Traffic Sign Attributes")
-        label_general.setFont(QFont("Arial", 11, QFont.Bold))
+        label_general.setFont(QFont("Arial", 11, QFont.Weight.Bold))
 
         self.toolbox.x_position_traffic_sign = QLineEdit()
         self.toolbox.x_position_traffic_sign.setValidator(QDoubleValidator())
         self.toolbox.x_position_traffic_sign.setMaxLength(4)
-        self.toolbox.x_position_traffic_sign.setAlignment(Qt.AlignRight)
+        self.toolbox.x_position_traffic_sign.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.toolbox.y_position_traffic_sign = QLineEdit()
         self.toolbox.y_position_traffic_sign.setValidator(QDoubleValidator())
         self.toolbox.y_position_traffic_sign.setMaxLength(4)
-        self.toolbox.y_position_traffic_sign.setAlignment(Qt.AlignRight)
+        self.toolbox.y_position_traffic_sign.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.toolbox.traffic_sign_virtual_selection = QCheckBox("virtual")
 
         self.toolbox.selected_traffic_sign = QComboBox()

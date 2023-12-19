@@ -18,9 +18,9 @@ except ImportError:
                     "The GUI and other map conversions should work.")
     SUMO_AVAILABLE = False
 
-from PyQt5.QtWidgets import QMessageBox, QFrame
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import QThread
+from PyQt6.QtWidgets import QMessageBox, QFrame
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import QThread
 
 class SimulationWorker(QThread):
     def __init__(self, scenario, config, output_folder):
@@ -145,7 +145,7 @@ class SUMOSimulation(QFrame):
         # show Info box, telling user to wait for the simulation to finish
         # self.waiting_msg.information(self, "SUMO Simulation", "Simulating...",
         #                              QMessageBox.Ok)
-        self.waiting_msg.exec_()
+        self.waiting_msg.exec()
 
         return True
 
@@ -169,7 +169,7 @@ class SUMOSimulation(QFrame):
         # show Info box, telling user to wait for the simulation to finish
         # self.waiting_msg.information(self, "SUMO Simulation", "Simulating...",
         #                              QMessageBox.Ok)
-        self.waiting_msg.exec_()
+        self.waiting_msg.exec()
 
         return True
 
@@ -184,5 +184,5 @@ class SUMOSimulation(QFrame):
                 "SUMO Simulation",
                 "The SUMO Simulation encountered an error:\n{}".format(
                     self.worker.error),
-                QMessageBox.Ok,
+                QMessageBox.StandardButton.Ok,
             )

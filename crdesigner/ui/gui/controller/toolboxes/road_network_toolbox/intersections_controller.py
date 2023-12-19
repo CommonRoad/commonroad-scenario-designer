@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QTableWidgetItem
+
 from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
 
 from crdesigner.config.logging import logger
@@ -6,8 +6,6 @@ from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.intersections_ui import AddIntersectionUI
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
     RoadNetworkToolboxUI
-from commonroad.scenario.traffic_sign import *
-from PyQt5.QtWidgets import *
 
 
 class AddIntersectionController:
