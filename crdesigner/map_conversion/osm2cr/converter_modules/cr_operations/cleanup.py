@@ -469,8 +469,10 @@ def remove_unconnected_lanes(scenario: Scenario):
     :return: None
     """
     graph = scenario_to_networkx_graph(scenario)
+    print("len(scenario.lanelet_network.lanelets): ", len(scenario.lanelet_network.lanelets))
     net = scenario.lanelet_network
     lanelets = net.lanelets
+    print("lanalet lenght: ", len(lanelets))
 
     # create connections for adjacent lanelets
     tmp_edges = []

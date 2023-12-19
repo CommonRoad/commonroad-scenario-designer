@@ -150,6 +150,7 @@ def osm_to_commonroad(input_file: str) -> Scenario:
     :return: CommonRoad scenario
     """
     osm_graph = GraphScenario(input_file).graph
+    print("len(osm_graph.nodes): ", len(osm_graph.nodes))
     return convert_to_scenario(osm_graph)
 
 

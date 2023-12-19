@@ -22,7 +22,9 @@ from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import 
 
 
 def step_collection_1(file: str) -> road_graph.Graph:
+    print("step_collection_1")
     graph = osm_parser.create_graph(file)
+    print("len(graph.nodes): ", len(graph.nodes))
     if config.MAKE_CONTIGUOUS:
         logging.info("making graph contiguously")
         graph.make_contiguous()
