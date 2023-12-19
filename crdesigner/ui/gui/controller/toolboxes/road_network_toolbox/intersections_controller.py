@@ -5,6 +5,7 @@ from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.intersections_ui import AddIntersectionUI
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
     RoadNetworkToolboxUI
+from commonroad.scenario.traffic_sign import *
 
 
 class AddIntersectionController:
@@ -31,7 +32,6 @@ class AddIntersectionController:
         self.road_network_toolbox_ui.button_remove_intersection.clicked.connect(lambda: self.remove_intersection())
         self.road_network_toolbox_ui.button_update_intersection.clicked.connect(lambda: self.update_intersection())
 
-    @logger.log
     def add_four_way_intersection(self):
         """
         Adds a four-way intersection to the scenario.
@@ -53,7 +53,6 @@ class AddIntersectionController:
                                                           add_traffic_lights)
         self.road_network_controller.set_default_road_network_list_information()
 
-    @logger.log
     def add_three_way_intersection(self):
         """
         Adds a three-way intersection to the scenario.
@@ -152,7 +151,6 @@ class AddIntersectionController:
             print("intersections_controller.py/add_intersection: An intersection must consist at least of two "
                   "incomings.")
 
-    @logger.log
     def remove_intersection(self):
         """
         Removes selected intersection from lanelet network.
@@ -167,10 +165,36 @@ class AddIntersectionController:
 
         if self.road_network_toolbox_ui.selected_intersection.currentText() not in ["", "None"]:
             selected_intersection_id = int(self.road_network_toolbox_ui.selected_intersection.currentText())
+            selected_intersection = self.scenario_model.find_intersection_by_id(selected_intersection_id)
+            lanelet_set = self.scenario_model.get_current_scenario().compute_member_lanelets(selected_intersection)
+            self.remove_traffic_signs_and_lights_of_intersection(
+                    self.collect_traffic_signs_of_intersection(lanelet_set),
+                    self.collect_traffic_lights_of_intersection(lanelet_set))
+            for lanelet in lanelet_set:
+                self.scenario_model.remove_lanelet(lanelet)
             self.scenario_model.remove_intersection(selected_intersection_id)
             self.road_network_controller.set_default_road_network_list_information()
 
     @logger.log
+    def collect_traffic_lights_of_intersection(self, lanelet_ids: Set[int]) -> Set[int]:
+        traffic_lights = set()
+        for lanelet_ID in lanelet_ids:
+            traffic_lights.update(self.scenario_model.find_lanelet_by_id(lanelet_ID).traffic_lights)
+        return traffic_lights
+
+    def collect_traffic_signs_of_intersection(self, lanelet_ids: Set[int]) -> Set[int]:
+        traffic_signs = set()
+        for lanelet_ID in lanelet_ids:
+            traffic_signs.update(self.scenario_model.find_lanelet_by_id(lanelet_ID).traffic_signs)
+        return traffic_signs
+
+    def remove_traffic_signs_and_lights_of_intersection(self, traffic_signs: Set[int], traffic_lights: Set[int]):
+        for traffic_sign in traffic_signs:
+            self.scenario_model.remove_traffic_sign(traffic_sign)
+
+        for traffic_light in traffic_lights:
+            self.scenario_model.remove_traffic_light(traffic_light)
+
     def update_intersection(self):
         """
         Updates a selected intersection from the scenario.
