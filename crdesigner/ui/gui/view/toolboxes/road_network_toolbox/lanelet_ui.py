@@ -1,6 +1,6 @@
 import math
 
-from PyQt5.QtCore import *
+from PyQt6.QtCore import *
 from commonroad.geometry.polyline_util import compute_polyline_curvatures, compute_polyline_orientations, \
     compute_polyline_initial_orientation
 
@@ -80,27 +80,27 @@ class AddLaneletUI:
                     self.road_network_toolbox_ui.road_user_bidirectional.addItem(road_user_list[i])
                     item = self.road_network_toolbox_ui.road_user_bidirectional.model().item(i, 0)
                     if road_user_list[i] in list_bidirectional:
-                        item.setCheckState(Qt.Checked)
+                        item.setCheckState(Qt.CheckState.Checked)
                     else:
-                        item.setCheckState(Qt.Unchecked)
+                        item.setCheckState(Qt.CheckState.Unchecked)
 
                 list_oneway = [e.value for e in last_lanelet.user_one_way]
                 for i in range(0, len(road_user_list) - 1):
                     self.road_network_toolbox_ui.road_user_oneway.addItem(road_user_list[i])
                     item = self.road_network_toolbox_ui.road_user_oneway.model().item(i, 0)
                     if road_user_list[i] in list_oneway:
-                        item.setCheckState(Qt.Checked)
+                        item.setCheckState(Qt.CheckState.Checked)
                     else:
-                        item.setCheckState(Qt.Unchecked)
+                        item.setCheckState(Qt.CheckState.Unchecked)
 
                 list_types = [e.value for e in last_lanelet.lanelet_type]
                 for i in range(0, len(lanelet_type_list) - 1):
                     self.road_network_toolbox_ui.lanelet_type.addItem(lanelet_type_list[i])
                     item = self.road_network_toolbox_ui.lanelet_type.model().item(i, 0)
                     if lanelet_type_list[i] in list_types:
-                        item.setCheckState(Qt.Checked)
+                        item.setCheckState(Qt.CheckState.Checked)
                     else:
-                        item.setCheckState(Qt.Unchecked)
+                        item.setCheckState(Qt.CheckState.Unchecked)
 
             else:
                 self.road_network_toolbox_ui.previous_lanelet.addItem("None")
@@ -116,17 +116,17 @@ class AddLaneletUI:
             for i in range(0, len(road_user_list) - 1):
                 self.road_network_toolbox_ui.road_user_bidirectional.addItem(road_user_list[i])
                 item = self.road_network_toolbox_ui.road_user_bidirectional.model().item(i, 0)
-                item.setCheckState(Qt.Unchecked)
+                item.setCheckState(Qt.CheckState.Unchecked)
 
             for i in range(0, len(road_user_list) - 1):
                 self.road_network_toolbox_ui.road_user_oneway.addItem(road_user_list[i])
                 item = self.road_network_toolbox_ui.road_user_oneway.model().item(i, 0)
-                item.setCheckState(Qt.Unchecked)
+                item.setCheckState(Qt.CheckState.Unchecked)
 
             for i in range(0, len(lanelet_type_list) - 1):
                 self.road_network_toolbox_ui.lanelet_type.addItem(lanelet_type_list[i])
                 item = self.road_network_toolbox_ui.lanelet_type.model().item(i, 0)
-                item.setCheckState(Qt.Unchecked)
+                item.setCheckState(Qt.CheckState.Unchecked)
 
         line_markings_stop_line = [e.value for e in LineMarking if
                                    e.value not in [LineMarking.UNKNOWN.value, LineMarking.NO_MARKING.value]]

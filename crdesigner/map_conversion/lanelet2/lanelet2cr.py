@@ -205,6 +205,10 @@ class Lanelet2CRConverter:
         self.first_right_pts, self.last_right_pts = None, None
         self.osm = None
         self.lanelet_network = None
+
+        # Origin of the transformed coordinates
+        # if config.translate = False: defaults to (0, 0)
+        # if config.translate = True: origin is set to the geo location, and transformed coordinates are translated
         self.origin_utm = None
 
     def __call__(self, osm: OSMLanelet) -> Union[Scenario, None]:
@@ -239,10 +243,22 @@ class Lanelet2CRConverter:
             self.origin_utm = self.transformer.transform(origin_lat, origin_lon)
         else:
             self.origin_utm = (0, 0)
+
+        # create CR scenario object
         scenario_id = ScenarioID(country_id=self._cr_config.country_id,
                                  map_name=self._cr_config.map_name, map_id=self._cr_config.map_id)
         scenario = Scenario(dt=self._cr_config.time_step_size, scenario_id=scenario_id,
                             location=Location(gps_latitude=origin_lat, gps_longitude=origin_lon))
+
+        # add GeoTransformation
+        geo_transformation = GeoTransformation()
+        geo_transformation.geo_reference = self._config.proj_string_l2
+        # consider x ans y translation (relevant if self._config.translate is set)
+        geo_transformation.x_translation = self.origin_utm[0]
+        geo_transformation.y_translation = self.origin_utm[1]
+
+        scenario.location.geo_transformation = geo_transformation
+
         self.lanelet_network = ConversionLaneletNetwork()
 
         speed_limits = {}
@@ -315,8 +331,6 @@ class Lanelet2CRConverter:
         self.lanelet_network.cleanup_traffic_light_references()
 
         scenario.add_objects(self.lanelet_network)
-
-        scenario.location.geo_transformation = GeoTransformation(geo_reference=self._config.proj_string_l2)
 
         return scenario
     

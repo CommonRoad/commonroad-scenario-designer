@@ -3,7 +3,7 @@ import os
 import sys
 from typing import Optional
 
-from PyQt5.QtWidgets import *
+from PyQt6.QtWidgets import *
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 
 from crdesigner.config.logging import logger
@@ -106,7 +106,7 @@ class ScenarioSavingDialogController:
     @logger.log
     def select_directory(self):
         """Select the directory where the scenario should be saved."""
-        self.directory = QFileDialog.getExistingDirectory(self.save_window, "Dir", options=QFileDialog.Options())
+        self.directory = QFileDialog.getExistingDirectory(self.save_window, "Dir", options=QFileDialog.Option.ShowDirsOnly)
         if self.directory:
             self.save_window.label_directory.setText(self.directory)
 

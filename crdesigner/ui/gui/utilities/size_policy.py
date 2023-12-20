@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QSizePolicy
+from PyQt6.QtWidgets import QSizePolicy
 
 
 def create_size_policy_for_settings_elements():

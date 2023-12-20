@@ -2,12 +2,11 @@ import os
 from lxml import etree
 
 
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 from crdesigner.ui.gui.utilities.converter_modules.converter_interface import ConverterInterface
-from crdesigner.configurations.get_configs import get_configs
 
 # TODO: UNCERTAIN (either it goes into the utilities or becomes part of a controller in a different form).
 class OpenDRIVEInterface(ConverterInterface):

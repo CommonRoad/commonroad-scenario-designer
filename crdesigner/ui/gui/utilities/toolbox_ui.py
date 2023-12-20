@@ -1,16 +1,16 @@
 
-from PyQt5 import QtGui
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt6 import QtGui
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
 from crdesigner.config.gui_config import gui_config as config
 
 
 class QHLine(QFrame):
     def __init__(self):
         super(QHLine, self).__init__()
-        self.setFrameShape(QFrame.HLine)
-        self.setFrameShadow(QFrame.Sunken)
+        self.setFrameShape(QFrame.Shape.HLine)
+        self.setFrameShadow(QFrame.Shadow.Sunken)
 
 
 class SectionExpandButton(QPushButton):
@@ -52,10 +52,10 @@ class CheckableComboBox(QComboBox):
         item = self.model().itemFromIndex(index)
 
         # make it check if unchecked and vice-versa
-        if item.checkState() == Qt.Checked:
-            item.setCheckState(Qt.Unchecked)
+        if item.checkState() == Qt.CheckState.Checked:
+            item.setCheckState(Qt.CheckState.Unchecked)
         else:
-            item.setCheckState(Qt.Checked)
+            item.setCheckState(Qt.CheckState.Checked)
 
         self.check_items()
 
@@ -64,7 +64,7 @@ class CheckableComboBox(QComboBox):
         item = self.model().item(index, 0)
 
         # return true if checked else false
-        return item.checkState() == Qt.Checked
+        return item.checkState() == Qt.CheckState.Checked
 
     def get_checked_items(self):
         # blank list
@@ -93,9 +93,9 @@ class CheckableComboBox(QComboBox):
         for index in range(self.count()):
             item = self.model().item(index, 0)
             if item.text() in checked_items:
-                item.setCheckState(Qt.Checked)
+                item.setCheckState(Qt.CheckState.Checked)
             else:
-                item.setCheckState(Qt.Unchecked)
+                item.setCheckState(Qt.CheckState.Unchecked)
 
     def uncheck_items(self, uncheck_item):
         """
@@ -104,7 +104,7 @@ class CheckableComboBox(QComboBox):
         for index in range(self.count()):
             item = self.model().item(index, 0)
             if item.text() in uncheck_item:
-                item.setCheckState(Qt.Unchecked)
+                item.setCheckState(Qt.CheckState.Unchecked)
 
     def check_items(self):
         # blank list
@@ -242,8 +242,8 @@ class CollapsibleArrowBox(QToolButton):
         self.toolbox = toolbox
         self.button.setStyleSheet("QToolButton {border: none; color: " + self.mwindow.mwindow_ui.colorscheme().color + ";}")
         self.button.setText(title)
-        self.button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
-        self.button.setArrowType(Qt.RightArrow)
+        self.button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        self.button.setArrowType(Qt.ArrowType.RightArrow)
 
         self.toggle_checked = False
         self.button.clicked.connect(lambda: self.pressed())
@@ -262,11 +262,11 @@ class CollapsibleArrowBox(QToolButton):
 
         if not self.toggle_checked:
             self.box.setMaximumSize(1000, 1000)
-            self.button.setArrowType(Qt.DownArrow)
+            self.button.setArrowType(Qt.ArrowType.DownArrow)
             self.toggle_checked = True
         else:
             self.box.setMaximumSize(0, 0)
-            self.button.setArrowType(Qt.RightArrow)
+            self.button.setArrowType(Qt.ArrowType.RightArrow)
             self.toggle_checked = False
 
     def remove(self):
@@ -353,7 +353,7 @@ class Toolbox(QWidget):
         self.arrowButtons = []
         self.position_buttons = []
 
-        self.tree.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self.tree.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.tree.verticalScrollBar().setSingleStep(30)
 
         self.sections = []

@@ -9,7 +9,7 @@ from commonroad.scenario.obstacle import Obstacle
 
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.toolbox_ui import PosB
-from PyQt5.QtWidgets import *
+from PyQt6.QtWidgets import *
 
 
 class AnimatedViewerWrapperController:

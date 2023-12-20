@@ -9,9 +9,12 @@
 - Test Case for local geonamesID functionality
 - OpenDRIVE to CommonRoad conversion: considering line markings of inner shared lanelet boundaries
 - Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
+- Optional MGRS tag for nodes in CR to Lanelet2 conversion (comptaibility with Autoware)
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
+- osm2cr: virtual traffic sign have position assigned
+- PyQt6 instead of PyQt5 as GUI backend
 
 ### Fixed
 - Adding existing obstacles again
@@ -20,6 +23,7 @@
 - lanelet2cr wrong final vertice assignment 
 - Deleting unreferenced traffic signs/lights after deleting lanelet
 - Map verification/repairing: Checking unique ID of traffic light cycle element
+- Consider x, y translation for CR-Lanlet (and vice versa) conversion
 
 ## [0.8.0] - 2023-10-31
 
