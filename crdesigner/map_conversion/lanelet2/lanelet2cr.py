@@ -230,16 +230,19 @@ class Lanelet2CRConverter:
         crs_from = CRS("ETRF89")
         crs_to = CRS(self._config.proj_string_l2)
         self.transformer = Transformer.from_proj(crs_from, crs_to)
-        self._left_way_ids, self._right_way_ids = None, None
-        self.first_left_pts, self.last_left_pts = None, None
-        self.first_right_pts, self.last_right_pts = None, None
-        self.osm = None
-        self.lanelet_network = None
+        self._left_way_ids: Optional[Dict[str, str]] = None
+        self._right_way_ids: Optional[Dict[str, str]] = None
+        self.first_left_pts: Optional[Dict[str, List[str]]] = None
+        self.last_left_pts: Optional[Dict[str, List[str]]] = None
+        self.first_right_pts: Optional[Dict[str, List[str]]] = None
+        self.last_right_pts: Optional[Dict[str, List[str]]] = None
+        self.osm: Optional[OSMLanelet] = None
+        self.lanelet_network: Optional[LaneletNetwork] = None
 
         # Origin of the transformed coordinates
         # if config.translate = False: defaults to (0, 0)
         # if config.translate = True: origin is set to the geo location, and transformed coordinates are translated
-        self.origin_utm = None
+        self.origin_utm: Optional[Tuple[float, float]] = None
 
     def __call__(self, osm: OSMLanelet) -> Union[Scenario, None]:
         """

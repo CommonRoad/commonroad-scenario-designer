@@ -1,4 +1,5 @@
 import sys
+from typing import Optional
 
 from PyQt6.QtWidgets import QApplication
 
@@ -6,7 +7,7 @@ from crdesigner.ui.gui.controller.mwindow_controller import MWindowController
 from crdesigner.ui.gui.utilities.file_actions import open_path
 
 
-def start_gui(input_file: str = None):
+def start_gui(input_file: Optional[str] = None):
     """
     Redirect to the main window start.
 
