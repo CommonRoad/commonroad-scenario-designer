@@ -54,8 +54,12 @@ from commonroad.scenario.lanelet import (
 )
 from commonroad.scenario.obstacle import ObstacleRole, ObstacleType
 from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.traffic_light import TrafficLight, TrafficLightCycleElement, TrafficLightDirection, \
-    TrafficLightCycle
+from commonroad.scenario.traffic_light import (
+    TrafficLight,
+    TrafficLightCycle,
+    TrafficLightCycleElement,
+    TrafficLightDirection,
+)
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficSign
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from commonroad.scenario.trajectory import State
@@ -1351,8 +1355,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 continue
             lanelet_id = self.lane_id2lanelet_id[connection.from_lane.id]
             lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
-            cycle = [TrafficLightCycleElement(state=traffic_light_states_SUMO2CR[phase.state[connection.tl_link]],
-                     duration=round(phase.duration / self.conf.dt)) for phase in connection.tls.phases]
+            cycle = [
+                TrafficLightCycleElement(
+                    state=traffic_light_states_SUMO2CR[phase.state[connection.tl_link]],
+                    duration=round(phase.duration / self.conf.dt),
+                )
+                for phase in connection.tls.phases
+            ]
 
             traffic_cycle = TrafficLightCycle(cycle_elements=cycle, time_offset=time_offset)
             traffic_light = TrafficLight(

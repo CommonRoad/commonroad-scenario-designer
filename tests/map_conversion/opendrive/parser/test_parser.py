@@ -33,7 +33,6 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.parser import (
 
 
 class TestParser(unittest.TestCase):
-
     def test_parse_opendrive(self):
         file_path = Path(os.path.dirname(os.path.abspath(__file__)) + "/../../test_maps/opendrive/CulDeSac.xodr")
         xodr_file = parse_opendrive(file_path)

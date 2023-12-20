@@ -3,19 +3,22 @@ import os
 import sys
 from typing import Optional
 
+from commonroad.common.common_scenario import (
+    Location,
+    Time,
+    TimeOfDay,
+    Underground,
+    Weather,
+)
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.common.util import FileFormat
+from commonroad.planning.planning_problem import PlanningProblemSet
+from commonroad.scenario.scenario import Environment, Scenario, Tag
 
 from crdesigner.config.logging import logger
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-from crdesigner.ui.gui.view.settings.scenario_saving_dialog_ui import ScenarioSavingDialogUI
-from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.common.common_scenario import TimeOfDay, Weather, Underground, Time, Location
-from commonroad.scenario.scenario import Environment, Tag, Scenario
-
-from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
 from crdesigner.ui.gui.view.settings.scenario_saving_dialog_ui import (
     ScenarioSavingDialogUI,
 )
@@ -81,16 +84,21 @@ class ScenarioSavingDialogController:
         )
 
         if self.current_scenario.lanelet_network.location:
-            self.save_window.scenario_geo_anme_id.setText(str(self.current_scenario.lanelet_network.location.geo_name_id))
+            self.save_window.scenario_geo_anme_id.setText(
+                str(self.current_scenario.lanelet_network.location.geo_name_id)
+            )
             self.save_window.scenario_latitude.setText(str(self.current_scenario.lanelet_network.location.gps_latitude))
-            self.save_window.scenario_longitude.setText(str(self.current_scenario.lanelet_network.location.gps_longitude))
+            self.save_window.scenario_longitude.setText(
+                str(self.current_scenario.lanelet_network.location.gps_longitude)
+            )
             if self.current_scenario.environment:
                 self.save_window.scenario_time_of_day.setCurrentText(
-                        self.current_scenario.environment.time_of_day.value)
-                self.save_window.scenario_weather.setCurrentText(
-                        self.current_scenario.environment.weather.value)
+                    self.current_scenario.environment.time_of_day.value
+                )
+                self.save_window.scenario_weather.setCurrentText(self.current_scenario.environment.weather.value)
                 self.save_window.scenario_underground.setCurrentText(
-                        self.current_scenario.environment.underground.value)
+                    self.current_scenario.environment.underground.value
+                )
                 self.save_window.scenario_time_hour.setValue(self.current_scenario.environment.time.hours)
                 self.save_window.scenario_time_minute.setValue(self.current_scenario.environment.time.minutes)
             else:
@@ -139,13 +147,17 @@ class ScenarioSavingDialogController:
             original_stderr = sys.stderr
             original_level = logging.getLogger().getEffectiveLevel()
             logging.getLogger().setLevel(logging.ERROR)
-            sys.stdout = open(os.devnull, 'w')
-            sys.stderr = open(os.devnull, 'w')
-            writer = CommonRoadFileWriter(scenario=scenario,
-                                          planning_problem_set=self.current_pps,
-                                          author="Default Author", affiliation="Default Affiliation",
-                                          source="CommonRoad Scenario Designer", tags=set(),
-                                          file_format=FileFormat.XML)
+            sys.stdout = open(os.devnull, "w")
+            sys.stderr = open(os.devnull, "w")
+            writer = CommonRoadFileWriter(
+                scenario=scenario,
+                planning_problem_set=self.current_pps,
+                author="Default Author",
+                affiliation="Default Affiliation",
+                source="CommonRoad Scenario Designer",
+                tags=set(),
+                file_format=FileFormat.XML,
+            )
             filename = DIR_AUTOSAVE + "/autosave" + ".xml"
             if self.current_pps is None:
                 writer.write_scenario_to_file(filename, OverwriteExistingFile.ALWAYS)
@@ -162,12 +174,15 @@ class ScenarioSavingDialogController:
         self.update_scenario_meta_data()
         try:
             self.current_pps = self.current_pps_model.get_pps()
-            writer = CommonRoadFileWriter(scenario=self.current_scenario,
-                                          planning_problem_set=self.current_pps,
-                                          author=self.current_scenario.author,
-                                          affiliation=self.current_scenario.affiliation,
-                                          source=self.current_scenario.source, tags=set(self.current_scenario.tags),
-                                          file_format=FileFormat.XML)
+            writer = CommonRoadFileWriter(
+                scenario=self.current_scenario,
+                planning_problem_set=self.current_pps,
+                author=self.current_scenario.author,
+                affiliation=self.current_scenario.affiliation,
+                source=self.current_scenario.source,
+                tags=set(self.current_scenario.tags),
+                file_format=FileFormat.XML,
+            )
             filename = self.directory + "/" + self.current_scenario.scenario_id.__str__() + ".xml"
             if self.current_pps is None:
                 writer.write_scenario_to_file(filename, OverwriteExistingFile.ALWAYS)

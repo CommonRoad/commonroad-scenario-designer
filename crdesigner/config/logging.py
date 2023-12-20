@@ -27,14 +27,16 @@ class Logger:
                 time = datetime.now()
 
                 if not self.fully_initialized:
-                    self.first_stacks = (
-                            self.first_stacks + (f"{time.strftime('%d-%b-%y %H:%M:%S')} - "
-                                                 f"Function {func.__name__} was called with args {signature} \n"))
+                    self.first_stacks = self.first_stacks + (
+                        f"{time.strftime('%d-%b-%y %H:%M:%S')} - "
+                        f"Function {func.__name__} was called with args {signature} \n"
+                    )
 
                 elif not self.first_stack_saved:
-                    self.first_stacks = self.first_stacks + \
-                                        (f"{time.strftime('%d-%b-%y %H:%M:%S')} - "
-                                         f"Function {func.__name__} was called with args {signature}")
+                    self.first_stacks = self.first_stacks + (
+                        f"{time.strftime('%d-%b-%y %H:%M:%S')} - "
+                        f"Function {func.__name__} was called with args {signature}"
+                    )
                     with open(DIR_AUTOSAVE + "/logging_file.txt", "a+") as file_object:
                         file_object.write(self.first_stacks)
                         file_object.write("\n")
@@ -53,8 +55,10 @@ class Logger:
                 result = func(*args, **kwargs)
                 return result
             except Exception as e:
-                print(f"There has been an error with the Function {func.__name__} with args {signature} with "
-                      f"the actions: {str(e)} and the traceback: {traceback.format_exc()}")
+                print(
+                    f"There has been an error with the Function {func.__name__} with args {signature} with "
+                    f"the actions: {str(e)} and the traceback: {traceback.format_exc()}"
+                )
 
         return wrapper
 

@@ -61,7 +61,8 @@ class IntersectionsWidget:
         self.toolbox.intersection_incomings_table = QTableWidget()
         self.toolbox.intersection_incomings_table.setColumnCount(6)
         self.toolbox.intersection_incomings_table.setHorizontalHeaderLabels(
-                ['ID', 'Lanelets', 'Out. Left', 'Out. Straight', 'Out. Right', 'Left of'])
+            ["ID", "Lanelets", "Out. Left", "Out. Straight", "Out. Right", "Left of"]
+        )
         self.toolbox.intersection_incomings_table.resizeColumnsToContents()
         self.toolbox.intersection_incomings_table.setMaximumHeight(175)
         self.toolbox.button_add_incoming = QPushButton("Add Incoming")

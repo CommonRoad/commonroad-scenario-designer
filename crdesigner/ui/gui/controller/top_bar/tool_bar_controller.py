@@ -138,7 +138,6 @@ class ToolBarController:
 
             self.mwindow_ui.obstacle_toolbox.animate_obstacle_profile_state(value)
 
-
     def _time_step_set(self):
         if self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.edit.text() == "":
             return

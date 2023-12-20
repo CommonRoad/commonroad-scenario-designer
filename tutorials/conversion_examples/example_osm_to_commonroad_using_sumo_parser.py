@@ -15,13 +15,13 @@ scenario = osm_to_commonroad_using_sumo(
 )
 
 writer = CommonRoadFileWriter(
-        scenario=scenario,
-        planning_problem_set=PlanningProblemSet(),
-        author="YOUR NAME",
-        affiliation="Technical University of Munich",
-        source="CommonRoad Scenario Designer",
-        tags={Tag.URBAN},
-        file_format=FileFormat.XML
+    scenario=scenario,
+    planning_problem_set=PlanningProblemSet(),
+    author="YOUR NAME",
+    affiliation="Technical University of Munich",
+    source="CommonRoad Scenario Designer",
+    tags={Tag.URBAN},
+    file_format=FileFormat.XML,
 )
 
 # create a folder for the example file if it does not exist

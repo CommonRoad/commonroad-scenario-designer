@@ -957,7 +957,6 @@ class ObstacleController(
             else:
                 self.text_browser.append(message)
 
-
     def __get_obstacle_state_profile(self, obstacle, state_variable_name):
         profile = None
         message = "This Graph is only available for dynamic obstacles"
@@ -971,8 +970,9 @@ class ObstacleController(
                     profile = [j[0] for j in self.xyova]
                 else:
                     profile = [obstacle.initial_state.__getattribute__("position")[0]]
-                    profile += [state.__getattribute__("position")[0] for state in
-                                obstacle.prediction.trajectory.state_list]
+                    profile += [
+                        state.__getattribute__("position")[0] for state in obstacle.prediction.trajectory.state_list
+                    ]
         elif state_variable_name == "y-position":
             if isinstance(obstacle, StaticObstacle):
                 profile = [obstacle.initial_state.__getattribute__("position")[1]]
@@ -981,23 +981,25 @@ class ObstacleController(
                     profile = [j[1] for j in self.xyova]
                 else:
                     profile = [obstacle.initial_state.__getattribute__("position")[1]]
-                    profile += [state.__getattribute__("position")[1] for state in
-                                obstacle.prediction.trajectory.state_list]
+                    profile += [
+                        state.__getattribute__("position")[1] for state in obstacle.prediction.trajectory.state_list
+                    ]
 
-        elif (state_variable_name == "velocity" and isinstance(obstacle, DynamicObstacle)):
+        elif state_variable_name == "velocity" and isinstance(obstacle, DynamicObstacle):
             if self.xyova:
                 profile = [j[3] for j in self.xyova]
             else:
                 profile = [obstacle.initial_state.__getattribute__("velocity")]
                 profile += [state.__getattribute__("velocity") for state in obstacle.prediction.trajectory.state_list]
 
-        elif (state_variable_name == "acceleration" and isinstance(obstacle, DynamicObstacle)):
+        elif state_variable_name == "acceleration" and isinstance(obstacle, DynamicObstacle):
             if self.xyova:
                 profile = [j[4] for j in self.xyova]
             elif "acceleration" in obstacle.prediction.trajectory.final_state.attributes:
                 profile = [obstacle.initial_state.__getattribute__("acceleration")]
-                profile += [state.__getattribute__("acceleration") for state in
-                            obstacle.prediction.trajectory.state_list]
+                profile += [
+                    state.__getattribute__("acceleration") for state in obstacle.prediction.trajectory.state_list
+                ]
             else:
                 message = "This Obstacle has no information about the Acceleration"
 
@@ -1010,7 +1012,7 @@ class ObstacleController(
             else:
                 message = "This Obstacle has no information about the yaw_rate"
 
-        elif (state_variable_name == "slip_angle" and isinstance(obstacle, DynamicObstacle)):
+        elif state_variable_name == "slip_angle" and isinstance(obstacle, DynamicObstacle):
             if self.xyova:
                 profile = [j[6] for j in self.xyova]
             elif "slip_angle" in obstacle.prediction.trajectory.final_state.attributes:
@@ -1027,11 +1029,11 @@ class ObstacleController(
                     profile = [j[2] for j in self.xyova]
                 else:
                     profile = [obstacle.initial_state.__getattribute__("orientation")]
-                    profile += [state.__getattribute__("orientation") for state in
-                                obstacle.prediction.trajectory.state_list]
+                    profile += [
+                        state.__getattribute__("orientation") for state in obstacle.prediction.trajectory.state_list
+                    ]
 
         return profile, message
-
 
     @staticmethod
     def resolve_y_label(state_variable_name: str) -> str:
@@ -1170,7 +1172,6 @@ class ObstacleController(
         )
         self.change_color = True
 
-
     def animate_obstacle_profile_state(self, time_stamp):
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"] and not self.update_ongoing:
             obstacle = self.get_current_obstacle()
@@ -1183,7 +1184,7 @@ class ObstacleController(
             ax = self.obstacle_toolbox_ui.figure.axes[0]
             # red dot and vertical line
             if profile and time_stamp < len(profile):
-                ax.plot(time_stamp, profile[time_stamp], 'ro', markersize=4)
-                ax.axvline(x=time_stamp, color='r', linewidth=1)
+                ax.plot(time_stamp, profile[time_stamp], "ro", markersize=4)
+                ax.axvline(x=time_stamp, color="r", linewidth=1)
             # refresh canvas
             self.obstacle_toolbox_ui.canvas.draw()

@@ -12,35 +12,54 @@ class TestCommandLineInterface(unittest.TestCase):
             os.makedirs(self.output_path)
 
     def test_opendrive(self):
-        subprocess.Popen(['crdesigner',
-                          '--input-file', os.path.dirname(os.path.realpath(__file__))
-                          + '/../map_conversion/test_maps/opendrive/poly3_and_border_record.xodr',
-                          '--output-file', self.output_path + "/opendrive_command_line.xml",
-                          '--tags', 'urban',
-                          '--tags', 'highway',
-                          'odrcr'])
+        subprocess.Popen(
+            [
+                "crdesigner",
+                "--input-file",
+                os.path.dirname(os.path.realpath(__file__))
+                + "/../map_conversion/test_maps/opendrive/poly3_and_border_record.xodr",
+                "--output-file",
+                self.output_path + "/opendrive_command_line.xml",
+                "--tags",
+                "urban",
+                "--tags",
+                "highway",
+                "odrcr",
+            ]
+        )
         time.sleep(20)
         exists = Path(self.output_path + "/opendrive_command_line.xml")
         self.assertTrue(exists.is_file())
         exists.unlink()
 
     def test_osm(self):
-        subprocess.Popen(['crdesigner',
-                          '--input-file', os.path.dirname(os.path.realpath(__file__)) +
-                          '/../map_conversion/test_maps/osm/munich.osm',
-                          '--output-file', self.output_path + "/osm_command_line.xml",
-                          "osmcr"])
+        subprocess.Popen(
+            [
+                "crdesigner",
+                "--input-file",
+                os.path.dirname(os.path.realpath(__file__)) + "/../map_conversion/test_maps/osm/munich.osm",
+                "--output-file",
+                self.output_path + "/osm_command_line.xml",
+                "osmcr",
+            ]
+        )
         time.sleep(60)
-        exists = Path(self.output_path + '/osm_command_line.xml')
+        exists = Path(self.output_path + "/osm_command_line.xml")
         self.assertTrue(exists.is_file())
         exists.unlink()
 
     def test_lanelet2_to_cr(self):
-        subprocess.Popen(['crdesigner',
-                          '--input-file', os.path.dirname(os.path.realpath(__file__))
-                          + '/../map_conversion/test_maps/lanelet2/traffic_priority_lanelets_utm.osm',
-                          '--output-file', self.output_path + "/lanelet2_command_line.xml",
-                          "lanelet2cr"])
+        subprocess.Popen(
+            [
+                "crdesigner",
+                "--input-file",
+                os.path.dirname(os.path.realpath(__file__))
+                + "/../map_conversion/test_maps/lanelet2/traffic_priority_lanelets_utm.osm",
+                "--output-file",
+                self.output_path + "/lanelet2_command_line.xml",
+                "lanelet2cr",
+            ]
+        )
         time.sleep(10)
         exists = Path(self.output_path + "/lanelet2_command_line.xml")
         self.assertTrue(exists.is_file())

@@ -1,7 +1,12 @@
 import logging
 import os
 
-from commonroad.common.file_reader import CommonRoadFileReader, FileFormat, CommonRoadReadAll, CommonRoadMapFileReader
+from commonroad.common.file_reader import (
+    CommonRoadFileReader,
+    CommonRoadMapFileReader,
+    CommonRoadReadAll,
+    FileFormat,
+)
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario
 from PyQt6.QtGui import QIcon
@@ -17,9 +22,12 @@ def file_new(mwindow):
     """
     Function passed to the fileNewAction to create the action in the menu bar.
     """
-    scenario = Scenario(0.1,
-                        file_information=FileInformation(affiliation="Technical University of Munich",
-                                                         source="CommonRoad Scenario Designer"))
+    scenario = Scenario(
+        0.1,
+        file_information=FileInformation(
+            affiliation="Technical University of Munich", source="CommonRoad Scenario Designer"
+        ),
+    )
     net = LaneletNetwork()
     scenario.replace_lanelet_network(net)
     mwindow.scenario_model.set_scenario(scenario)
@@ -35,10 +43,14 @@ def open_commonroad_file(mwindow, path=None):
     Opens a file. If no path is given it opens a FileDialog, otherwise it uses the given Path
     """
     if path is None:
-        path, _ = QFileDialog.getOpenFileName(mwindow.mwindow_ui, "Open a CommonRoad scenario", "",
-                                              "CommonRoad scenario *.xml file (*.xml);; "
-                                              "CommonRoad scenario *-SC.pb file (*-SC.pb);; "
-                                              "CommonRoad map *.pb file (*.pb);; ", )
+        path, _ = QFileDialog.getOpenFileName(
+            mwindow.mwindow_ui,
+            "Open a CommonRoad scenario",
+            "",
+            "CommonRoad scenario *.xml file (*.xml);; "
+            "CommonRoad scenario *-SC.pb file (*-SC.pb);; "
+            "CommonRoad map *.pb file (*.pb);; ",
+        )
     if not path:
         return
     open_path(mwindow=mwindow, path=path)
@@ -62,9 +74,12 @@ def open_path(mwindow, path):
             raise FileExistsError("Unknown File type.")
 
     except Exception as e:
-        QMessageBox.warning(mwindow.mwindow_ui, "CommonRoad opening error",
-                            "There was an error during the loading of the selected CommonRoad file.\n\n" +
-                            "Syntax Error: {}".format(e), QMessageBox.StandardButton.Ok, )
+        QMessageBox.warning(
+            mwindow.mwindow_ui,
+            "CommonRoad opening error",
+            "There was an error during the loading of the selected CommonRoad file.\n\n" + "Syntax Error: {}".format(e),
+            QMessageBox.StandardButton.Ok,
+        )
         return
 
     filename = os.path.splitext(os.path.basename(path))[0]

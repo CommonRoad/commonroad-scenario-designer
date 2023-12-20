@@ -2,15 +2,22 @@ import copy
 from collections import deque
 from typing import List, Optional
 
-from commonroad.scenario.intersection import IncomingGroup, CrossingGroup
-from pyproj import CRS, Transformer
+from commonroad.common.common_lanelet import LaneletType, LineMarking, StopLine
 from commonroad.common.common_scenario import GeoTransformation, Location, ScenarioID
+from commonroad.scenario.intersection import CrossingGroup, IncomingGroup
+from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.scenario.scenario import Scenario
-from commonroad.common.common_lanelet import StopLine, LineMarking, LaneletType
-from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
-from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany, \
-    TrafficSignIDZamunda, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, \
-    TrafficSignIDRussia
+from commonroad.scenario.traffic_sign import (
+    TrafficSign,
+    TrafficSignElement,
+    TrafficSignIDChina,
+    TrafficSignIDGermany,
+    TrafficSignIDRussia,
+    TrafficSignIDSpain,
+    TrafficSignIDUsa,
+    TrafficSignIDZamunda,
+)
+from pyproj import CRS, Transformer
 
 from crdesigner.config.general_config import GeneralConfig, general_config
 from crdesigner.config.opendrive_config import OpenDriveConfig, open_drive_config
@@ -321,8 +328,9 @@ class Network:
             for intersection in lanelet_network.intersections:
                 for incoming in intersection.incomings:
                     if find_incoming(incoming):
-                        crossing_group = CrossingGroup(generate_unique_id(), {crosswalk.lanelet_id},
-                                                       incoming_group_id=incoming.incoming_id)
+                        crossing_group = CrossingGroup(
+                            generate_unique_id(), {crosswalk.lanelet_id}, incoming_group_id=incoming.incoming_id
+                        )
                         intersection.crossings.append(crossing_group)
                     break
 
@@ -483,13 +491,12 @@ class Network:
         )
 
         scenario_id = ScenarioID(
-                country_id=g_config.country_id if self._country_ID == "ZAM" else self._country_ID,
-                map_name=g_config.map_name,
-                map_id=g_config.map_id)
-
-        scenario = Scenario(
-            dt=g_config.time_step_size, scenario_id=scenario_id
+            country_id=g_config.country_id if self._country_ID == "ZAM" else self._country_ID,
+            map_name=g_config.map_name,
+            map_id=g_config.map_id,
         )
+
+        scenario = Scenario(dt=g_config.time_step_size, scenario_id=scenario_id)
 
         scenario = Scenario(dt=g_config.time_step_size, scenario_id=scenario_id, location=location)
 

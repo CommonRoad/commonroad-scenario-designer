@@ -1,10 +1,15 @@
 from typing import List, Set, Tuple, Union
 
 import numpy as np
-
-from commonroad.scenario.intersection import Intersection
-from commonroad.scenario.intersection import IncomingGroup
-from commonroad.scenario.lanelet import RoadUser, LaneletNetwork, Lanelet, LineMarking, LaneletType, StopLine
+from commonroad.scenario.intersection import IncomingGroup, Intersection
+from commonroad.scenario.lanelet import (
+    Lanelet,
+    LaneletNetwork,
+    LaneletType,
+    LineMarking,
+    RoadUser,
+    StopLine,
+)
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_light import (
     TrafficLight,
@@ -896,9 +901,15 @@ class MapCreator:
             left = {outgoing_left[n]}
             straight = {outgoing_straight[n]}
             incoming_id = incoming_ids[n]
-            map_incoming.append(IncomingGroup(incoming_id, incoming_lanelets=inc,
-                                outgoing_right=right, outgoing_straight=straight,
-                                outgoing_left=left))
+            map_incoming.append(
+                IncomingGroup(
+                    incoming_id,
+                    incoming_lanelets=inc,
+                    outgoing_right=right,
+                    outgoing_straight=straight,
+                    outgoing_left=left,
+                )
+            )
         intersection_id = scenario.generate_object_id()
         intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
 
@@ -1236,9 +1247,15 @@ class MapCreator:
             left = {outgoing_left[n]} if outgoing_left[n] is not None else set()
             straight = {outgoing_straight[n]} if outgoing_straight[n] is not None else set()
             incoming_id = incoming_ids[n]
-            map_incoming.append(IncomingGroup(incoming_id, incoming_lanelets=inc,
-                                outgoing_right=right, outgoing_straight=straight,
-                                outgoing_left=left))
+            map_incoming.append(
+                IncomingGroup(
+                    incoming_id,
+                    incoming_lanelets=inc,
+                    outgoing_right=right,
+                    outgoing_straight=straight,
+                    outgoing_left=left,
+                )
+            )
 
         intersection_id = scenario.generate_object_id()
         intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)

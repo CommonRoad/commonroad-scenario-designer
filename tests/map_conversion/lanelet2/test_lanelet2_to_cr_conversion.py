@@ -2,13 +2,11 @@ import os
 import time
 import unittest
 
-from commonroad.common.util import FileFormat
-from lxml import etree  # type: ignore
-
 from commonroad.common.file_writer import (  # type: ignore
     CommonRoadFileWriter,
     OverwriteExistingFile,
 )
+from commonroad.common.util import FileFormat
 from commonroad.planning.planning_problem import PlanningProblemSet  # type: ignore
 from commonroad.scenario.scenario import Scenario, Tag  # type: ignore
 from lxml import etree  # type: ignore
@@ -80,19 +78,26 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         xml_output_name = file_name
         translated = "" if not translate else "_translated"
 
-        cr_file_path = os.path.dirname(os.path.realpath(__file__)) + f"/../test_maps/lanelet2/{xml_output_name}" \
-                                                                     f"{translated}.xml"
-        with open(cr_file_path, "r", ) as fh:
+        cr_file_path = (
+            os.path.dirname(os.path.realpath(__file__)) + f"/../test_maps/lanelet2/{xml_output_name}"
+            f"{translated}.xml"
+        )
+        with open(
+            cr_file_path,
+            "r",
+        ) as fh:
             parser = etree.XMLParser(remove_blank_text=True)
             tree_import = etree.parse(fh, parser=parser).getroot()
-            writer = CommonRoadFileWriter(scenario=self.load_and_convert(file_name, translate=translate,
-                                                                         file_path=file_path),
-                                          planning_problem_set=PlanningProblemSet(), author="", affiliation="",
-                                          source="CommonRoad Scenario Designer", tags={Tag.URBAN, Tag.HIGHWAY},
-                                          file_format=FileFormat.XML)
-            writer.write_to_file(
-                    get_tmp_dir() + xml_output_name
-                    + translated + ".xml", OverwriteExistingFile.ALWAYS)
+            writer = CommonRoadFileWriter(
+                scenario=self.load_and_convert(file_name, translate=translate, file_path=file_path),
+                planning_problem_set=PlanningProblemSet(),
+                author="",
+                affiliation="",
+                source="CommonRoad Scenario Designer",
+                tags={Tag.URBAN, Tag.HIGHWAY},
+                file_format=FileFormat.XML,
+            )
+            writer.write_to_file(get_tmp_dir() + xml_output_name + translated + ".xml", OverwriteExistingFile.ALWAYS)
 
             # set same date so this won't change the comparison
             date = time.strftime("%Y-%m-%d", time.localtime())

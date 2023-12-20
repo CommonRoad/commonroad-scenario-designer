@@ -85,9 +85,12 @@ def execute_menubar_test(window):
 def execute_toolbar_test(window):
     # action_new
     toolbar_wrapper_action_new_successful = False
-    scenario = Scenario(0.1,
-                        file_information=FileInformation(affiliation="Technical University of Munich",
-                                                         source="CommonRoad Scenario Designer"))
+    scenario = Scenario(
+        0.1,
+        file_information=FileInformation(
+            affiliation="Technical University of Munich", source="CommonRoad Scenario Designer"
+        ),
+    )
     net = LaneletNetwork()
     scenario.replace_lanelet_network(net)
     scenario_in_app = None
@@ -151,8 +154,12 @@ def execute_toolbar_test(window):
 
 def execute_scenario_tests(window):
     # Tests for adding a Lanelet to a Scenario
-    scenario = Scenario(0.1, file_information=FileInformation(affiliation="Technical University of Munich",
-                                                              source="CommonRoad Scenario Designer"))
+    scenario = Scenario(
+        0.1,
+        file_information=FileInformation(
+            affiliation="Technical University of Munich", source="CommonRoad Scenario Designer"
+        ),
+    )
     net = LaneletNetwork()
     scenario.replace_lanelet_network(net)
     lanelet_start_pos_x = 0.0

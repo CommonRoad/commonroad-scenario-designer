@@ -2,7 +2,11 @@ import unittest
 from typing import List
 
 import numpy as np
-from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
+from commonroad.scenario.intersection import (
+    IncomingGroup,
+    Intersection,
+    IntersectionIncomingElement,
+)
 from commonroad.scenario.lanelet import LaneletNetwork, LaneletType, StopLine
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
@@ -10,17 +14,6 @@ from pyproj.transformer import CRS, Transformer
 
 import crdesigner.map_conversion.common.conversion_lanelet_network
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
-from commonroad.scenario.lanelet import LaneletNetwork, StopLine
-from commonroad.scenario.traffic_light import TrafficLight
-from commonroad.scenario.traffic_sign import TrafficSign
-from commonroad.scenario.intersection import Intersection, IncomingGroup
-from commonroad.scenario.lanelet import LaneletType
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import \
-    ParametricLane, ParametricLaneGroup
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLaneBorderGroup, \
-    Border
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
-from typing import List
 from crdesigner.map_conversion.common.conversion_lanelet_network import (
     ConversionLaneletNetwork,
     _JoinSplitPair,
@@ -72,8 +65,9 @@ class TestConversionLanelet(unittest.TestCase):
         ids_assigned = {"69.0.-1.-1": 5, "89.0.4.-1": 6, "71.0.1.-1": 7, "71.0.-3.-1": 8}
         old_lanelet_id = "71.0.-3.-1"
         true_new_id = ids_assigned[old_lanelet_id]
-        self.assertEqual(true_new_id, crdesigner.map_conversion.common
-                         .utils.convert_to_new_lanelet_id(old_lanelet_id, ids_assigned))
+        self.assertEqual(
+            true_new_id, crdesigner.map_conversion.common.utils.convert_to_new_lanelet_id(old_lanelet_id, ids_assigned)
+        )
 
     def test_init(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
@@ -987,7 +981,15 @@ class TestJointSplitTarget(unittest.TestCase):
         plane_group = ParametricLaneGroup()
         plane_group._add_geo_length(100, False)
         reference_plan_view = PlanView()
-        reference_plan_view.add_line(np.ndarray([2, ]), 0.5, 100)
+        reference_plan_view.add_line(
+            np.ndarray(
+                [
+                    2,
+                ]
+            ),
+            0.5,
+            100,
+        )
         inner_border = Border()
         inner_border.reference = reference_plan_view
         inner_border.width_coefficients.append([0, 0, 0, 0])

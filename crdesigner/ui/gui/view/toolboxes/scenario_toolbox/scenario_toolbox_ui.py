@@ -1,8 +1,10 @@
 import math
 from typing import Tuple
 
+from commonroad.common.common_scenario import TimeOfDay, Underground, Weather
 from commonroad.scenario.scenario import Tag, TimeOfDay, Underground, Weather
 from commonroad.scenario.state import InitialState
+from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
 from pyparsing import Literal
 from PyQt6 import QtCore
@@ -26,9 +28,6 @@ from PyQt6.QtWidgets import (
 )
 
 from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox, Toolbox
-from commonroad.common.common_scenario import TimeOfDay, Weather, Underground
-from commonroad.scenario.scenario import Tag
-from commonroad.scenario.traffic_sign import *
 
 
 class ScenarioToolboxUI(Toolbox):

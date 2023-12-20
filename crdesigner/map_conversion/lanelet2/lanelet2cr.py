@@ -3,6 +3,7 @@ from collections import defaultdict
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
+from commonroad.common.common_scenario import GeoTransformation, Location
 from commonroad.scenario.lanelet import (
     Lanelet,
     LaneletNetwork,
@@ -32,7 +33,7 @@ from commonroad.scenario.traffic_sign import (
 )
 from pyproj import CRS, Transformer
 from shapely.geometry import LineString  # type: ignore
-from commonroad.common.common_scenario import Location, GeoTransformation
+
 from crdesigner.config.general_config import GeneralConfig, general_config
 from crdesigner.config.lanelet2_config import Lanelet2Config, lanelet2_config
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
@@ -283,10 +284,14 @@ class Lanelet2CRConverter:
             self.origin_utm = (0, 0)
 
         # create CR scenario object
-        scenario_id = ScenarioID(country_id=self._cr_config.country_id,
-                                 map_name=self._cr_config.map_name, map_id=self._cr_config.map_id)
-        scenario = Scenario(dt=self._cr_config.time_step_size, scenario_id=scenario_id,
-            location=Location(gps_latitude=origin_lat, gps_longitude=origin_lon),)
+        scenario_id = ScenarioID(
+            country_id=self._cr_config.country_id, map_name=self._cr_config.map_name, map_id=self._cr_config.map_id
+        )
+        scenario = Scenario(
+            dt=self._cr_config.time_step_size,
+            scenario_id=scenario_id,
+            location=Location(gps_latitude=origin_lat, gps_longitude=origin_lon),
+        )
 
         # add GeoTransformation
         geo_transformation = GeoTransformation()
@@ -296,8 +301,9 @@ class Lanelet2CRConverter:
         geo_transformation.y_translation = self.origin_utm[1]
 
         self.lanelet_network = ConversionLaneletNetwork()
-        self.lanelet_network.location = Location(gps_latitude=origin_lat, gps_longitude=origin_lon,
-                                                 geo_transformation=geo_transformation)
+        self.lanelet_network.location = Location(
+            gps_latitude=origin_lat, gps_longitude=origin_lon, geo_transformation=geo_transformation
+        )
 
         speed_limits = {}
         speed_limit_lanelets = {}  # type: ignore

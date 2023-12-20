@@ -3,14 +3,12 @@ import os
 import sys
 import unittest
 
-from commonroad.scenario.lanelet import StopLine, LineMarking, Lanelet, LaneletNetwork
-from commonroad.scenario.traffic_sign import *
-from commonroad.common.common_scenario import Location, GeoTransformation
-from commonroad.scenario.scenario import TrafficSign
 import numpy as np
+from commonroad.common.common_scenario import GeoTransformation, Location
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork, LineMarking, StopLine
-from commonroad.scenario.scenario import GeoTransformation, Location
+from commonroad.scenario.scenario import GeoTransformation, Location, TrafficSign
 from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.traffic_sign import (
     TrafficSign,
     TrafficSignIDGermany,
@@ -130,9 +128,14 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         # test the scenario values given in the constructor
         self.assertEqual(scenario.dt, 0.1)
-        self.assertEqual(scenario.lanelet_network.location,
-                         Location(gps_latitude=origin_lat, gps_longitude=origin_lon,
-                                  geo_transformation=GeoTransformation(geo_reference=lanelet2_config.proj_string_l2)))
+        self.assertEqual(
+            scenario.lanelet_network.location,
+            Location(
+                gps_latitude=origin_lat,
+                gps_longitude=origin_lon,
+                geo_transformation=GeoTransformation(geo_reference=lanelet2_config.proj_string_l2),
+            ),
+        )
 
         # test the class of the lanelet network
         self.assertEqual(l2cr.lanelet_network.__class__, LaneletNetwork)

@@ -3,13 +3,13 @@ import warnings
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
-from commonroad.common.common_lanelet import LineMarking, LaneletType
-from pyproj import CRS, Transformer
+from commonroad.common.common_lanelet import LaneletType, LineMarking
+from commonroad.common.common_scenario import Location
 from commonroad.scenario.lanelet import Lanelet
+from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
-from commonroad.scenario.scenario import Scenario
-from commonroad.common.common_scenario import Location
+from pyproj import CRS, Transformer
 
 from crdesigner.config.lanelet2_config import Lanelet2Config, lanelet2_config
 from crdesigner.map_conversion.common.utils import generate_unique_id

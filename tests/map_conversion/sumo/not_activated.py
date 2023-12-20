@@ -86,14 +86,19 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
         self.assertIsNotNone(simulated_scenario)
 
         # write simulated scenario to disk
-        CommonRoadFileWriter(simulated_scenario, None, author=self.scenario.file_information.author,
-                             affiliation=self.scenario.file_information.affiliation,
-                             source=self.scenario.file_information.source,
-                             tags=self.scenario.tags,
-                             location=self.scenario.lanelet_network.location,
-                             file_format=FileFormat.XML).write_scenario_to_file(
-                             os.path.join(os.path.dirname(self.path), self.scenario_name + ".simulated.xml"),
-                             overwrite_existing_file=OverwriteExistingFile.ALWAYS)
+        CommonRoadFileWriter(
+            simulated_scenario,
+            None,
+            author=self.scenario.file_information.author,
+            affiliation=self.scenario.file_information.affiliation,
+            source=self.scenario.file_information.source,
+            tags=self.scenario.tags,
+            location=self.scenario.lanelet_network.location,
+            file_format=FileFormat.XML,
+        ).write_scenario_to_file(
+            os.path.join(os.path.dirname(self.path), self.scenario_name + ".simulated.xml"),
+            overwrite_existing_file=OverwriteExistingFile.ALWAYS,
+        )
         return f.getvalue()
 
     @staticmethod

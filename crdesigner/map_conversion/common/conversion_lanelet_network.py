@@ -8,10 +8,13 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 import shapely
-from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
+from commonroad.scenario.intersection import (
+    IncomingGroup,
+    Intersection,
+    IntersectionIncomingElement,
+)
 from commonroad.scenario.lanelet import LaneletNetwork, StopLine
-from commonroad.scenario.intersection import IncomingGroup, Intersection
-from commonroad.scenario.traffic_light import TrafficLightDirection, TrafficLight
+from commonroad.scenario.traffic_light import TrafficLight, TrafficLightDirection
 from commonroad.scenario.traffic_sign import TrafficSign
 
 from crdesigner.config.opendrive_config import OpenDriveConfig, open_drive_config
@@ -109,25 +112,13 @@ class ConversionLaneletNetwork(LaneletNetwork):
         for lanelet in self.lanelets:
             lanelet.description = lanelet.lanelet_id
             self.remove_lanelet(str(lanelet.lanelet_id))
-            lanelet.lanelet_id = convert_to_new_lanelet_id(
-                str(lanelet.lanelet_id), self._old_lanelet_ids
-            )
-            lanelet.predecessor = [
-                convert_to_new_lanelet_id(x, self._old_lanelet_ids)
-                for x in lanelet.predecessor
-            ]
-            lanelet.successor = [
-                convert_to_new_lanelet_id(x, self._old_lanelet_ids)
-                for x in lanelet.successor
-            ]
+            lanelet.lanelet_id = convert_to_new_lanelet_id(str(lanelet.lanelet_id), self._old_lanelet_ids)
+            lanelet.predecessor = [convert_to_new_lanelet_id(x, self._old_lanelet_ids) for x in lanelet.predecessor]
+            lanelet.successor = [convert_to_new_lanelet_id(x, self._old_lanelet_ids) for x in lanelet.successor]
             if lanelet.adj_left is not None:
-                lanelet.adj_left = convert_to_new_lanelet_id(
-                    str(lanelet.adj_left), self._old_lanelet_ids
-                )
+                lanelet.adj_left = convert_to_new_lanelet_id(str(lanelet.adj_left), self._old_lanelet_ids)
             if lanelet.adj_right is not None:
-                lanelet.adj_right = convert_to_new_lanelet_id(
-                    str(lanelet.adj_right), self._old_lanelet_ids
-                )
+                lanelet.adj_right = convert_to_new_lanelet_id(str(lanelet.adj_right), self._old_lanelet_ids)
             self.add_lanelet(lanelet)
 
         new_lanelet_ids_assigned = {}
@@ -262,9 +253,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
             # each reference to lanelet_2 should point to lanelet_id
             # of new_lanelet instead
-            self.update_lanelet_id_references(
-                str(lanelet_2.lanelet_id), str(lanelet_1.lanelet_id)
-            )
+            self.update_lanelet_id_references(str(lanelet_2.lanelet_id), str(lanelet_1.lanelet_id))
             # update dict to show which lanelet_id changed to which
             new_lanelet_ids[pair[1]] = pair[0]
 
@@ -579,11 +568,13 @@ class ConversionLaneletNetwork(LaneletNetwork):
                         successors.append(successor)
                     else:
                         warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
-            intersection_incoming_lane = IncomingGroup(generate_unique_id(),
-                                                       incoming_lanelets=set(incoming_lanelet_set),
-                                                       outgoing_right=successor_right,
-                                                       outgoing_straight=successor_straight,
-                                                       outgoing_left=successor_left)
+            intersection_incoming_lane = IncomingGroup(
+                generate_unique_id(),
+                incoming_lanelets=set(incoming_lanelet_set),
+                outgoing_right=successor_right,
+                outgoing_straight=successor_straight,
+                outgoing_left=successor_left,
+            )
 
             intersection_incoming_lanes.append(intersection_incoming_lane)
             # TODO: Add crossings to intersections

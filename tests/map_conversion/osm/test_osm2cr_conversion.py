@@ -1,14 +1,11 @@
 import math
 import os
 import unittest
-import math
-
-from commonroad.common.util import FileFormat
-from lxml import etree
 from typing import Tuple
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+from commonroad.common.util import FileFormat
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Scenario
 from lxml import etree
@@ -92,9 +89,8 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
     ):
         """Test if created CommonRoad scenario validates"""
         fw = CommonRoadFileWriter(
-            scenario=cr_scenario,
-            planning_problem_set=cr_planning_problem,
-            file_format=FileFormat.XML)
+            scenario=cr_scenario, planning_problem_set=cr_planning_problem, file_format=FileFormat.XML
+        )
         fw.write_to_file(
             filename=self.out_path + "/" + osm_file_name + "_written.xml",
             overwrite_existing_file=OverwriteExistingFile.ALWAYS,

@@ -7,14 +7,14 @@ from commonroad.common.util import Interval
 from commonroad.geometry.shape import Circle, Rectangle
 from commonroad.planning.goal import GoalRegion
 from commonroad.planning.planning_problem import PlanningProblem, PlanningProblemSet
-from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
+from commonroad.scenario.intersection import (
+    IncomingGroup,
+    Intersection,
+    IntersectionIncomingElement,
+)
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.obstacle import Obstacle
 from commonroad.scenario.scenario import Scenario, ScenarioID
-from commonroad.scenario.traffic_light import TrafficLight
-from commonroad.scenario.traffic_sign import TrafficSign
-from commonroad.scenario.intersection import Intersection, IncomingGroup
-from commonroad.planning.planning_problem import PlanningProblem, PlanningProblemSet
 from commonroad.scenario.state import CustomState, InitialState
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
@@ -322,12 +322,14 @@ class IntermediateFormat:
                 incoming_lanelets = set(incoming["incomingLanelet"])
                 successors_right = set(incoming["right"])
                 successors_left = set(incoming["left"])
-                successors_straight = set(incoming['through']).union(set(incoming['none']))
-                incoming_element = IncomingGroup(incoming_ids[index],
-                                                 incoming_lanelets=incoming_lanelets,
-                                                 outgoing_right=successors_right,
-                                                 outgoing_straight=successors_straight,
-                                                 outgoing_left=successors_left)
+                successors_straight = set(incoming["through"]).union(set(incoming["none"]))
+                incoming_element = IncomingGroup(
+                    incoming_ids[index],
+                    incoming_lanelets=incoming_lanelets,
+                    outgoing_right=successors_right,
+                    outgoing_straight=successors_straight,
+                    outgoing_left=successors_left,
+                )
                 incoming_elements.append(incoming_element)
                 index += 1
             intersections_cr.append(Intersection(idgenerator.get_id(), incoming_elements))

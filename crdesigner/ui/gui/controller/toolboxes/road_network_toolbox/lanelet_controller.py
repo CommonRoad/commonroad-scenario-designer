@@ -3,6 +3,7 @@ import math
 from typing import List, Union
 
 import numpy as np
+from commonroad.scenario.intersection import IncomingGroup, Intersection
 from commonroad.scenario.lanelet import (
     Lanelet,
     LaneletType,
@@ -10,21 +11,18 @@ from commonroad.scenario.lanelet import (
     RoadUser,
     StopLine,
 )
+from commonroad.scenario.scenario import Scenario
 from numpy import ndarray
 
 from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-import math
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.lanelet_ui import (
     AddLaneletUI,
 )
-from commonroad.scenario.lanelet import LineMarking, LaneletType, RoadUser, StopLine, Lanelet
-from commonroad.scenario.intersection import IncomingGroup, Intersection
-from commonroad.scenario.scenario import Scenario
-
-from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
-    RoadNetworkToolboxUI
+from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import (
+    RoadNetworkToolboxUI,
+)
 
 
 class AddLaneletController:

@@ -2,8 +2,8 @@ import copy
 import math
 import warnings
 from typing import List, Union
-import numpy as np
 
+import numpy as np
 import PyQt6
 from commonroad.geometry.shape import Circle, Rectangle
 from commonroad.planning.planning_problem import PlanningProblem
@@ -55,8 +55,15 @@ class DynamicCanvasController(FigureCanvas):
     control_key = False
     show_aerial = False
 
-    def __init__(self, parent=None, scenario_model: Scenario = None, width: float = 5, height: float = 5,
-                 dpi: int = 100, animated_viewer=None):
+    def __init__(
+        self,
+        parent=None,
+        scenario_model: Scenario = None,
+        width: float = 5,
+        height: float = 5,
+        dpi: int = 100,
+        animated_viewer=None,
+    ):
         self.scenario_model = scenario_model
         self.image_limits = None
         self.current_aerial_image = None
@@ -1467,8 +1474,13 @@ class DynamicCanvasController(FigureCanvas):
         self.draw_curved_lanelet()
         self.motion_notify_event_cid = self.mpl_connect("motion_notify_event", self.move_cursor_curved_lanelet)
 
-    def calc_angle(self, left_vertice_point_one: np.ndarray, right_vertice_point_one: np.ndarray,
-                   left_vertice_point_two: np.ndarray, right_vertice_point_two: np.ndarray) -> float:
+    def calc_angle(
+        self,
+        left_vertice_point_one: np.ndarray,
+        right_vertice_point_one: np.ndarray,
+        left_vertice_point_two: np.ndarray,
+        right_vertice_point_two: np.ndarray,
+    ) -> float:
         """
         Calculates the angle between two given lines
 
