@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import Union
 
 
@@ -25,7 +26,7 @@ class RoadType:
         "townExpressway",
         "townLocal",
         "townPlayStreet",
-        "townPrivate"
+        "townPrivate",
     ]
 
     def __init__(self, s_pos=None, use_type=None, speed=None):

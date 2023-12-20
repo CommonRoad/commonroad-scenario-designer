@@ -1,5 +1,12 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLateralProfile import *
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLateralProfile import (
+    Crossfall,
+    LateralProfile,
+    Shape,
+    Superelevation,
+)
+
 
 class TestLateralProfile(unittest.TestCase):
     def test_initialize_shape(self):

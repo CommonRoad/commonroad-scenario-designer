@@ -1,6 +1,18 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import *
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import *
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+    Lane,
+    LaneBorder,
+    LaneLink,
+    LaneOffset,
+    Lanes,
+    LaneSection,
+    LaneWidth,
+    LeftLanes,
+    RightLanes,
+    RoadMark,
+)
 
 
 class TestRoadLanes(unittest.TestCase):
@@ -228,5 +240,5 @@ class TestRoadLanes(unittest.TestCase):
         self.assertEqual("bold", road_mark.weight)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

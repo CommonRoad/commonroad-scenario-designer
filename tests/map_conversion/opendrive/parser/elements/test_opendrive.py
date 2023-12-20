@@ -1,6 +1,12 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import *
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import *
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import (
+    Junction,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import (
+    Header,
+    OpenDrive,
+)
 
 
 class TestOpenDrive(unittest.TestCase):
@@ -14,8 +20,17 @@ class TestOpenDrive(unittest.TestCase):
         south = "0.0000000000000000e+00"
         east = "0.0000000000000000e+00"
         west = "0.0000000000000000e+00"
-        header = Header(rev_major=revMajor, rev_minor=revMinor, name=name, version=version, date=date,
-                        north=north, south=south, east=east, west=west)
+        header = Header(
+            rev_major=revMajor,
+            rev_minor=revMinor,
+            name=name,
+            version=version,
+            date=date,
+            north=north,
+            south=south,
+            east=east,
+            west=west,
+        )
 
         self.assertEqual(revMajor, header.revMajor)
         self.assertEqual(revMinor, header.revMinor)
@@ -30,8 +45,18 @@ class TestOpenDrive(unittest.TestCase):
         self.assertEqual(None, header.geo_reference)
 
         vendor = "test"
-        header1 = Header(rev_major=revMajor, rev_minor=revMinor, name=name, version=version, date=date, north=north,
-                         south=south, east=east, west=west, vendor=vendor)
+        header1 = Header(
+            rev_major=revMajor,
+            rev_minor=revMinor,
+            name=name,
+            version=version,
+            date=date,
+            north=north,
+            south=south,
+            east=east,
+            west=west,
+            vendor=vendor,
+        )
         self.assertEqual(vendor, header1.vendor)
 
     def test_initialize_openDrive(self):
@@ -45,8 +70,17 @@ class TestOpenDrive(unittest.TestCase):
         south = "0.0000000000000000e+00"
         east = "0.0000000000000000e+00"
         west = "0.0000000000000000e+00"
-        header = Header(rev_major=revMajor, rev_minor=revMinor, name=name, version=version, date=date, north=north,
-                        south=south, east=east, west=west)
+        header = Header(
+            rev_major=revMajor,
+            rev_minor=revMinor,
+            name=name,
+            version=version,
+            date=date,
+            north=north,
+            south=south,
+            east=east,
+            west=west,
+        )
         # TODO define road elements
         # TODO define controller elements -> no class/file available yet
         # define junction elements
@@ -69,5 +103,5 @@ class TestOpenDrive(unittest.TestCase):
         self.assertEqual(junction2, opendrive.getJunction(3245000))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

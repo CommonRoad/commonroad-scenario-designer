@@ -2,17 +2,16 @@
 Sublayered Graph class
 """
 
-from typing import List, Set, Tuple, Optional
+from typing import List, Optional, Set, Tuple
 
 from ._graph import Graph
-from ._graph_node import GraphNode
 from ._graph_edge import GraphEdge
+from ._graph_node import GraphNode
 from ._graph_traffic_light import GraphTrafficLight
 from ._graph_traffic_sign import GraphTrafficSign
 
 
 class SublayeredGraph(Graph):
-
     def __init__(
         self,
         nodes: Set[GraphNode],
@@ -21,11 +20,9 @@ class SublayeredGraph(Graph):
         bounds: Tuple[float, float, float, float],
         traffic_signs: List[GraphTrafficSign],
         traffic_lights: List[GraphTrafficLight],
-        sublayer_graph: Graph
+        sublayer_graph: Graph,
     ):
-        super().__init__(
-            nodes, edges, center_point, bounds, traffic_signs, traffic_lights
-        )
+        super().__init__(nodes, edges, center_point, bounds, traffic_signs, traffic_lights)
         # graph that is connected by crossings only (e.g. pedestrian path)
         self.sublayer_graph = sublayer_graph
         self.apply_on_sublayer = True
@@ -56,8 +53,7 @@ class SublayeredGraph(Graph):
         if self.apply_on_sublayer:
             self.sublayer_graph.create_lane_link_segments()
 
-    def create_lane_bounds(
-            self, interpolation_scale: Optional[float] = None) -> None:
+    def create_lane_bounds(self, interpolation_scale: Optional[float] = None) -> None:
         super().create_lane_bounds(interpolation_scale)
         if self.apply_on_sublayer:
             self.sublayer_graph.create_lane_bounds(interpolation_scale)

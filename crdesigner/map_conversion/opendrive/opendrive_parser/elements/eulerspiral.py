@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from typing import Tuple
+
 import numpy as np
 from scipy import special
 
@@ -41,8 +43,9 @@ class EulerSpiral:
             return EulerSpiral(0)
         return EulerSpiral(1 * (curv_end - curv_start) / length)
 
-    def calc(self, s: float, x0: float = 0, y0: float = 0, kappa0: float = 0, theta0: float = 0)\
-            -> Tuple[float, float, float, Tuple[float, float]]:
+    def calc(
+        self, s: float, x0: float = 0, y0: float = 0, kappa0: float = 0, theta0: float = 0
+    ) -> Tuple[float, float, float, Tuple[float, float]]:
         """
         Calculates x and y position, angle of the tangent and the curvature at position s.
         The position is described in complex representation with x being the real part of the
@@ -67,16 +70,14 @@ class EulerSpiral:
 
         elif self._gamma == 0 and kappa0 != 0:
             # Arc, (1/kappa) = radius
-            Cs = C0 + np.exp(1j * theta0) / kappa0 * (
-                np.sin(kappa0 * s) + 1j * (1 - np.cos(kappa0 * s))
-            )
+            Cs = C0 + np.exp(1j * theta0) / kappa0 * (np.sin(kappa0 * s) + 1j * (1 - np.cos(kappa0 * s)))
 
         else:
             # Fresnel integrals
             Cs = self._calc_fresnel_integral(s, kappa0, theta0, C0)
 
         # Tangent at each point
-        theta = self._gamma * s ** 2 / 2 + kappa0 * s + theta0
+        theta = self._gamma * s**2 / 2 + kappa0 * s + theta0
 
         return Cs.real, Cs.imag, theta, self.curvature(s, kappa0)
 
@@ -90,15 +91,11 @@ class EulerSpiral:
         :param C0: initial x and y position represented in complex form
         :return: new x and y position represented in complex form (x + 1j * y)
         """
-        Sa, Ca = special.fresnel(
-            (kappa0 + self._gamma * s) / np.sqrt(np.pi * np.abs(self._gamma))
-        )
+        Sa, Ca = special.fresnel((kappa0 + self._gamma * s) / np.sqrt(np.pi * np.abs(self._gamma)))
         Sb, Cb = special.fresnel(kappa0 / np.sqrt(np.pi * np.abs(self._gamma)))
 
         # Euler Spiral
-        Cs1 = np.sqrt(np.pi / np.abs(self._gamma)) * np.exp(
-            1j * (theta0 - kappa0 ** 2 / 2 / self._gamma)
-        )
+        Cs1 = np.sqrt(np.pi / np.abs(self._gamma)) * np.exp(1j * (theta0 - kappa0**2 / 2 / self._gamma))
         Cs2 = np.sign(self._gamma) * (Ca - Cb) + 1j * Sa - 1j * Sb
 
         Cs = C0 + Cs1 * Cs2

@@ -1,11 +1,11 @@
-import unittest
 import os
+import unittest
 from pathlib import Path
 
 
 class MapConversionExampleTests(unittest.TestCase):
     # change the directory to match example scripts due to contained paths
-    os.chdir(Path(__file__).parent.parent.parent/"tutorials/conversion_examples")
+    os.chdir(Path(__file__).parent.parent.parent / "tutorials/conversion_examples")
 
     def test_example_lanelet2_to_commonroad(self):
         # remove the file if it has already been created
@@ -16,8 +16,11 @@ class MapConversionExampleTests(unittest.TestCase):
         self.assertFalse(Path.exists(Path("./example_files/lanelet2/merging_lanelets_utm.xml")))
 
         # call the execution of the example script
-        exec(open(Path(__file__).parent.parent.parent/"tutorials/conversion_examples/"
-                                                      "example_lanelet2_to_commonroad.py").read())
+        exec(
+            open(
+                Path(__file__).parent.parent.parent / "tutorials/conversion_examples/example_lanelet2_to_commonroad.py"
+            ).read()
+        )
 
         # check if the file has been created
         self.assertTrue(Path.exists(Path("./example_files/lanelet2/merging_lanelets_utm.xml")))

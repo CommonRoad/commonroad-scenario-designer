@@ -5,12 +5,16 @@ This module contains the GUI of the osm -> CR converter
 
 import os
 
-from PyQt6.QtWidgets import QMainWindow
 from matplotlib.pyplot import close
+from PyQt6.QtWidgets import QMainWindow
 
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations import export
-from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crdesigner.ui.gui.utilities.converter_modules.converter_interface import ConverterInterface
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph import (
+    Graph,
+)
+from crdesigner.ui.gui.utilities.converter_modules.converter_interface import (
+    ConverterInterface,
+)
 
 
 class OSMInterface(ConverterInterface):
@@ -30,7 +34,7 @@ class OSMInterface(ConverterInterface):
         self.main_window.show()
 
     # TODO: CONTROLLER
-    def edge_edit_embedding(self, graph: rg.Graph):
+    def edge_edit_embedding(self, graph: Graph):
         """
         sets edge edit embedding as main window
 
@@ -43,7 +47,7 @@ class OSMInterface(ConverterInterface):
             print("no graph loaded")
 
     # TODO: CONTROLLER
-    def lane_link_embedding(self, graph: rg.Graph):
+    def lane_link_embedding(self, graph: Graph):
         """
         sets lane link embedding as main window
 
@@ -55,7 +59,7 @@ class OSMInterface(ConverterInterface):
 
     # TODO: CONTROLLER
     def export(self, graph):
-        """ converts a graph to a scenario and loads it into the CrSD """
+        """converts a graph to a scenario and loads it into the CrSD"""
         scenario = export.convert_to_scenario(graph)
         filename = os.path.basename("new_scenario")
         self.cr_designer.open_scenario(scenario, filename)
@@ -74,7 +78,3 @@ class OSMInterface(ConverterInterface):
             close(self.lane_link_window.gui_plot.fig)
         self.edge_edit_window = None
         self.lane_link_window = None
-
-    # TODO: VIEW
-    def show_settings(self):
-        self.settings = settings.OSMSettings(self, self.main_window.close)

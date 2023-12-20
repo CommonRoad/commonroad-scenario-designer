@@ -2,13 +2,13 @@
 This module holds all interaction between this application and the ***CommonRoad python tools**.
 It allows to export a scenario to CR or plot a CR scenario.
 """
+import logging
 from typing import List, Tuple
 
-import logging
 import numpy as np
 import utm
-from commonroad.common.util import FileFormat
 
+from commonroad.common.util import FileFormat
 from crdesigner.config.osm_config import osm_config as config
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format import \
@@ -25,8 +25,32 @@ from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.scenario import Scenario, Lanelet, Tag
 from commonroad.common.common_scenario import Location
 
+from crdesigner.config.osm_config import osm_config as config
+from crdesigner.map_conversion.common import geometry
+from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.cleanup import (
+    sanitize,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph import (
+    Graph,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_lane import (
+    Lane,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._sublayered_graph import (
+    SublayeredGraph,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format._intermediate_format import (
+    IntermediateFormat,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.utility.geonamesID import (
+    get_geonamesID,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.utility.idgenerator import (
+    get_id,
+)
 
-def get_lanelet(lane: rg.Lane) -> Lanelet:
+
+def get_lanelet(lane: Lane) -> Lanelet:
     """
     converts a graph lane to a lanelet
 
@@ -86,7 +110,7 @@ def get_lanelet(lane: rg.Lane) -> Lanelet:
     return lanelet
 
 
-def get_lanelets(graph: rg.Graph) -> List[Lanelet]:
+def get_lanelets(graph: Graph) -> List[Lanelet]:
     """
     converts each lane in a graph to a lanelet and returns a list of all lanelets
 
@@ -143,11 +167,10 @@ def convert_coordinates_to_utm(scenario: Scenario, origin: np.ndarray) -> None:
 
 
 def create_scenario_intermediate(graph) -> Tuple[Scenario, IntermediateFormat]:
-    """ Convert Scenario from RoadGraph via IntermediateFormat """
+    """Convert Scenario from RoadGraph via IntermediateFormat"""
     interm = IntermediateFormat.extract_from_road_graph(graph)
-    if isinstance(graph, rg.SublayeredGraph):
-        interm_sublayer = IntermediateFormat.extract_from_road_graph(
-            graph.sublayer_graph)
+    if isinstance(graph, SublayeredGraph):
+        interm_sublayer = IntermediateFormat.extract_from_road_graph(graph.sublayer_graph)
         crossings = IntermediateFormat.get_lanelet_intersections(interm_sublayer, interm)
         interm_sublayer.intersections = list()
         interm_sublayer.traffic_signs = list()
@@ -160,10 +183,7 @@ def create_scenario_intermediate(graph) -> Tuple[Scenario, IntermediateFormat]:
     return scenario, interm
 
 
-def export(
-        graph: rg.Graph,
-        file_path=config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
-) -> None:
+def export(graph: Graph, file_path=config.SAVE_PATH + config.BENCHMARK_ID + ".xml") -> None:
     """
     converts a graph to a CR scenario and saves it to disk
 
@@ -205,7 +225,7 @@ def export(
     # file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
 
 
-def convert_to_scenario(graph: rg.Graph) -> Scenario:
+def convert_to_scenario(graph: Graph) -> Scenario:
     # scenario = create_scenario(graph)
     scenario, intermediate_format = create_scenario_intermediate(graph)
     # removing converting errors before writing to xml
@@ -234,30 +254,10 @@ def find_bounds(scenario: Scenario) -> List[float]:
     :param scenario: the scenario of which the bounds are found
     :return: list of bounds
     """
-    x_min = min(
-        [
-            min(point[0] for point in lanelet.center_vertices)
-            for lanelet in scenario.lanelet_network.lanelets
-        ]
-    )
-    x_max = max(
-        [
-            max(point[0] for point in lanelet.center_vertices)
-            for lanelet in scenario.lanelet_network.lanelets
-        ]
-    )
-    y_min = min(
-        [
-            min(point[1] for point in lanelet.center_vertices)
-            for lanelet in scenario.lanelet_network.lanelets
-        ]
-    )
-    y_max = max(
-        [
-            max(point[1] for point in lanelet.center_vertices)
-            for lanelet in scenario.lanelet_network.lanelets
-        ]
-    )
+    x_min = min([min(point[0] for point in lanelet.center_vertices) for lanelet in scenario.lanelet_network.lanelets])
+    x_max = max([max(point[0] for point in lanelet.center_vertices) for lanelet in scenario.lanelet_network.lanelets])
+    y_min = min([min(point[1] for point in lanelet.center_vertices) for lanelet in scenario.lanelet_network.lanelets])
+    y_max = max([max(point[1] for point in lanelet.center_vertices) for lanelet in scenario.lanelet_network.lanelets])
     return [x_min, x_max, y_min, y_max]
 
 
@@ -278,15 +278,22 @@ def view_xml(filename: str, ax=None) -> None:
         return
     limits = find_bounds(scenario)
 
-    draw_params = {'lanelet_network': {'draw_intersections': True, 'draw_traffic_signs_in_lanelet': True,
-                                       'draw_traffic_signs': True, 'draw_traffic_lights': True,
-                                       'intersection': {'draw_intersections': True},
-                                       'traffic_sign': {'draw_traffic_signs': True,
-                                                        'show_label': False,
-                                                        'show_traffic_signs': 'all',
-
-                                                        'scale_factor': 0.15}},
-                   'lanelet': {'show_label': False}}
+    draw_params = {
+        "lanelet_network": {
+            "draw_intersections": True,
+            "draw_traffic_signs_in_lanelet": True,
+            "draw_traffic_signs": True,
+            "draw_traffic_lights": True,
+            "intersection": {"draw_intersections": True},
+            "traffic_sign": {
+                "draw_traffic_signs": True,
+                "show_label": False,
+                "show_traffic_signs": "all",
+                "scale_factor": 0.15,
+            },
+        },
+        "lanelet": {"show_label": False},
+    }
     rnd = MPRenderer(plot_limits=limits, ax=ax, draw_params=draw_params)
     scenario.draw(rnd)
     rnd.render()

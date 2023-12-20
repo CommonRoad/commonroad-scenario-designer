@@ -1,4 +1,4 @@
-from typing import Set, List
+from typing import List, Set
 
 import numpy as np
 from commonroad.scenario.lanelet import Lanelet, StopLine

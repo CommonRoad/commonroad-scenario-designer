@@ -1,5 +1,8 @@
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road_record import RoadRecord
 import warnings
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road_record import (
+    RoadRecord,
+)
 
 
 class LateralProfile:
@@ -97,8 +100,10 @@ class Crossfall(RoadRecord):
     def __init__(self, *polynomial_coefficients: float, start_pos: float = None, side: str = None):
         super().__init__(*polynomial_coefficients, start_pos=start_pos)
         self.side = side
-        warnings.warn("Crossfalls are not an own element of OpenDRIVE anymore. They are defined within shapes!",
-                      DeprecationWarning)
+        warnings.warn(
+            "Crossfalls are not an own element of OpenDRIVE anymore. They are defined within shapes!",
+            DeprecationWarning,
+        )
 
     @property
     def side(self) -> str:
@@ -133,7 +138,12 @@ class Shape(RoadRecord):
     :ivar start_pos_t: t-coordinate of start position
     """
 
-    def __init__(self, *polynomial_coefficients: float, start_pos: float = None, start_pos_t: float = None, ):
+    def __init__(
+        self,
+        *polynomial_coefficients: float,
+        start_pos: float = None,
+        start_pos_t: float = None,
+    ):
         """
         Constructor of class shape.
 

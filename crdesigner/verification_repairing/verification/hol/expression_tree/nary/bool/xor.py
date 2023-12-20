@@ -1,8 +1,14 @@
 from typing import List
 
-from crdesigner.verification_repairing.verification.hol.expression_tree.expression import Expression
-from crdesigner.verification_repairing.verification.hol.expression_tree.nary.nary import Nary
-from crdesigner.verification_repairing.verification.hol.expression_tree.symbols import Symbol
+from crdesigner.verification_repairing.verification.hol.expression_tree.expression import (
+    Expression,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.nary.nary import (
+    Nary,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.symbols import (
+    Symbol,
+)
 
 
 class Xor(Nary):

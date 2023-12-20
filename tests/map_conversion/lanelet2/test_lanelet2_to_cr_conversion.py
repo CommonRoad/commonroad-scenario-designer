@@ -1,15 +1,19 @@
-import time
 import os
+import time
 import unittest
 
 from commonroad.common.util import FileFormat
 from lxml import etree  # type: ignore
 
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile  # type: ignore
+from commonroad.common.file_writer import (  # type: ignore
+    CommonRoadFileWriter,
+    OverwriteExistingFile,
+)
 from commonroad.planning.planning_problem import PlanningProblemSet  # type: ignore
-from commonroad.scenario.scenario import Tag, Scenario  # type: ignore
+from commonroad.scenario.scenario import Scenario, Tag  # type: ignore
+from lxml import etree  # type: ignore
 
-from crdesigner.config.gui_config import utm_default, pseudo_mercator
+from crdesigner.config.gui_config import pseudo_mercator, utm_default
 from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
@@ -30,8 +34,9 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         lanelet2_config.proj_string_l2 = pseudo_mercator
 
     @staticmethod
-    def load_and_convert(osm_file_name: str, translate: bool = False, proj_string: str = None,
-                         file_path: str = None) -> Scenario:
+    def load_and_convert(
+        osm_file_name: str, translate: bool = False, proj_string: str = None, file_path: str = None
+    ) -> Scenario:
         """Loads and converts osm file to a scenario
 
         :param osm_file_name: name of the osm file
@@ -46,15 +51,18 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         if not os.path.isdir(out_path):
             os.makedirs(out_path)
         else:
-            for (dir_path, _, filenames) in os.walk(out_path):
+            for dir_path, _, filenames in os.walk(out_path):
                 for file in filenames:
-                    if file.endswith('.xml'):
+                    if file.endswith(".xml"):
                         os.remove(os.path.join(dir_path, file))
 
         if file_path is None:
             file_path = os.path.dirname(os.path.realpath(__file__)) + f"/../test_maps/lanelet2/{osm_file_name}.osm"
 
-        with open(file_path, "r", ) as fh:
+        with open(
+            file_path,
+            "r",
+        ) as fh:
             osm = Lanelet2Parser(etree.parse(fh).getroot()).parse()
 
         if proj_string is not None:
@@ -129,8 +137,8 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         cr_scenario = self.load_and_convert(lanelet2_file_name, proj_string=proj_string)
         l2osm = CR2LaneletConverter()
         lanelet2 = l2osm(cr_scenario)
-        lanelet2_converted_file_name = f'{lanelet2_file_name}__converted'
-        lanelet2_converted_file_path = f'{get_tmp_dir()}{lanelet2_converted_file_name}.osm'
+        lanelet2_converted_file_name = f"{lanelet2_file_name}__converted"
+        lanelet2_converted_file_path = f"{get_tmp_dir()}{lanelet2_converted_file_name}.osm"
         etree.ElementTree(lanelet2).write(lanelet2_converted_file_path, pretty_print=True)
 
         self.assertTrue(self.compare_maps(lanelet2_file_name, file_path=lanelet2_converted_file_path))

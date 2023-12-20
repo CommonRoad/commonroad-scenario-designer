@@ -1,8 +1,8 @@
-import unittest
-import subprocess
-from pathlib import Path
-import time
 import os
+import subprocess
+import time
+import unittest
+from pathlib import Path
 
 
 class TestCommandLineInterface(unittest.TestCase):
@@ -47,11 +47,17 @@ class TestCommandLineInterface(unittest.TestCase):
         exists.unlink()
 
     def test_cr_to_lanelet(self):
-        subprocess.Popen(['crdesigner',
-                          '--input-file', os.path.dirname(os.path.realpath(__file__))
-                          + '/../map_conversion/test_maps/lanelet2/merging_lanelets_utm.xml',
-                          '--output-file', self.output_path + "/cr_lanelet_command_line.osm",
-                          'crlanelet2'])
+        subprocess.Popen(
+            [
+                "crdesigner",
+                "--input-file",
+                os.path.dirname(os.path.realpath(__file__))
+                + "/../map_conversion/test_maps/lanelet2/merging_lanelets_utm.xml",
+                "--output-file",
+                self.output_path + "/cr_lanelet_command_line.osm",
+                "crlanelet2",
+            ]
+        )
         time.sleep(5)
         exists = Path(self.output_path + "/cr_lanelet_command_line.osm")
         self.assertTrue(exists.is_file())
@@ -70,19 +76,17 @@ class TestCommandLineInterface(unittest.TestCase):
     #     self.assertTrue(exists.is_file())
 
     def test_gui(self):
-        process = subprocess.Popen(['crdesigner'])
+        process = subprocess.Popen(["crdesigner"])
         time.sleep(5)
         process.terminate()
-        process = subprocess.Popen(['crdesigner', 'gui'])
+        process = subprocess.Popen(["crdesigner", "gui"])
         time.sleep(5)
         process.terminate()
 
     def test_map_ver_scenario(self):
         path = Path(__file__).parent.parent / "map_verification/test_maps/paper_test_maps/DEU_Guetersloh-20_1_T-1.xml"
         path_repaired = path.parent / "DEU_Guetersloh-20_1_T-1-repaired.xml"
-        process = subprocess.Popen(['crdesigner',
-                                    '--input-file', str(path),
-                                   'verify-map'])
+        process = subprocess.Popen(["crdesigner", "--input-file", str(path), "verify-map"])
         time.sleep(15)
         process.terminate()
         self.assertTrue(path_repaired.exists())
@@ -93,10 +97,7 @@ class TestCommandLineInterface(unittest.TestCase):
         path_1 = path / "DEU_Guetersloh-20_1_T-1-repaired.xml"
         path_2 = path / "DEU_BadEssen-3_1_T-1-repaired.xml"
         path_3 = path / "DEU_Reutlingen-1_1_T-1-repaired.xml"
-        process = subprocess.Popen(
-                ['crdesigner',
-                 '--input-file', str(path),
-                 'verify-dir'])
+        process = subprocess.Popen(["crdesigner", "--input-file", str(path), "verify-dir"])
         time.sleep(30)
         process.terminate()
         self.assertTrue(path_1.exists())

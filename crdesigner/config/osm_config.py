@@ -1,4 +1,4 @@
-from crdesigner.config.config_base import BaseConfig, Attribute
+from crdesigner.config.config_base import Attribute, BaseConfig
 
 
 class OsmConfig(BaseConfig):
@@ -60,42 +60,128 @@ class OsmConfig(BaseConfig):
     # suitable types: 'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential',
     # 'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link', 'living_street', 'service'
     ACCEPTED_HIGHWAYS_MAINLAYER = Attribute(
-            {"motorway": True, "trunk": True, "primary": True, "secondary": True, "tertiary": True,
-             "unclassified": False, "residential": True, "motorway_link": True, "trunk_link": True,
-             "primary_link": True, "secondary_link": True, "tertiary_link": True, "living_street": True,
-             "service": False, "path": False, "footway": False, "cycleway": False}, "Accepted Highways Mainlayer")
+        {
+            "motorway": True,
+            "trunk": True,
+            "primary": True,
+            "secondary": True,
+            "tertiary": True,
+            "unclassified": False,
+            "residential": True,
+            "motorway_link": True,
+            "trunk_link": True,
+            "primary_link": True,
+            "secondary_link": True,
+            "tertiary_link": True,
+            "living_street": True,
+            "service": False,
+            "path": False,
+            "footway": False,
+            "cycleway": False,
+        },
+        "Accepted Highways Mainlayer",
+    )
     EXTRACT_SUBLAYER = Attribute(False, "Extract Sublayer")
     # types of highways extracted from the OSM file as sublayer
     # elements mustn't be in ACCEPTED_HIGHWAYS
     ACCEPTED_HIGHWAYS_SUBLAYER = Attribute(
-            {"motorway": False, "trunk": False, "primary": False, "secondary": False, "tertiary": False,
-             "unclassified": False, "residential": False, "motorway_link": False, "trunk_link": False,
-             "primary_link": False, "secondary_link": False, "tertiary_link": False, "living_street": False,
-             "service": False, "path": True, "footway": True, "cycleway": True}, "Accepted Highways Sublayer")
+        {
+            "motorway": False,
+            "trunk": False,
+            "primary": False,
+            "secondary": False,
+            "tertiary": False,
+            "unclassified": False,
+            "residential": False,
+            "motorway_link": False,
+            "trunk_link": False,
+            "primary_link": False,
+            "secondary_link": False,
+            "tertiary_link": False,
+            "living_street": False,
+            "service": False,
+            "path": True,
+            "footway": True,
+            "cycleway": True,
+        },
+        "Accepted Highways Sublayer",
+    )
     # Lanelet type of the sublayer lanelets
-    SUBLAYER_LANELETTYPE = Attribute('sidewalk', "Sublayer Lanelet Type")
+    SUBLAYER_LANELETTYPE = Attribute("sidewalk", "Sublayer Lanelet Type")
     # Lanelet type of the sublayer lanelets that cross the main layer
     # overwrites SUBLAYER_LANELETTYPE for lanelets applied on
-    CROSSING_LANELETTYPE = Attribute('crosswalk', "Crossing Lanelet Type")
+    CROSSING_LANELETTYPE = Attribute("crosswalk", "Crossing Lanelet Type")
     # osm ways with these tags are not taken into account
     REJECTED_TAGS = Attribute({"area": "yes"}, "Rejected Tags")
     # number of lanes for each type of road should be >=1
-    LANECOUNTS = Attribute({"motorway": 6, "trunk": 4, "primary": 2, "secondary": 2, "tertiary": 2, "unclassified": 2,
-                            "residential": 2, "motorway_link": 2, "trunk_link": 2, "primary_link": 2,
-                            "secondary_link": 2, "tertiary_link": 2, "living_street": 2, "service": 2, "path": 1,
-                            "footway": 1, "cycleway": 1}, "Lane Counts")
+    LANECOUNTS = Attribute(
+        {
+            "motorway": 6,
+            "trunk": 4,
+            "primary": 2,
+            "secondary": 2,
+            "tertiary": 2,
+            "unclassified": 2,
+            "residential": 2,
+            "motorway_link": 2,
+            "trunk_link": 2,
+            "primary_link": 2,
+            "secondary_link": 2,
+            "tertiary_link": 2,
+            "living_street": 2,
+            "service": 2,
+            "path": 1,
+            "footway": 1,
+            "cycleway": 1,
+        },
+        "Lane Counts",
+    )
     # width of lanes for each type of road in meters
     LANEWIDTHS = Attribute(
-            {"motorway": 3.5, "trunk": 3.5, "primary": 3.5, "secondary": 3.5, "tertiary": 3.5, "unclassified": 3.5,
-             "residential": 3.5, "motorway_link": 3.5, "trunk_link": 3.5, "primary_link": 3.5, "secondary_link": 3.5,
-             "tertiary_link": 3.5, "living_street": 3.5, "service": 3.5, "path": 2.0, "footway": 2.0, "cycleway": 2.0},
-            "Lane widths")
+        {
+            "motorway": 3.5,
+            "trunk": 3.5,
+            "primary": 3.5,
+            "secondary": 3.5,
+            "tertiary": 3.5,
+            "unclassified": 3.5,
+            "residential": 3.5,
+            "motorway_link": 3.5,
+            "trunk_link": 3.5,
+            "primary_link": 3.5,
+            "secondary_link": 3.5,
+            "tertiary_link": 3.5,
+            "living_street": 3.5,
+            "service": 3.5,
+            "path": 2.0,
+            "footway": 2.0,
+            "cycleway": 2.0,
+        },
+        "Lane widths",
+    )
     # default speed limit for each type of road in km/h
     SPEED_LIMITS = Attribute(
-            {"motorway": 120, "trunk": 100, "primary": 100, "secondary": 100, "tertiary": 100, "unclassified": 80,
-             "residential": 50, "motorway_link": 80, "trunk_link": 80, "primary_link": 80, "secondary_link": 80,
-             "tertiary_link": 80, "living_street": 7, "service": 10, "path": 8, "footway": 8, "cycleway": 20},
-            "Speed limits")
+        {
+            "motorway": 120,
+            "trunk": 100,
+            "primary": 100,
+            "secondary": 100,
+            "tertiary": 100,
+            "unclassified": 80,
+            "residential": 50,
+            "motorway_link": 80,
+            "trunk_link": 80,
+            "primary_link": 80,
+            "secondary_link": 80,
+            "tertiary_link": 80,
+            "living_street": 7,
+            "service": 10,
+            "path": 8,
+            "footway": 8,
+            "cycleway": 20,
+        },
+        "Speed limits",
+    )
 
     # Export Settings
     # desired distance between interpolated waypoints in meters
@@ -144,14 +230,26 @@ class OsmConfig(BaseConfig):
     REMOVE_UNCONNECTED_LANELETS = Attribute(True, "Remove Unconnected Lanelets")
     # set of processed turn lanes
     # this should only be changed for further development
-    RECOGNIZED_TURNLANES = ["left", "through", "right", "slight_right", "slight_left", "merge_to_left",
-                            "merge_to_right", "through;right", "left;through", "left;through;right", "left;right",
-                            "none"]
+    RECOGNIZED_TURNLANES = [
+        "left",
+        "through",
+        "right",
+        "slight_right",
+        "slight_left",
+        "merge_to_left",
+        "merge_to_right",
+        "through;right",
+        "left;through",
+        "left;through;right",
+        "left;right",
+        "none",
+    ]
 
     # Traffic Lights
     # cycle that will be applied to each traffic light. Values in seconds
-    TRAFFIC_LIGHT_CYCLE = Attribute({"red_phase": 57, "red_yellow_phase": 3, "green_phase": 37, "yellow_phase": 3},
-                                    "Traffic Light Cycle")
+    TRAFFIC_LIGHT_CYCLE = Attribute(
+        {"red_phase": 57, "red_yellow_phase": 3, "green_phase": 37, "yellow_phase": 3}, "Traffic Light Cycle"
+    )
 
     # Traffic Signs
     # values to search for in OSM
@@ -170,13 +268,48 @@ class OsmConfig(BaseConfig):
     USER_EDIT = False
 
     LAYOUT = [
-        ["Benchmark", BENCHMARK_ID, AUTHOR, AFFILIATION, SOURCE, TAGS, TIMESTEPSIZE, "Scenario Settings", LOAD_TUNNELS,
-         MAKE_CONTIGUOUS, SPLIT_AT_CORNER, USE_RESTRICTIONS, ACCEPTED_HIGHWAYS_MAINLAYER, LANECOUNTS, LANECOUNTS,
-         SPEED_LIMITS, "Export Settings", INTERPOLATION_DISTANCE, COMPRESSION_THRESHOLD, EXPORT_IN_UTM, FILTER, ],
-        ["Internal Settings", EARTH_RADIUS, DELETE_SHORT_EDGES, INTERPOLATION_DISTANCE_INTERNAL, BEZIER_PARAMETER,
-         INTERSECTION_DISTANCE, INTERSECTION_DISTANCE_SUBLAYER, SOFT_ANGLE_THRESHOLD, LANE_SEGMENT_ANGLE,
-         CLUSTER_LENGTH, LEAST_CLUSTER_LENGTH, MERGE_DISTANCE, "Crossing Sublayer Settings", EXTRACT_SUBLAYER,
-         ACCEPTED_HIGHWAYS_SUBLAYER, INTERSECTION_DISTANCE_SUBLAYER]]
+        [
+            "Benchmark",
+            BENCHMARK_ID,
+            AUTHOR,
+            AFFILIATION,
+            SOURCE,
+            TAGS,
+            TIMESTEPSIZE,
+            "Scenario Settings",
+            LOAD_TUNNELS,
+            MAKE_CONTIGUOUS,
+            SPLIT_AT_CORNER,
+            USE_RESTRICTIONS,
+            ACCEPTED_HIGHWAYS_MAINLAYER,
+            LANECOUNTS,
+            LANECOUNTS,
+            SPEED_LIMITS,
+            "Export Settings",
+            INTERPOLATION_DISTANCE,
+            COMPRESSION_THRESHOLD,
+            EXPORT_IN_UTM,
+            FILTER,
+        ],
+        [
+            "Internal Settings",
+            EARTH_RADIUS,
+            DELETE_SHORT_EDGES,
+            INTERPOLATION_DISTANCE_INTERNAL,
+            BEZIER_PARAMETER,
+            INTERSECTION_DISTANCE,
+            INTERSECTION_DISTANCE_SUBLAYER,
+            SOFT_ANGLE_THRESHOLD,
+            LANE_SEGMENT_ANGLE,
+            CLUSTER_LENGTH,
+            LEAST_CLUSTER_LENGTH,
+            MERGE_DISTANCE,
+            "Crossing Sublayer Settings",
+            EXTRACT_SUBLAYER,
+            ACCEPTED_HIGHWAYS_SUBLAYER,
+            INTERSECTION_DISTANCE_SUBLAYER,
+        ],
+    ]
 
 
 osm_config = OsmConfig()

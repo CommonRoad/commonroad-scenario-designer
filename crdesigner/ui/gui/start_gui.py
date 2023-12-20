@@ -1,7 +1,7 @@
 import sys
-from pathlib import Path
 
-from PyQt6.QtWidgets import *
+from PyQt6.QtWidgets import QApplication
+
 from crdesigner.ui.gui.controller.mwindow_controller import MWindowController
 from crdesigner.ui.gui.utilities.file_actions import open_path
 
@@ -20,5 +20,5 @@ def start_gui(input_file: str = None):
     sys.exit(app.exec())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     start_gui()

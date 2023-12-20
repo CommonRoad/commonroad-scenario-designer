@@ -1,11 +1,22 @@
 import unittest
+
 import numpy as np
-from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet, LaneletType
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import ParametricLane, \
-    ParametricLaneGroup
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLaneBorderGroup, \
-    Border
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
+
+from crdesigner.map_conversion.common.conversion_lanelet import (
+    ConversionLanelet,
+    LaneletType,
+)
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import (
+    Border,
+    ParametricLaneBorderGroup,
+)
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import (
+    ParametricLane,
+    ParametricLaneGroup,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import (
+    PlanView,
+)
 
 
 def init_conversion_lanelet() -> ConversionLanelet:
@@ -37,26 +48,42 @@ def init_conversion_lanelet() -> ConversionLanelet:
     # append the lane to the lane group
     plane_group.parametric_lanes.append(lane)
     # create the conversion lanelet
-    lanelet = ConversionLanelet(plane_group, np.array([[0, 1], [1, 2]]), np.array([[0, 0], [1, 1]]),
-                                np.array([[0, -1], [1, 0]]), 1)
+    lanelet = ConversionLanelet(
+        plane_group, np.array([[0, 1], [1, 2]]), np.array([[0, 0], [1, 1]]), np.array([[0, -1], [1, 0]]), 1
+    )
     return lanelet
 
 
 class TestConversionLanelet(unittest.TestCase):
     def test_equals(self):
-        lanelet1 = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                                     np.array([[-0.5, -0.5], [1, 0]]), 1)
+        lanelet1 = ConversionLanelet(
+            None,
+            np.array([[0.5, 0.5], [1, 0]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            np.array([[-0.5, -0.5], [1, 0]]),
+            1,
+        )
         lanelet1.lanelet_id = "115.2.3.-1"
-        lanelet2 = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                                     np.array([[-0.5, -0.5], [1, 0]]), 1)
+        lanelet2 = ConversionLanelet(
+            None,
+            np.array([[0.5, 0.5], [1, 0]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            np.array([[-0.5, -0.5], [1, 0]]),
+            1,
+        )
         lanelet2.lanelet_id = "115.2.3.-1"
         self.assertTrue(lanelet1.__eq__(lanelet2))
         lanelet1.lanelet_id = "foo"
         self.assertFalse(lanelet1.__eq__(lanelet2))
 
     def test_lanelet_type(self):
-        lanelet1 = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                                     np.array([[-0.5, -0.5], [1, 0]]), 1)
+        lanelet1 = ConversionLanelet(
+            None,
+            np.array([[0.5, 0.5], [1, 0]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            np.array([[-0.5, -0.5], [1, 0]]),
+            1,
+        )
         lanelet1.lanelet_type = "driving"
         true_type = {LaneletType.URBAN}
         self.assertEqual(true_type, lanelet1.lanelet_type)
@@ -69,9 +96,13 @@ class TestConversionLanelet(unittest.TestCase):
         true_type = {LaneletType.URBAN}
         self.assertEqual(true_type, lanelet1.lanelet_type)
 
-        lanelet2 = \
-            ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                              np.array([[-0.5, -0.5], [1, 0]]), 1)
+        lanelet2 = ConversionLanelet(
+            None,
+            np.array([[0.5, 0.5], [1, 0]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            np.array([[-0.5, -0.5], [1, 0]]),
+            1,
+        )
         lanelet2.lanelet_type = "driving"
         true_type = {LaneletType.URBAN}
         self.assertEqual(true_type, lanelet2.lanelet_type)
@@ -85,8 +116,13 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertEqual(true_type, lanelet2.lanelet_type)
 
     def test_lanelet_id(self):
-        lanelet1 = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                                     np.array([[-0.5, -0.5], [1, 0]]), 1)
+        lanelet1 = ConversionLanelet(
+            None,
+            np.array([[0.5, 0.5], [1, 0]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            np.array([[-0.5, -0.5], [1, 0]]),
+            1,
+        )
         true_id = 1
         lanelet1.lanelet_id = 1
         self.assertEqual(true_id, lanelet1.lanelet_id)
@@ -96,8 +132,13 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertEqual(true_id, lanelet1.lanelet_id)
 
     def test_left_vertices(self):
-        lanelet1 = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                                     np.array([[-0.5, -0.5], [1, 0]]), 1)
+        lanelet1 = ConversionLanelet(
+            None,
+            np.array([[0.5, 0.5], [1, 0]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            np.array([[-0.5, -0.5], [1, 0]]),
+            1,
+        )
 
         np.testing.assert_equal([[0.5, 0.5], [1, 0]], lanelet1.left_vertices.tolist())
 
@@ -108,8 +149,13 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertListEqual([[13.95, 59.12], [22.56, 66.20]], lanelet1.left_vertices)
 
     def test_right_vertices(self):
-        lanelet1 = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                                     np.array([[-0.5, -0.5], [1, 0]]), 1)
+        lanelet1 = ConversionLanelet(
+            None,
+            np.array([[0.5, 0.5], [1, 0]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            np.array([[-0.5, -0.5], [1, 0]]),
+            1,
+        )
 
         np.testing.assert_equal([[-0.5, -0.5], [1, 0]], lanelet1.right_vertices.tolist())
 
@@ -120,8 +166,13 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertListEqual([[13.95, 59.12], [22.56, 66.20]], lanelet1.right_vertices)
 
     def test_center_vertices(self):
-        lanelet1 = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                                     np.array([[0.0, 0.0], [0.5, 0.5]]), 1)
+        lanelet1 = ConversionLanelet(
+            None,
+            np.array([[0.5, 0.5], [1, 0]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            1,
+        )
 
         np.testing.assert_equal([[0.0, 0.0], [0.5, 0.5]], lanelet1.center_vertices.tolist())
 
@@ -132,8 +183,13 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertListEqual([[13.95, 59.12], [22.56, 66.20]], lanelet1.center_vertices)
 
     def test_predecessor(self):
-        lanelet = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                                    np.array([[0.0, 0.0], [0.5, 0.5]]), 1)
+        lanelet = ConversionLanelet(
+            None,
+            np.array([[0.5, 0.5], [1, 0]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            1,
+        )
 
         self.assertEqual([], lanelet.predecessor)
 
@@ -144,8 +200,13 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertListEqual([69, 70], lanelet.predecessor)
 
     def test_successor(self):
-        lanelet = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                                    np.array([[0.0, 0.0], [0.5, 0.5]]), 1)
+        lanelet = ConversionLanelet(
+            None,
+            np.array([[0.5, 0.5], [1, 0]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            1,
+        )
 
         self.assertEqual([], lanelet.successor)
 
@@ -156,8 +217,13 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertListEqual([60, 61], lanelet.successor)
 
     def test_adj_left(self):
-        lanelet = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                                    np.array([[0.0, 0.0], [0.5, 0.5]]), 1)
+        lanelet = ConversionLanelet(
+            None,
+            np.array([[0.5, 0.5], [1, 0]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            1,
+        )
 
         lanelet.adj_left = "3212.0.-1.-1"
         self.assertEqual("3212.0.-1.-1", lanelet.adj_left)
@@ -166,8 +232,13 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertEqual(72, lanelet.adj_left)
 
     def test_adj_left_same_direction(self):
-        lanelet = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                                    np.array([[0.0, 0.0], [0.5, 0.5]]), 1)
+        lanelet = ConversionLanelet(
+            None,
+            np.array([[0.5, 0.5], [1, 0]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            1,
+        )
         lanelet.adj_left_same_direction = True
         self.assertEqual(True, lanelet.adj_left_same_direction)
 
@@ -175,8 +246,13 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertEqual(False, lanelet.adj_left_same_direction)
 
     def test_adj_right(self):
-        lanelet = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                                    np.array([[0.0, 0.0], [0.5, 0.5]]), 1)
+        lanelet = ConversionLanelet(
+            None,
+            np.array([[0.5, 0.5], [1, 0]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            1,
+        )
 
         lanelet.adj_right = "3212.0.-1.-1"
         self.assertEqual("3212.0.-1.-1", lanelet.adj_right)
@@ -185,8 +261,13 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertEqual(72, lanelet.adj_right)
 
     def test_adj_right_same_direction(self):
-        lanelet = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                                    np.array([[0.0, 0.0], [0.5, 0.5]]), 1)
+        lanelet = ConversionLanelet(
+            None,
+            np.array([[0.5, 0.5], [1, 0]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            np.array([[0.0, 0.0], [0.5, 0.5]]),
+            1,
+        )
         lanelet.adj_right_same_direction = True
         self.assertEqual(True, lanelet.adj_right_same_direction)
 
@@ -194,10 +275,12 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertEqual(False, lanelet.adj_right_same_direction)
 
     def test_concatenate(self):
-        lanelet = ConversionLanelet(None, np.array([[0, 1], [1, 2]]), np.array([[0, 0], [1, 1]]),
-                                    np.array([[0, -1], [1, 0]]), 1)
-        lanelet_conc = ConversionLanelet(None, np.array([[1, 2], [2, 2]]), np.array([[1, 1], [2, 1]]),
-                                         np.array([[1, 0], [2, 0]]), 1)
+        lanelet = ConversionLanelet(
+            None, np.array([[0, 1], [1, 2]]), np.array([[0, 0], [1, 1]]), np.array([[0, -1], [1, 0]]), 1
+        )
+        lanelet_conc = ConversionLanelet(
+            None, np.array([[1, 2], [2, 2]]), np.array([[1, 1], [2, 1]]), np.array([[1, 0], [2, 0]]), 1
+        )
         lanelet.concatenate(lanelet_conc, False)
         # test 1: Initial lanelet has same end vertices as start vertices of the concatenate vertex
         true_left_vertices = [[0, 1], [1, 2], [2, 2]]
@@ -209,11 +292,13 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertListEqual(true_right_vertices, lanelet.right_vertices.tolist())
         # test 2: Initial lanelet has different end vertices as start vertices of the concatenate vertex
 
-        lanelet = ConversionLanelet(None, np.array([[0, 1], [1, 2]]), np.array([[0, 0], [1, 1]]),
-                                    np.array([[0, -1], [1, 0]]), 1)
+        lanelet = ConversionLanelet(
+            None, np.array([[0, 1], [1, 2]]), np.array([[0, 0], [1, 1]]), np.array([[0, -1], [1, 0]]), 1
+        )
 
-        lanelet_conc = ConversionLanelet(None, np.array([[2, 2], [3, 2]]), np.array([[2, 1], [3, 1]]),
-                                         np.array([[2, 0], [3, 0]]), 1)
+        lanelet_conc = ConversionLanelet(
+            None, np.array([[2, 2], [3, 2]]), np.array([[2, 1], [3, 1]]), np.array([[2, 0], [3, 0]]), 1
+        )
 
         lanelet.concatenate(lanelet_conc, False)
 
@@ -269,8 +354,9 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertFalse(lanelet.has_zero_width_everywhere())
 
         lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.clear()
-        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients\
-            .append([0.0, 0.0, 0.0, 0.0])
+        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.append(
+            [0.0, 0.0, 0.0, 0.0]
+        )
         self.assertTrue(lanelet.has_zero_width_everywhere())
 
     def test_first_zero_width_change_position(self):
@@ -279,11 +365,12 @@ class TestConversionLanelet(unittest.TestCase):
         np.testing.assert_almost_equal((120, 3.75000), res, 5)
         # change outer border width coefficients to a polynomial with roots
         lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.clear()
-        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients\
-            .append([3.75, 0.0, -0.015, 0.0004])
+        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.append(
+            [3.75, 0.0, -0.015, 0.0004]
+        )
         # roots of above polynomial are 0, 25
         res = lanelet.first_zero_width_change_position(False, 0.0)
-        np.testing.assert_almost_equal((25., 3.125), res, 3)
+        np.testing.assert_almost_equal((25.0, 3.125), res, 3)
 
     def test_maximum_width(self):
         lanelet = init_conversion_lanelet()
@@ -291,8 +378,9 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertEqual(3.75, max_width)
         # change outer border width coefficients to a polynomial with roots
         lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.clear()
-        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients\
-            .append([3.75, 0.0, -0.015, 0.0004])
+        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.append(
+            [3.75, 0.0, -0.015, 0.0004]
+        )
         self.assertEqual(3.75, max_width)
 
     def test_optimal_join_split_values(self):
@@ -306,8 +394,9 @@ class TestConversionLanelet(unittest.TestCase):
 
         # now polynomial has real roots, merge pos is at roots
         lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.clear()
-        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients\
-            .append([3.75, 0.0, -0.015, 0.0004])
+        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.append(
+            [3.75, 0.0, -0.015, 0.0004]
+        )
         merge_pos, merge_width = lanelet.optimal_join_split_values(True, False, 0.0)
         true_merge_pos = 25.0
         true_merge_width = 3.125

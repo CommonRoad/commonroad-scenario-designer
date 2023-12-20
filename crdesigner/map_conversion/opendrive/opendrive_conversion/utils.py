@@ -1,9 +1,21 @@
-import iso3166
-from dataclasses import dataclass
 from typing import Union
-from commonroad.scenario.traffic_sign import TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, \
-    TrafficSignIDChina, TrafficSignIDSpain, TrafficSignIDRussia, TrafficSignIDArgentina, TrafficSignIDBelgium, \
-    TrafficSignIDFrance, TrafficSignIDGreece, TrafficSignIDCroatia, TrafficSignIDItaly, TrafficSignIDPuertoRico
+
+import iso3166
+from commonroad.scenario.traffic_sign import (
+    TrafficSignIDArgentina,
+    TrafficSignIDBelgium,
+    TrafficSignIDChina,
+    TrafficSignIDCroatia,
+    TrafficSignIDFrance,
+    TrafficSignIDGermany,
+    TrafficSignIDGreece,
+    TrafficSignIDItaly,
+    TrafficSignIDPuertoRico,
+    TrafficSignIDRussia,
+    TrafficSignIDSpain,
+    TrafficSignIDUsa,
+    TrafficSignIDZamunda,
+)
 
 
 def encode_road_section_lane_width_id(road_id, section_id, lane_id, width_id) -> str:
@@ -21,6 +33,7 @@ def encode_road_section_lane_width_id(road_id, section_id, lane_id, width_id) ->
     :rtype: str
     """
     return ".".join([str(road_id), str(section_id), str(lane_id), str(width_id)])
+
 
 def encode_mark_lane_width_id(roadId, sectionId, laneId, widthId, mId) -> str:
     """Encodes a road section lane width with an ID.
@@ -58,12 +71,23 @@ def get_signal_country(signal_country: str) -> str:
         return "ZAM"
 
 
-def get_traffic_sign_enum_from_country(country: str) -> Union[TrafficSignIDZamunda, TrafficSignIDGermany,
-                                                              TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain,
-                                                              TrafficSignIDRussia, TrafficSignIDArgentina,
-                                                              TrafficSignIDBelgium, TrafficSignIDFrance,
-                                                              TrafficSignIDGreece, TrafficSignIDCroatia,
-                                                              TrafficSignIDItaly, TrafficSignIDPuertoRico]:
+def get_traffic_sign_enum_from_country(
+    country: str,
+) -> Union[
+    TrafficSignIDZamunda,
+    TrafficSignIDGermany,
+    TrafficSignIDUsa,
+    TrafficSignIDChina,
+    TrafficSignIDSpain,
+    TrafficSignIDRussia,
+    TrafficSignIDArgentina,
+    TrafficSignIDBelgium,
+    TrafficSignIDFrance,
+    TrafficSignIDGreece,
+    TrafficSignIDCroatia,
+    TrafficSignIDItaly,
+    TrafficSignIDPuertoRico,
+]:
     """Returns the traffic sign ID enumeration for the country supplied by the ISO3166 country string.
 
     :param country: ISO3166 country string to get the traffic sign enumeration from.

@@ -2,7 +2,10 @@ from typing import Tuple
 
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import ScenarioID
-from commonroad.scenario.traffic_light import TrafficLightState, TrafficLightCycleElement
+from commonroad.scenario.traffic_light import (
+    TrafficLightCycleElement,
+    TrafficLightState,
+)
 
 from crdesigner.verification_repairing.repairing.repairing import ElementRepairing
 
@@ -27,7 +30,7 @@ class TrafficLightRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        traffic_light_id, = location
+        (traffic_light_id,) = location
 
         self._network.remove_traffic_light(traffic_light_id)
 
@@ -48,7 +51,7 @@ class TrafficLightRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        traffic_light_id, = location
+        (traffic_light_id,) = location
 
         self._network.remove_traffic_light(traffic_light_id)
 
@@ -58,7 +61,7 @@ class TrafficLightRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        traffic_light_id, = location
+        (traffic_light_id,) = location
 
         traffic_light = self._network.find_traffic_light_by_id(traffic_light_id)
 
@@ -94,22 +97,33 @@ class TrafficLightRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        traffic_light_id, = location
+        (traffic_light_id,) = location
 
         TLS = TrafficLightState
-        default_combis = {'DEU': [(TLS.RED, 30), (TLS.RED_YELLOW, 3), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
-                          'CHN': [(TLS.GREEN, 30), (TLS.RED, 30), (TLS.YELLOW, 3)],
-                          'ESP': [(TLS.RED, 30), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
-                          'RUS': [(TLS.RED, 30), (TLS.YELLOW, 3), (TLS.GREEN, 30), (TLS.INACTIVE, 2), (TLS.GREEN, 2),
-                                  (TLS.INACTIVE, 2), (TLS.GREEN, 2), (TLS.INACTIVE, 2), (TLS.GREEN, 2),
-                                  (TLS.YELLOW, 3)],
-                          'BEL': [(TLS.RED, 30), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
-                          'FRA': [(TLS.RED, 30), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
-                          'GRC': [(TLS.RED, 30), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
-                          'HRV': [(TLS.RED, 30), (TLS.RED_YELLOW, 3), (TLS.RED, 30), (TLS.YELLOW, 3)],
-                          'USA': [(TLS.RED, 30), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
-                          'ITA': [(TLS.RED, 30), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
-                          'ZAM': [(TLS.RED, 30), (TLS.RED_YELLOW, 3), (TLS.GREEN, 30), (TLS.YELLOW, 3)]}
+        default_combis = {
+            "DEU": [(TLS.RED, 30), (TLS.RED_YELLOW, 3), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
+            "CHN": [(TLS.GREEN, 30), (TLS.RED, 30), (TLS.YELLOW, 3)],
+            "ESP": [(TLS.RED, 30), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
+            "RUS": [
+                (TLS.RED, 30),
+                (TLS.YELLOW, 3),
+                (TLS.GREEN, 30),
+                (TLS.INACTIVE, 2),
+                (TLS.GREEN, 2),
+                (TLS.INACTIVE, 2),
+                (TLS.GREEN, 2),
+                (TLS.INACTIVE, 2),
+                (TLS.GREEN, 2),
+                (TLS.YELLOW, 3),
+            ],
+            "BEL": [(TLS.RED, 30), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
+            "FRA": [(TLS.RED, 30), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
+            "GRC": [(TLS.RED, 30), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
+            "HRV": [(TLS.RED, 30), (TLS.RED_YELLOW, 3), (TLS.RED, 30), (TLS.YELLOW, 3)],
+            "USA": [(TLS.RED, 30), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
+            "ITA": [(TLS.RED, 30), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
+            "ZAM": [(TLS.RED, 30), (TLS.RED_YELLOW, 3), (TLS.GREEN, 30), (TLS.YELLOW, 3)],
+        }
 
         traffic_light = self._network.find_traffic_light_by_id(traffic_light_id)
 

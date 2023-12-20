@@ -1,11 +1,11 @@
 import logging
-from typing import Tuple, Optional, Union, Set
-import numpy as np
-from pyproj import Transformer
-from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking, RoadUser
+from typing import Optional, Set, Tuple, Union
 
-from crdesigner.config.config_base import Config
-from crdesigner.config.opendrive_config import open_drive_config, OpenDriveConfig
+import numpy as np
+from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking, RoadUser
+from pyproj import Transformer
+
+from crdesigner.config.opendrive_config import OpenDriveConfig, open_drive_config
 
 
 class ConversionLanelet(Lanelet):
@@ -41,16 +41,23 @@ class ConversionLanelet(Lanelet):
         speed=None,
         config: OpenDriveConfig = open_drive_config,
     ):
-
         if lanelet_type is None:
             lanelet_type = {LaneletType.UNKNOWN}
         self.parametric_lane_group = parametric_lane_group
-        self._default_lanelet_type = {LaneletType(config.general_lanelet_type) if LaneletType(
-                config.general_lanelet_type) is not None else LaneletType.UNKNOWN} if \
-            config.general_lanelet_type_activ else set()
-        self._driving_default_lanelet_type = LaneletType(config.driving_default_lanelet_type) \
-            if LaneletType(config.driving_default_lanelet_type) is not None \
+        self._default_lanelet_type = (
+            {
+                LaneletType(config.general_lanelet_type)
+                if LaneletType(config.general_lanelet_type) is not None
+                else LaneletType.UNKNOWN
+            }
+            if config.general_lanelet_type_activ
+            else set()
+        )
+        self._driving_default_lanelet_type = (
+            LaneletType(config.driving_default_lanelet_type)
+            if LaneletType(config.driving_default_lanelet_type) is not None
             else LaneletType.UNKNOWN
+        )
         self._lanelet_types_backwards_compatible = config.lanelet_types_backwards_compatible
         _user_bidirectional = None
         _user_one_way = None
@@ -113,40 +120,39 @@ class ConversionLanelet(Lanelet):
 
     @lanelet_type.setter
     def lanelet_type(self, value: str):
-        if value in ['urban', 'country', 'highway', 'interstate', 'parking', 'sidewalk', 'crosswalk']:
-            self._lanelet_type = \
-                {LaneletType(value) if LaneletType(value) is not None else LaneletType.UNKNOWN}
-        elif value in ['restricted', 'mainCarriageWay', 'intersection']:
-            self._lanelet_type = \
-                {LaneletType(value) if LaneletType(value) is not None
-                 else LaneletType.UNKNOWN}.union(self._default_lanelet_type)
-        elif value == 'entry':
+        if value in ["urban", "country", "highway", "interstate", "parking", "sidewalk", "crosswalk"]:
+            self._lanelet_type = {LaneletType(value) if LaneletType(value) is not None else LaneletType.UNKNOWN}
+        elif value in ["restricted", "mainCarriageWay", "intersection"]:
+            self._lanelet_type = {LaneletType(value) if LaneletType(value) is not None else LaneletType.UNKNOWN}.union(
+                self._default_lanelet_type
+            )
+        elif value == "entry":
             self._lanelet_type = {LaneletType.ACCESS_RAMP}.union(self._default_lanelet_type)
-        elif value == 'exit':
+        elif value == "exit":
             self._lanelet_type = {LaneletType.EXIT_RAMP}.union(self._default_lanelet_type)
-        elif value == 'onRamp':
+        elif value == "onRamp":
             self._lanelet_type = {LaneletType.ACCESS_RAMP}.union(self._default_lanelet_type)
-        elif value == 'offRamp':
+        elif value == "offRamp":
             self._lanelet_type = {LaneletType.EXIT_RAMP}.union(self._default_lanelet_type)
-        elif value == 'connectingRamp':
+        elif value == "connectingRamp":
             self._lanelet_type = {LaneletType.ACCESS_RAMP}.union(self._default_lanelet_type)
-        elif value == 'shoulder':
+        elif value == "shoulder":
             if self._lanelet_types_backwards_compatible:
                 self._lanelet_type = set()
             else:
                 self._lanelet_type = {LaneletType.BORDER}
-        elif value == 'border':
+        elif value == "border":
             if self._lanelet_types_backwards_compatible:
                 self._lanelet_type = set()
             else:
                 self._lanelet_type = {LaneletType.BORDER}
-        elif value == 'bus':
+        elif value == "bus":
             self._lanelet_type = {LaneletType.BUS_LANE}.union(self._default_lanelet_type)
-        elif value == 'stop':
+        elif value == "stop":
             self._lanelet_type = {LaneletType.SHOULDER}.union(self._default_lanelet_type)
-        elif value == 'biking':
+        elif value == "biking":
             self._lanelet_type = {LaneletType.BICYCLE_LANE}
-        elif value == 'driving':
+        elif value == "driving":
             self._lanelet_type = {LaneletType(self._driving_default_lanelet_type)}
         else:
             logging.warning("ConversionLanelet::lanelet_type: Unknown lane type: {}".format(value))
@@ -301,9 +307,7 @@ class ConversionLanelet(Lanelet):
         # pylint: disable=W0201
         self._adj_right_same_direction = same
 
-    def concatenate(
-        self, lanelet_conc: "ConversionLanelet", extend_plane_group: bool = True
-    ):
+    def concatenate(self, lanelet_conc: "ConversionLanelet", extend_plane_group: bool = True):
         """Concatenate this lanelet with lanelet_conc and assign the
         new lanelet_id to the resulting lanelet.
 
@@ -319,19 +323,11 @@ class ConversionLanelet(Lanelet):
         else:
             idx = 0
 
-        self.left_vertices = np.vstack(
-            (self.left_vertices, lanelet_conc.left_vertices[idx:])
-        )
-        self.center_vertices = np.vstack(
-            (self.center_vertices, lanelet_conc.center_vertices[idx:])
-        )
-        self.right_vertices = np.vstack(
-            (self.right_vertices, lanelet_conc.right_vertices[idx:])
-        )
+        self.left_vertices = np.vstack((self.left_vertices, lanelet_conc.left_vertices[idx:]))
+        self.center_vertices = np.vstack((self.center_vertices, lanelet_conc.center_vertices[idx:]))
+        self.right_vertices = np.vstack((self.right_vertices, lanelet_conc.right_vertices[idx:]))
         if extend_plane_group:
-            self.parametric_lane_group.extend(
-                lanelet_conc.parametric_lane_group.parametric_lanes
-            )
+            self.parametric_lane_group.extend(lanelet_conc.parametric_lane_group.parametric_lanes)
         self.successor = lanelet_conc.successor.copy()
 
     def calc_width_at_end(self) -> float:
@@ -391,9 +387,7 @@ class ConversionLanelet(Lanelet):
         :return: Position of lanelet (in curve parameter ds) where width change is zero.
         :rtype: Tuple[Optional[float], Optional[float]]
         """
-        return self.parametric_lane_group.first_zero_width_change_position(
-            reverse, reference_width
-        )
+        return self.parametric_lane_group.first_zero_width_change_position(reverse, reference_width)
 
     def maximum_width(self) -> float:
         """Get width by calculating maximum width of parametric lane group.
@@ -444,7 +438,7 @@ class ConversionLanelet(Lanelet):
         distance: np.ndarray,
         adjacent_lanelet: "ConversionLanelet",
         precision: float,
-        transformer: Transformer
+        transformer: Transformer,
     ):
         """Move vertices of one border by mirroring other border with
         a specified distance.
@@ -472,8 +466,9 @@ class ConversionLanelet(Lanelet):
         self.center_vertices = lanelet.center_vertices
         self.right_vertices = lanelet.right_vertices
 
-    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0,
-                    compute_curvature=True) -> Tuple[Tuple[float, float], float, float, float]:
+    def calc_border(
+        self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True
+    ) -> Tuple[Tuple[float, float], float, float, float]:
         """
         Calc border position according to parametric_lane_group. Note: This does not consider borders which have been
         moved due to joining / splitting.

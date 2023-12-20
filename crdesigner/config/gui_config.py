@@ -3,10 +3,19 @@ from typing import Optional
 from urllib.request import HTTPBasicAuthHandler, build_opener, install_opener, urlopen
 
 import requests
-from commonroad.visualization.draw_params import LaneletNetworkParams, IntersectionParams, TrafficSignParams, \
-    TrafficLightParams, TrajectoryParams, OccupancyParams, DynamicObstacleParams, LaneletParams, MPDrawParams
+from commonroad.visualization.draw_params import (
+    DynamicObstacleParams,
+    IntersectionParams,
+    LaneletNetworkParams,
+    LaneletParams,
+    MPDrawParams,
+    OccupancyParams,
+    TrafficLightParams,
+    TrafficSignParams,
+    TrajectoryParams,
+)
 
-from crdesigner.config.config_base import BaseConfig, Attribute
+from crdesigner.config.config_base import Attribute, BaseConfig
 
 pseudo_mercator = "EPSG:3857"
 utm_default = "+proj=utm +zone=32 +ellps=WGS84"
@@ -14,14 +23,14 @@ utm_default = "+proj=utm +zone=32 +ellps=WGS84"
 
 @dataclass
 class ColorSchema:
-    axis: str = 'all'
-    background: str = '#f0f0f0'
-    color: str = '#0a0a0a'
-    font_size: str = '11pt'
-    highlight: str = '#c0c0c0'
-    highlight_text: str = '#202020'
-    second_background: str = '#ffffff'
-    disabled: str = '#959595'
+    axis: str = "all"
+    background: str = "#f0f0f0"
+    color: str = "#0a0a0a"
+    font_size: str = "11pt"
+    highlight: str = "#c0c0c0"
+    highlight_text: str = "#202020"
+    second_background: str = "#ffffff"
+    disabled: str = "#959595"
 
 
 @dataclass
@@ -38,16 +47,15 @@ def validate_bing_key(key) -> bool:
         return True
 
     req = f"http://dev.virtualearth.net/REST/V1/Imagery/Metadata/Aerial?output=json&include=ImageryProviders&key={key}"
-    headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
+    headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0"}
     try:
         with requests.session() as s:
-
             # load cookies otherwise an HTTP error occurs
             s.get(f"http://dev.virtualearth.net/?key={key}", headers=headers)
 
             # get data
             data = s.get(req, headers=headers).json()
-            if data['authenticationResultCode'] == 'ValidCredentials':
+            if data["authenticationResultCode"] == "ValidCredentials":
                 return True
     except Exception:
         pass
@@ -65,13 +73,19 @@ def validate_ldbv_credentials(_) -> bool:
     if ldbv_username == "" or ldbv_password == "":
         return True
 
-    url = "https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi?service=wms&request=GetMap&version=1.1.1&bbox=11.65541," \
-          "48.26142,11.66093,48.26386&width=100&height=100&layers=by_dop20c&format=image/jpeg&srs=EPSG:4326"
+    url = (
+        "https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi?service=wms&request=GetMap&version=1.1.1&bbox=11.65541,"
+        "48.26142,11.66093,48.26386&width=100&height=100&layers=by_dop20c&format=image/jpeg&srs=EPSG:4326"
+    )
 
     try:
         auth_handler = HTTPBasicAuthHandler()
-        auth_handler.add_password(realm='WMS DOP20', uri='https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi',
-                                  user=ldbv_username, passwd=ldbv_password)
+        auth_handler.add_password(
+            realm="WMS DOP20",
+            uri="https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi",
+            user=ldbv_username,
+            passwd=ldbv_password,
+        )
         opener = build_opener(auth_handler)
         install_opener(opener)
         with urlopen(url) as webpage:
@@ -85,6 +99,7 @@ class GuiConfig(BaseConfig):
     """
     This class contains all settings for the GUI.
     """
+
     # Borders for Scenario/ Zoom
     MAX_LANELET = 100
     MAX_TRAFFIC_SIGNS = 50
@@ -112,8 +127,9 @@ class GuiConfig(BaseConfig):
     DRAW_INTERSECTION_LABELS: Attribute = Attribute(False, "Draw intersection labels")
     DARKMODE: Attribute = Attribute(False, "Darkmode")
     MODERN_LOOK: Attribute = Attribute(True, display_name="Modern Look")
-    AXIS_VISIBLE: Attribute = Attribute(value='All', display_name="Axis visible",
-                                        options=['All', 'Left/Bottom', 'None'])
+    AXIS_VISIBLE: Attribute = Attribute(
+        value="All", display_name="Axis visible", options=["All", "Left/Bottom", "None"]
+    )
     LEGEND: Attribute = Attribute(True, "Legend")
     # The key to access bing maps
     BING_MAPS_KEY: Attribute = Attribute(value="", display_name="Bing maps key", validation=validate_bing_key)
@@ -126,44 +142,77 @@ class GuiConfig(BaseConfig):
     utm_default = Attribute(utm_default, "UTM Default")
 
     OBSTACLE_SPECS = {
-        'car': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
-        'truck': {'width': '2.550', 'length': '16.50', 'shape': 'Rectangle'},
-        'bus': {'width': '2.550', 'length': '11.95', 'shape': 'Rectangle'},
-        'bicycle': {'width': '0.64', 'length': '1.75', 'shape': 'Rectangle'},
-        'pedestrian': {'shape': 'Circle', 'radius': '0.3'},
-        'priorityVehicle': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
-        'parkedVehicle': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
-        'motorcycle': {'width': '1.016', 'length': '2.540', 'shape': 'Rectangle'},
-        'taxi': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
+        "car": {"width": "1.610", "length": "4.508", "shape": "Rectangle"},
+        "truck": {"width": "2.550", "length": "16.50", "shape": "Rectangle"},
+        "bus": {"width": "2.550", "length": "11.95", "shape": "Rectangle"},
+        "bicycle": {"width": "0.64", "length": "1.75", "shape": "Rectangle"},
+        "pedestrian": {"shape": "Circle", "radius": "0.3"},
+        "priorityVehicle": {"width": "1.610", "length": "4.508", "shape": "Rectangle"},
+        "parkedVehicle": {"width": "1.610", "length": "4.508", "shape": "Rectangle"},
+        "motorcycle": {"width": "1.016", "length": "2.540", "shape": "Rectangle"},
+        "taxi": {"width": "1.610", "length": "4.508", "shape": "Rectangle"},
     }
 
     # The layout of the settings window
     LAYOUT = [
-        ["Appearance", DARKMODE, MODERN_LOOK, AXIS_VISIBLE, LEGEND, "Obstacle visualization", DRAW_DYNAMIC_OBSTACLES,
-         DRAW_TRAJECTORY, DRAW_OBSTACLE_LABELS,DRAW_OBSTACLE_ICONS, DRAW_OBSTACLE_DIRECTION, DRAW_OBSTACLE_SIGNALS,
-         "Intersection visualization",DRAW_INCOMING_LANELETS, DRAW_OUTGOINGS, DRAW_INTERSECTION_LABELS, ],
-        ["Other", ENABLE_EDITING_CURVED_LANELETS, ENABLE_UNDETAILED_DISPLAY, DRAW_OCCUPANCY, DRAW_TRAFFIC_SIGNS,
-         DRAW_TRAFFIC_LIGHTS, BING_MAPS_KEY, LDBV_USERNAME, LDBV_PASSWORD, LOG_ACTIONS_OF_THE_USER]]
+        [
+            "Appearance",
+            DARKMODE,
+            MODERN_LOOK,
+            AXIS_VISIBLE,
+            LEGEND,
+            "Obstacle visualization",
+            DRAW_DYNAMIC_OBSTACLES,
+            DRAW_TRAJECTORY,
+            DRAW_OBSTACLE_LABELS,
+            DRAW_OBSTACLE_ICONS,
+            DRAW_OBSTACLE_DIRECTION,
+            DRAW_OBSTACLE_SIGNALS,
+            "Intersection visualization",
+            DRAW_INCOMING_LANELETS,
+            DRAW_OUTGOINGS,
+            DRAW_INTERSECTION_LABELS,
+        ],
+        [
+            "Other",
+            ENABLE_EDITING_CURVED_LANELETS,
+            ENABLE_UNDETAILED_DISPLAY,
+            DRAW_OCCUPANCY,
+            DRAW_TRAFFIC_SIGNS,
+            DRAW_TRAFFIC_LIGHTS,
+            BING_MAPS_KEY,
+            LDBV_USERNAME,
+            LDBV_PASSWORD,
+            LOG_ACTIONS_OF_THE_USER,
+        ],
+    ]
 
     def get_draw_params(self) -> DrawParamsCustom:
         """
         :returns: DrawParams based on the settings selected in the GUI Settings window
         """
-        return DrawParamsCustom(color_schema=self.get_colorscheme(), lanelet_network=LaneletNetworkParams(
+        return DrawParamsCustom(
+            color_schema=self.get_colorscheme(),
+            lanelet_network=LaneletNetworkParams(
                 traffic_sign=TrafficSignParams(draw_traffic_signs=self.DRAW_TRAFFIC_SIGNS),
-                intersection=IntersectionParams(draw_intersections=True,
-                                                draw_incoming_lanelets=self.DRAW_INCOMING_LANELETS,
-                                                draw_outgoings=self.DRAW_OUTGOINGS,
-                                                show_label=self.DRAW_INTERSECTION_LABELS),
-                traffic_light=TrafficLightParams(draw_traffic_lights=self.DRAW_TRAFFIC_LIGHTS)),
-                                trajectory=TrajectoryParams(draw_trajectory=self.DRAW_TRAJECTORY),
-                                occupancy=OccupancyParams(draw_occupancies=self.DRAW_OCCUPANCY),
-                                dynamic_obstacle=DynamicObstacleParams(trajectory=TrajectoryParams(
-                                        draw_trajectory=self.DRAW_TRAJECTORY),
-                                        draw_icon=self.DRAW_OBSTACLE_ICONS,
-                                        draw_direction=self.DRAW_OBSTACLE_DIRECTION,
-                                        draw_signals=self.DRAW_OBSTACLE_SIGNALS,
-                                        show_label=self.DRAW_OBSTACLE_LABELS))
+                intersection=IntersectionParams(
+                    draw_intersections=True,
+                    draw_incoming_lanelets=self.DRAW_INCOMING_LANELETS,
+                    draw_successors=self.DRAW_OUTGOINGS,
+                    show_label=self.DRAW_INTERSECTION_LABELS,
+                ),
+                traffic_light=TrafficLightParams(draw_traffic_lights=self.DRAW_TRAFFIC_LIGHTS),
+            ),
+            trajectory=TrajectoryParams(draw_trajectory=self.DRAW_TRAJECTORY),
+            occupancy=OccupancyParams(draw_occupancies=self.DRAW_OCCUPANCY),
+            dynamic_obstacle=DynamicObstacleParams(
+                trajectory=TrajectoryParams(draw_trajectory=self.DRAW_TRAJECTORY),
+                draw_icon=self.DRAW_OBSTACLE_ICONS,
+                draw_direction=self.DRAW_OBSTACLE_DIRECTION,
+                draw_signals=self.DRAW_OBSTACLE_SIGNALS,
+                show_label=self.DRAW_OBSTACLE_LABELS,
+            ),
+        )
 
     def show_dynamic_obstacles(self) -> bool:
         """
@@ -186,9 +235,15 @@ class GuiConfig(BaseConfig):
         elif not self.ZOOM_DETAILED:
             return None
         else:
-            return LaneletParams(draw_start_and_direction=False, draw_stop_line=False, draw_center_bound=False,
-                              draw_right_bound=True, draw_left_bound=True, fill_lanelet=False,
-                              draw_line_markings=False)
+            return LaneletParams(
+                draw_start_and_direction=False,
+                draw_stop_line=False,
+                draw_center_bound=False,
+                draw_right_bound=True,
+                draw_left_bound=True,
+                fill_lanelet=False,
+                draw_line_markings=False,
+            )
 
     def resize_lanelet_network_when_zoom(self, lanelet_count: int, traffic_sign_count: int, x: float, y: float) -> bool:
         """
@@ -201,8 +256,9 @@ class GuiConfig(BaseConfig):
 
         :returns; boolean wheater the lanelet_network should be resized
         """
-        return (x <= self.MAX_X_TRESHOLD or y <= self.MAX_Y_TRESHOLD) and \
-            (lanelet_count > self.MAX_LANELET or traffic_sign_count > self.MAX_TRAFFIC_SIGNS)
+        return (x <= self.MAX_X_TRESHOLD or y <= self.MAX_Y_TRESHOLD) and (
+            lanelet_count > self.MAX_LANELET or traffic_sign_count > self.MAX_TRAFFIC_SIGNS
+        )
 
     def set_zoom_treshold(self, x, y):
         """
@@ -223,10 +279,15 @@ class GuiConfig(BaseConfig):
         :returns: ColorSchema depending on the setting
         """
         if gui_config.DARKMODE:
-            colorscheme = ColorSchema(axis=gui_config.AXIS_VISIBLE, background='#303030', color='#f0f0f0',
-                                      highlight='#1e9678', second_background='#2c2c2c')
+            colorscheme = ColorSchema(
+                axis=gui_config.AXIS_VISIBLE,
+                background="#303030",
+                color="#f0f0f0",
+                highlight="#1e9678",
+                second_background="#2c2c2c",
+            )
         else:
-            colorscheme = ColorSchema(axis=gui_config.AXIS_VISIBLE, background='#f0f0f0')
+            colorscheme = ColorSchema(axis=gui_config.AXIS_VISIBLE, background="#f0f0f0")
 
         return colorscheme
 
@@ -373,8 +434,7 @@ class GuiConfig(BaseConfig):
                                     }
                                     QToolTip {
                                     color: #000000;
-                                    }                                  
-                                    
+                                    }
 
                                 """
             return stylesheet

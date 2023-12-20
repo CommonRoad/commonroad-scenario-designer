@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_mainWindow(object):
     def setupUi(self, mainWindow):
         mainWindow.setObjectName("mainWindow")
-        #mainWindow.resize(1920, 1080)
+        # mainWindow.resize(1920, 1080)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/Icon/icon.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         mainWindow.setWindowIcon(icon)
@@ -30,7 +30,7 @@ class Ui_mainWindow(object):
         self.toolBar = QtWidgets.QToolBar(mainWindow)
         self.toolBar.setObjectName("toolBar")
         mainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
-        """""
+        """ ""
 
         self.retranslateUi(mainWindow)
         QtCore.QMetaObject.connectSlotsByName(mainWindow)

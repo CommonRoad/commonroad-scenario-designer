@@ -1,32 +1,44 @@
-from datetime import datetime
 import os
 import pathlib
+from datetime import datetime
 
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QGuiApplication
-from PyQt6.QtWidgets import *
-from PyQt6.QtCore import *
+from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
+from crdesigner.config.gui_config import gui_config
 from crdesigner.config.logging import logger
-from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_wrapper_controller import \
-    AnimatedViewerWrapperController
-from crdesigner.ui.gui.controller.settings.scenario_saving_dialog_controller import ScenarioSavingDialogController
+from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
+from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_wrapper_controller import (
+    AnimatedViewerWrapperController,
+)
+from crdesigner.ui.gui.controller.settings.scenario_saving_dialog_controller import (
+    ScenarioSavingDialogController,
+)
 from crdesigner.ui.gui.controller.settings.settings_controller import SettingsController
-from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.road_network_controller import RoadNetworkController
-from crdesigner.ui.gui.controller.toolboxes.obstacle_toolbox.obstacle_controller import ObstacleController
-from crdesigner.ui.gui.controller.toolboxes.converter_toolbox.map_conversion_controller import \
-    MapConversionToolboxController
-from crdesigner.ui.gui.controller.toolboxes.scenario_toolbox.scenario_toolbox_controller import \
-    ScenarioToolboxController
+from crdesigner.ui.gui.controller.toolboxes.converter_toolbox.map_conversion_controller import (
+    MapConversionToolboxController,
+)
+from crdesigner.ui.gui.controller.toolboxes.obstacle_toolbox.obstacle_controller import (
+    ObstacleController,
+)
+from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.road_network_controller import (
+    RoadNetworkController,
+)
+from crdesigner.ui.gui.controller.toolboxes.scenario_toolbox.scenario_toolbox_controller import (
+    ScenarioToolboxController,
+)
 from crdesigner.ui.gui.controller.top_bar.top_bar_controller import TopBarController
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-from crdesigner.config.gui_config import gui_config
-from crdesigner.ui.gui.view.console.console_ui import ConsoleUI
-
-from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
 from crdesigner.ui.gui.utilities.file_actions import open_commonroad_file
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
-from crdesigner.ui.gui.utilities.util import *
+from crdesigner.ui.gui.utilities.util import (
+    find_invalid_lanelet_polygons,
+    find_invalid_ref_of_traffic_lights,
+    find_invalid_ref_of_traffic_signs,
+)
+from crdesigner.ui.gui.view.console.console_ui import ConsoleUI
 from crdesigner.ui.gui.view.mwindow_ui import MWindowUI
 
 
@@ -70,9 +82,9 @@ class MWindowController:
         self.mwindow_ui = MWindowUI()
         self.mwindow_ui.closeEvent = self.close_event
 
-        self.animated_viewer_wrapper = AnimatedViewerWrapperController(mwindow=self,
-                                                                       scenario_model=self.scenario_model,
-                                                                       scenario_saving_dialog=self.scenario_saving_dialog)
+        self.animated_viewer_wrapper = AnimatedViewerWrapperController(
+            mwindow=self, scenario_model=self.scenario_model, scenario_saving_dialog=self.scenario_saving_dialog
+        )
         self.mwindow_ui.animated_viewer_wrapper = self.animated_viewer_wrapper
         self.animated_viewer_wrapper.create_viewer_dock()
 
@@ -117,13 +129,15 @@ class MWindowController:
         if os.path.exists(self.path_autosave):
             reply = self.mwindow_ui.ask_for_autosaved_file()
             if reply == QMessageBox.StandardButton.Save:
-                self.directory = QFileDialog.getExistingDirectory(self.scenario_saving_dialog.save_window, "Dir",
-                                                                  options=QFileDialog.Option.ShowDirsOnly)
+                self.directory = QFileDialog.getExistingDirectory(
+                    self.scenario_saving_dialog.save_window, "Dir", options=QFileDialog.Option.ShowDirsOnly
+                )
                 if self.directory:
                     if os.path.exists(self.path_logging):
                         time = datetime.now()
-                        with open(self.path_logging, 'r') as fp1, \
-                             open(self.directory + "/logging_file_" + time.strftime("%d-%b-%y %H:%M:%S"), 'w') as fp2:
+                        with open(self.path_logging, "r") as fp1, open(
+                            self.directory + "/logging_file_" + time.strftime("%d-%b-%y %H:%M:%S"), "w"
+                        ) as fp2:
                             results = fp1.read()
                             fp2.write(results)
                 reply = self.mwindow_ui.ask_for_autosaved_file(False)
@@ -172,7 +186,7 @@ class MWindowController:
             self.mwindow_ui.map_converter_toolbox.sumo_simulation.scenario = scenario
 
     def store_scenario(self):
-        """ Redirect to the service layer. """
+        """Redirect to the service layer."""
         self.store_scenario_service_layer()
 
     def check_scenario_service_layer(self, scenario) -> int:
@@ -194,19 +208,27 @@ class MWindowController:
         if found_ids and verbose:
             error_score = max(error_score, fatal_error)
             self.mwindow_ui.crdesigner_console_wrapper.text_browser.append(
-                    "invalid traffic light refs: " + str(found_ids))
-            QMessageBox.critical(self.mwindow_ui, "CommonRoad XML error",
-                                 "Scenario contains invalid traffic light refenence(s): " + str(found_ids),
-                                 QMessageBox.StandardButton.Ok, )
+                "invalid traffic light refs: " + str(found_ids)
+            )
+            QMessageBox.critical(
+                self.mwindow_ui,
+                "CommonRoad XML error",
+                "Scenario contains invalid traffic light refenence(s): " + str(found_ids),
+                QMessageBox.StandardButton.Ok,
+            )
 
         found_ids = find_invalid_ref_of_traffic_signs(scenario)
         if found_ids and verbose:
             error_score = max(error_score, fatal_error)
             self.mwindow_ui.crdesigner_console_wrapper.text_browser.append(
-                    "invalid traffic sign refs: " + str(found_ids))
-            QMessageBox.critical(self.mwindow_ui, "CommonRoad XML error",
-                                 "Scenario contains invalid traffic sign refenence(s): " + str(found_ids),
-                                 QMessageBox.StandardButton.Ok, )
+                "invalid traffic sign refs: " + str(found_ids)
+            )
+            QMessageBox.critical(
+                self.mwindow_ui,
+                "CommonRoad XML error",
+                "Scenario contains invalid traffic sign refenence(s): " + str(found_ids),
+                QMessageBox.StandardButton.Ok,
+            )
 
         if error_score >= fatal_error:
             return error_score
@@ -216,10 +238,14 @@ class MWindowController:
         if found_ids and verbose:
             error_score = max(error_score, warning)
             self.mwindow_ui.crdesigner_console_wrapper.text_browser.append(
-                    "Warning: Lanelet(s) with invalid polygon:" + str(found_ids))
-            QMessageBox.warning(self.mwindow_ui, "CommonRoad XML error",
-                                "Scenario contains lanelet(s) with invalid polygon: " + str(found_ids),
-                                QMessageBox.StandardButton.Ok, )
+                "Warning: Lanelet(s) with invalid polygon:" + str(found_ids)
+            )
+            QMessageBox.warning(
+                self.mwindow_ui,
+                "CommonRoad XML error",
+                "Scenario contains lanelet(s) with invalid polygon: " + str(found_ids),
+                QMessageBox.StandardButton.Ok,
+            )
 
         return error_score
 

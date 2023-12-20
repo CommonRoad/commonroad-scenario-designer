@@ -1,15 +1,31 @@
 """
 This module holds all methods necessary to cluster segments at intersections.
 """
-from crdesigner.map_conversion.common import geometry
-from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crdesigner.config.osm_config import osm_config as config
+from typing import Dict, List, Set, Tuple
 
 import numpy as np
-from typing import Set, Dict, List, Tuple
+
+from crdesigner.config.osm_config import osm_config as config
+from crdesigner.map_conversion.common import geometry
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph import (
+    Graph,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_edge import (
+    GraphEdge,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_functions import (
+    get_lane_waypoints,
+    set_points,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_lane import (
+    Lane,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_node import (
+    GraphNode,
+)
 
 
-def lane_at_start_of_edge(edge: rg.GraphEdge, lane: rg.Lane) -> bool:
+def lane_at_start_of_edge(edge: GraphEdge, lane: Lane) -> bool:
     """
     checks if lane starts at start or end of an edge
 
@@ -25,7 +41,7 @@ def lane_at_start_of_edge(edge: rg.GraphEdge, lane: rg.Lane) -> bool:
         raise ValueError("lane and edge have no node in common")
 
 
-def get_lane_point(lane: rg.Lane, at_start: bool) -> np.ndarray:
+def get_lane_point(lane: Lane, at_start: bool) -> np.ndarray:
     """
     gets the first or last waypoint of a lane
 
@@ -40,7 +56,7 @@ def get_lane_point(lane: rg.Lane, at_start: bool) -> np.ndarray:
     return point
 
 
-def alladjacent(lanes: List[rg.Lane]) -> bool:
+def alladjacent(lanes: List[Lane]) -> bool:
     """
     checks if all lanes in the list are adjacent
 
@@ -57,7 +73,7 @@ def alladjacent(lanes: List[rg.Lane]) -> bool:
     return True
 
 
-def find_groups(graph: rg.Graph) -> Dict[int, Set[rg.Lane]]:
+def find_groups(graph: Graph) -> Dict[int, Set[Lane]]:
     """
     finds group of link segments heading between two different nodes
 
@@ -83,8 +99,8 @@ def find_groups(graph: rg.Graph) -> Dict[int, Set[rg.Lane]]:
 
 
 def group_segments_to_links(
-    groups: Dict[int, Set[rg.Lane]], group_id: int
-) -> Tuple[Dict[int, Set[rg.Lane]], Dict[rg.GraphEdge, Set[int]]]:
+    groups: Dict[int, Set[Lane]], group_id: int
+) -> Tuple[Dict[int, Set[Lane]], Dict[GraphEdge, Set[int]]]:
     """
     groups segments in a group by the edges they connect -> links
     assigns all links to the edges they connect
@@ -114,7 +130,7 @@ def group_segments_to_links(
     return links, edge_links
 
 
-def get_start_point(current_lanes: List[rg.Lane], at_start: bool) -> np.ndarray:
+def get_start_point(current_lanes: List[Lane], at_start: bool) -> np.ndarray:
     """
     gets the start point of the cluster
 
@@ -134,7 +150,7 @@ def get_start_point(current_lanes: List[rg.Lane], at_start: bool) -> np.ndarray:
     return start_point
 
 
-def get_end_point(start_point: np.ndarray, node2: rg.GraphNode) -> np.ndarray:
+def get_end_point(start_point: np.ndarray, node2: GraphNode) -> np.ndarray:
     """
     gets the end point of the cluster
 
@@ -154,8 +170,8 @@ def get_end_point(start_point: np.ndarray, node2: rg.GraphNode) -> np.ndarray:
 def get_middle_point(
     start_point: np.ndarray,
     end_point: np.ndarray,
-    edge: rg.GraphEdge,
-    node1: rg.GraphNode,
+    edge: GraphEdge,
+    node1: GraphNode,
 ) -> np.ndarray:
     """
     gets the central control point for the bezier curve of the cluster
@@ -173,12 +189,7 @@ def get_middle_point(
         vector1 = edge_waypoints[-1] - edge_waypoints[-2]
     else:
         raise ValueError("edge is not at node 1")
-    vector1 = (
-            vector1
-            / np.linalg.norm(vector1)
-            * np.linalg.norm(start_point - end_point)
-            * config.BEZIER_PARAMETER
-    )
+    vector1 = vector1 / np.linalg.norm(vector1) * np.linalg.norm(start_point - end_point) * config.BEZIER_PARAMETER
     middle_point = start_point + vector1
     return middle_point
 
@@ -202,9 +213,7 @@ def get_waypoints_of_group(
     return waypoints
 
 
-def get_nodes(
-    at_start: bool, edge: rg.GraphEdge, segment: rg.Lane
-) -> Tuple[rg.GraphNode, rg.GraphNode]:
+def get_nodes(at_start: bool, edge: GraphEdge, segment: Lane) -> Tuple[GraphNode, GraphNode]:
     """
     gets nodes which are connected by cluster
 
@@ -226,9 +235,7 @@ def get_nodes(
     return node1, node2
 
 
-def find_lanes_to_extend(
-    edge: rg.GraphEdge, current_segments: Set[rg.Lane], at_start: bool
-) -> List[rg.Lane]:
+def find_lanes_to_extend(edge: GraphEdge, current_segments: Set[Lane], at_start: bool) -> List[Lane]:
     """
     finds lanes of an edge which are consecutive with current_segments
 
@@ -248,9 +255,7 @@ def find_lanes_to_extend(
     return current_lanes
 
 
-def create_new_lanes(
-    current_lanes: List[rg.Lane], current_segments: Set[rg.Lane], at_start: bool
-) -> List[rg.Lane]:
+def create_new_lanes(current_lanes: List[Lane], current_segments: Set[Lane], at_start: bool) -> List[Lane]:
     """
     creates new link segments for the segment
 
@@ -272,7 +277,7 @@ def create_new_lanes(
             width1 = width2 = lane.width1
         else:
             width1 = width2 = lane.width2
-        new_lane = rg.Lane(
+        new_lane = Lane(
             None,
             successors,
             predecessors,
@@ -325,9 +330,7 @@ def create_new_lanes(
     return new_lanes
 
 
-def set_waypoints_of_lanes(
-    edge: rg.GraphEdge, new_lanes: List[rg.Lane], waypoints: List[np.ndarray]
-) -> None:
+def set_waypoints_of_lanes(edge: GraphEdge, new_lanes: List[Lane], waypoints: List[np.ndarray]) -> None:
     """
     sets waypoints of new created link segments
 
@@ -337,7 +340,7 @@ def set_waypoints_of_lanes(
     :return: None
     """
     width = config.LANEWIDTHS[edge.roadtype]
-    lane_waypoints = rg.get_lane_waypoints(len(new_lanes), width, waypoints)
+    lane_waypoints = get_lane_waypoints(len(new_lanes), width, waypoints)
     for index, lane in enumerate(new_lanes):
         # lane.waypoints = lane_waypoints[index]
         if lane.forward:
@@ -347,7 +350,7 @@ def set_waypoints_of_lanes(
     return
 
 
-def set_waypoints_of_segments(current_segments: Set[rg.Lane]) -> None:
+def set_waypoints_of_segments(current_segments: Set[Lane]) -> None:
     """
     updates waypoints of link segments segments
 
@@ -357,12 +360,12 @@ def set_waypoints_of_segments(current_segments: Set[rg.Lane]) -> None:
     for segment in current_segments:
         predecessor = next(iter(segment.predecessors))
         successor = next(iter(segment.successors))
-        waypoints = rg.set_points(predecessor, successor)
+        waypoints = set_points(predecessor, successor)
         segment.waypoints = waypoints
     return
 
 
-def cluster_segments(graph: rg.Graph) -> None:
+def cluster_segments(graph: Graph) -> None:
     """
     groups segments in a graph to clusters
 
@@ -402,10 +405,7 @@ def cluster_segments(graph: rg.Graph) -> None:
                 # create waypoints of group
                 waypoints = get_waypoints_of_group(start_point, end_point, middle_point)
                 # only go on if new lanes would be long enough
-                if (
-                    np.linalg.norm(start_point - end_point)
-                    < config.LEAST_CLUSTER_LENGTH
-                ):
+                if np.linalg.norm(start_point - end_point) < config.LEAST_CLUSTER_LENGTH:
                     continue
                 # create new lanes
                 new_lanes = create_new_lanes(current_lanes, current_segments, at_start)

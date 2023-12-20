@@ -1,13 +1,13 @@
 import math
 import os
-import numpy as np
 
+import numpy as np
 from commonroad.common.common_lanelet import LineMarking
 from commonroad.common.common_scenario import FileInformation
-from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad.scenario.obstacle import StaticObstacle, ObstacleType
-from commonroad.scenario.scenario import Scenario
 from commonroad.geometry.shape import Rectangle
+from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.scenario.obstacle import ObstacleType, StaticObstacle
+from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.state import InitialState
 
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
@@ -177,11 +177,28 @@ def execute_scenario_tests(window):
     traffic_lights = set()
     stop_line_at_end = False
     stop_line_at_beginning = False
-    lanelet = MapCreator.create_straight(lanelet_width, lanelet_length, num_vertices, lanelet_id, lanelet_type,
-                                         predecessors, successors, adjacent_left, adjacent_right,
-                                         adjacent_left_same_direction, adjacent_right_same_direction, user_one_way,
-                                         user_bidirectional, line_marking_left, line_marking_right, stop_line,
-                                         traffic_signs, traffic_lights, stop_line_at_end, stop_line_at_beginning)
+    lanelet = MapCreator.create_straight(
+        lanelet_width,
+        lanelet_length,
+        num_vertices,
+        lanelet_id,
+        lanelet_type,
+        predecessors,
+        successors,
+        adjacent_left,
+        adjacent_right,
+        adjacent_left_same_direction,
+        adjacent_right_same_direction,
+        user_one_way,
+        user_bidirectional,
+        line_marking_left,
+        line_marking_right,
+        stop_line,
+        traffic_signs,
+        traffic_lights,
+        stop_line_at_end,
+        stop_line_at_beginning,
+    )
 
     lanelet.translate_rotate(np.array([lanelet_start_pos_x, lanelet_start_pos_y]), 0)
     scenario.add_objects(lanelet)
@@ -198,17 +215,19 @@ def execute_scenario_tests(window):
     # Tests for updating a lanelet
     selected_lanelet_length = 10.0
     actual_selected_lanelet_length = 0
-    should_be_length_of_changed_lanelet = '20.0'
+    should_be_length_of_changed_lanelet = "20.0"
     changed_lanelet_length_after_update = 0
 
     try:
         window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.setCurrentIndex(1)
         actual_selected_lanelet_length = window.road_network_toolbox.get_float(
-                window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_length)
+            window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_length
+        )
         window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_length.setText("20.0")
         window.road_network_toolbox.road_network_toolbox_ui.button_update_lanelet.click()
         changed_lanelet_length_after_update = window.road_network_toolbox.lanelet_controller.lanelet_ui.get_length(
-                window.scenario_model.find_lanelet_by_id(1))
+            window.scenario_model.find_lanelet_by_id(1)
+        )
 
     except Exception as e:
         print("Select_lanelet failed with exception: " + str(e))
@@ -221,17 +240,20 @@ def execute_scenario_tests(window):
 
 
 def execute_add_obstacle_test(window):
-    expected_obstacle = StaticObstacle(obstacle_id=2,
-                                       obstacle_type=ObstacleType("unknown"),
-                                       obstacle_shape=Rectangle(length=5.0, width=5.0),
-                                       initial_state=InitialState(**{'position': np.array(
-                                                 [0.0, 0.0]), 'orientation': math.radians(0.0), 'time_step': 1}))
+    expected_obstacle = StaticObstacle(
+        obstacle_id=2,
+        obstacle_type=ObstacleType("unknown"),
+        obstacle_shape=Rectangle(length=5.0, width=5.0),
+        initial_state=InitialState(
+            **{"position": np.array([0.0, 0.0]), "orientation": math.radians(0.0), "time_step": 1}
+        ),
+    )
 
     actual_obstacle = None
 
     try:
         window.obstacle_toolbox.obstacle_toolbox_ui.obstacle_length.setText("5")
-        window.obstacle_toolbox.obstacle_toolbox_ui.obstacle_width .setText("5")
+        window.obstacle_toolbox.obstacle_toolbox_ui.obstacle_width.setText("5")
         window.obstacle_toolbox.obstacle_toolbox_ui.obstacle_orientation.setText("0")
         window.obstacle_toolbox.obstacle_toolbox_ui.obstacle_x_Position.setText("0")
         window.obstacle_toolbox.obstacle_toolbox_ui.obstacle_y_Position.setText("0")
@@ -243,7 +265,7 @@ def execute_add_obstacle_test(window):
 
     assert expected_obstacle == actual_obstacle
 
-    
+
 def execute_load_scenario_test(window):
     parent_directory = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
     path_to_test = parent_directory + "/map_conversion/test_maps/sumo/ARG_Carcarana-10_2_T-1.xml"
