@@ -1,6 +1,6 @@
 import copy
 import os
-from typing import TypeVar, Generic, Optional, Callable, Union, Tuple, List, Dict, Type
+from typing import Callable, Dict, Generic, List, Optional, Tuple, Type, TypeVar, Union
 
 import yaml
 from PyQt6.QtCore import QObject, pyqtSignal
@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import QMessageBox
 
 from crdesigner.ui.gui.utilities.custom_yaml import add_custom_interval_interpreter
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 add_custom_interval_interpreter()
@@ -25,9 +25,15 @@ class Attribute(Generic[T], QObject):
 
     attribute_changed = pyqtSignal()
 
-    def __init__(self, value: T, display_name: str = "", description: str = "", unit: str = "",
-                 options: Optional[Union[Tuple[T, T], List[T]]] = None,
-                 validation: Optional[Callable[[T], bool]] = None):
+    def __init__(
+        self,
+        value: T,
+        display_name: str = "",
+        description: str = "",
+        unit: str = "",
+        options: Optional[Union[Tuple[T, T], List[T]]] = None,
+        validation: Optional[Callable[[T], bool]] = None,
+    ):
         """Constructor of the attribute class.
         :param value: The value of the attribute. This is also used as the default value.
         :param display_name: The display name of the attribute. This is used in the GUI.
@@ -131,8 +137,13 @@ class Attribute(Generic[T], QObject):
 
     def _warning_wrong_setting(self):
         warning_dialog = QMessageBox()
-        warning_dialog.warning(None, "Warning", f"Setting {self.display_name} contains invalid value!", QMessageBox.StandardButton.Ok,
-                               QMessageBox.StandardButton.Ok)
+        warning_dialog.warning(
+            None,
+            "Warning",
+            f"Setting {self.display_name} contains invalid value!",
+            QMessageBox.StandardButton.Ok,
+            QMessageBox.StandardButton.Ok,
+        )
         warning_dialog.close()
         self.reset()
 
@@ -183,7 +194,7 @@ class BaseConfig:
         # yaml file, which belong to the derived settings class then write the yaml file again
         settings = {}
         if os.path.exists(yaml_path):
-            with open(yaml_path, 'r', encoding='utf-8') as f:
+            with open(yaml_path, "r", encoding="utf-8") as f:
                 settings = yaml.load(f, Loader=yaml.FullLoader)
             if settings is not None:
                 for attr_name in vars(type(self)).keys():
@@ -194,7 +205,7 @@ class BaseConfig:
 
         settings.update(self._get_none_default_settings())
 
-        with open(yaml_path, 'w', encoding='utf-8') as f:
+        with open(yaml_path, "w", encoding="utf-8") as f:
             yaml.dump(settings, f)
 
     def restore_from_yaml_file(self):
@@ -206,7 +217,7 @@ class BaseConfig:
             yaml_path = self.CUSTOM_SETTINGS_PATH.value
 
         if os.path.exists(yaml_path):
-            with open(yaml_path, 'r', encoding='utf-8') as f:
+            with open(yaml_path, "r", encoding="utf-8") as f:
                 settings = yaml.load(f, Loader=yaml.FullLoader)
             if settings is None:
                 # if no custom settings were saved, they have to be default
@@ -245,8 +256,11 @@ class BaseConfig:
 
     def _get_none_default_settings(self) -> dict:
         """This function will return a dictionary with the none default settings of the derived settings class."""
-        return {name: attr.value for name, attr in vars(type(self)).items()
-                if isinstance(attr, Attribute) and not attr.is_default()}
+        return {
+            name: attr.value
+            for name, attr in vars(type(self)).items()
+            if isinstance(attr, Attribute) and not attr.is_default()
+        }
 
     def _set_settings(self, settings: dict):
         """This function will set the settings of the derived settings class from a dictionary."""

@@ -1,9 +1,9 @@
 import math
 from abc import ABC, abstractmethod
-from typing import Dict, Tuple, List
+from typing import Dict, List, Tuple
 
 import numpy as np
-from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
+from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.scenario.scenario import ScenarioID
 from similaritymeasures import similaritymeasures
 
@@ -15,7 +15,9 @@ class Mapping(ABC):
     The class is responsible for mapping the CommonRoad elements to supported instances by the corresponding solver.
     """
 
-    def __init__(self, network: LaneletNetwork, config: MapVerParams = MapVerParams(), scenario_id: ScenarioID = ScenarioID()):
+    def __init__(
+        self, network: LaneletNetwork, config: MapVerParams = MapVerParams(), scenario_id: ScenarioID = ScenarioID()
+    ):
         """
         Constructor.
 
@@ -23,7 +25,9 @@ class Mapping(ABC):
         :param config: Configuration.
         :param scenario_id: ScenarioID.
         """
-        self._complete_map_name = str(scenario_id.country_id)+'_'+str(scenario_id.map_name)+'-'+str(scenario_id.map_id)
+        self._complete_map_name = (
+            str(scenario_id.country_id) + "_" + str(scenario_id.map_name) + "-" + str(scenario_id.map_id)
+        )
         self._network = network
         self._config = config
 
@@ -129,9 +133,9 @@ class Preprocessing(ABC):
         :param is_same_dir: Same of opposite direction.
         :return: Adjacency type.
         """
-        parallel = 'Parallel'
-        merge = 'Merge'
-        fork = 'Fork'
+        parallel = "Parallel"
+        merge = "Merge"
+        fork = "Fork"
 
         if not is_same_dir:
             return parallel
@@ -181,7 +185,7 @@ class Preprocessing(ABC):
             start_v_1 = polyline_1[0]
             end_v_1 = polyline_1[len(polyline_1) - 1]
 
-            thresh = 5.
+            thresh = 5.0
 
             near_points = True
             for v_0, v_1 in zip([start_v_0, end_v_0], [start_v_1, end_v_1]):
@@ -235,4 +239,3 @@ class Preprocessing(ABC):
             adjacencies.update({lanelet.lanelet_id: adjs})
 
         return adjacencies
-

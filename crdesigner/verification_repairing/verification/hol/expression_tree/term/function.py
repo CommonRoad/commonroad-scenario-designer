@@ -1,8 +1,10 @@
 import warnings
-from typing import List, Callable, Any, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 
-from crdesigner.verification_repairing.verification.hol.expression_tree.term.term import Term
 from crdesigner.verification_repairing.verification.hol.context import Context
+from crdesigner.verification_repairing.verification.hol.expression_tree.term.term import (
+    Term,
+)
 
 
 class Function(Term):
@@ -45,10 +47,10 @@ class Function(Term):
 
         :return: String.
         """
-        string = self._name + '('
+        string = self._name + "("
         for i, term in enumerate(self._terms):
-            string += term.to_string() + (', ' if i < len(self._terms) - 1 else '')
-        return string + ')'
+            string += term.to_string() + (", " if i < len(self._terms) - 1 else "")
+        return string + ")"
 
     def initialize(self, model: Context):
         """
@@ -59,7 +61,7 @@ class Function(Term):
         if self._name in model.function_funcs.keys():
             self._func = model.function_funcs[self._name]
         else:
-            warnings.warn('Unsuccessful initialization of function of term function {}!'.format(self._name))
+            warnings.warn("Unsuccessful initialization of function of term function {}!".format(self._name))
 
         for term in self._terms:
             term.initialize(model)

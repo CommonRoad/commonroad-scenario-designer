@@ -10,9 +10,7 @@ import numpy as np
 from crdesigner.config.osm_config import osm_config as config
 
 
-def write_bounds_to_file(
-    filename: str, lon1: float, lat1: float, lon2: float, lat2: float
-):
+def write_bounds_to_file(filename: str, lon1: float, lat1: float, lon2: float, lat2: float):
     """
     adds a tag to the downloaded osm file which defines the bounds of the downloaded window
     this is used in osm_parser.py to only extract points within these bounds
@@ -55,7 +53,7 @@ def download_map(filename: str, lon1: float, lat1: float, lon2: float, lat2: flo
     # query = "https://overpass-api.de/api/map?bbox={},{},{},{}".format(
     #     lon1, lat1, lon2, lat2
     # )
-    query = 'https://api.openstreetmap.org/api/0.6/map?bbox={},{},{},{}'.format(lon1, lat1, lon2, lat2)
+    query = "https://api.openstreetmap.org/api/0.6/map?bbox={},{},{},{}".format(lon1, lat1, lon2, lat2)
     print("downloading map")
     data = urlopen(query).read()
     with open(filename, "wb") as file:
@@ -64,9 +62,7 @@ def download_map(filename: str, lon1: float, lat1: float, lon2: float, lat2: flo
     write_bounds_to_file(filename, lon1, lat1, lon2, lat2)
 
 
-def get_frame(
-    lon: float, lat: float, radius: float
-) -> Tuple[float, float, float, float]:
+def get_frame(lon: float, lat: float, radius: float) -> Tuple[float, float, float, float]:
     """
     gets the frame of area to download
 

@@ -1,7 +1,8 @@
 from typing import Any, Iterable
+
 from commonroad.scenario.lanelet import Lanelet
-from commonroad.scenario.traffic_sign import TrafficSign
 from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.scenario.traffic_sign import TrafficSign
 
 
 def equal(val_0: Any, val_1: Any) -> bool:

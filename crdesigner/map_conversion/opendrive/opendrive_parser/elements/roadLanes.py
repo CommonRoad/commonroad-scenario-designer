@@ -1,12 +1,15 @@
 from __future__ import annotations
-from typing import Union
-from typing import TYPE_CHECKING
+
 import logging
+import warnings
+from typing import TYPE_CHECKING, Union
+
 if TYPE_CHECKING:
     from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road_record import RoadRecord
-import warnings
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road_record import (
+    RoadRecord,
+)
 
 
 class Lanes:
@@ -511,12 +514,7 @@ class LaneWidth(RoadRecord):
     :ivar length: length of the position on the lane corresponding to the width
     """
 
-    def __init__(
-        self,
-        *polynomial_coefficients: float,
-        idx: int = None,
-        start_offset: float = None
-    ):
+    def __init__(self, *polynomial_coefficients: float, idx: int = None, start_offset: float = None):
         """
         Constructor of class LaneWidth.
 
@@ -575,6 +573,7 @@ class RoadMark:
         in ascending order from right to left. If the attribute is missing, “both” is used as default.
     :ivar _height: height of the road mark
     """
+
     def __init__(self):
         self._SOffset = None
         self._type = None
@@ -642,7 +641,8 @@ class RoadMark:
         """
         if value is None:
             logging.warning(
-                    "RoadMark::weight: Parser could not find value for road_mark.weight, standard is used per default.")
+                "RoadMark::weight: Parser could not find value for road_mark.weight, standard is used per default."
+            )
             value = "standard"
         self._weight = str(value)
 

@@ -1,11 +1,21 @@
 import enum
 from typing import List
 
-from crdesigner.verification_repairing.verification.hol.expression_tree.domain.domain import Domain
-from crdesigner.verification_repairing.verification.hol.expression_tree.expression import Expression
-from crdesigner.verification_repairing.verification.hol.expression_tree.symbols import Symbol
-from crdesigner.verification_repairing.verification.hol.expression_tree.term.variable import Variable
-from crdesigner.verification_repairing.verification.hol.expression_tree.unary.first_order.first_order import FirstOrder
+from crdesigner.verification_repairing.verification.hol.expression_tree.domain.domain import (
+    Domain,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.expression import (
+    Expression,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.symbols import (
+    Symbol,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.term.variable import (
+    Variable,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.unary.first_order.first_order import (
+    FirstOrder,
+)
 
 
 class Counting(FirstOrder):
@@ -18,14 +28,14 @@ class Counting(FirstOrder):
         Enum representing the type of the counting quantifier.
         """
 
-        EQUAL = '='
-        LESS_EQUAL = '<='
-        GREATER_EQUAL = '>='
+        EQUAL = "="
+        LESS_EQUAL = "<="
+        GREATER_EQUAL = ">="
 
     def __init__(self, expr: Expression, vars: List[Variable], domains: List[Domain], count_type: CountType, num: int):
         """
         Constructor.
-        
+
         :param expr: Expression.
         :param vars: Variables.
         :param domains: Domains.

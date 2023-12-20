@@ -1,11 +1,17 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
 
 from commonroad.scenario.lanelet import LaneletNetwork
 
 from crdesigner.verification_repairing.config import MapVerParams
-from crdesigner.verification_repairing.verification.formula_ids import LaneletFormulaID, FormulaID, TrafficSignFormulaID, TrafficLightFormulaID, \
-    IntersectionFormulaID, FormulaTypes
+from crdesigner.verification_repairing.verification.formula_ids import (
+    FormulaID,
+    FormulaTypes,
+    IntersectionFormulaID,
+    LaneletFormulaID,
+    TrafficLightFormulaID,
+    TrafficSignFormulaID,
+)
 from crdesigner.verification_repairing.verification.satisfaction import InvalidStates
 
 
@@ -21,8 +27,8 @@ class InvalidState:
 class MapVerificationResult:
     """Dataclass storing all information of a result of a map verification ."""
 
-    verification_time: float = 0.
-    repairing_time: float = 0.
+    verification_time: float = 0.0
+    repairing_time: float = 0.0
     invalid_states: List[InvalidState] = field(default_factory=list)
 
 
@@ -30,7 +36,7 @@ class MapVerificationResult:
 class MapVerification:
     """Dataclass storing all information of a map verification ."""
 
-    benchmark_id: str = ''
+    benchmark_id: str = ""
     config: MapVerParams = field(default_factory=MapVerParams)
     map_verification_result: MapVerificationResult = field(default_factory=MapVerificationResult)
 
@@ -100,8 +106,7 @@ def extract_invalid_states(verification_result: VerificationResult) -> Dict[str,
     return invalid_states
 
 
-def extract_verification_parameters(verification_result: VerificationResult) \
-        -> Dict[str, Tuple[int, int, bool]]:
+def extract_verification_parameters(verification_result: VerificationResult) -> Dict[str, Tuple[int, int, bool]]:
     """
     Extracts parameters of all map verification s.
 
@@ -110,14 +115,17 @@ def extract_verification_parameters(verification_result: VerificationResult) \
     """
     verification_params = {}
     for map_verification in verification_result.map_verifications:
-        verification_params[map_verification.benchmark_id] = \
-            (map_verification.config.verification.max_iterations, map_verification.config.verification.num_threads,
-             map_verification.config.evaluation.partitioned)
+        verification_params[map_verification.benchmark_id] = (
+            map_verification.config.verification.max_iterations,
+            map_verification.config.verification.num_threads,
+            map_verification.config.evaluation.partitioned,
+        )
     return verification_params
 
 
-def initial_map_verification(verification_result: VerificationResult, benchmark_id: str,
-                             config: MapVerParams) -> MapVerification:
+def initial_map_verification(
+    verification_result: VerificationResult, benchmark_id: str, config: MapVerParams
+) -> MapVerification:
     """
     Initializes a new map verification .
 
@@ -140,8 +148,9 @@ def initial_map_verification(verification_result: VerificationResult, benchmark_
     return map_verification
 
 
-def update_map_verification(map_verification: MapVerification, verification_time: float, repairing_time: float,
-                            invalid_states: InvalidStates):
+def update_map_verification(
+    map_verification: MapVerification, verification_time: float, repairing_time: float, invalid_states: InvalidStates
+):
     """
     Updates a map verification .
 
@@ -165,10 +174,11 @@ def update_map_verification(map_verification: MapVerification, verification_time
 class MapVerificationComparison:
     """Dataclass storing all information for comparing map verification s."""
 
-    map_id: str = ''
+    map_id: str = ""
     comp_time: float = 0.0
-    most_violated_spec: Dict[str, int] = \
-        field(default_factory=lambda: {formula.name: 0 for formula_type in FormulaTypes for formula in formula_type})
+    most_violated_spec: Dict[str, int] = field(
+        default_factory=lambda: {formula.name: 0 for formula_type in FormulaTypes for formula in formula_type}
+    )
     repairing_time: float = 0.0
     num_invalid_states: int = 0
     executions: int = 0

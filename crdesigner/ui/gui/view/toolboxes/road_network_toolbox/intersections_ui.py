@@ -1,19 +1,17 @@
-from typing import Optional
+from typing import List, Optional
 
-from PyQt6.QtWidgets import *
-from PyQt6.QtCore import *
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QComboBox, QTableWidgetItem
 
 from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox
-from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
-    RoadNetworkToolboxUI
-
-from commonroad.scenario.traffic_sign import *
+from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import (
+    RoadNetworkToolboxUI,
+)
 
 
 class AddIntersectionUI:
-
     def __init__(self, scenario_model: ScenarioModel, road_network_toolbox_ui: RoadNetworkToolboxUI):
         self.road_network_toolbox_ui = road_network_toolbox_ui
         self.scenario_model = scenario_model
@@ -24,7 +22,8 @@ class AddIntersectionUI:
         Updates incoming table information.
         """
         selected_intersection = self.scenario_model.find_intersection_by_id(
-                int(self.road_network_toolbox_ui.selected_intersection.currentText()))
+            int(self.road_network_toolbox_ui.selected_intersection.currentText())
+        )
         for inc in selected_intersection.incomings:
             self.road_network_toolbox_ui.intersection_incomings_table.setItem(0, 0, inc.incoming_id)
 
@@ -44,15 +43,18 @@ class AddIntersectionUI:
         @param incoming_ids: List of available incoming IDs.
         """
         if incoming_ids is None:
-            incoming_ids = [self.road_network_toolbox_ui.intersection_incomings_table.item(row, 0).text() for row in
-                            range(self.road_network_toolbox_ui.intersection_incomings_table.rowCount())]
+            incoming_ids = [
+                self.road_network_toolbox_ui.intersection_incomings_table.item(row, 0).text()
+                for row in range(self.road_network_toolbox_ui.intersection_incomings_table.rowCount())
+            ]
         for row in range(self.road_network_toolbox_ui.intersection_incomings_table.rowCount()):
             combo_box_left_of = QComboBox()
             combo_box_left_of.addItems(incoming_ids)
             if row != self.road_network_toolbox_ui.intersection_incomings_table.rowCount() - 1:
                 index = self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).findText(
-                        self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).currentText(),
-                        Qt.MatchFixedString)
+                    self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).currentText(),
+                    Qt.MatchFixedString,
+                )
             else:
                 index = -1
             self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(row, 5, combo_box_left_of)
@@ -62,23 +64,32 @@ class AddIntersectionUI:
     def set_default_intersection_information(self):
         self.road_network_toolbox_ui.selected_intersection.clear()
         self.road_network_toolbox_ui.selected_intersection.addItems(
-                ["None"] + [str(item) for item in self.scenario_model.collect_intersection_ids()])
+            ["None"] + [str(item) for item in self.scenario_model.collect_intersection_ids()]
+        )
         self.road_network_toolbox_ui.selected_intersection.setCurrentIndex(0)
 
         self.road_network_toolbox_ui.intersection_crossings.clear()
         self.road_network_toolbox_ui.intersection_crossings.addItems(
-                ["None"] + [str(item) for item in self.scenario_model.collect_lanelet_ids()])
+            ["None"] + [str(item) for item in self.scenario_model.collect_lanelet_ids()]
+        )
         self.road_network_toolbox_ui.intersection_crossings.setCurrentIndex(0)
 
         self.road_network_toolbox_ui.intersection_lanelet_to_fit.clear()
-        self.road_network_toolbox_ui.intersection_lanelet_to_fit.addItems(["None"] + [
-            str(item) for item in self.scenario_model.collect_incoming_lanelet_ids_from_intersection(
-                    self.road_network_toolbox_ui.selected_intersection.currentText())])
+        self.road_network_toolbox_ui.intersection_lanelet_to_fit.addItems(
+            ["None"]
+            + [
+                str(item)
+                for item in self.scenario_model.collect_incoming_lanelet_ids_from_intersection(
+                    self.road_network_toolbox_ui.selected_intersection.currentText()
+                )
+            ]
+        )
         self.road_network_toolbox_ui.intersection_lanelet_to_fit.setCurrentIndex(0)
 
         self.road_network_toolbox_ui.other_lanelet_to_fit.clear()
         self.road_network_toolbox_ui.other_lanelet_to_fit.addItems(
-                ["None"] + [str(item) for item in self.scenario_model.collect_lanelet_ids()])
+            ["None"] + [str(item) for item in self.scenario_model.collect_lanelet_ids()]
+        )
         self.road_network_toolbox_ui.other_lanelet_to_fit.setCurrentIndex(0)
 
         self.road_network_toolbox_ui.intersection_incomings_table.setRowCount(0)
@@ -95,27 +106,40 @@ class AddIntersectionUI:
             for incoming in intersection.incomings:
                 self.add_incoming_to_table(False, incoming_ids)
                 num_rows = self.road_network_toolbox_ui.intersection_incomings_table.rowCount()
-                self.road_network_toolbox_ui.intersection_incomings_table.setItem(num_rows - 1, 0, QTableWidgetItem(
-                        str(incoming.incoming_id)))
+                self.road_network_toolbox_ui.intersection_incomings_table.setItem(
+                    num_rows - 1, 0, QTableWidgetItem(str(incoming.incoming_id))
+                )
                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 1).set_checked_items(
-                        [str(la_id) for la_id in incoming.incoming_lanelets])
+                    [str(la_id) for la_id in incoming.incoming_lanelets]
+                )
                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 2).set_checked_items(
-                        [str(la_id) for la_id in incoming.successors_left])
+                    [str(la_id) for la_id in incoming.successors_left]
+                )
                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 3).set_checked_items(
-                        [str(la_id) for la_id in incoming.successors_straight])
+                    [str(la_id) for la_id in incoming.successors_straight]
+                )
                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 4).set_checked_items(
-                        [str(la_id) for la_id in incoming.successors_right])
+                    [str(la_id) for la_id in incoming.successors_right]
+                )
                 index = self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 5).findText(
-                        str(incoming.left_of))
+                    str(incoming.left_of)
+                )
                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 5).setCurrentIndex(
-                        index)
+                    index
+                )
             self.road_network_toolbox_ui.intersection_crossings.set_checked_items(
-                    [str(cr) for cr in intersection.crossings])
+                [str(cr) for cr in intersection.crossings]
+            )
 
             self.road_network_toolbox_ui.intersection_lanelet_to_fit.clear()
             current_text = self.road_network_toolbox_ui.selected_intersection.currentText()
-            self.road_network_toolbox_ui.intersection_lanelet_to_fit.addItems(["None"] + [str(item) for item in
-                                      self.scenario_model.collect_incoming_lanelet_ids_from_intersection(current_text)])
+            self.road_network_toolbox_ui.intersection_lanelet_to_fit.addItems(
+                ["None"]
+                + [
+                    str(item)
+                    for item in self.scenario_model.collect_incoming_lanelet_ids_from_intersection(current_text)
+                ]
+            )
             self.road_network_toolbox_ui.intersection_lanelet_to_fit.setCurrentIndex(0)
 
     @logger.log
@@ -136,8 +160,8 @@ class AddIntersectionUI:
         lanelet_ids = [str(la_id) for la_id in self.scenario_model.collect_lanelet_ids()]
         if new_incoming:
             self.road_network_toolbox_ui.intersection_incomings_table.setItem(
-                    num_rows,
-                    0,QTableWidgetItem(str(self.scenario_model.generate_object_id())))
+                num_rows, 0, QTableWidgetItem(str(self.scenario_model.generate_object_id()))
+            )
         combo_box_lanelets = CheckableComboBox()
         combo_box_lanelets.addItems(lanelet_ids)
         self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(num_rows, 1, combo_box_lanelets)
@@ -146,8 +170,9 @@ class AddIntersectionUI:
         self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(num_rows, 2, combo_box_successors_left)
         combo_box_successors_straight = CheckableComboBox()
         combo_box_successors_straight.addItems(lanelet_ids)
-        self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(num_rows, 3,
-                                                                                combo_box_successors_straight)
+        self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(
+            num_rows, 3, combo_box_successors_straight
+        )
         combo_box_successors_right = CheckableComboBox()
         combo_box_successors_right.addItems(lanelet_ids)
         self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(num_rows, 4, combo_box_successors_right)

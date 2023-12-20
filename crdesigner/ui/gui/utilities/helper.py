@@ -1,12 +1,12 @@
 from typing import List
+
 import numpy as np
-from matplotlib.path import Path
 from matplotlib.patches import PathPatch
+from matplotlib.path import Path
 
 
 def _merge_dict(source, destination):
-    """deeply merges two dicts
-    """
+    """deeply merges two dicts"""
     for key, value in source.items():
         if isinstance(value, dict):
             # get node or create one
@@ -67,9 +67,7 @@ def unit_vector(vector):
 def angle_between(v1, v2):
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
-    minor = np.linalg.det(
-        np.stack((v2_u[-2:], v1_u[-2:]))
-    )
+    minor = np.linalg.det(np.stack((v2_u[-2:], v1_u[-2:])))
     if minor == 0:
-        raise NotImplementedError('Too odd vectors =(')
+        raise NotImplementedError("Too odd vectors =(")
     return np.sign(minor) * np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))

@@ -1,9 +1,15 @@
-from typing import Tuple, Optional, List
+from typing import List, Optional, Tuple
+
 import numpy as np
 from numpy.polynomial import polynomial
 from pyproj import Transformer
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import RoadMark
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import Border
+
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import (
+    Border,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+    RoadMark,
+)
 
 
 class ParametricLaneBorderGroup:
@@ -32,8 +38,14 @@ class ParametricLaneBorderGroup:
         self.outer_border_offset = outer_border_offset
 
     def calc_border_position(
-        self, border: str, s_pos: float, width_offset: float, is_last_pos: bool = False, reverse=False,
-            compute_curvature: bool = True) -> Tuple[Tuple[float, float], float]:
+        self,
+        border: str,
+        s_pos: float,
+        width_offset: float,
+        is_last_pos: bool = False,
+        reverse=False,
+        compute_curvature: bool = True,
+    ) -> Tuple[Tuple[float, float], float]:
         """Calc vertices point of inner or outer Border.
 
         :param border: Which border to calculate (inner or outer)
@@ -48,13 +60,14 @@ class ParametricLaneBorderGroup:
             raise ValueError("Border specified must be 'inner' or 'outer'!")
 
         select_border = self.inner_border if border == "inner" else self.outer_border
-        select_offset = (
-            self.inner_border_offset if border == "inner" else self.outer_border_offset
-        )
+        select_offset = self.inner_border_offset if border == "inner" else self.outer_border_offset
 
         return select_border.calc(
-            select_offset + s_pos, width_offset=width_offset, is_last_pos=is_last_pos, reverse=reverse,
-            compute_curvature=compute_curvature
+            select_offset + s_pos,
+            width_offset=width_offset,
+            is_last_pos=is_last_pos,
+            reverse=reverse,
+            compute_curvature=compute_curvature,
         )
 
     def get_width_coefficients(self) -> List:
@@ -70,6 +83,7 @@ class ParametricLane:
     """A lane defines a part of a road along a
     reference trajectory (plan view), using lane borders
     and start/stop positions (parametric)"""
+
     def __init__(
         self,
         id_: str,
@@ -79,7 +93,7 @@ class ParametricLane:
         line_marking: Optional[RoadMark] = None,
         side: Optional[str] = None,
         speed: Optional[float] = None,
-        access: Optional[List] = None
+        access: Optional[List] = None,
     ):
         """Initializes a ParametricLane object.
 
@@ -120,7 +134,8 @@ class ParametricLane:
 
         is_last_pos = np.isclose(self.length, border_pos)
         r1, r2, r3, la = self.border_group.calc_border_position(
-            border, border_pos, width_offset, is_last_pos, self.reverse, compute_curvature=compute_curvature)
+            border, border_pos, width_offset, is_last_pos, self.reverse, compute_curvature=compute_curvature
+        )
         return r1, r2, r3, la
 
     def calc_width(self, s_pos: float) -> float:
@@ -244,8 +259,9 @@ class ParametricLane:
     #         last_width_difference,
     #     )
 
-    def calc_vertices(self, error_tolerance: float, min_delta_s: float,
-                      transformer: Optional[Transformer] = None) -> Tuple[np.ndarray, np.ndarray]:
+    def calc_vertices(
+        self, error_tolerance: float, min_delta_s: float, transformer: Optional[Transformer] = None
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Convert a ParametricLane to Lanelet.
 
         :param error_tolerance: Max. error between reference geometry and polyline of vertices.
@@ -267,11 +283,11 @@ class ParametricLane:
         num_steps = int(max(3, np.ceil(self.length / float(0.5))))
         poses = np.linspace(0, self.length, num_steps)
         for s in poses:
-        #
-        # old version end
+            #
+            # old version end
 
-        # version with sampling
-        # while s <= self.length:
+            # version with sampling
+            # while s <= self.length:
             # s_cache = s + 0.0
             inner_pos, _, curvature, max_geometry_length = self.calc_border("inner", s)
             outer_pos = self.calc_border("outer", s, compute_curvature=False)[0]
@@ -309,9 +325,7 @@ class ParametricLane:
         """
 
         width_coefficients = self.border_group.get_width_coefficients()
-        if width_coefficients[0] > 0.0 and all(
-            coeff == 0.0 for coeff in width_coefficients[1:]
-        ):
+        if width_coefficients[0] > 0.0 and all(coeff == 0.0 for coeff in width_coefficients[1:]):
             # this is not correct as it should be an interval
             return [0, self.length]
         # but useful because only start and end of ParametricLane should be considered

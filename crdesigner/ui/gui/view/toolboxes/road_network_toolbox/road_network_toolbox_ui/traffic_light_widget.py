@@ -1,8 +1,18 @@
-from PyQt6.QtCore import *
-from PyQt6.QtGui import *
-from PyQt6.QtWidgets import *
-
 from commonroad.scenario.traffic_light import TrafficLightDirection
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QDoubleValidator, QFont, QIntValidator
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QFormLayout,
+    QFrame,
+    QGridLayout,
+    QGroupBox,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QVBoxLayout,
+)
 
 from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox, PositionButton
 
@@ -11,6 +21,7 @@ class TrafficLightWidget:
     """
     Inherits the traffic light widget setup
     """
+
     def __init__(self, toolbox):
         self.toolbox = toolbox
 
@@ -78,15 +89,17 @@ class TrafficLightWidget:
 
         self.toolbox.traffic_light_cycle_order = QComboBox()
         self.toolbox.traffic_light_cycle_order.addItems(
-                ["r-ry-g-y", "g-y-r-ry", "ry-g-y-r", "y-r-ry-g", "r-g", "r-g-in"])
+            ["r-ry-g-y", "g-y-r-ry", "ry-g-y-r", "y-r-ry-g", "r-g", "r-g-in"]
+        )
 
         traffic_light_layout = QFormLayout()
         traffic_light_information_layout = QFormLayout()
         traffic_light_information_groupbox = QGroupBox()
         traffic_light_information_groupbox.setLayout(traffic_light_information_layout)
         traffic_light_information_layout.addRow(label_general)
-        button_traffic_light_position = PositionButton(self.toolbox.x_position_traffic_light,
-                                                       self.toolbox.y_position_traffic_light, self.toolbox)
+        button_traffic_light_position = PositionButton(
+            self.toolbox.x_position_traffic_light, self.toolbox.y_position_traffic_light, self.toolbox
+        )
         traffic_light_position = QGridLayout()
         traffic_light_position.addWidget(QLabel("x: "), 1, 0)
         traffic_light_position.addWidget(self.toolbox.x_position_traffic_light, 1, 1)

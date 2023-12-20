@@ -1,8 +1,9 @@
 from PyQt6 import QtCore, QtWidgets
 
-from crdesigner.config.gui_config import gui_config as gui_settings_model, gui_config
+from crdesigner.config.gui_config import gui_config
 from crdesigner.config.logging import logger
-from crdesigner.config.settings_config import settings as settings_model, CONFIGS_TO_RENDER, settings
+from crdesigner.config.settings_config import CONFIGS_TO_RENDER
+from crdesigner.config.settings_config import settings as settings_model
 from crdesigner.ui.gui.view.settings.settings_ui import SettingsUI
 
 
@@ -77,6 +78,7 @@ class SettingsController:
     def _hide_and_update(self):
         self.settings_ui.settings.hide()
 
+
 @logger.log
 def _set_default():
     """
@@ -84,6 +86,7 @@ def _set_default():
     """
     for config in CONFIGS_TO_RENDER:
         config.reset_settings()
+
 
 @logger.log
 def _select_directory():

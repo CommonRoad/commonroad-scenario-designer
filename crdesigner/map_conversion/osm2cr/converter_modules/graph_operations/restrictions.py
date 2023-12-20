@@ -3,7 +3,7 @@ This Module provides a restriction class which can be used to parse OSM restrict
 These are used later in the lane linking step
 """
 
-from typing import Set, Optional
+from typing import Optional, Set
 
 known_restrictions = {"no_left_turn", "no_right_turn", "no_straight_on"}
 
@@ -38,8 +38,9 @@ def parse_restriction(restriction: str) -> Optional[Set[str]]:
 
 
 class Restriction:
-    def __init__(self, from_edge_id: int, via_element_id: int, via_element_type: str, to_edge_id: int,
-                 restriction: str):
+    def __init__(
+        self, from_edge_id: int, via_element_id: int, via_element_type: str, to_edge_id: int, restriction: str
+    ):
         """
         :param from_edge_id: id of the edge the restriction starts
         :param via_element_id: id if the element in the way of the restriction

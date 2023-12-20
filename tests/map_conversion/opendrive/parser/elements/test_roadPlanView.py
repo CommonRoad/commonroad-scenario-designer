@@ -1,5 +1,15 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import *
+
+import numpy as np
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import (
+    Arc,
+    Line,
+    ParamPoly3,
+    PlanView,
+    Poly3,
+    Spiral,
+)
 
 
 class TestRoadPlanView(unittest.TestCase):
@@ -27,7 +37,9 @@ class TestRoadPlanView(unittest.TestCase):
         length = 2
         curvStart = 1
         curvEnd = 1.2
-        plan_view.add_spiral(start_pos=start_pos, heading=heading, length=length, curv_start=curvStart, curv_end=curvEnd)
+        plan_view.add_spiral(
+            start_pos=start_pos, heading=heading, length=length, curv_start=curvStart, curv_end=curvEnd
+        )
         # arc
         start_pos = np.array([4, 5])
         heading = 1.2
@@ -47,8 +59,20 @@ class TestRoadPlanView(unittest.TestCase):
         cV = 0.2
         dV = 0.1
         pRange = 4
-        plan_view.add_param_poly3(start_pos=start_pos, heading=heading, length=length, aU=aU, bU=bU, cU=cU, dU=dU,
-                                  aV=aV, bV=bV, cV=cV, dV=dV, pRange=pRange)
+        plan_view.add_param_poly3(
+            start_pos=start_pos,
+            heading=heading,
+            length=length,
+            aU=aU,
+            bU=bU,
+            cU=cU,
+            dU=dU,
+            aV=aV,
+            bV=bV,
+            cV=cV,
+            dV=dV,
+            pRange=pRange,
+        )
         # poly 3
         start_pos = np.array([2, 5])
         length = 4
@@ -97,7 +121,9 @@ class TestRoadPlanView(unittest.TestCase):
         length = 2
         curvStart = 1
         curvEnd = 1.2
-        plan_view.add_spiral(start_pos=start_pos, heading=heading, length=length, curv_start=curvStart, curv_end=curvEnd)
+        plan_view.add_spiral(
+            start_pos=start_pos, heading=heading, length=length, curv_start=curvStart, curv_end=curvEnd
+        )
         # arc
         start_pos = np.array([4, 5])
         heading = 1.2
@@ -117,8 +143,20 @@ class TestRoadPlanView(unittest.TestCase):
         cV = 0.2
         dV = 0.1
         pRange = 4
-        plan_view.add_param_poly3(start_pos=start_pos, heading=heading, length=length, aU=aU, bU=bU, cU=cU, dU=dU,
-                                  aV=aV, bV=bV, cV=cV, dV=dV, pRange=pRange)
+        plan_view.add_param_poly3(
+            start_pos=start_pos,
+            heading=heading,
+            length=length,
+            aU=aU,
+            bU=bU,
+            cU=cU,
+            dU=dU,
+            aV=aV,
+            bV=bV,
+            cV=cV,
+            dV=dV,
+            pRange=pRange,
+        )
         # poly 3
         start_pos = np.array([2, 5])
         length = 4
@@ -136,5 +174,5 @@ class TestRoadPlanView(unittest.TestCase):
         np.testing.assert_equal(expected_res1, plan_view._precalculation[1])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

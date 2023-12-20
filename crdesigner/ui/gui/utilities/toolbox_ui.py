@@ -1,8 +1,21 @@
-
 from PyQt6 import QtGui
-from PyQt6.QtWidgets import *
-from PyQt6.QtGui import *
-from PyQt6.QtCore import *
+from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtGui import QIcon, QStandardItemModel
+from PyQt6.QtWidgets import (
+    QAbstractItemView,
+    QCheckBox,
+    QComboBox,
+    QFrame,
+    QGroupBox,
+    QPushButton,
+    QRadioButton,
+    QToolButton,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
+
 from crdesigner.config.gui_config import gui_config as config
 
 
@@ -15,6 +28,7 @@ class QHLine(QFrame):
 
 class SectionExpandButton(QPushButton):
     """a QPushbutton that can expand or collapse its section"""
+
     def __init__(self, item, text="", parent=None, mwindow=None):
         super().__init__(text, parent)
         self.mwindow = mwindow
@@ -25,9 +39,13 @@ class SectionExpandButton(QPushButton):
 
     def update_window(self):
         self.setStyleSheet(
-            'background-color:' + self.mwindow.mwindow_ui.colorscheme().highlight +
-            '; color:' + self.mwindow.mwindow_ui.colorscheme().highlight_text
-            + '; font-size:' + self.mwindow.mwindow_ui.colorscheme().font_size)
+            "background-color:"
+            + self.mwindow.mwindow_ui.colorscheme().highlight
+            + "; color:"
+            + self.mwindow.mwindow_ui.colorscheme().highlight_text
+            + "; font-size:"
+            + self.mwindow.mwindow_ui.colorscheme().font_size
+        )
 
     def on_clicked(self):
         """toggle expand/collapse of section by clicking"""
@@ -38,16 +56,16 @@ class SectionExpandButton(QPushButton):
             self.mwindow.road_network_toolbox.disable_show_of_curved_lanelet(self.text())
             self.section.setExpanded(True)
 
+
 class CheckableComboBox(QComboBox):
-    def __init__(self, mwindow=None, pred_suc = False):
+    def __init__(self, mwindow=None, pred_suc=False):
         super(CheckableComboBox, self).__init__()
         self.mwindow = mwindow
         self.view().pressed.connect(self.handle_item_pressed)
         self.setModel(QStandardItemModel(self))
-        #self.update_window()
+        # self.update_window()
 
     def handle_item_pressed(self, index):
-
         # getting which item is pressed
         item = self.model().itemFromIndex(index)
 
@@ -72,7 +90,6 @@ class CheckableComboBox(QComboBox):
 
         # traversing the items
         for i in range(self.count()):
-
             # if item is checked add it to the list
             if self.item_checked(i):
                 checked_items.append(self.itemText(i))
@@ -112,7 +129,6 @@ class CheckableComboBox(QComboBox):
 
         # traversing the items
         for i in range(self.count()):
-
             # if item is checked add it to the list
             if self.item_checked(i):
                 checked_items.append(i)
@@ -123,18 +139,17 @@ class CheckableComboBox(QComboBox):
     @staticmethod
     def update_labels(item_list):
         # method to update the label
-        n = ''
+        n = ""
         count = 0
 
         # traversing the list
         for i in item_list:
-
             # if count value is 0 don't add comma
             if count == 0:
-                n += ' % s' % i  # else value is greater then 0
+                n += " % s" % i  # else value is greater then 0
             # add comma
             else:
-                n += ', % s' % i
+                n += ", % s" % i
 
                 # increment count
             count += 1
@@ -148,11 +163,15 @@ class CheckableComboBox(QComboBox):
             p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.mwindow.mwindow_ui.colorscheme().color))
             p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(self.mwindow.mwindow_ui.colorscheme().color))
             p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.mwindow.mwindow_ui.colorscheme().color))
-            p.setColor(QtGui.QPalette.ColorRole.AlternateBase, QtGui.QColor(self.mwindow.mwindow_ui.colorscheme().background))
+            p.setColor(
+                QtGui.QPalette.ColorRole.AlternateBase, QtGui.QColor(self.mwindow.mwindow_ui.colorscheme().background)
+            )
             self.setPalette(p)
+
 
 class CollapsibleCheckBox(QCheckBox):
     """CollapsibleCheckBox which can hide or show its content (which is inside the layout)"""
+
     def __init__(self, title, layout, adding_to_layout, index, parent=None):
         super().__init__(parent)
         self.button = QCheckBox(title)
@@ -187,10 +206,12 @@ class CollapsibleCheckBox(QCheckBox):
         else:
             self.box.setMaximumSize(0, 0)
 
+
 class CollapsibleButtonBox(QRadioButton):
     """
     CollapsibleButtonBox which can hide or show its content (which is inside the layout)
     """
+
     def __init__(self, title, layout, adding_to_layout, index, parent=None):
         super().__init__(parent)
         self.button = QRadioButton(title)
@@ -227,10 +248,12 @@ class CollapsibleButtonBox(QRadioButton):
         else:
             self.box.setMaximumSize(0, 0)
 
+
 class CollapsibleArrowBox(QToolButton):
     """
     CollapsibleArrowBox which can hide or show its content (which is inside the layout)
     """
+
     def __init__(self, title, layout, adding_to_layout, index, mwindow, toolbox, parent=None):
         super().__init__(parent)
         self.button = QToolButton()
@@ -240,7 +263,9 @@ class CollapsibleArrowBox(QToolButton):
         self.button = QToolButton()
         toolbox.arrowButtons.append(self.button)
         self.toolbox = toolbox
-        self.button.setStyleSheet("QToolButton {border: none; color: " + self.mwindow.mwindow_ui.colorscheme().color + ";}")
+        self.button.setStyleSheet(
+            "QToolButton {border: none; color: " + self.mwindow.mwindow_ui.colorscheme().color + ";}"
+        )
         self.button.setText(title)
         self.button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         self.button.setArrowType(Qt.ArrowType.RightArrow)
@@ -259,7 +284,6 @@ class CollapsibleArrowBox(QToolButton):
         self.adding_to_layout = adding_to_layout
 
     def pressed(self):
-
         if not self.toggle_checked:
             self.box.setMaximumSize(1000, 1000)
             self.button.setArrowType(Qt.ArrowType.DownArrow)
@@ -275,9 +299,11 @@ class CollapsibleArrowBox(QToolButton):
         if self.button in self.toolbox.arrowButtons:
             self.toolbox.arrowButtons.remove(self.button)
 
+
 class PosB:
     """PosB is used for connecting PositionButton with functionallity of retrieving the coordinates.
     It saves the x and y position of the last position of the mouse pressed event"""
+
     def __init__(self, x_position, y_position, parent=None):
         self.x_position = x_position
         self.y_position = y_position
@@ -286,6 +312,7 @@ class PosB:
 class PositionButton(QPushButton):
     """PositionButton is used to select a position on the canvas and insert it in the
     x_position and y_position QLineEdit"""
+
     def __init__(self, x_position, y_position, toolbox, parent=None):
         super().__init__("", parent)
         self.setIcon(QIcon(":/icons/target.png"))
@@ -319,12 +346,20 @@ class PositionButton(QPushButton):
 
     def update_window(self):
         if self.button_pressed:
-            self.setStyleSheet("color: " + self.toolbox.mwindow.mwindow_ui.colorscheme().highlight_text +
-                               "; background-color: " + self.toolbox.mwindow.mwindow_ui.colorscheme().highlight)
+            self.setStyleSheet(
+                "color: "
+                + self.toolbox.mwindow.mwindow_ui.colorscheme().highlight_text
+                + "; background-color: "
+                + self.toolbox.mwindow.mwindow_ui.colorscheme().highlight
+            )
             self.setIcon(QIcon(":/icons/target.png"))
         else:
-            self.setStyleSheet("color: " + self.toolbox.mwindow.mwindow_ui.colorscheme().highlight +
-                               "; background-color: " + self.toolbox.mwindow.mwindow_ui.colorscheme().second_background)
+            self.setStyleSheet(
+                "color: "
+                + self.toolbox.mwindow.mwindow_ui.colorscheme().highlight
+                + "; background-color: "
+                + self.toolbox.mwindow.mwindow_ui.colorscheme().second_background
+            )
             if config.DARKMODE:
                 self.setIcon(QIcon(":/icons/target-darkmode.png"))
             else:
@@ -333,11 +368,12 @@ class PositionButton(QPushButton):
     def remove(self):
         self.toolbox.position_buttons.remove(self)
 
+
 class Toolbox(QWidget):
     """a dialog to which collapsible sections can be added;
     reimplement define_sections() to define sections and
     add them as (title, widget) tuples to self.sections
-        """
+    """
 
     def __init__(self, mwindow):
         super().__init__()
@@ -362,9 +398,9 @@ class Toolbox(QWidget):
 
     def add_sections(self):
         """adds a collapsible sections for every
-            (title, widget) tuple in self.sections
-            """
-        for (title, widget) in self.sections:
+        (title, widget) tuple in self.sections
+        """
+        for title, widget in self.sections:
             button1 = self.add_button(title)
             section1 = self.add_widget(button1, widget)
             button1.addChild(section1)
@@ -400,7 +436,9 @@ class Toolbox(QWidget):
             i.setStyleSheet("QToolButton {border: none; color: " + self.mwindow.mwindow_ui.colorscheme().color + ";}")
 
         p = QtGui.QPalette()
-        p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.mwindow.mwindow_ui.colorscheme().second_background))
+        p.setColor(
+            QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.mwindow.mwindow_ui.colorscheme().second_background)
+        )
         p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.mwindow.mwindow_ui.colorscheme().second_background))
         p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.mwindow_ui.colorscheme().background))
         p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.mwindow.mwindow_ui.colorscheme().color))
