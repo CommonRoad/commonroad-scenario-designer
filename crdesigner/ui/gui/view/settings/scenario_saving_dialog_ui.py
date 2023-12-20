@@ -1,4 +1,5 @@
-from commonroad.scenario.scenario import Tag, TimeOfDay, Underground, Weather
+from commonroad.common.common_scenario import TimeOfDay, Underground, Weather
+from commonroad.scenario.scenario import Tag
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QDoubleValidator, QFont, QIntValidator
