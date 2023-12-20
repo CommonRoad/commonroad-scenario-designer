@@ -1,5 +1,5 @@
-import uuid
 import logging
+import uuid
 
 from commonroad.scenario.scenario import Scenario
 
@@ -8,19 +8,23 @@ from crdesigner.ui.gui.utilities.util import Observable
 
 # try to import sumo functionality
 try:
+    from sumocr.interface.sumo_simulation import SumoSimulation
+
     from crdesigner.map_conversion.sumo_map.config import SumoConfig
     from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
-    from sumocr.interface.sumo_simulation import SumoSimulation
 
     SUMO_AVAILABLE = True
 except ImportError:
-    logging.warning("Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
-                    "The GUI and other map conversions should work.")
+    logging.warning(
+        "Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
+        "The GUI and other map conversions should work."
+    )
     SUMO_AVAILABLE = False
 
-from PyQt6.QtWidgets import QMessageBox, QFrame
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import QThread
+from PyQt6.QtWidgets import QFrame, QMessageBox
+
 
 class SimulationWorker(QThread):
     def __init__(self, scenario, config, output_folder):
@@ -130,15 +134,11 @@ class SUMOSimulation(QFrame):
         simulates the current scenario and returns the simulated version
         """
         if not self._scenario:
-            error(
-                self,
-                "No Scenario loaded, load a valid commonroad scenario to simulate"
-            )
+            error(self, "No Scenario loaded, load a valid commonroad scenario to simulate")
             return False
 
         self.waiting_msg = WaitingDialog()
-        self.worker: ConversionWorker = ConversionWorker(
-            self._scenario, self._config, output_folder)
+        self.worker: ConversionWorker = ConversionWorker(self._scenario, self._config, output_folder)
         self.worker.finished.connect(self.simulation_done)
         self.worker.start()
 
@@ -154,15 +154,11 @@ class SUMOSimulation(QFrame):
         simulates the current scenario and returns the simulated version
         """
         if not self._scenario:
-            error(
-                self,
-                "No Scenario loaded, load a valid commonroad scenario to simulate"
-            )
+            error(self, "No Scenario loaded, load a valid commonroad scenario to simulate")
             return False
 
         self.waiting_msg = WaitingDialog()
-        self.worker: SimulationWorker = SimulationWorker(
-            self._scenario, self._config, self._output_folder)
+        self.worker: SimulationWorker = SimulationWorker(self._scenario, self._config, self._output_folder)
         self.worker.finished.connect(self.simulation_done)
         self.worker.start()
 
@@ -182,7 +178,6 @@ class SUMOSimulation(QFrame):
             QMessageBox.critical(
                 None,
                 "SUMO Simulation",
-                "The SUMO Simulation encountered an error:\n{}".format(
-                    self.worker.error),
+                "The SUMO Simulation encountered an error:\n{}".format(self.worker.error),
                 QMessageBox.StandardButton.Ok,
             )

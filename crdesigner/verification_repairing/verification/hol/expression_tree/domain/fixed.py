@@ -1,5 +1,8 @@
 from typing import Any, Set
-from crdesigner.verification_repairing.verification.hol.expression_tree.domain.domain import Domain
+
+from crdesigner.verification_repairing.verification.hol.expression_tree.domain.domain import (
+    Domain,
+)
 
 
 class FixedDomain(Domain):

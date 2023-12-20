@@ -1,4 +1,4 @@
-from crdesigner.config.config_base import BaseConfig, Attribute
+from crdesigner.config.config_base import Attribute, BaseConfig
 
 
 class GeneralConfig(BaseConfig):

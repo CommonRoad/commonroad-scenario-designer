@@ -4,10 +4,10 @@ from typing import List
 
 import numpy as np
 from commonroad.scenario.lanelet import Lanelet
-from shapely.geometry import LineString, Polygon, Point
+from shapely.geometry import LineString, Point, Polygon
 
-Line = collections.namedtuple('Line', 'x1 y1 x2 y2')
-LPoint = collections.namedtuple('Point', 'x y')
+Line = collections.namedtuple("Line", "x1 y1 x2 y2")
+LPoint = collections.namedtuple("Point", "x y")
 
 
 def check_line_intersection_efficient(line1: List[List[float]], line2: List[List[float]]) -> bool:
@@ -18,12 +18,14 @@ def check_line_intersection_efficient(line1: List[List[float]], line2: List[List
     :param line2: Line consisting of two 2D points.
     :return: Boolean indicating whether lines intersect.
     """
+
     def ccw(p1: List[float], p2: List[float], p3: List[float]):
         return (p3[1] - p1[1]) * (p2[0] - p1[0]) > (p2[1] - p1[1]) * (p3[0] - p1[0])
 
     # Return true if line segments AB and CD intersect
-    return (ccw(line1[0], line2[0], line2[1]) != ccw(line1[1], line2[0], line2[1])
-            and ccw(line1[0], line1[1], line2[0]) != ccw(line1[0], line1[1], line2[1]))
+    return ccw(line1[0], line2[0], line2[1]) != ccw(line1[1], line2[0], line2[1]) and ccw(
+        line1[0], line1[1], line2[0]
+    ) != ccw(line1[0], line1[1], line2[1])
 
 
 def check_intersected_lines(line1: np.ndarray, line2: np.ndarray = None, excluded_points=None) -> bool:
@@ -44,10 +46,10 @@ def check_intersected_lines(line1: np.ndarray, line2: np.ndarray = None, exclude
     line_string2 = LineString([(x, y) for x, y in line2])
     intersection = line_string1.intersection(line_string2)
 
-    if type(intersection) == LineString:
+    if isinstance(intersection, LineString):
         return False
 
-    if type(intersection) == Point:
+    if isinstance(intersection, Point):
         intersection_point = [intersection.x, intersection.y]
         for excluded_point in excluded_points:
             if excluded_point == intersection_point:
@@ -138,9 +140,9 @@ def insert_vertices(long_polyline: np.ndarray, short_polyline: np.ndarray) -> np
             ub = org_polyline[value]
             lb = short_polyline[last_key]
             for idx in range(1, counter + 1):
-                insertion_factor = \
-                    (path_length_percentage_long[last_key + idx] - path_length_percentage_long[last_key]) / \
-                    (path_length_percentage_long[key] - path_length_percentage_long[last_key])
+                insertion_factor = (
+                    path_length_percentage_long[last_key + idx] - path_length_percentage_long[last_key]
+                ) / (path_length_percentage_long[key] - path_length_percentage_long[last_key])
                 new_vertex = insertion_factor * (ub - lb) + lb
                 short_polyline_updated = np.insert(short_polyline, last_key + idx, new_vertex, 0)
                 short_polyline = short_polyline_updated
@@ -170,8 +172,9 @@ def create_mapping(path_length_percentage_long: np.ndarray, path_length_percenta
         value = path_length_percentage_short[key]
         threshold = 0.01
         while key not in index_mapping and not finished:
-            for idx_long in range(last_idx_long,
-                                  len(path_length_percentage_long) - (len(path_length_percentage_short) - key) + 1):
+            for idx_long in range(
+                last_idx_long, len(path_length_percentage_long) - (len(path_length_percentage_short) - key) + 1
+            ):
                 if abs(path_length_percentage_long[idx_long] - value) < threshold and index_mapping[idx_long] == -1:
                     index_mapping[idx_long] = key
                     last_idx_long = idx_long
@@ -195,8 +198,9 @@ def compute_path_length_from_polyline(polyline: np.ndarray) -> np.ndarray:
     :param polyline: Polyline with 2D points
     :return: Path length of the polyline
     """
-    assert isinstance(polyline, np.ndarray) and polyline.ndim == 2 and len(
-        polyline[:, 0]) > 2, 'Polyline malformed for pathlength computation p={}'.format(polyline)
+    assert (
+        isinstance(polyline, np.ndarray) and polyline.ndim == 2 and len(polyline[:, 0]) > 2
+    ), "Polyline malformed for pathlength computation p={}".format(polyline)
     distance = [0]
     for i in range(1, len(polyline)):
         distance.append(distance[i - 1] + np.linalg.norm(polyline[i] - polyline[i - 1]))

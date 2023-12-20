@@ -1,7 +1,8 @@
-import unittest
 import os
-from crdesigner.config.settings_config import settings
+import unittest
+
 from crdesigner.config.osm_config import osm_config
+from crdesigner.config.settings_config import settings
 
 
 class TestConfiguration(unittest.TestCase):
@@ -18,5 +19,5 @@ class TestConfiguration(unittest.TestCase):
         self.assertTrue(osm_config.LOAD_TUNNELS)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -1,5 +1,5 @@
 stages:
-    - static_check
+    - style_check
     - test
     - deploy
 
@@ -20,26 +20,20 @@ default:
 
 
 # static_check
-prospector_source:
-  stage: static_check
+formatting_check:
+  stage: style_check
+  before_script: [ ]
   script:
-    - prospector crdesigner/
-  allow_failure: true
-  needs: []
+    - pip install black isort
+    - black --check .
+    - isort --check-only .
 
-prospector_test:
-  stage: static_check
+lint_flake8:
+  stage: style_check
+  before_script: [ ]
   script:
-    - prospector tests/
-  allow_failure: true
-  needs: []
-
-prospector_tutorials:
-  stage: static_check
-  script:
-    - prospector tutorials/
-  allow_failure: true
-  needs: []
+    - pip install flake8
+    - flake8 .
 
 build_and_test_python:
   image : python:$PYTHON_VERSIONS

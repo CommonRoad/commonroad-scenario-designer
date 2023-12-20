@@ -1,4 +1,5 @@
-from typing import Optional, Dict, List
+from typing import Dict, List, Optional
+
 from lxml import etree  # type: ignore
 
 from crdesigner.map_conversion.common.utils import create_mgrs_code
@@ -9,11 +10,19 @@ class Node:
     OSM Node.
     """
 
-    def __init__(self, id_, lat, lon, ele: float = 0.0, autoware: bool = False,
-                 local_x: Optional[float] = None, local_y: Optional[float] = None):
+    def __init__(
+        self,
+        id_,
+        lat,
+        lon,
+        ele: float = 0.0,
+        autoware: bool = False,
+        local_x: Optional[float] = None,
+        local_y: Optional[float] = None,
+    ):
         """
         Initialization of Node
-        
+
         :param lat: Latitude geo position information
         :param lon: Longitude geo position information
         :param ele: Elevation (height information)
@@ -53,7 +62,7 @@ class Node:
             local_y.set("v", str(self.local_y))
             node.append(local_x)
             node.append(local_y)
-        if (self.ele != "0.0" and self.ele != '0') or self.autoware:
+        if (self.ele != "0.0" and self.ele != "0") or self.autoware:
             ele = etree.SubElement(node, "tag")
             ele.set("k", "ele")
             ele.set("v", self.ele)
@@ -109,11 +118,17 @@ class WayRelation:
     Relation for a lanelet with a left and a right way
     """
 
-    def __init__(self, id_, left_way, right_way, tag_dict: Optional[Dict[str, str]] = None,
-                 regulatory_elements: Optional[List[str]] = None):
+    def __init__(
+        self,
+        id_,
+        left_way,
+        right_way,
+        tag_dict: Optional[Dict[str, str]] = None,
+        regulatory_elements: Optional[List[str]] = None,
+    ):
         """
         Initialization of WayRelation
-        
+
         :param id_: ID of the WayRelation
         :param left_way: ID of the left_way of WayRelation
         :param right_way: ID of the right_way of WayRelation
@@ -160,12 +175,18 @@ class WayRelation:
 class RegulatoryElement:
     """Relation for a regulatory element (traffic light, traffic sign, speed limit)"""
 
-    def __init__(self, id_, refers: Optional[list] = None, yield_ways: Optional[list] = None,
-                 right_of_ways: Optional[list] = None, tag_dict: Optional[Dict[str, str]] = None,
-                 ref_line: Optional[list] = None):
+    def __init__(
+        self,
+        id_,
+        refers: Optional[list] = None,
+        yield_ways: Optional[list] = None,
+        right_of_ways: Optional[list] = None,
+        tag_dict: Optional[Dict[str, str]] = None,
+        ref_line: Optional[list] = None,
+    ):
         """
         Initialization of RegulatoryElement
-        
+
         :param id_: ID of the RegulatoryElement
         :param refers: list of the way IDs that the relation refers to
         :param yield_ways: list of the yield way IDs that the relation contains
@@ -297,7 +318,7 @@ class OSMLanelet:
     def find_regulatory_element_by_id(self, right_id: str) -> Optional[RegulatoryElement]:
         """
         Finds a right of way relation corresponding to its id.
-        
+
         :param right_id: id of the right of way relation
         :return: RegulatoryElement with the corresponding id
         """
@@ -306,7 +327,7 @@ class OSMLanelet:
     def find_right_of_way_by_id(self, right_id: str) -> Optional[RegulatoryElement]:
         """
         Finds a right of way relation corresponding to its id.
-        
+
         :param right_id: id of the right of way relation
         :return: RegulatoryElement with the corresponding id
         """
@@ -315,7 +336,7 @@ class OSMLanelet:
     def find_node_by_id(self, node_id: str) -> Optional[Node]:
         """
         Finds a node corresponding to its id.
-        
+
         :param node_id: id of the node
         :return: Node with the corresponding id
         """

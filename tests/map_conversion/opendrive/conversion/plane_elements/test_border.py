@@ -1,12 +1,17 @@
-import unittest
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import Border
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
-import numpy as np
 import math
+import unittest
+
+import numpy as np
+
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import (
+    Border,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import (
+    PlanView,
+)
 
 
 class TestBorder(unittest.TestCase):
-
     def test_initialize_border(self):
         offset = 0.0
         border = Border(offset)
@@ -36,7 +41,7 @@ class TestBorder(unittest.TestCase):
 
         s_pos = -1
         idx = border._get_width_index(s_pos, False)
-        self.assertEqual(len(border.width_coefficient_offsets)-1, idx)
+        self.assertEqual(len(border.width_coefficient_offsets) - 1, idx)
 
         s_pos = 5.4
         idx = border._get_width_index(s_pos, True)
@@ -75,9 +80,7 @@ class TestBorder(unittest.TestCase):
         width_at_s = border.width_coefficients[2]
         offset_at_s = border.width_coefficient_offsets[2]
         distance = np.polynomial.polynomial.polyval(s_pos - offset_at_s, width_at_s)
-        coord_border = coord_line + np.array(
-                [distance * math.cos(ortho_at_s), distance * math.sin(ortho_at_s)]
-        )
+        coord_border = coord_line + np.array([distance * math.cos(ortho_at_s), distance * math.sin(ortho_at_s)])
 
         coord, tang_angle, curv, max_geometry_length = border.calc(s_pos, 0.0, False, False, True)
 

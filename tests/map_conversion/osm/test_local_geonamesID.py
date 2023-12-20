@@ -1,8 +1,9 @@
 import unittest
-from pathlib import Path
-import crdesigner
+
 import crdesigner.map_conversion.osm2cr.converter_modules.utility.geonamesID as geonamesID
-from crdesigner.map_conversion.osm2cr.converter_modules.utility.labeling_create_tree import create_tree_from_file
+from crdesigner.map_conversion.osm2cr.converter_modules.utility.labeling_create_tree import (
+    create_tree_from_file,
+)
 
 
 class TestGeonameLabeling(unittest.TestCase):

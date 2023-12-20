@@ -1,8 +1,10 @@
 from abc import ABC
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-from crdesigner.verification_repairing.verification.hol.expression_tree.expression import Expression
 from crdesigner.verification_repairing.verification.hol.context import Context
+from crdesigner.verification_repairing.verification.hol.expression_tree.expression import (
+    Expression,
+)
 
 
 class Nary(Expression, ABC):
@@ -35,9 +37,9 @@ class Nary(Expression, ABC):
 
         :return: String.
         """
-        string = '('
+        string = "("
         for i, expr in enumerate(self._exprs):
-            string += expr.to_string() + (' ' + self._symbol + ' ' if i < len(self._exprs) - 1 else ')')
+            string += expr.to_string() + (" " + self._symbol + " " if i < len(self._exprs) - 1 else ")")
         return string
 
     def initialize(self, model: Context):

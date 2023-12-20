@@ -1,9 +1,13 @@
 import warnings
-from typing import List, Callable, Any, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 
-from crdesigner.verification_repairing.verification.hol.expression_tree.expression import Expression
-from crdesigner.verification_repairing.verification.hol.expression_tree.term.term import Term
 from crdesigner.verification_repairing.verification.hol.context import Context
+from crdesigner.verification_repairing.verification.hol.expression_tree.expression import (
+    Expression,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.term.term import (
+    Term,
+)
 
 
 class Predicate(Expression):
@@ -46,14 +50,14 @@ class Predicate(Expression):
 
         :return: String.
         """
-        if self._symbol in ['=', '!=', '<', '>', '<=', '>=']:
-            string = '(' + self._terms[0].to_string() + ' ' + self._symbol + ' ' + self._terms[1].to_string()
+        if self._symbol in ["=", "!=", "<", ">", "<=", ">="]:
+            string = "(" + self._terms[0].to_string() + " " + self._symbol + " " + self._terms[1].to_string()
         else:
-            string = self._symbol + '('
+            string = self._symbol + "("
             for i, term in enumerate(self._terms):
-                string += term.to_string() + (', ' if i < len(self._terms) - 1 else '')
+                string += term.to_string() + (", " if i < len(self._terms) - 1 else "")
 
-        return string + ')'
+        return string + ")"
 
     def evaluate(self) -> bool:
         """
@@ -76,7 +80,7 @@ class Predicate(Expression):
         if self._symbol in model.predicate_funcs.keys():
             self._func = model.predicate_funcs[self._symbol]
         else:
-            warnings.warn('Unsuccessful initialization of function of predicate {}!'.format(self._symbol))
+            warnings.warn("Unsuccessful initialization of function of predicate {}!".format(self._symbol))
 
         for term in self._terms:
             term.initialize(model)

@@ -23,14 +23,17 @@ SOFTWARE.
 
 import math
 
-from PyQt6.QtCore import *
-from PyQt6.QtGui import *
-from PyQt6.QtWidgets import *
+from PyQt6.QtCore import QRect, Qt, QTimer
+from PyQt6.QtGui import QColor, QColorConstants, QPainter
+from PyQt6.QtWidgets import QWidget
 
 # TODO: UTILITIES
 
+
 class QtWaitingSpinner(QWidget):
-    def __init__(self, parent, centerOnParent=True, disableParentWhenSpinning=False, modality=Qt.WindowModality.NonModal):
+    def __init__(
+        self, parent, centerOnParent=True, disableParentWhenSpinning=False, modality=Qt.WindowModality.NonModal
+    ):
         super().__init__(parent)
 
         self._centerOnParent = centerOnParent
@@ -76,8 +79,9 @@ class QtWaitingSpinner(QWidget):
             painter.rotate(rotateAngle)
             painter.translate(self._innerRadius, 0)
             distance = self.lineCountDistanceFromPrimary(i, self._currentCounter, self._numberOfLines)
-            color = self.currentLineColor(distance, self._numberOfLines, self._trailFadePercentage,
-                                          self._minimumTrailOpacity, self._color)
+            color = self.currentLineColor(
+                distance, self._numberOfLines, self._trailFadePercentage, self._minimumTrailOpacity, self._color
+            )
             painter.setBrush(color)
             rect = QRect(0, int(-self._lineWidth / 2), int(self._lineLength), int(self._lineWidth))
             painter.drawRoundedRect(rect, self._roundness, self._roundness, Qt.SizeMode.RelativeSize)
@@ -184,8 +188,10 @@ class QtWaitingSpinner(QWidget):
 
     def updatePosition(self):
         if self.parentWidget() and self._centerOnParent:
-            self.move(int(self.parentWidget().width() / 2 - self.width() / 2),
-                      int(self.parentWidget().height() / 2 - self.height() / 2))
+            self.move(
+                int(self.parentWidget().width() / 2 - self.width() / 2),
+                int(self.parentWidget().height() / 2 - self.height() / 2),
+            )
 
     def lineCountDistanceFromPrimary(self, current, primary, totalNrOfLines):
         distance = primary - current

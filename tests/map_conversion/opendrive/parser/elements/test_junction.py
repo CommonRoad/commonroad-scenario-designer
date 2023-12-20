@@ -1,5 +1,10 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import *
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import (
+    Connection,
+    Junction,
+    LaneLink,
+)
 
 
 class TestJunction(unittest.TestCase):
@@ -76,5 +81,5 @@ class TestJunction(unittest.TestCase):
         self.assertEqual(str(incoming_lane) + " > " + str(connection_lane), str(lane_link))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

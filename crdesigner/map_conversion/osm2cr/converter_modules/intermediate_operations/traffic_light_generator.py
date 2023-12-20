@@ -1,6 +1,12 @@
+from commonroad.scenario.traffic_light import (
+    TrafficLight,
+    TrafficLightCycle,
+    TrafficLightCycleElement,
+    TrafficLightDirection,
+    TrafficLightState,
+)
+
 from crdesigner.config.osm_config import osm_config as config
-from commonroad.scenario.traffic_light import TrafficLight, TrafficLightCycleElement, TrafficLightState, \
-    TrafficLightDirection, TrafficLightCycle
 
 
 class TrafficLightGenerator:
@@ -9,6 +15,7 @@ class TrafficLightGenerator:
     Traffic light cycles are based on the number of incoming lanes.
 
     """
+
     def __init__(self, number_of_incomings):
         self.number_incomings = number_of_incomings
 
@@ -17,7 +24,7 @@ class TrafficLightGenerator:
 
         # increase red phase if more than 4 incomings
         if number_of_incomings > 4:
-            self.cycle['red_phase'] += 50
+            self.cycle["red_phase"] += 50
 
         # internal variables
         self.cycle_length = sum(self.cycle.values())
@@ -27,10 +34,12 @@ class TrafficLightGenerator:
         """
         Cycle that is applied to all traffic lights
         """
-        cycle = [(TrafficLightState.RED, self.cycle['red_phase']),
-                 (TrafficLightState.RED_YELLOW, self.cycle['red_yellow_phase']),
-                 (TrafficLightState.GREEN, self.cycle['green_phase']),
-                 (TrafficLightState.YELLOW, self.cycle['yellow_phase'])]
+        cycle = [
+            (TrafficLightState.RED, self.cycle["red_phase"]),
+            (TrafficLightState.RED_YELLOW, self.cycle["red_yellow_phase"]),
+            (TrafficLightState.GREEN, self.cycle["green_phase"]),
+            (TrafficLightState.YELLOW, self.cycle["yellow_phase"]),
+        ]
         cycle_element_list = [TrafficLightCycleElement(state[0], state[1]) for state in cycle]
         return TrafficLightCycle(cycle_element_list, time_offset=self.get_time_offset())
 
@@ -56,7 +65,11 @@ class TrafficLightGenerator:
         Method to create the new traffic light
         """
 
-        new_traffic_light = TrafficLight(traffic_light_id=new_id, position=position,
-                                         traffic_light_cycle=self.get_cycle(), direction=TrafficLightDirection.ALL,
-                                         active=True)
+        new_traffic_light = TrafficLight(
+            traffic_light_id=new_id,
+            position=position,
+            traffic_light_cycle=self.get_cycle(),
+            direction=TrafficLightDirection.ALL,
+            active=True,
+        )
         return new_traffic_light

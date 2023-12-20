@@ -1,18 +1,21 @@
 import itertools
 import logging
 from collections import Counter
+
 import numpy as np
+from commonroad.scenario.lanelet import Lanelet, StopLine
+from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.scenario.traffic_sign import TrafficSign
 from shapely import LineString
 from similaritymeasures import similaritymeasures
 
-from commonroad.scenario.lanelet import Lanelet, StopLine
-from commonroad.scenario.traffic_sign import TrafficSign
-from commonroad.scenario.traffic_light import TrafficLight
-
 try:
-    from commonroad_dc.geometry.util import resample_polyline, chaikins_corner_cutting, \
-        compute_orientation_from_polyline
     from commonroad_dc.geometry.geometry import CurvilinearCoordinateSystem
+    from commonroad_dc.geometry.util import (
+        chaikins_corner_cutting,
+        compute_orientation_from_polyline,
+        resample_polyline,
+    )
 except ModuleNotFoundError:
     logging.error("MapVerification: Please install CommonRoad Drivability Checker manually.")
 
@@ -69,9 +72,11 @@ def is_left_adj_same_direction(lanelet: Lanelet, adj_lanelet: Lanelet) -> bool:
     :param adj_lanelet: Potential adjacent lanelet.
     :return: Boolean indicates whether the left adjacency of the lanelet has the same direction.
     """
-    return lanelet.adj_left_same_direction \
-        and np.linalg.norm(lanelet.left_vertices[0] - adj_lanelet.right_vertices[0]) < 1 \
+    return (
+        lanelet.adj_left_same_direction
+        and np.linalg.norm(lanelet.left_vertices[0] - adj_lanelet.right_vertices[0]) < 1
         and np.linalg.norm(lanelet.left_vertices[-1] - adj_lanelet.right_vertices[-1]) < 1
+    )
 
 
 def is_left_adj_opposite_direction(lanelet: Lanelet, adj_lanelet: Lanelet) -> bool:
@@ -82,9 +87,11 @@ def is_left_adj_opposite_direction(lanelet: Lanelet, adj_lanelet: Lanelet) -> bo
     :param adj_lanelet: Potential adjacent lanelet.
     :return: Boolean indicates whether the left adjacency of the lanelet has the same direction.
     """
-    return not lanelet.adj_left_same_direction \
-        and np.linalg.norm(lanelet.left_vertices[0] - adj_lanelet.left_vertices[-1]) < 1 \
+    return (
+        not lanelet.adj_left_same_direction
+        and np.linalg.norm(lanelet.left_vertices[0] - adj_lanelet.left_vertices[-1]) < 1
         and np.linalg.norm(lanelet.left_vertices[-1] - adj_lanelet.left_vertices[0]) < 1
+    )
 
 
 def is_right_adj_same_direction(lanelet: Lanelet, adj_lanelet: Lanelet) -> bool:
@@ -95,9 +102,11 @@ def is_right_adj_same_direction(lanelet: Lanelet, adj_lanelet: Lanelet) -> bool:
     :param adj_lanelet: Potential adjacent lanelet.
     :return: Boolean indicates whether the right adjacency of the lanelet has the same direction.
     """
-    return lanelet.adj_right_same_direction \
-        and np.linalg.norm(lanelet.right_vertices[0] - adj_lanelet.left_vertices[0]) < 1 \
+    return (
+        lanelet.adj_right_same_direction
+        and np.linalg.norm(lanelet.right_vertices[0] - adj_lanelet.left_vertices[0]) < 1
         and np.linalg.norm(lanelet.right_vertices[-1] - adj_lanelet.left_vertices[-1]) < 1
+    )
 
 
 def is_right_adj_opposite_direction(lanelet: Lanelet, adj_lanelet: Lanelet) -> bool:
@@ -108,9 +117,11 @@ def is_right_adj_opposite_direction(lanelet: Lanelet, adj_lanelet: Lanelet) -> b
     :param adj_lanelet: Potential adjacent lanelet.
     :return: Boolean indicates whether the right adjacency of the lanelet has the same direction.
     """
-    return not lanelet.adj_right_same_direction \
-        and np.linalg.norm(lanelet.right_vertices[0] - adj_lanelet.right_vertices[-1]) < 1 \
+    return (
+        not lanelet.adj_right_same_direction
+        and np.linalg.norm(lanelet.right_vertices[0] - adj_lanelet.right_vertices[-1]) < 1
         and np.linalg.norm(lanelet.right_vertices[-1] - adj_lanelet.right_vertices[0]) < 1
+    )
 
 
 def is_correct_left_right_boundary_assignment(lanelet: Lanelet) -> bool:
@@ -123,8 +134,12 @@ def is_correct_left_right_boundary_assignment(lanelet: Lanelet) -> bool:
     return not _wrong_left_right_boundary_side(lanelet.center_vertices, lanelet.left_vertices, lanelet.right_vertices)
 
 
-def _wrong_left_right_boundary_side(center_vertices: np.ndarray, left_vertices: np.ndarray,
-                                    right_vertices: np.ndarray, config: Lanelet2Config = Lanelet2Config()) -> bool:
+def _wrong_left_right_boundary_side(
+    center_vertices: np.ndarray,
+    left_vertices: np.ndarray,
+    right_vertices: np.ndarray,
+    config: Lanelet2Config = Lanelet2Config(),
+) -> bool:
     """
     Checks whether left and right boundary are swapped.
 
@@ -136,11 +151,13 @@ def _wrong_left_right_boundary_side(center_vertices: np.ndarray, left_vertices: 
     left, right = None, None
     center_vertices = chaikins_corner_cutting(center_vertices, config.chaikins_initial_refinements)
     center_vertices = resample_polyline(center_vertices, config.resampling_initial_step)
-    for eps, max_polyline_resampling_step in itertools.product(config.eps2_values,
-                                                               config.max_polyline_resampling_step_values):
+    for eps, max_polyline_resampling_step in itertools.product(
+        config.eps2_values, config.max_polyline_resampling_step_values
+    ):
         try:
-            ccs = CurvilinearCoordinateSystem(center_vertices, eps2=eps,
-                                              max_polyline_resampling_step=max_polyline_resampling_step)
+            ccs = CurvilinearCoordinateSystem(
+                center_vertices, eps2=eps, max_polyline_resampling_step=max_polyline_resampling_step
+            )
             left = np.array([ccs.convert_to_curvilinear_coords(vert[0], vert[1])[1] for vert in left_vertices])
             right = np.array([ccs.convert_to_curvilinear_coords(vert[0], vert[1])[1] for vert in right_vertices])
             break
@@ -230,8 +247,11 @@ def is_polyline_self_intersection(polyline: np.ndarray):
     # shapely does not detect all cases of self-intersections:
     # second check: twice the same element
     # third check: 180 degree orientation change of line; visually line is perfect
-    return not line_string.is_simple or Counter(line).most_common(1)[0][1] > 1 \
+    return (
+        not line_string.is_simple
+        or Counter(line).most_common(1)[0][1] > 1
         or np.isclose(np.max(orientation_dif), np.pi)
+    )
 
 
 def are_equal_vertices(vertex_0: np.ndarray, vertex_1: np.ndarray) -> bool:
@@ -297,18 +317,26 @@ def are_similar_polylines(polyline_0: np.ndarray, polyline_1: np.ndarray) -> boo
     :return: Boolean symbol indicates whether the two polylines are similar.
     """
     # initial or final vertices are not similar
-    if not ((np.linalg.norm(polyline_0[0] - polyline_1[0]) < 1)
-            and (np.linalg.norm((polyline_0[-1] - polyline_1[-1]) < 1))
-            or ((np.linalg.norm(polyline_0[0] - polyline_1[-1]) < 1)
-                and (np.linalg.norm(polyline_0[-1] - polyline_1[0]) < 1))):
+    if not (
+        (np.linalg.norm(polyline_0[0] - polyline_1[0]) < 1)
+        and (np.linalg.norm((polyline_0[-1] - polyline_1[-1]) < 1))
+        or (
+            (np.linalg.norm(polyline_0[0] - polyline_1[-1]) < 1)
+            and (np.linalg.norm(polyline_0[-1] - polyline_1[0]) < 1)
+        )
+    ):
         return False
     # length is completely different
-    if (Lanelet._compute_polyline_cumsum_dist([polyline_0])[-1] -
-            Lanelet._compute_polyline_cumsum_dist([polyline_1])[-1] > 50):
+    if (
+        Lanelet._compute_polyline_cumsum_dist([polyline_0])[-1]
+        - Lanelet._compute_polyline_cumsum_dist([polyline_1])[-1]
+        > 50
+    ):
         return False
     # all vertices are quite close
-    if (polyline_0.shape[0] == polyline_1.shape[0] and
-            all([dist < 0.01 for dist in np.linalg.norm(polyline_0 - polyline_1, axis=1)])):
+    if polyline_0.shape[0] == polyline_1.shape[0] and all(
+        [dist < 0.01 for dist in np.linalg.norm(polyline_0 - polyline_1, axis=1)]
+    ):
         return True
     return similaritymeasures.frechet_dist(polyline_0, polyline_1) < 1e-6
     # TODO: Use thresh of config and update parameter above in this function
@@ -323,7 +351,7 @@ def is_adj_type(lanelet: Lanelet, adj: Lanelet, exp_adj_type: str) -> bool:
     :param exp_adj_type: Expected adjacent type.
     :return: Boolean indicates whether the expected adjacent type is equal to the computed type.
     """
-    parallel, merging, forking = 'parallel', 'merging', 'forking'
+    parallel, merging, forking = "parallel", "merging", "forking"
 
     is_left = lanelet.adj_left == adj.lanelet_id
 

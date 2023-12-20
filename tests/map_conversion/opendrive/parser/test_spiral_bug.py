@@ -1,16 +1,23 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import OpenDriveConverter
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import Border
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import LaneWidth, Lane, LaneSection
 
+from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import (
+    OpenDriveConverter,
+)
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import (
+    Border,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+    Lane,
+    LaneSection,
+    LaneWidth,
+)
 
 # parameter guessed
 MAX_DIST = 20
 
 
 class TestSamplingForSpirals(unittest.TestCase):
-
     def test_sampling_for_spirals(self):
         """
         test the sampling as it fails for some scenarios containing spirals
@@ -48,5 +55,5 @@ class TestSamplingForSpirals(unittest.TestCase):
             self.assertLess(abs(rv[i][1] - rv[i - 1][1]), MAX_DIST)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
