@@ -500,7 +500,7 @@ class Network:
 
         scenario = Scenario(dt=g_config.time_step_size, scenario_id=scenario_id)
 
-        scenario = Scenario(dt=g_config.time_step_size, scenario_id=scenario_id, location=location)
+        scenario = Scenario(dt=g_config.time_step_size, scenario_id=scenario_id)
 
         scenario.add_objects(self.export_lanelet_network(transformer=transformer, filter_types=od_config.filter_types))
 
