@@ -198,7 +198,7 @@ class GuiConfig(BaseConfig):
                 intersection=IntersectionParams(
                     draw_intersections=True,
                     draw_incoming_lanelets=self.DRAW_INCOMING_LANELETS,
-                    draw_successors=self.DRAW_OUTGOINGS,
+                    draw_outgoings=self.DRAW_OUTGOINGS,
                     show_label=self.DRAW_INTERSECTION_LABELS,
                 ),
                 traffic_light=TrafficLightParams(draw_traffic_lights=self.DRAW_TRAFFIC_LIGHTS),

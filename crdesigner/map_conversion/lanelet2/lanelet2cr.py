@@ -283,7 +283,6 @@ class Lanelet2CRConverter:
         scenario = Scenario(
             dt=self._cr_config.time_step_size,
             scenario_id=scenario_id,
-            location=Location(gps_latitude=origin_lat, gps_longitude=origin_lon),
         )
 
         # add GeoTransformation
