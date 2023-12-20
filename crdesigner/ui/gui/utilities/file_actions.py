@@ -1,12 +1,14 @@
 import logging
 import os
 
+from commonroad.common.common_scenario import FileInformation
 from commonroad.common.file_reader import (
     CommonRoadFileReader,
     CommonRoadMapFileReader,
     CommonRoadReadAll,
     FileFormat,
 )
+from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario
 from PyQt6.QtGui import QIcon

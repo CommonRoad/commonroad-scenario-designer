@@ -36,9 +36,6 @@ from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_gr
 from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format import (
     IntermediateFormat,
 )
-from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format._intermediate_format import (
-    IntermediateFormat,
-)
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.geonamesID import (
     get_geonamesID,
 )

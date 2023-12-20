@@ -2,6 +2,8 @@ import copy
 from collections import deque
 from typing import List, Optional
 
+import iso3166
+import numpy as np
 from commonroad.common.common_lanelet import LaneletType, LineMarking, StopLine
 from commonroad.common.common_scenario import GeoTransformation, Location, ScenarioID
 from commonroad.scenario.intersection import CrossingGroup, IncomingGroup

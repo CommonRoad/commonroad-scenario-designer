@@ -3,7 +3,6 @@ import math
 from typing import List, Union
 
 import numpy as np
-from commonroad.scenario.intersection import IncomingGroup, Intersection
 from commonroad.scenario.lanelet import (
     Lanelet,
     LaneletType,
@@ -11,7 +10,6 @@ from commonroad.scenario.lanelet import (
     RoadUser,
     StopLine,
 )
-from commonroad.scenario.scenario import Scenario
 from numpy import ndarray
 
 from crdesigner.config.logging import logger

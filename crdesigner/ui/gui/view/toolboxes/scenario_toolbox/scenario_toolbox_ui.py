@@ -2,9 +2,7 @@ import math
 from typing import Tuple
 
 from commonroad.common.common_scenario import TimeOfDay, Underground, Weather
-from commonroad.scenario.scenario import Tag, TimeOfDay, Underground, Weather
 from commonroad.scenario.state import InitialState
-from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
 from pyparsing import Literal
 from PyQt6 import QtCore

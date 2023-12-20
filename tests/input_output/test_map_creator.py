@@ -1,7 +1,7 @@
 import unittest
 
 import numpy as np
-from commonroad.scenario.intersection import IncomingGroup, IntersectionIncomingElement
+from commonroad.scenario.intersection import IncomingGroup
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork, LineMarking, StopLine
 from commonroad.scenario.scenario import Scenario, ScenarioID
 from commonroad.scenario.traffic_light import TrafficLightDirection, TrafficLightState

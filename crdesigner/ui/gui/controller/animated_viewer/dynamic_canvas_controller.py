@@ -9,6 +9,7 @@ from commonroad.geometry.shape import Circle, Rectangle
 from commonroad.planning.planning_problem import PlanningProblem
 from commonroad.scenario.lanelet import LaneletType
 from commonroad.scenario.obstacle import DynamicObstacle, StaticObstacle
+from commonroad.scenario.scenario import Scenario
 from commonroad.visualization.draw_params import (
     DynamicObstacleParams,
     StaticObstacleParams,
@@ -19,7 +20,6 @@ from matplotlib import pyplot as plt
 from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from numpy import ndarray
 from PyQt6 import QtCore
 from PyQt6.QtCore import QPoint
 from PyQt6.QtGui import QCursor, QMouseEvent

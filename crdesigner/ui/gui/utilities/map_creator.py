@@ -1,6 +1,7 @@
 from typing import List, Set, Tuple, Union
 
 import numpy as np
+from commonroad.common.validity import is_natural_number
 from commonroad.scenario.intersection import IncomingGroup, Intersection
 from commonroad.scenario.lanelet import (
     Lanelet,
@@ -892,7 +893,7 @@ class MapCreator:
         outgoing_straight = [lanelet_ids[2], lanelet_ids[12], lanelet_ids[3], lanelet_ids[13]]
         outgoing_left = [lanelet_ids[4], lanelet_ids[10], lanelet_ids[16], lanelet_ids[18]]
         incoming_ids = [scenario.generate_object_id() for i in range(len(incomings))]
-        left_of = [incoming_ids[-1], incoming_ids[0], incoming_ids[1], incoming_ids[2]]
+        # left_of = [incoming_ids[-1], incoming_ids[0], incoming_ids[1], incoming_ids[2]]
         map_incoming = []
 
         for n in range(len(incomings)):
@@ -1238,7 +1239,7 @@ class MapCreator:
         outgoing_straight = [None, lanelet_ids[6], lanelet_ids[7]]
         outgoing_left = [lanelet_ids[2], None, lanelet_ids[10]]
         incoming_ids = [scenario.generate_object_id() for i in range(len(incomings))]
-        left_of = [incoming_ids[-1], incoming_ids[0], None]
+        # left_of = [incoming_ids[-1], incoming_ids[0], None]
         map_incoming = []
 
         for n in range(len(incomings)):

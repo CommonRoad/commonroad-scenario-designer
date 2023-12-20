@@ -7,11 +7,7 @@ from commonroad.common.util import Interval
 from commonroad.geometry.shape import Circle, Rectangle
 from commonroad.planning.goal import GoalRegion
 from commonroad.planning.planning_problem import PlanningProblem, PlanningProblemSet
-from commonroad.scenario.intersection import (
-    IncomingGroup,
-    Intersection,
-    IntersectionIncomingElement,
-)
+from commonroad.scenario.intersection import IncomingGroup, Intersection
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.obstacle import Obstacle
 from commonroad.scenario.scenario import Scenario, ScenarioID

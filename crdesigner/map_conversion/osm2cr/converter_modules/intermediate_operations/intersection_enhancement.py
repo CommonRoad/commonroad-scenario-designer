@@ -51,7 +51,7 @@ def intersection_enhancement(intermediate_format):
         traffic_light_generator = TrafficLightGenerator(len(intersection.incomings))
 
         # begin with incoming that is not left of any other
-        left_of_map = {}
+        # left_of_map = {}
         # for incoming in intersection.incomings:
         #     left_of_map[incoming] = incoming.left_of
 

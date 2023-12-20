@@ -1,3 +1,5 @@
+from typing import Set
+
 from commonroad.scenario.intersection import IncomingGroup, Intersection
 
 from crdesigner.config.logging import logger
@@ -155,11 +157,11 @@ class AddIntersectionController:
             if len(successor_left) + len(successor_right) + len(successor_straight) < 1:
                 print("An incoming must consist at least of one successor")
                 return
-            left_of = (
-                int(self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).currentText())
-                if self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).currentText() != ""
-                else None
-            )
+            # left_of = (
+            #     int(self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).currentText())
+            #     if self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).currentText() != ""
+            #     else None
+            # )
             incoming = IncomingGroup(
                 incoming_id=incoming_id,
                 incoming_lanelets=incoming_lanelets,
@@ -168,7 +170,7 @@ class AddIntersectionController:
                 outgoing_left=successor_left,
             )
             incomings.append(incoming)
-        crossings = {int(item) for item in self.road_network_toolbox_ui.intersection_crossings.get_checked_items()}
+        # crossings = {int(item) for item in self.road_network_toolbox_ui.intersection_crossings.get_checked_items()}
 
         if len(incomings) > 1:
             intersection = Intersection(intersection_id, incomings)

@@ -18,6 +18,8 @@ from commonroad.planning.goal import GoalRegion
 from commonroad.planning.planning_problem import PlanningProblem
 from commonroad.scenario.scenario import Tag
 from commonroad.scenario.state import CustomState, InitialState, TraceState
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QDockWidget, QTableWidgetItem
 
 from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel

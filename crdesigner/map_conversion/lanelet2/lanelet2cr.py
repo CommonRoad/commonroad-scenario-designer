@@ -11,14 +11,7 @@ from commonroad.scenario.lanelet import (
     RoadUser,
     StopLine,
 )
-from commonroad.scenario.scenario import GeoTransformation  # type: ignore
-from commonroad.scenario.scenario import (
-    Location,
-    Scenario,
-    ScenarioID,
-    TrafficLight,
-    TrafficSign,
-)
+from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficLight, TrafficSign
 from commonroad.scenario.traffic_light import (
     TrafficLightCycle,
     TrafficLightCycleElement,
