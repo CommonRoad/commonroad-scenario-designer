@@ -21,9 +21,6 @@ from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.cleanup import (
     sanitize,
 )
-from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import (
-    road_graph as rg,
-)
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph import (
     Graph,
 )
@@ -33,7 +30,7 @@ from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_gr
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._sublayered_graph import (
     SublayeredGraph,
 )
-from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format import (
+from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format._intermediate_format import (
     IntermediateFormat,
 )
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.geonamesID import (

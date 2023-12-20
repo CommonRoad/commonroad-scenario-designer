@@ -8,11 +8,7 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 import shapely
-from commonroad.scenario.intersection import (
-    IncomingGroup,
-    Intersection,
-    IntersectionIncomingElement,
-)
+from commonroad.scenario.intersection import IncomingGroup, Intersection
 from commonroad.scenario.lanelet import LaneletNetwork, StopLine
 from commonroad.scenario.traffic_light import TrafficLight, TrafficLightDirection
 from commonroad.scenario.traffic_sign import TrafficSign
