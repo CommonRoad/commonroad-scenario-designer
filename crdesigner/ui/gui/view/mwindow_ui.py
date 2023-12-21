@@ -1,11 +1,11 @@
 import logging
 
-from PyQt6 import QtGui, QtWidgets
+from PyQt6 import QtGui
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import *
+from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
 
-from crdesigner.config.gui_config import gui_config, ColorSchema
+from crdesigner.config.gui_config import ColorSchema, gui_config
 from crdesigner.ui.gui.resources.MainWindow import Ui_mainWindow
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 
@@ -38,29 +38,29 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
 
     def setup_mwindow(self):
         """
-            Calling the methods for setting up the main window.
+        Calling the methods for setting up the main window.
         """
         self.setupUi(self)
-        self.setWindowIcon(QIcon(':/icons/cr.ico'))
+        self.setWindowIcon(QIcon(":/icons/cr.ico"))
         self.setWindowTitle("CommonRoad Scenario Designer")
-        self.centralwidget.setStyleSheet('background-color:rgb(150,150,150)')
+        self.centralwidget.setStyleSheet("background-color:rgb(150,150,150)")
         self.setWindowFlag(Qt.WindowType.Window)
 
     def update_max_step(self, value: int = -1):
-        """ Redirect to the service layer. """
-        logging.info('update_max_step')
+        """Redirect to the service layer."""
+        logging.info("update_max_step")
         value = value if value > -1 else self.animated_viewer_wrapper.cr_viewer.max_timestep
-        self.top_bar.toolbar_wrapper.tool_bar_ui.label2.setText(' / ' + str(value))
+        self.top_bar.toolbar_wrapper.tool_bar_ui.label2.setText(" / " + str(value))
         self.top_bar.toolbar_wrapper.tool_bar_ui.slider.setMaximum(value)
 
     def update_toolbox_scenarios(self):
-        """ Redirect to the service layer. """
+        """Redirect to the service layer."""
         self.update_toolbox_scenarios_service_layer(mwindow=self)
 
     # here are some actual functionalities which are either too small for sourcing out or cant be due to dependencies
 
     def process_trigger(self, q):
-        self.status.showMessage(q.text() + ' is triggered')
+        self.status.showMessage(q.text() + " is triggered")
 
     def initialize_toolboxes(self):
         self.road_network_toolbox.initialize_road_network_toolbox()
@@ -87,14 +87,20 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         self.scenario_toolbox.scenario_toolbox_ui.update_window()
         self.animated_viewer_wrapper.update_window()
         self.menubar.setStyleSheet(
-            'background-color: ' + self.colorscheme().second_background + '; color: ' + self.colorscheme().color)
+            "background-color: " + self.colorscheme().second_background + "; color: " + self.colorscheme().color
+        )
 
     def close_window(self) -> bool:
         """
         For closing the window.
         """
-        message_box = QMessageBox(QMessageBox.Icon.Warning, "Warning", "Do you really want to quit?",
-                                  buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, parent=self)
+        message_box = QMessageBox(
+            QMessageBox.Icon.Warning,
+            "Warning",
+            "Do you really want to quit?",
+            buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            parent=self,
+        )
 
         p = QtGui.QPalette()
         p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.colorscheme().background))
@@ -118,8 +124,13 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
 
         @return: Boolean with the answer of the user
         """
-        message_box = QMessageBox(QMessageBox.Icon.Warning, "Warning", "Do you want to restore the last project? \n \n Do you want to save the logging file?",
-                                  buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Save | QMessageBox.StandardButton.No, parent=self)
+        message_box = QMessageBox(
+            QMessageBox.Icon.Warning,
+            "Warning",
+            "Do you want to restore the last project? \n \n Do you want to save the logging file?",
+            buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Save | QMessageBox.StandardButton.No,
+            parent=self,
+        )
 
         if not save_log_enabled:
             message_box.button(QMessageBox.StandardButton.Save).setEnabled(False)

@@ -1,6 +1,10 @@
 from crdesigner.verification_repairing.verification.hol.context import Context
-from crdesigner.verification_repairing.verification.hol.expression_tree.domain.domain import Domain
-from crdesigner.verification_repairing.verification.hol.expression_tree.term.function import Function
+from crdesigner.verification_repairing.verification.hol.expression_tree.domain.domain import (
+    Domain,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.term.function import (
+    Function,
+)
 
 
 class DynamicDomain(Domain):

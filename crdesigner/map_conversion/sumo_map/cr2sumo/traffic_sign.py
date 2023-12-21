@@ -1,12 +1,23 @@
 import logging
 from collections import defaultdict
 from copy import copy
-from typing import Optional, Dict, List, Set, Generator
+from typing import Dict, Generator, List, Optional, Set
 
 import numpy as np
 from commonroad.scenario.lanelet import Lanelet
-from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany, TrafficSignIDZamunda
-from crdesigner.map_conversion.sumo_map.sumolib_net import Edge, EdgeTypes, NodeType, VehicleType
+from commonroad.scenario.traffic_sign import (
+    TrafficSign,
+    TrafficSignElement,
+    TrafficSignIDGermany,
+    TrafficSignIDZamunda,
+)
+
+from crdesigner.map_conversion.sumo_map.sumolib_net import (
+    Edge,
+    EdgeTypes,
+    NodeType,
+    VehicleType,
+)
 from crdesigner.map_conversion.sumo_map.util import compute_max_curvature_from_polyline
 
 
@@ -77,8 +88,9 @@ class TrafficSignEncoder:
         :param edge:
         :return:
         """
-        assert len(traffic_sign_element.additional_values) == 1, \
-            f"MAX_SPEED, can only have one additional attribute, has: {traffic_sign_element.additional_values}"
+        assert (
+            len(traffic_sign_element.additional_values) == 1
+        ), f"MAX_SPEED, can only have one additional attribute, has: {traffic_sign_element.additional_values}"
         max_speed = float(traffic_sign_element.additional_values[0])  # in m/s
         new_type = self.edge_types.create_from_update_speed(edge.type_id, max_speed)
         # According to CommonRoad 2020a spec
@@ -103,8 +115,7 @@ class TrafficSignEncoder:
             if edge in visited:
                 continue
             visited.add(edge)
-            if any(elem.traffic_sign_element_id == start_id for elem in self.edge_traffic_signs[edge]
-                   if edge != start):
+            if any(elem.traffic_sign_element_id == start_id for elem in self.edge_traffic_signs[edge] if edge != start):
                 continue
             queue += edge.outgoing
             yield edge
@@ -117,8 +128,9 @@ class TrafficSignEncoder:
         :param max_curvature: Maximal curvature for successors
         :return:
         """
-        assert len(element.additional_values) == 0, \
-            f"PRIORITY can only have none additional attribute, has: {element.additional_values}"
+        assert (
+            len(element.additional_values) == 0
+        ), f"PRIORITY can only have none additional attribute, has: {element.additional_values}"
         old_type = self.edge_types.types[edge.type_id]
         new_type = self.edge_types.create_from_update_priority(old_type.id, old_type.priority + 1)
         edge.to_node.type = NodeType.PRIORITY_STOP
@@ -132,12 +144,19 @@ class TrafficSignEncoder:
             if edge in curvatures:
                 return curvatures[edge]
 
-            curvature = np.max([
-                compute_max_curvature_from_polyline(np.array(lane.shape))
-                for lane in edge.lanes
-            ]) if edge.lanes else float("-inf")
-            curvature = np.max([curvature] + [compute_max_path_curvature(parent, checked_parents + tuple(parents[edge]))
-                                              for parent in parents[edge] if parent not in checked_parents])
+            curvature = (
+                np.max([compute_max_curvature_from_polyline(np.array(lane.shape)) for lane in edge.lanes])
+                if edge.lanes
+                else float("-inf")
+            )
+            curvature = np.max(
+                [curvature]
+                + [
+                    compute_max_path_curvature(parent, checked_parents + tuple(parents[edge]))
+                    for parent in parents[edge]
+                    if parent not in checked_parents
+                ]
+            )
             curvatures[edge] = curvature
             return curvature
 
@@ -161,8 +180,9 @@ class TrafficSignEncoder:
         :param edge:
         :return:
         """
-        assert len(element.additional_values) == 0, \
-            f"STOP can only have none additional attribute, has: {element.additional_values}"
+        assert (
+            len(element.additional_values) == 0
+        ), f"STOP can only have none additional attribute, has: {element.additional_values}"
         edge.to_node.type = NodeType.ALLWAY_STOP
 
     def _set_yield(self, element: TrafficSignElement, edge: Edge):
@@ -172,8 +192,9 @@ class TrafficSignEncoder:
         :param edge:
         :return:
         """
-        assert len(element.additional_values) == 0, \
-            f"GIVEWAY can only have none additional attribute, has: {element.additional_values}"
+        assert (
+            len(element.additional_values) == 0
+        ), f"GIVEWAY can only have none additional attribute, has: {element.additional_values}"
         edge.to_node.type = NodeType.PRIORITY_STOP
         for outgoing in [edge] + edge.outgoing:
             old_type = self.edge_types.types[outgoing.type_id]
@@ -187,8 +208,9 @@ class TrafficSignEncoder:
         :param edge:
         :return:
         """
-        assert len(element.additional_values) == 0, \
-            f"RIGHT_BEFORE_LEFT can only have none additional attribute, has: {element.additional_values}"
+        assert (
+            len(element.additional_values) == 0
+        ), f"RIGHT_BEFORE_LEFT can only have none additional attribute, has: {element.additional_values}"
         edge.to_node.type = NodeType.RIGHT_BEFORE_LEFT
 
     def _set_ban_car_truck_bus_motorcycle(self, element: TrafficSignElement, edge: Edge):
@@ -198,17 +220,22 @@ class TrafficSignEncoder:
         :param edge:
         :return:
         """
-        assert len(element.additional_values) == 0, \
-            f"BAN_CAR_TRUCK_BUS_MOTORCYCLE can only have none additional attribute, has: {element.additional_values}"
+        assert (
+            len(element.additional_values) == 0
+        ), f"BAN_CAR_TRUCK_BUS_MOTORCYCLE can only have none additional attribute, has: {element.additional_values}"
         old_type = self.edge_types.types[edge.type_id]
         disallow = {v_type for v_type in old_type.disallow} | {
-            VehicleType.PASSENGER, VehicleType.HOV, VehicleType.TAXI,
-            VehicleType.BUS, VehicleType.COACH, VehicleType.DELIVERY,
-            VehicleType.TRUCK, VehicleType.TRAILER, VehicleType.MOTORCYCLE,
-            VehicleType.EVEHICLE
+            VehicleType.PASSENGER,
+            VehicleType.HOV,
+            VehicleType.TAXI,
+            VehicleType.BUS,
+            VehicleType.COACH,
+            VehicleType.DELIVERY,
+            VehicleType.TRUCK,
+            VehicleType.TRAILER,
+            VehicleType.MOTORCYCLE,
+            VehicleType.EVEHICLE,
         }
-        new_type = self.edge_types.create_from_update_allow(old_type.id, list(
-            set(VehicleType) - disallow
-        ))
+        new_type = self.edge_types.create_from_update_allow(old_type.id, list(set(VehicleType) - disallow))
         for successor in self._bfs_until(edge, element):
             successor.type_id = new_type.id

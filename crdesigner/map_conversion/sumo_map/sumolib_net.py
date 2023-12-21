@@ -1,15 +1,14 @@
-
 """
 This file contains a content handler for parsing sumo network xml files.
 It uses other classes from this module to represent the road network.
 """
 
+import os
 from collections import defaultdict
 from copy import deepcopy
 from enum import Enum, unique
-from typing import List, Dict, Tuple, Optional, Callable, TypeVar, Iterable, Union, Set
+from typing import Callable, Dict, Iterable, List, Optional, Set, Tuple, TypeVar, Union
 from xml.etree import cElementTree as ET
-import os
 
 import numpy as np
 import sumolib
@@ -30,10 +29,9 @@ def set_allowed_changes(xml_node: ET.Element, obj: Union["Connection", "Lane"]):
 
 
 class NetLocation:
-    def __init__(self, net_offset: np.ndarray,
-                 conv_boundary: np.ndarray,
-                 orig_boundary: np.ndarray,
-                 proj_parameter: str):
+    def __init__(
+        self, net_offset: np.ndarray, conv_boundary: np.ndarray, orig_boundary: np.ndarray, proj_parameter: str
+    ):
         assert net_offset.shape == (2,)
         self.net_offset = net_offset
         self.conv_boundary = conv_boundary
@@ -44,11 +42,14 @@ class NetLocation:
 class Net:
     """The whole sumo network."""
 
-    def __init__(self, version: str = None,
-                 junction_corner_detail: float = None,
-                 junction_link_detail: float = None,
-                 limit_turn_speed: float = None,
-                 location: NetLocation = None):
+    def __init__(
+        self,
+        version: str = None,
+        junction_corner_detail: float = None,
+        junction_link_detail: float = None,
+        limit_turn_speed: float = None,
+        location: NetLocation = None,
+    ):
         self.version: str = version if version is not None else ""
         self.location = location
         self.junction_corner_detail = junction_corner_detail
@@ -60,7 +61,8 @@ class Net:
         self.edges: Dict[int, Edge] = {}
         # from_edge -> from_lane -> to_edge -> to_lane -> Connection
         self.connections: Dict[int, Dict[int, Dict[int, Dict[int, Connection]]]] = defaultdict(
-            lambda: defaultdict(lambda: defaultdict(dict)))
+            lambda: defaultdict(lambda: defaultdict(dict))
+        )
         # id -> program_id -> TLSProgram
         self.tlss: Dict[str, TLSProgram] = {}
 
@@ -70,9 +72,9 @@ _V = TypeVar("_V")
 _VV = TypeVar("_VV")
 
 
-def _get_default(d: Dict[_K, _V], key: _K, default: Optional[_VV] = None, map: Callable[[_V], _VV] = lambda x: x) -> \
-    Optional[
-        _VV]:
+def _get_default(
+    d: Dict[_K, _V], key: _K, default: Optional[_VV] = None, map: Callable[[_V], _VV] = lambda x: x
+) -> Optional[_VV]:
     try:
         return map(d[key])
     except KeyError:
@@ -94,51 +96,59 @@ def sumo_net_from_xml(file: str) -> Net:
         raise RuntimeError(f"Invalid file type {file}, required *.net.xml")
 
     root = ET.parse(file).getroot()
-    net = Net(version=_get_default(root.attrib, "version", None),
-              junction_corner_detail=_get_default(root.attrib, "junctionCornerDetail", None, float),
-              junction_link_detail=_get_default(root.attrib, "junctionLinkDetail", None, float),
-              limit_turn_speed=_get_default(root.attrib, "limitTurnSpeed", None, float))
+    net = Net(
+        version=_get_default(root.attrib, "version", None),
+        junction_corner_detail=_get_default(root.attrib, "junctionCornerDetail", None, float),
+        junction_link_detail=_get_default(root.attrib, "junctionLinkDetail", None, float),
+        limit_turn_speed=_get_default(root.attrib, "limitTurnSpeed", None, float),
+    )
     for elem in root.iter():
         if elem.tag == "location":
             net.location = NetLocation(
                 net_offset=np.array([float(f) for f in elem.attrib["netOffset"].split(",")]),
                 conv_boundary=np.array([float(f) for f in elem.attrib["convBoundary"].split(",")]),
                 orig_boundary=np.array([float(f) for f in elem.attrib["origBoundary"].split(",")]),
-                proj_parameter=elem.attrib["projParameter"]
+                proj_parameter=elem.attrib["projParameter"],
             )
         elif elem.tag == "type":
             try:
                 net.types[elem.attrib["id"]] = EdgeType(
                     id=elem.attrib["id"],
-                    allow=_get_default(elem.attrib, "allow", None,
-                                       lambda allow: [VehicleType(a) for a in allow.split(" ")]),
-                    disallow=_get_default(elem.attrib, "disallow", None,
-                                          lambda disallow: [VehicleType(a) for a in disallow.split(" ")]),
+                    allow=_get_default(
+                        elem.attrib, "allow", None, lambda allow: [VehicleType(a) for a in allow.split(" ")]
+                    ),
+                    disallow=_get_default(
+                        elem.attrib, "disallow", None, lambda disallow: [VehicleType(a) for a in disallow.split(" ")]
+                    ),
                     discard=_get_default(elem.attrib, "discard", False, lambda d: bool(int(x))),
                     num_lanes=_get_default(elem.attrib, "num_lanes", -1, int),
                     oneway=_get_default(elem.attrib, "oneway", False, lambda o: bool(int(o))),
                     priority=_get_default(elem.attrib, "priority", 0, int),
                     speed=_get_default(elem.attrib, "speed", 13.89, float),
-                    sidewalk_width=_get_default(elem.attrib, "sidewalkWidth", -1., float)
+                    sidewalk_width=_get_default(elem.attrib, "sidewalkWidth", -1.0, float),
                 )
             except ValueError:
                 print("eeor")
         elif elem.tag == "tlLogic":
-            program = TLSProgram(id=elem.attrib["id"],
-                                 offset=_get_default(elem.attrib, "offset", 0, int),
-                                 program_id=elem.attrib["programID"],
-                                 tls_type=TLSType(elem.attrib["type"]))
+            program = TLSProgram(
+                id=elem.attrib["id"],
+                offset=_get_default(elem.attrib, "offset", 0, int),
+                program_id=elem.attrib["programID"],
+                tls_type=TLSType(elem.attrib["type"]),
+            )
             for phase in elem:
                 if phase.tag != "phase":
                     continue
-                program.add_phase(Phase(
-                    duration=_get_default(phase.attrib, "duration", 0., float),
-                    state=_get_default(phase.attrib, "state", [], lambda state: [SignalState(s) for s in state]),
-                    min_dur=_get_default(phase.attrib, "minDur", None, int),
-                    max_dur=_get_default(phase.attrib, "maxDur", None, int),
-                    name=_get_default(phase.attrib, "name"),
-                    next=_get_default(phase.attrib, "next", None, lambda n: [int(i) for i in n.split(" ")])
-                ))
+                program.add_phase(
+                    Phase(
+                        duration=_get_default(phase.attrib, "duration", 0.0, float),
+                        state=_get_default(phase.attrib, "state", [], lambda state: [SignalState(s) for s in state]),
+                        min_dur=_get_default(phase.attrib, "minDur", None, int),
+                        max_dur=_get_default(phase.attrib, "maxDur", None, int),
+                        name=_get_default(phase.attrib, "name"),
+                        next=_get_default(phase.attrib, "next", None, lambda n: [int(i) for i in n.split(" ")]),
+                    )
+                )
 
             assert program.id not in net.tlss
             net.tlss[program.id] = program
@@ -156,10 +166,12 @@ def sumo_net_from_xml(file: str) -> Net:
                 junction_type=_get_default(elem.attrib, "type", None, JunctionType),
                 coord=np.array([x, y, z] if z is not None else [x, y]),
                 shape=_get_default(elem.attrib, "shape", None, from_shape_string),
-                inc_lanes=_get_default(elem.attrib, "incLanes", None,
-                                       lambda inc_lanes: inc_lanes.split(" ") if inc_lanes else None),
-                int_lanes=_get_default(elem.attrib, "intLanes", None,
-                                       lambda int_lanes: int_lanes.split(" ") if int_lanes else None),
+                inc_lanes=_get_default(
+                    elem.attrib, "incLanes", None, lambda inc_lanes: inc_lanes.split(" ") if inc_lanes else None
+                ),
+                int_lanes=_get_default(
+                    elem.attrib, "intLanes", None, lambda int_lanes: int_lanes.split(" ") if int_lanes else None
+                ),
             )
             for request in elem:
                 if request.tag != "request":
@@ -167,11 +179,11 @@ def sumo_net_from_xml(file: str) -> Net:
                 junction.requests.append(
                     JunctionRequest(
                         index=_get_default(request.attrib, "index", 0, int),
-                        response=_get_default(request.attrib, "response", [],
-                                              lambda response: [bool(int(bit)) for bit in response]),
-                        foes=_get_default(request.attrib, "foes", [],
-                                          lambda foes: [bool(int(bit)) for bit in foes]),
-                        cont=_get_default(request.attrib, "cont", 0, int)
+                        response=_get_default(
+                            request.attrib, "response", [], lambda response: [bool(int(bit)) for bit in response]
+                        ),
+                        foes=_get_default(request.attrib, "foes", [], lambda foes: [bool(int(bit)) for bit in foes]),
+                        cont=_get_default(request.attrib, "cont", 0, int),
                     )
                 )
             net.junctions[junction.id] = junction
@@ -198,11 +210,13 @@ def sumo_net_from_xml(file: str) -> Net:
                     speed=_get_default(lane.attrib, "speed", None, float),
                     length=_get_default(lane.attrib, "length", None, float),
                     width=_get_default(lane.attrib, "width", None, float),
-                    allow=_get_default(lane.attrib, "allow", None,
-                                       lambda allow: [VehicleType(a) for a in allow.split(" ")]),
-                    disallow=_get_default(lane.attrib, "disallow", None,
-                                          lambda disallow: [VehicleType(a) for a in disallow.split(" ")]),
-                    shape=_get_default(lane.attrib, "shape", None, from_shape_string)
+                    allow=_get_default(
+                        lane.attrib, "allow", None, lambda allow: [VehicleType(a) for a in allow.split(" ")]
+                    ),
+                    disallow=_get_default(
+                        lane.attrib, "disallow", None, lambda disallow: [VehicleType(a) for a in disallow.split(" ")]
+                    ),
+                    shape=_get_default(lane.attrib, "shape", None, from_shape_string),
                 )
             net.edges[edge.id] = edge
         elif elem.tag == "connection":
@@ -220,11 +234,12 @@ def sumo_net_from_xml(file: str) -> Net:
                 via_lane_id=_get_default(elem.attrib, "via", map=lambda via: via.split(" ")),
                 shape=_get_default(elem.attrib, "shape", map=from_shape_string),
                 keep_clear=_get_default(elem.attrib, "keepClear", map=lambda k: bool(int(k))),
-                cont_pos=_get_default(elem.attrib, "contPos")
+                cont_pos=_get_default(elem.attrib, "contPos"),
             )
             net.connections[c.from_edge.id][c.from_lane.id][c.to_edge.id][c.to_lane.id] = c
 
     for junction in net.junctions.values():
+
         def replace_lanes(lane_ids):
             if not lane_ids:
                 return None
@@ -301,17 +316,19 @@ class RightOfWay(Enum):
 
 
 class Node:
-    """ Nodes from a sumo network """
+    """Nodes from a sumo network"""
 
-    def __init__(self,
-                 id: int,
-                 node_type: NodeType,
-                 coord: np.ndarray,
-                 shape: np.ndarray = None,
-                 inc_lanes: List['Lane'] = None,
-                 int_lanes: List['Lane'] = None,
-                 tl: 'TLSProgram' = None,
-                 right_of_way=RightOfWay.DEFAULT):
+    def __init__(
+        self,
+        id: int,
+        node_type: NodeType,
+        coord: np.ndarray,
+        shape: np.ndarray = None,
+        inc_lanes: List["Lane"] = None,
+        int_lanes: List["Lane"] = None,
+        tl: "TLSProgram" = None,
+        right_of_way=RightOfWay.DEFAULT,
+    ):
         self.id = id
         self.type = node_type
         self.coord = coord
@@ -327,18 +344,18 @@ class Node:
         self.zipper = True
         self.keep_clear = True
 
-    def add_outgoing(self, edge: 'Edge'):
+    def add_outgoing(self, edge: "Edge"):
         self._outgoing.append(edge)
 
     @property
-    def outgoing(self) -> List['Edge']:
+    def outgoing(self) -> List["Edge"]:
         return self._outgoing
 
-    def add_incoming(self, edge: 'Edge'):
+    def add_incoming(self, edge: "Edge"):
         self._incoming.append(edge)
 
     @property
-    def incoming(self) -> List['Edge']:
+    def incoming(self) -> List["Edge"]:
         return self._incoming
 
     def to_xml(self) -> str:
@@ -348,7 +365,7 @@ class Node:
         node = ET.Element("node")
         node.set("id", str(self.id))
         node.set("type", str(self.type.value))
-        for k, v in zip(["x", "y", "z"][:self.coord.shape[0]], self.coord):
+        for k, v in zip(["x", "y", "z"][: self.coord.shape[0]], self.coord):
             node.set(k, str(v))
         if self.incoming:
             node.set("incoming", " ".join([str(i.id) for i in self.incoming]))
@@ -380,10 +397,12 @@ class Node:
         return hash((self.id, self.type))
 
     def __eq__(self, other):
-        return self.id == other.id \
-               and self.type == other.type \
-               and self.tl == other.tl \
-               and self.right_of_way == other.right_of_way
+        return (
+            self.id == other.id
+            and self.type == other.type
+            and self.tl == other.tl
+            and self.right_of_way == other.right_of_way
+        )
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -392,6 +411,7 @@ class Node:
 #
 # Junction
 #
+
 
 @unique
 class JunctionType(Enum):
@@ -431,13 +451,15 @@ class JunctionType(Enum):
 
 
 class Junction(Node):
-    def __init__(self,
-                 id: int,
-                 junction_type: JunctionType,
-                 coord: np.ndarray,
-                 shape: np.ndarray = None,
-                 inc_lanes: List['Lane'] = None,
-                 int_lanes: List['Lane'] = None):
+    def __init__(
+        self,
+        id: int,
+        junction_type: JunctionType,
+        coord: np.ndarray,
+        shape: np.ndarray = None,
+        inc_lanes: List["Lane"] = None,
+        int_lanes: List["Lane"] = None,
+    ):
         super().__init__(id, junction_type, coord, shape, inc_lanes, int_lanes)
         self.id = id
         self.type = junction_type
@@ -479,24 +501,26 @@ class SpreadType(Enum):
 
 
 class Edge:
-    """ Edges from a sumo network """
+    """Edges from a sumo network"""
 
-    def __init__(self,
-                 id: int,
-                 from_node: 'Node',
-                 to_node: 'Node',
-                 type_id: str = "",
-                 speed: float = None,
-                 priority: int = None,
-                 length: float = None,
-                 shape: np.ndarray = None,
-                 spread_type: SpreadType = SpreadType.RIGHT,
-                 allow: List['VehicleType'] = None,
-                 disallow: List['VehicleType'] = None,
-                 width: float = None,
-                 name: str = None,
-                 end_offset: float = None,
-                 sidewalk_width: float = None):
+    def __init__(
+        self,
+        id: int,
+        from_node: "Node",
+        to_node: "Node",
+        type_id: str = "",
+        speed: float = None,
+        priority: int = None,
+        length: float = None,
+        shape: np.ndarray = None,
+        spread_type: SpreadType = SpreadType.RIGHT,
+        allow: List["VehicleType"] = None,
+        disallow: List["VehicleType"] = None,
+        width: float = None,
+        name: str = None,
+        end_offset: float = None,
+        sidewalk_width: float = None,
+    ):
         self.id = id
         self.from_node = from_node
         self.to_node = to_node
@@ -518,7 +542,7 @@ class Edge:
         self.end_offset = end_offset
         self.sidewalk_width = sidewalk_width
 
-        self._lanes: List['Lane'] = []
+        self._lanes: List["Lane"] = []
         self._incoming: Dict[Node, List[Edge]] = defaultdict(list)
         self._outgoing: Dict[Node, List[Edge]] = defaultdict(list)
         self._name = name
@@ -528,28 +552,28 @@ class Edge:
         return len(self._lanes)
 
     @property
-    def lanes(self) -> List['Lane']:
+    def lanes(self) -> List["Lane"]:
         return self._lanes
 
-    def add_lane(self, lane: 'Lane') -> int:
+    def add_lane(self, lane: "Lane") -> int:
         index = len(self._lanes)
         self._lanes.append(lane)
         self.speed = lane.speed
         self.length = lane.length
         return index
 
-    def add_outgoing(self, edge: 'Edge'):
+    def add_outgoing(self, edge: "Edge"):
         self._outgoing[edge.to_node].append(edge)
 
-    def add_incoming(self, edge: 'Edge'):
+    def add_incoming(self, edge: "Edge"):
         self._incoming[edge.from_node].append(edge)
 
     @property
-    def incoming(self) -> List['Edge']:
+    def incoming(self) -> List["Edge"]:
         return [e for edges in self._incoming.values() for e in edges]
 
     @property
-    def outgoing(self) -> List['Edge']:
+    def outgoing(self) -> List["Edge"]:
         return [e for edges in self._outgoing.values() for e in edges]
 
     # def getClosestLanePosDist(self, point, perpendicular=False):
@@ -664,22 +688,25 @@ class Edge:
     def __hash__(self):
         return hash((self.id, self.from_node.id, self.to_node.id, self.type_id, *self._lanes))
 
-    def __eq__(self, other: 'Edge'):
-        return type(self) == type(other) \
-               and self.id == other.id \
-               and self.from_node == other.from_node \
-               and self.to_node == other.to_node \
-               and self.type_id == other.type_id \
-               and len(self._lanes) == len(other._lanes) \
-               and all(x == y for x, y in zip(self._lanes, other._lanes))
+    def __eq__(self, other: "Edge"):
+        return (
+            isinstance(self, other)
+            and self.id == other.id
+            and self.from_node == other.from_node
+            and self.to_node == other.to_node
+            and self.type_id == other.type_id
+            and len(self._lanes) == len(other._lanes)
+            and all(x == y for x, y in zip(self._lanes, other._lanes))
+        )
 
-    def __ne__(self, other: 'Edge'):
+    def __ne__(self, other: "Edge"):
         return not self.__eq__(other)
 
 
 #
 # Lane
 #
+
 
 def add_junction_pos(shape, fromPos, toPos):
     """Extends shape with the given positions in case they differ from the
@@ -693,16 +720,18 @@ def add_junction_pos(shape, fromPos, toPos):
 
 
 class Lane:
-    """ Lanes from a sumo network """
+    """Lanes from a sumo network"""
 
-    def __init__(self,
-                 edge: Edge,
-                 speed: float,
-                 length: float,
-                 width: float,
-                 allow: List['VehicleType'] = None,
-                 disallow: List['VehicleType'] = None,
-                 shape: np.ndarray = None):
+    def __init__(
+        self,
+        edge: Edge,
+        speed: float,
+        length: float,
+        width: float,
+        allow: List["VehicleType"] = None,
+        disallow: List["VehicleType"] = None,
+        shape: np.ndarray = None,
+    ):
         self._edge = edge
         self._speed = speed
         self._length = length
@@ -710,10 +739,10 @@ class Lane:
         self._shape = shape if shape is not None else np.empty(0)
         self._shapeWithJunctions = None
         self._shapeWithJunctions3D = None
-        self._outgoing: List['Connection'] = []
+        self._outgoing: List["Connection"] = []
         self._adjacent_opposite = None  # added by Lisa
-        self._allow: List['VehicleType'] = []
-        self._disallow: List['VehicleType'] = []
+        self._allow: List["VehicleType"] = []
+        self._disallow: List["VehicleType"] = []
         self._set_allow_disallow(allow, disallow)
 
         self._index = edge.add_lane(self)
@@ -722,15 +751,15 @@ class Lane:
     def id(self) -> str:
         return f"{self._edge.id}_{self.index}"
 
-    def _set_allow_disallow(self, allow: Optional[List['VehicleType']], disallow: Optional[List['VehicleType']]):
+    def _set_allow_disallow(self, allow: Optional[List["VehicleType"]], disallow: Optional[List["VehicleType"]]):
         if allow is not None and disallow is not None:
             assert set(allow).isdisjoint(set(disallow))
             self._allow = allow
             self._disallow = disallow
         elif allow:
-            self._disallow: List['VehicleType'] = list(set(VehicleType) - set(allow))
+            self._disallow: List["VehicleType"] = list(set(VehicleType) - set(allow))
         elif disallow:
-            self._allow: List['VehicleType'] = list(set(VehicleType) - set(disallow))
+            self._allow: List["VehicleType"] = list(set(VehicleType) - set(disallow))
 
     @property
     def edge(self) -> Edge:
@@ -806,38 +835,37 @@ class Lane:
         xmax = float(np.max(s[:, 0]))
         ymin = float(np.min(s[:, 1]))
         ymax = float(np.max(s[:, 1]))
-        assert (xmin != xmax or ymin != ymax)
+        assert xmin != xmax or ymin != ymax
         return xmin, ymin, xmax, ymax
 
     def getClosestLanePosAndDist(self, point, perpendicular=False):
-        return sumolib.geomhelper.polygon.OffsetAndDistanceToPoint(
-            point, self.getShape(), perpendicular)
+        return sumolib.geomhelper.polygon.OffsetAndDistanceToPoint(point, self.getShape(), perpendicular)
 
     @property
     def index(self) -> int:
         return self._index
 
     @property
-    def outgoing(self) -> List['Connection']:
+    def outgoing(self) -> List["Connection"]:
         return self._outgoing
 
-    def add_outgoing(self, conn: 'Connection'):
+    def add_outgoing(self, conn: "Connection"):
         self._outgoing.append(conn)
 
     @property
-    def allow(self) -> List['VehicleType']:
+    def allow(self) -> List["VehicleType"]:
         return self._allow
 
     @allow.setter
-    def allow(self, allow: List['VehicleType']):
+    def allow(self, allow: List["VehicleType"]):
         self._set_allow_disallow(allow, None)
 
     @property
-    def disallow(self) -> List['VehicleType']:
+    def disallow(self) -> List["VehicleType"]:
         return self._disallow
 
     @disallow.setter
-    def disallow(self, disallow: List['VehicleType']):
+    def disallow(self, disallow: List["VehicleType"]):
         self._set_allow_disallow(None, disallow)
 
     def to_xml(self) -> str:
@@ -869,28 +897,31 @@ class Lane:
     def __hash__(self):
         return hash((self.edge.id, self.index))
 
-    def __eq__(self, other: 'Lane'):
-        return type(self) == type(other) \
-               and self.edge.id == other.edge.id \
-               and self.speed == other.speed \
-               and self.length == other.length \
-               and self.width == other.width \
-               and self._shapeWithJunctions == other._shapeWithJunctions \
-               and self._shapeWithJunctions3D == other._shapeWithJunctions3D \
-               and len(self.outgoing) == len(other.outgoing) \
-               and all(x == y for x, y in zip(self.outgoing, other.outgoing)) \
-               and len(self.allow) == len(other.allow) \
-               and all(x == y for x, y in zip(self.allow, other.allow)) \
-               and len(self.disallow) == len(other.disallow) \
-               and all(x == y for x, y in zip(self.disallow, other.disallow))
+    def __eq__(self, other: "Lane"):
+        return (
+            isinstance(self, other)
+            and self.edge.id == other.edge.id
+            and self.speed == other.speed
+            and self.length == other.length
+            and self.width == other.width
+            and self._shapeWithJunctions == other._shapeWithJunctions
+            and self._shapeWithJunctions3D == other._shapeWithJunctions3D
+            and len(self.outgoing) == len(other.outgoing)
+            and all(x == y for x, y in zip(self.outgoing, other.outgoing))
+            and len(self.allow) == len(other.allow)
+            and all(x == y for x, y in zip(self.allow, other.allow))
+            and len(self.disallow) == len(other.disallow)
+            and all(x == y for x, y in zip(self.disallow, other.disallow))
+        )
 
-    def __ne__(self, other: 'Lane'):
+    def __ne__(self, other: "Lane"):
         return not self.__eq__(other)
 
 
 #
 # Connection
 #
+
 
 def to_shape_string(shape: np.ndarray) -> str:
     """
@@ -924,23 +955,25 @@ class ConnectionDirection(Enum):
 class Connection:
     """edge connection for a sumo network"""
 
-    def __init__(self,
-                 from_edge: Edge,
-                 to_edge: Edge,
-                 from_lane: Lane,
-                 to_lane: Lane,
-                 direction: ConnectionDirection = None,
-                 tls: 'TLSProgram' = None,
-                 tl_link: int = None,
-                 state=None,
-                 via_lane_id: List[str] = None,
-                 shape: Optional[np.ndarray] = None,
-                 keep_clear: bool = None,
-                 cont_pos=None,
-                 prohibits: List["Connection"] = [],
-                 change_left_allowed: Set['VehicleType'] = None,
-                 change_right_allowed: Set['VehicleType'] = None,
-                 forbidden=False):
+    def __init__(
+        self,
+        from_edge: Edge,
+        to_edge: Edge,
+        from_lane: Lane,
+        to_lane: Lane,
+        direction: ConnectionDirection = None,
+        tls: "TLSProgram" = None,
+        tl_link: int = None,
+        state=None,
+        via_lane_id: List[str] = None,
+        shape: Optional[np.ndarray] = None,
+        keep_clear: bool = None,
+        cont_pos=None,
+        prohibits: List["Connection"] = [],
+        change_left_allowed: Set["VehicleType"] = None,
+        change_right_allowed: Set["VehicleType"] = None,
+        forbidden=False,
+    ):
         self._from = from_edge
         self._to = to_edge
         self._from_lane = from_lane
@@ -1009,7 +1042,7 @@ class Connection:
         return self._tls
 
     @tls.setter
-    def tls(self, tls: 'TLSProgram'):
+    def tls(self, tls: "TLSProgram"):
         self._tls = tls
 
     @property
@@ -1060,41 +1093,44 @@ class Connection:
         return f"{self.from_lane.id}->{self.to_lane.id}"
 
     @property
-    def change_left_forbidden(self) -> Set['VehicleType']:
+    def change_left_forbidden(self) -> Set["VehicleType"]:
         return set(VehicleType) - self._change_left_allowed
 
     @change_left_forbidden.setter
     def change_left_forbidden(self, change_left_forbidden):
-        self._change_left_allowed = set(VehicleType) - set(change_left_forbidden) \
-            if change_left_forbidden is not None else set(VehicleType)
+        self._change_left_allowed = (
+            set(VehicleType) - set(change_left_forbidden) if change_left_forbidden is not None else set(VehicleType)
+        )
 
     @property
-    def change_right_forbidden(self) -> Set['VehicleType']:
-        return set(VehicleType) - self._change_right_allowed \
-            if self._change_right_allowed is not None else set(VehicleType)
+    def change_right_forbidden(self) -> Set["VehicleType"]:
+        return (
+            set(VehicleType) - self._change_right_allowed
+            if self._change_right_allowed is not None
+            else set(VehicleType)
+        )
 
     @change_right_forbidden.setter
     def change_right_forbidden(self, change_right_forbidden):
-        self._change_right_allowed = set(VehicleType) - set(change_right_forbidden) \
-            if change_right_forbidden is not None else set(VehicleType)
+        self._change_right_allowed = (
+            set(VehicleType) - set(change_right_forbidden) if change_right_forbidden is not None else set(VehicleType)
+        )
 
     @property
-    def change_left_allowed(self) -> Set['VehicleType']:
+    def change_left_allowed(self) -> Set["VehicleType"]:
         return self._change_left_allowed
 
     @change_left_allowed.setter
     def change_left_allowed(self, change_left_allowed):
-        self._change_left_allowed = set(change_left_allowed) \
-            if change_left_allowed is not None else set(VehicleType)
+        self._change_left_allowed = set(change_left_allowed) if change_left_allowed is not None else set(VehicleType)
 
     @property
-    def change_right_allowed(self) -> Set['VehicleType']:
+    def change_right_allowed(self) -> Set["VehicleType"]:
         return self._change_right_allowed
 
     @change_right_allowed.setter
     def change_right_allowed(self, change_right_allowed):
-        self._change_right_allowed = set(change_right_allowed) \
-            if change_right_allowed is not None else set(VehicleType)
+        self._change_right_allowed = set(change_right_allowed) if change_right_allowed is not None else set(VehicleType)
 
     def to_xml(self) -> str:
         """
@@ -1144,17 +1180,38 @@ class Connection:
         return str(self)
 
     def __hash__(self):
-        return hash((self._from.id, self._to.id, self._from_lane.id, self._to_lane.id, self._direction, self._tls,
-                     self._tl_link, self._state, len(self._via) if self._via else 0, self._keep_clear, self._cont_pos))
+        return hash(
+            (
+                self._from.id,
+                self._to.id,
+                self._from_lane.id,
+                self._to_lane.id,
+                self._direction,
+                self._tls,
+                self._tl_link,
+                self._state,
+                len(self._via) if self._via else 0,
+                self._keep_clear,
+                self._cont_pos,
+            )
+        )
 
-    def __eq__(self, other: 'Connection'):
-        return type(self) == type(other) and self._from == other._from and self._to == other._to \
-               and self._direction == other._direction and self._tls == other._tls and self._tl_link == other._tl_link \
-               and self._state == other._state and len(self._via) == len(other._via) \
-               and all(x == y for x, y in zip(self._via, other._via)) \
-               and self._keep_clear == other._keep_clear and self._cont_pos == other._cont_pos
+    def __eq__(self, other: "Connection"):
+        return (
+            isinstance(self, other)
+            and self._from == other._from
+            and self._to == other._to
+            and self._direction == other._direction
+            and self._tls == other._tls
+            and self._tl_link == other._tl_link
+            and self._state == other._state
+            and len(self._via) == len(other._via)
+            and all(x == y for x, y in zip(self._via, other._via))
+            and self._keep_clear == other._keep_clear
+            and self._cont_pos == other._cont_pos
+        )
 
-    def __ne__(self, other: 'Connection'):
+    def __ne__(self, other: "Connection"):
         return not self.__eq__(other)
 
 
@@ -1162,16 +1219,19 @@ class Connection:
 # Crossings
 #
 
+
 class Crossing:
-    def __init__(self,
-                 node: Node,
-                 edges: Iterable[Edge],
-                 priority: bool = None,
-                 width: float = None,
-                 shape=None,
-                 link_index: int = None,
-                 link_index_2: int = None,
-                 discard: bool = None):
+    def __init__(
+        self,
+        node: Node,
+        edges: Iterable[Edge],
+        priority: bool = None,
+        width: float = None,
+        shape=None,
+        link_index: int = None,
+        link_index_2: int = None,
+        discard: bool = None,
+    ):
         self.node = node
         self.edges = edges
         self.priority = priority
@@ -1219,15 +1279,18 @@ _T = TypeVar("_T")
 
 
 class EdgeType:
-    def __init__(self, id: str,
-                 allow: List['VehicleType'] = None,
-                 disallow: List['VehicleType'] = None,
-                 discard: bool = False,
-                 num_lanes: int = -1,
-                 oneway=False,
-                 priority: int = 0,
-                 speed: float = 13.89,
-                 sidewalk_width: float = -1):
+    def __init__(
+        self,
+        id: str,
+        allow: List["VehicleType"] = None,
+        disallow: List["VehicleType"] = None,
+        discard: bool = False,
+        num_lanes: int = -1,
+        oneway=False,
+        priority: int = 0,
+        speed: float = 13.89,
+        sidewalk_width: float = -1,
+    ):
         """
         Constructs a SUMO Edge Type
         Documentation from: https://sumo.dlr.de/docs/SUMO_edge_type_file.html
@@ -1247,19 +1310,22 @@ class EdgeType:
         :param sidewalk_width: The default width for added sidewalks (defaults to -1 which disables extra sidewalks).
         """
         self.id = id
-        assert not (allow and disallow and set(allow) & set(disallow)), \
-            f"allow and disallow contain common elements {set(allow) & set(disallow)}"
-        self.allow: List['VehicleType'] = []
+        assert not (
+            allow and disallow and set(allow) & set(disallow)
+        ), f"allow and disallow contain common elements {set(allow) & set(disallow)}"
+        self.allow: List["VehicleType"] = []
         if allow:
-            assert set(allow).issubset(set(VehicleType)), \
-                f"allow contains invalid classes {set(allow) - set(VehicleType)}"
-            self.allow: List['VehicleType'] = allow
+            assert set(allow).issubset(
+                set(VehicleType)
+            ), f"allow contains invalid classes {set(allow) - set(VehicleType)}"
+            self.allow: List["VehicleType"] = allow
 
-        self.disallow: List['VehicleType'] = []
+        self.disallow: List["VehicleType"] = []
         if disallow:
-            assert set(disallow).issubset(set(VehicleType)), \
-                f"disallow contains invalid classes {set(disallow) - set(VehicleType)}"
-            self.disallow: List['VehicleType'] = disallow
+            assert set(disallow).issubset(
+                set(VehicleType)
+            ), f"disallow contains invalid classes {set(disallow) - set(VehicleType)}"
+            self.disallow: List["VehicleType"] = disallow
 
         self.discard = discard
         self.num_lanes = num_lanes
@@ -1269,7 +1335,7 @@ class EdgeType:
         self.sidewalk_width = sidewalk_width
 
     @classmethod
-    def from_xml(cls, xml: str) -> 'EdgeType':
+    def from_xml(cls, xml: str) -> "EdgeType":
         """
         Creates an instance of this class from the given xml representation
         :param xml:
@@ -1284,15 +1350,17 @@ class EdgeType:
         def str_to_vehicle_type(value: str) -> VehicleType:
             return VehicleType(value)
 
-        return cls(id=root.get("id"),
-                   allow=get_map("allow", lambda sp: [str_to_vehicle_type(s) for s in sp.split(" ")], []),
-                   disallow=get_map("disallow", lambda sp: [str_to_vehicle_type(s) for s in sp.split(" ")], []),
-                   discard=get_map("discard", _str_to_bool, False),
-                   num_lanes=get_map("numLanes", int, -1),
-                   oneway=get_map("oneway", _str_to_bool, False),
-                   priority=get_map("priority", int, 0),
-                   speed=get_map("speed", float, 13.89),
-                   sidewalk_width=get_map("sidewalkWidth", int, -1))
+        return cls(
+            id=root.get("id"),
+            allow=get_map("allow", lambda sp: [str_to_vehicle_type(s) for s in sp.split(" ")], []),
+            disallow=get_map("disallow", lambda sp: [str_to_vehicle_type(s) for s in sp.split(" ")], []),
+            discard=get_map("discard", _str_to_bool, False),
+            num_lanes=get_map("numLanes", int, -1),
+            oneway=get_map("oneway", _str_to_bool, False),
+            priority=get_map("priority", int, 0),
+            speed=get_map("speed", float, 13.89),
+            sidewalk_width=get_map("sidewalkWidth", int, -1),
+        )
 
     def to_xml(self) -> str:
         """
@@ -1328,7 +1396,7 @@ class EdgeTypes:
         self.types: Dict[str, EdgeType] = types if types else dict()
 
     @classmethod
-    def from_xml(cls, xml: str) -> 'EdgeTypes':
+    def from_xml(cls, xml: str) -> "EdgeTypes":
         root = ET.fromstring(xml)
         types: Dict[str, EdgeType] = {}
         for edge_type in root.iter("type"):
@@ -1371,12 +1439,12 @@ class EdgeTypes:
     def create_from_update_oneway(self, old_id: str, oneway: bool) -> Optional[EdgeType]:
         return self._create_from_update(old_id, "oneway", oneway)
 
-    def create_from_update_allow(self, old_id: str, allow: List['VehicleType']) -> Optional[EdgeType]:
+    def create_from_update_allow(self, old_id: str, allow: List["VehicleType"]) -> Optional[EdgeType]:
         new_type = self._create_from_update(old_id, "allow", allow)
         # setattr(new_type, "disallow", list(set(new_type.disallow) - set(new_type.allow)))
         return new_type
 
-    def create_from_update_disallow(self, old_id: str, disallow: List['VehicleType']) -> Optional[EdgeType]:
+    def create_from_update_disallow(self, old_id: str, disallow: List["VehicleType"]) -> Optional[EdgeType]:
         new_type = self._create_from_update(old_id, "disallow", disallow)
         # setattr(new_type, "allow", list(set(new_type.allow) - set(new_type.disallow)))
         return new_type
@@ -1389,6 +1457,7 @@ class SignalState(Enum):
     """
     Adapted from: https://sumo.dlr.de/docs/Simulation/Traffic_Lights.html#tllogic62_attributes
     """
+
     # 'red light' for a signal - vehicles must stop
     RED = "r"
     # 'amber (yellow) light' for a signal -
@@ -1417,13 +1486,15 @@ class SignalState(Enum):
 
 
 class Phase:
-    def __init__(self,
-                 duration: float,
-                 state: List[SignalState],
-                 min_dur: int = None,
-                 max_dur: int = None,
-                 name: str = None,
-                 next: List[int] = None):
+    def __init__(
+        self,
+        duration: float,
+        state: List[SignalState],
+        min_dur: int = None,
+        max_dur: int = None,
+        name: str = None,
+        next: List[int] = None,
+    ):
         """
         Adapted from: https://sumo.dlr.de/docs/Simulation/Traffic_Lights.html#tllogic62_attributes
         :param duration: The duration of the phase (sec)
@@ -1473,6 +1544,7 @@ class TLSType(Enum):
      - phase prolongation based on time gaps between vehicles (actuated),
      - or on accumulated time loss of queued vehicles (delay_based)
     """
+
     STATIC = "static"
     ACTUATED = "actuated"
     DELAY_BASED = "delay_based"
@@ -1591,6 +1663,7 @@ class TLS:
 # Roundabout
 #
 
+
 class Roundabout:
     def __init__(self, edges: List[Edge] = None):
         self._edges = edges if edges is not None else []
@@ -1633,6 +1706,7 @@ class VehicleType(Enum):
     "rail_slow",         # deprecated
     "rail_fast",         # deprecated
     """
+
     PRIVATE = "private"
     EMERGENCY = "emergency"
     AUTHORITY = "authority"

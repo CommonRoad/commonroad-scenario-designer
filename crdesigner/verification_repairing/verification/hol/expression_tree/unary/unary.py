@@ -1,7 +1,9 @@
 from abc import ABC
 
-from crdesigner.verification_repairing.verification.hol.expression_tree.expression import Expression
 from crdesigner.verification_repairing.verification.hol.context import Context
+from crdesigner.verification_repairing.verification.hol.expression_tree.expression import (
+    Expression,
+)
 
 
 class Unary(Expression, ABC):
@@ -32,7 +34,7 @@ class Unary(Expression, ABC):
         """
         Converts unary expression to string representation.
         """
-        return self._symbol + '(' + self._expr.to_string() + ')'
+        return self._symbol + "(" + self._expr.to_string() + ")"
 
     def initialize(self, model: Context):
         """

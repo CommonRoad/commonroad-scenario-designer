@@ -1,5 +1,11 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import *
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import (
+    Link,
+    Neighbor,
+    Predecessor,
+    Successor,
+)
 
 
 class TestRoadLink(unittest.TestCase):
@@ -19,7 +25,6 @@ class TestRoadLink(unittest.TestCase):
             pre.contactPoint = "test"
             pre.contactPoint = 1
             pre.contactPoint = None
-            pre_new = Predecessor(element_type="wrong", element_id=2, contact_point="wrong")
 
     def test_initialize_neighbor(self):
         side = "left"
@@ -37,7 +42,6 @@ class TestRoadLink(unittest.TestCase):
             neighbor.direction = "test"
             neighbor.direction = 4
             neighbor.direction = None
-            neighbor_new = Neighbor(side="wrong", element_id=1, direction="opposite")
 
     def test_link(self):
         pre = Predecessor(element_type="road", element_id="1", contact_point="start")
@@ -64,5 +68,5 @@ class TestRoadLink(unittest.TestCase):
         self.assertEqual([n1, n2], road_link.neighbors)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

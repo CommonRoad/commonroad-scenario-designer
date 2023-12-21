@@ -6,7 +6,6 @@ from crdesigner.verification_repairing.repairing.repairing import ElementRepairi
 
 
 class IntersectionRepairing(ElementRepairing):
-
     def __init__(self, network: LaneletNetwork):
         """
         Constructor.
@@ -21,7 +20,7 @@ class IntersectionRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        intersection_id, = location
+        (intersection_id,) = location
 
         self._network.remove_intersection(intersection_id)
 

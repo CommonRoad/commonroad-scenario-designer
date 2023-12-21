@@ -1,9 +1,9 @@
 import os
 import unittest
 from pathlib import Path
-from lxml import etree  # type: ignore
 
 from commonroad.common.file_reader import CommonRoadFileReader  # type: ignore
+from lxml import etree  # type: ignore
 
 from crdesigner.config.gui_config import gui_config
 from crdesigner.config.lanelet2_config import lanelet2_config
@@ -25,9 +25,7 @@ def load_and_convert(xml_file_name: str) -> etree.Element:
         return osm
     except etree.XMLSyntaxError as xml_error:
         print(f"SyntaxError: {xml_error}")
-        print(
-            "There was an error during the loading of the selected CommonRoad file.\n"
-        )
+        print("There was an error during the loading of the selected CommonRoad file.\n")
         return None
 
 

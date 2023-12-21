@@ -1,5 +1,9 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadtype import *
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadtype import (
+    RoadType,
+    Speed,
+)
 
 
 class TestRoadType(unittest.TestCase):
@@ -50,5 +54,5 @@ class TestRoadType(unittest.TestCase):
         self.assertEqual(None, road_type.speed)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

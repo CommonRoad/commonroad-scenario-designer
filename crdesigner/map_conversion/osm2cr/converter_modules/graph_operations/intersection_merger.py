@@ -9,13 +9,21 @@ from typing import Set, Tuple
 import numpy as np
 
 from crdesigner.config.osm_config import osm_config as config
-from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crdesigner.map_conversion.osm2cr.converter_modules.utility import idgenerator as id_gen
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph import (
+    Graph,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_edge import (
+    GraphEdge,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_node import (
+    GraphNode,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.utility import (
+    idgenerator as id_gen,
+)
 
 
-def redirect_edges(
-    edges: Set[rg.GraphEdge], nodes: Set[rg.GraphNode], node: rg.GraphNode
-) -> None:
+def redirect_edges(edges: Set[GraphEdge], nodes: Set[GraphNode], node: GraphNode) -> None:
     """
     changes all nodes, which are in a set of nodes, of edges to a certain node
 
@@ -32,7 +40,7 @@ def redirect_edges(
     return
 
 
-def get_all_edges(nodes: Set[rg.GraphNode]) -> Set[rg.GraphEdge]:
+def get_all_edges(nodes: Set[GraphNode]) -> Set[GraphEdge]:
     """
     gets all edges connected to a set of nodes
 
@@ -45,7 +53,7 @@ def get_all_edges(nodes: Set[rg.GraphNode]) -> Set[rg.GraphEdge]:
     return res
 
 
-def collect_neighbors(node: rg.GraphNode, distance: float) -> Set[rg.GraphNode]:
+def collect_neighbors(node: GraphNode, distance: float) -> Set[GraphNode]:
     """
     collects the set of all near nodes which have at most distance 'distance' to
     each other and have a degree of four
@@ -72,9 +80,7 @@ def collect_neighbors(node: rg.GraphNode, distance: float) -> Set[rg.GraphNode]:
     return merge_with
 
 
-def merge_nodes(
-    nodes: Set[rg.GraphNode]
-) -> Tuple[rg.GraphNode, Set[rg.GraphEdge], Set[rg.GraphNode]]:
+def merge_nodes(nodes: Set[GraphNode]) -> Tuple[GraphNode, Set[GraphEdge], Set[GraphNode]]:
     """
     merges a set of nodes to one
 
@@ -93,7 +99,7 @@ def merge_nodes(
             edges_to_delete.add(edge)
     edges -= edges_to_delete
 
-    new_node = rg.GraphNode(id_gen.get_id(), central_point[0], central_point[1], edges)
+    new_node = GraphNode(id_gen.get_id(), central_point[0], central_point[1], edges)
 
     redirect_edges(edges, nodes, new_node)
 
@@ -102,7 +108,7 @@ def merge_nodes(
     return new_node, edges_to_delete, nodes_to_delete
 
 
-def merge_close_intersections(graph: rg.Graph) -> None:
+def merge_close_intersections(graph: Graph) -> None:
     """
     merges close graph nodes
 
@@ -118,9 +124,7 @@ def merge_close_intersections(graph: rg.Graph) -> None:
                 updated = False
                 nodes_to_merge = collect_neighbors(node, config.MERGE_DISTANCE)
                 if len(nodes_to_merge) > 1:
-                    new_node, edges_to_delete, nodes_to_delete = merge_nodes(
-                        nodes_to_merge
-                    )
+                    new_node, edges_to_delete, nodes_to_delete = merge_nodes(nodes_to_merge)
                     graph.nodes -= nodes_to_delete
                     graph.edges -= edges_to_delete
                     graph.nodes.add(new_node)

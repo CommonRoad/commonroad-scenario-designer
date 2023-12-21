@@ -1,9 +1,15 @@
-from antlr4 import InputStream, CommonTokenStream
+from antlr4 import CommonTokenStream, InputStream
 
 from crdesigner.verification_repairing.verification.hol.formula import Formula
-from crdesigner.verification_repairing.verification.hol.parser.gen.FormulaLexer import FormulaLexer
-from crdesigner.verification_repairing.verification.hol.parser.gen.FormulaParser import FormulaParser
-from crdesigner.verification_repairing.verification.hol.parser.gen.FormulaVisitor import FormulaVisitor
+from crdesigner.verification_repairing.verification.hol.parser.gen.FormulaLexer import (
+    FormulaLexer,
+)
+from crdesigner.verification_repairing.verification.hol.parser.gen.FormulaParser import (
+    FormulaParser,
+)
+from crdesigner.verification_repairing.verification.hol.parser.gen.FormulaVisitor import (
+    FormulaVisitor,
+)
 
 
 class Parser:
@@ -12,7 +18,7 @@ class Parser:
     """
 
     @staticmethod
-    def parse(formula: str, formula_id: str = '') -> Formula:
+    def parse(formula: str, formula_id: str = "") -> Formula:
         """
         Parses a formula.
 
