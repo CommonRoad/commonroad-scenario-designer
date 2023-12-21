@@ -32,10 +32,10 @@ def convert_line_marking(plane_line_marking: RoadMark) -> LineMarking:
         elif plane_line_marking.weight == "bold":
             mark = LineMarking.BROAD_DASHED
 
-    elif plane_line_marking.type == "solid_solid":
+    elif plane_line_marking.type == "solid solid":
         mark = LineMarking.SOLID_SOLID
 
-    elif plane_line_marking.type == "broken_broken":
+    elif plane_line_marking.type == "broken broken":
         mark = LineMarking.DASHED_DASHED
 
     elif plane_line_marking.type == "curb":
@@ -44,10 +44,10 @@ def convert_line_marking(plane_line_marking: RoadMark) -> LineMarking:
     elif plane_line_marking.type == "none":
         mark = LineMarking.NO_MARKING
 
-    elif plane_line_marking.type == "solid_dashed":
+    elif plane_line_marking.type == "solid dashed":
         mark = LineMarking.SOLID_DASHED
 
-    elif plane_line_marking.type == "dashed_solid":
+    elif plane_line_marking.type == "dashed solid":
         mark = LineMarking.DASHED_SOLID
 
     return mark
@@ -65,6 +65,7 @@ class ParametricLaneGroup:
         inner_neighbour=None,
         inner_neighbour_same_direction=True,
         outer_neighbour=None,
+        inner_linemarking=None
     ):
         """Initializes a ParametricLaneGroup object.
 
@@ -76,6 +77,8 @@ class ParametricLaneGroup:
         :type inner_neighbour: str
         :param outer_neighbour: ID of the outer neighbor of this group.
         :type outer_neighbour: str
+        :param inner_linemarking: inside road mark present in 2 central inner lanelets, closest to the center line
+        :type inner_linemarking: RoadMark
         """
         self._geo_lengths = [np.array([0.0])]
         self.parametric_lanes: List[ParametricLane] = []
@@ -87,6 +90,10 @@ class ParametricLaneGroup:
         self.traffic_signs = []
         self.stop_lines = []
         self.signal_references = []
+        if inner_linemarking is None:
+            inner_linemarking = RoadMark()
+            inner_linemarking.type = 'unknown'
+        self.inner_linemarking = inner_linemarking
 
         if parametric_lanes is not None:
             if isinstance(parametric_lanes, list):
@@ -180,7 +187,6 @@ class ParametricLaneGroup:
         :return: Created Lanelet.
         """
         left_vertices, right_vertices = np.array([]), np.array([])
-        line_marking_left_vertices = LineMarking.UNKNOWN
         line_marking_right_vertices = LineMarking.UNKNOWN
 
         for parametric_lane in self.parametric_lanes:
@@ -206,10 +212,9 @@ class ParametricLaneGroup:
         for parametric_lane in self.parametric_lanes:
             line_marking = parametric_lane.line_marking
             if line_marking is not None:
-                if parametric_lane.side == "left":
-                    line_marking_left_vertices = convert_line_marking(line_marking)
-                elif parametric_lane.side == "right":
-                    line_marking_right_vertices = convert_line_marking(line_marking)
+                # for the right-hand driving, outer lanelet is always on the right side
+                # assumed right-hand driving
+                line_marking_right_vertices = convert_line_marking(line_marking)
             else:
                 pass
 
@@ -256,17 +261,16 @@ class ParametricLaneGroup:
             users = set.union({"vehicle"}, set.difference(users, vehicle_set))
         if self.type == "bidirectional":
             lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
-                                        lanelet_type=self.type, line_marking_left_vertices=line_marking_left_vertices,
+                                        lanelet_type=self.type, line_marking_left_vertices=convert_line_marking(self.inner_linemarking),
                                         line_marking_right_vertices=line_marking_right_vertices,
                                         speed=self.parametric_lanes[0].speed,
                                         user_bidirectional=users)
         else:
             lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
-                                        lanelet_type=self.type, line_marking_left_vertices=line_marking_left_vertices,
+                                        lanelet_type=self.type, line_marking_left_vertices=convert_line_marking(self.inner_linemarking),
                                         line_marking_right_vertices=line_marking_right_vertices,
                                         speed=self.parametric_lanes[0].speed,
                                         user_one_way=users)
-
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
 

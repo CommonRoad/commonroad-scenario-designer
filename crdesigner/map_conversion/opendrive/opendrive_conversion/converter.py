@@ -95,6 +95,17 @@ class OpenDriveConverter:
                     )
                 )
 
+                # check the center line to save the inner linemarkings of the lanes around the center line
+                inner_linemarking = None
+                # lanes around the center line have an id of 1 and -1.
+                if lane.id == 1 or lane.id == -1:
+                    for parent_lane_section in lane.parentRoad.lanes.lane_sections:
+                        # check for the center line
+                        if len(parent_lane_section.centerLanes) > 0:
+                            # check if the center lane has a road mark
+                            if len(parent_lane_section.centerLanes[0].road_mark) > 0:
+                                inner_linemarking = parent_lane_section.centerLanes[0].road_mark[0]
+
                 plane_group = ParametricLaneGroup(
                     id_=encode_road_section_lane_width_id(
                         lane_section.parentRoad.id, lane_section.idx, lane.id, -1
@@ -102,6 +113,7 @@ class OpenDriveConverter:
                     inner_neighbour=inner_neighbour_id,
                     inner_neighbour_same_direction=inner_neighbour_same_dir,
                     outer_neighbour=outer_neighbour_id,
+                    inner_linemarking=inner_linemarking
                 )
 
                 # Create new lane for each width segment
