@@ -2,7 +2,7 @@ import numpy as np
 from commonroad.geometry.shape import Rectangle
 from commonroad.scenario.lanelet import LaneletNetwork
 
-from crdesigner.config.gui_config import gui_config
+from crdesigner.common.config.gui_config import gui_config
 
 
 def resize_lanelet_network(

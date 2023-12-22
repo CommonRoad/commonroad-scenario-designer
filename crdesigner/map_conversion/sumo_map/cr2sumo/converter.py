@@ -56,6 +56,7 @@ from commonroad.scenario.obstacle import ObstacleRole, ObstacleType
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_light import (
     TrafficLight,
+    TrafficLightCycle,
     TrafficLightCycleElement,
     TrafficLightDirection,
 )
@@ -1356,16 +1357,18 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
             traffic_light = TrafficLight(
                 traffic_light_id=next_cr_id,
-                cycle=[
-                    TrafficLightCycleElement(
-                        state=traffic_light_states_SUMO2CR[phase.state[connection.tl_link]],
-                        duration=round(phase.duration / self.conf.dt),
-                    )
-                    for phase in connection.tls.phases
-                ],
+                traffic_light_cycle=TrafficLightCycle(
+                    [
+                        TrafficLightCycleElement(
+                            state=traffic_light_states_SUMO2CR[phase.state[connection.tl_link]],
+                            duration=round(phase.duration / self.conf.dt),
+                        )
+                        for phase in connection.tls.phases
+                    ],
+                    time_offset=time_offset / self.conf.dt,
+                ),
                 direction=directions_SUMO2CR[connection.direction],
                 position=lanelet.right_vertices[-1],
-                time_offset=time_offset / self.conf.dt,
             )
             next_cr_id += 1
             assert self.lanelet_network.add_traffic_light(
@@ -1521,7 +1524,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._output_file = str(output_path)
         # Calling of Netconvert
         command = (
-            f"netconvert "
+            f"{os.environ['SUMO_HOME']}/bin/netconvert "
             f" --no-turnarounds=true"
             f" --junctions.internal-link-detail=20"
             f" --geometry.avoid-overlap=true"

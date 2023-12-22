@@ -1,11 +1,11 @@
 import os
 
-from crdesigner.config import CONFIG_DIR
-from crdesigner.config.config_base import Attribute, BaseConfig
-from crdesigner.config.gui_config import gui_config
-from crdesigner.config.lanelet2_config import lanelet2_config
-from crdesigner.config.opendrive_config import open_drive_config
-from crdesigner.config.osm_config import osm_config
+from crdesigner.common.config import CONFIG_DIR
+from crdesigner.common.config.config_base import Attribute, BaseConfig
+from crdesigner.common.config.gui_config import gui_config
+from crdesigner.common.config.lanelet2_config import lanelet2_config
+from crdesigner.common.config.opendrive_config import open_drive_config
+from crdesigner.common.config.osm_config import osm_config
 
 CONFIGS_TO_RENDER = [gui_config, osm_config, open_drive_config, lanelet2_config]
 

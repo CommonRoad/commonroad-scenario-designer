@@ -7,8 +7,10 @@ from commonroad.scenario.lanelet import LaneletType, LineMarking, RoadUser
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import TrafficSignIDZamunda
 
-from crdesigner.config.gui_config import utm_default
-from crdesigner.config.opendrive_config import open_drive_config as opendrive_config
+from crdesigner.common.config.gui_config import utm_default
+from crdesigner.common.config.opendrive_config import (
+    open_drive_config as opendrive_config,
+)
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
 

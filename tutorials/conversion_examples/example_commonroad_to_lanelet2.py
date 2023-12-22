@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from crdesigner.config.lanelet2_config import lanelet2_config
+from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.map_conversion_interface import commonroad_to_lanelet
 
 input_path = Path.cwd().parent.parent / "tests/map_conversion/test_maps/lanelet2/merging_lanelets_utm.xml"

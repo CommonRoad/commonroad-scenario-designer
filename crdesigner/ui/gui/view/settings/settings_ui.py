@@ -3,8 +3,8 @@ from typing import List, Union
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QMainWindow
 
-from crdesigner.config.config_base import Attribute
-from crdesigner.config.settings_config import settings
+from crdesigner.common.config.config_base import Attribute
+from crdesigner.common.config.settings_config import settings
 from crdesigner.ui.gui.view.settings.settings_tab_ui import SettingsTabUI
 
 HEIGHT = 25

@@ -2,7 +2,7 @@ from typing import Dict
 
 from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSignIDZamunda
 
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.osm_config import osm_config as config
 
 
 class TrafficSignParser:

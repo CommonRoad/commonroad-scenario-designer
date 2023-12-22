@@ -8,7 +8,7 @@ from typing import List, Optional, Set, Tuple
 import numpy as np
 from ordered_set import OrderedSet
 
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.custom_types import (
     Assumption_info,

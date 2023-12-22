@@ -1,9 +1,9 @@
 from PyQt6 import QtCore, QtWidgets
 
-from crdesigner.config.gui_config import gui_config
-from crdesigner.config.logging import logger
-from crdesigner.config.settings_config import CONFIGS_TO_RENDER
-from crdesigner.config.settings_config import settings as settings_model
+from crdesigner.common.config.gui_config import gui_config
+from crdesigner.common.config.settings_config import CONFIGS_TO_RENDER
+from crdesigner.common.config.settings_config import settings as settings_model
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.view.settings.settings_ui import SettingsUI
 
 

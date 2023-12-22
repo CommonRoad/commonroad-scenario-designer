@@ -6,8 +6,8 @@ from lxml import etree
 from PyQt6.QtCore import Q_ARG, QMetaObject, QRunnable, Qt, QThreadPool, pyqtSlot
 from PyQt6.QtWidgets import QDockWidget, QFileDialog, QMainWindow, QMessageBox
 
-from crdesigner.config.logging import logger
-from crdesigner.config.osm_config import osm_config
+from crdesigner.common.config.osm_config import osm_config
+from crdesigner.common.logging import logger
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
