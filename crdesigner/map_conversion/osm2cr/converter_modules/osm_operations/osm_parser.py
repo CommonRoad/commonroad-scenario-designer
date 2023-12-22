@@ -10,9 +10,6 @@ from ordered_set import OrderedSet
 from collections import OrderedDict
 import logging
 import numpy as np
-from pyproj import Proj, CRS, Transformer
-from matplotlib import pyplot as plt
-from matplotlib.ticker import FormatStrFormatter
 
 from crdesigner.config.osm_config import osm_config as config
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
@@ -56,13 +53,6 @@ def get_points(nodes: Dict[int, ElTree.Element], custom_bounds=None) \
     :return: dict of points
     :rtype: Dict[int, Point]
     """
-
-    print("test")
-    print("test")
-    print("test")
-    print("test")
-
-
     if len(nodes) < 1:
         raise ValueError("Map is empty")
     ids = []
@@ -79,77 +69,17 @@ def get_points(nodes: Dict[int, ElTree.Element], custom_bounds=None) \
     assert bounds[0] >= bounds[2]
     assert bounds[3] >= bounds[1]
     # TODO reuse projection in geometry.py
-    # lon_center = (bounds[1] + bounds[3]) / 2
-    # lat_center = (bounds[0] + bounds[2]) / 2
-
-    lon_center = 0.0
-    lat_center = 0.0
+    lon_center = (bounds[1] + bounds[3]) / 2
+    lat_center = (bounds[0] + bounds[2]) / 2
     lons = np.array(lons)
     lats = np.array(lats)
-
-    # lons_3857 = []
-    # lats_3857 = []
-
-    
-    # # crs_from = CRS("EPSG:4326")
-    # # crs_to = CRS("EPSG:3857")
-    # transformer = Transformer.from_proj(4326, 3857)
-
-    # # 3215769.83,5016650.49
-
-    # points =[]
-    # for i in range(len(lons)):
-    #     point = (lats[i], lons[i])
-    #     points.append(point)
-
-    # for pt in transformer.itransform(points):
-    #     x, y = pt
-    #     lons_3857.append(x)
-    #     lats_3857.append(y)
-    #     # print("x: ", x)
-    #     # print("y: ", y)
-    #     # print("--------")
-
-
-    # lons_m = np.array(lons_3857)
-    # lats_m = np.array(lats_3857)
-
-    # fig, ax = plt.subplots()
-    # ax.xaxis.set_major_formatter(FormatStrFormatter('%2f'))
-    # ax.yaxis.set_major_formatter(FormatStrFormatter('%2f'))
-
-    # plt.plot(lats_3857, lons_3857)
-    # plt.show()
-
-    # x_list = []
-    # y_list = []
-
-    # for i in range(len(lons)):
-    #     p_x, p_y = lon_lat_to_cartesian(np.array([lats[i], lons[i]]), np.array([0, 0]))
-    #     print("p_x: ", p_x)
-    #     print("p_y: ", p_y)
-    #     print("\n")
-    #     x_list.append(p_x)
-    #     y_list.append(p_y)
-
-    #     # point = (lats[i], lons[i])
-    #     # points.append(point)
-
-    
-    # x = np.array(x_list)
-    # y = np.array(y_list)
-
-
-
     lons_d = lons - lon_center
     lats_d = lats - lat_center
     points = OrderedDict()
-    lon_constants = np.pi / 180 * config.EARTH_RADIUS * np.cos(np.radians(lats))
+    lon_constants = (111312.84*np.cos(np.radians(lats))) - (93.5*np.cos(3*np.radians(lats))) + (0.118*np.cos(5*np.radians(lats)))
     x = lon_constants * lons_d
-    # x = lons_m
-    lat_constant = np.pi / 180 * config.EARTH_RADIUS
+    lat_constant = 111132.92 - (559.82*np.cos(2*np.radians(lats))) + (1.175*np.cos(4*np.radians(lats))) - (0.0023*np.cos(6*np.radians(lats)))
     y = lat_constant * lats_d
-    # y = lats_m
     for index, point_id in enumerate(ids):
         points[int(point_id)] = Point(int(point_id), x[index], y[index])
     logging.info("{} required nodes found".format(len(points)))
@@ -414,7 +344,6 @@ def parse_file(filename: str, accepted_highways: List[str], rejected_tags: Dict[
     if custom_bounds is not None:
         bounds = custom_bounds
 
-    print("len(road_points)", len(road_points))
     return ways, road_points, restrictions, center_point, bounds, traffic_signs, traffic_lights, crossing_points
 
 
@@ -673,9 +602,8 @@ def get_graph_edges_from_road(roads: Set[ElTree.Element],
         if index + 1 < len(point_in_area_list):
             result = result or point_in_area_list[index + 1]
         return result
-
+    
     area = get_area_from_bounds(bounds, origin)
-    print("area: ", area)
     edges = OrderedDict()
     for road_index, road in enumerate(roads):
         # get basic information of road
@@ -704,29 +632,19 @@ def get_graph_edges_from_road(roads: Set[ElTree.Element],
         outside_waypoints = OrderedSet()
         point_list = [points[int(nd.attrib["ref"])] for nd in road.findall("nd")]
         point_in_area_list = [point in area for point in point_list]
-        print("len(point_in_area_list): ", len(point_in_area_list))
-        # for index, point in enumerate(point_list):
-        #     # loading only inside of bounds
-        #     if point_in_area_list[index]:
-        #         # point is added
-        #         waypoints.append(point)
-        #     elif neighbor_in_area(index, point_in_area_list):
-        #         # point is added, but edge is split
-        #         outside_waypoints.add(point.id)
-        #         waypoints.append(point)
-        #         nodes[point.id] = rg.GraphNode(point.id, point.x, point.y, OrderedSet())
-        #     else:
-        #         print("x: ", point.x, "\ty: ", point.y)
-
-        #         # point is not added
-        #         pass
-
-
         for index, point in enumerate(point_list):
-            outside_waypoints.add(point.id)
-            waypoints.append(point)
-            nodes[point.id] = rg.GraphNode(point.id, point.x, point.y, OrderedSet())
-
+            # loading only inside of bounds
+            if point_in_area_list[index]:
+                # point is added
+                waypoints.append(point)
+            elif neighbor_in_area(index, point_in_area_list):
+                # point is added, but edge is split
+                outside_waypoints.add(point.id)
+                waypoints.append(point)
+                nodes[point.id] = rg.GraphNode(point.id, point.x, point.y, OrderedSet())
+            else:
+                # point is not added
+                pass
 
         if flip:
             waypoints.reverse()
@@ -878,37 +796,22 @@ def roads_to_graph(roads: Set[ElTree.Element],
     :param additional_nodes: nodes that should be considered additionally
     :return:
     """
-    print("\n\n")
-    print("roads_to_graph:")
     origin = np.array(origin)[::-1]
-    print("origin: ", origin)
     nodes = get_graph_nodes(roads, road_points, traffic_signs, traffic_lights)
-    # print("nodes: ", nodes.values().mapping.keys())  # 
-    print("len(nodes): ", len(nodes))
     if additional_nodes is not None:
         for node in additional_nodes:
             nodes[node.id] = node
             logging.info("added crossing point", node)
     edges = get_graph_edges_from_road(roads, nodes, road_points, bounds, origin)
-    print("bounds: ", bounds)
-    print("len(edges): ", len(edges))
     graph_traffic_signs = get_graph_traffic_signs(nodes, edges, traffic_signs)
     graph_traffic_lights = get_graph_traffic_lights(nodes, traffic_lights)
     map_restrictions(edges, restrictions, nodes)
-    # print("edges.values", edges.values())
     edges = OrderedSet([elem for edge_set in edges.values() for elem in edge_set])
-
-    # for edge_set in edges.values():
-    #     print("\nelem:", elem)
-
-    #     for elem in edge_set:
-    #         print("\telem:", elem)
-
-
-    print("*---------------len(edges): ", len(edges))
+    # node_set = set()
+    # for node in nodes:
+    #     node_set.add(nodes[node])
     node_set = get_node_set(edges)
     graph = rg.Graph(node_set, edges, center_point, bounds, graph_traffic_signs, graph_traffic_lights)
-    print("\n\n")
     return graph
 
 
@@ -985,7 +888,6 @@ def create_graph(file_path: str) -> rg.Graph:
     Create a graph from the given osm file.
     If a sublayer should be extracted the graph will be a SublayeredGraph.
     """
-    print("create_graph")
 
     def _create_graph(
             file, accepted_ways, custom_bounds=None, additional_nodes=None):
@@ -999,9 +901,6 @@ def create_graph(file_path: str) -> rg.Graph:
             roads, points, restrictions, center_point, bounds, center_point,
             traffic_signs, traffic_lights, additional_nodes
         )
-        print("graph")
-        print("len - graph.nodes: ", len(graph.nodes))
-
         return graph, crossing_points
 
     #  reset id generator for new graph
