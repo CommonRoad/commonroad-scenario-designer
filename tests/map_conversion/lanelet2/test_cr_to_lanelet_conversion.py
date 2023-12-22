@@ -5,8 +5,8 @@ from pathlib import Path
 from commonroad.common.file_reader import CommonRoadFileReader  # type: ignore
 from lxml import etree  # type: ignore
 
-from crdesigner.config.gui_config import gui_config
-from crdesigner.config.lanelet2_config import lanelet2_config
+from crdesigner.common.config.gui_config import gui_config
+from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
 from tests.map_conversion.utils import elements_equal

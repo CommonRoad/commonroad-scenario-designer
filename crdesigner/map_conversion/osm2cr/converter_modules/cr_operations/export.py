@@ -14,7 +14,7 @@ from commonroad.scenario.scenario import Lanelet, Location, Scenario, Tag
 # CommonRoad python tools are imported
 from commonroad.visualization.mp_renderer import MPRenderer
 
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.cleanup import (
     sanitize,

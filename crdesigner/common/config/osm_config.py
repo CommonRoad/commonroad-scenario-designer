@@ -1,4 +1,4 @@
-from crdesigner.config.config_base import Attribute, BaseConfig
+from crdesigner.common.config.config_base import Attribute, BaseConfig
 
 
 class OsmConfig(BaseConfig):

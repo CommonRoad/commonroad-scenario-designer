@@ -840,6 +840,20 @@ files = [
 ]
 
 [[package]]
+name = "eclipse-sumo"
+version = "1.19.0"
+description = "A microscopic, multi-modal traffic simulation package"
+optional = false
+python-versions = "*"
+files = [
+    {file = "eclipse_sumo-1.19.0-py2.py3-none-macosx_12_0_x86_64.whl", hash = "sha256:431210f6b7147bd8b83878cc80a7fcffdf54620e8681d6ec662b08b471035468"},
+    {file = "eclipse_sumo-1.19.0-py2.py3-none-macosx_14_0_arm64.whl", hash = "sha256:a92378a4f5a1309eb461a330bbe59c84819ff83f5e8bb0cf810f1f1f188ec80e"},
+    {file = "eclipse_sumo-1.19.0-py2.py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1ae19f908a62b5d42604f34152a8d6cd892787de23e04265cd4690bd96f17e05"},
+    {file = "eclipse_sumo-1.19.0-py2.py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3ead5b777520d72639b81c81344f0d8a13888cfc4f667ca5a2a46f1cfb650378"},
+    {file = "eclipse_sumo-1.19.0-py2.py3-none-win_amd64.whl", hash = "sha256:ad74c3f02e14d293a58bae8f233137dd4886151df1ef6971f9be118944145623"},
+]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.2.0"
 description = "Backport of PEP 654 (exception groups)"
@@ -4255,4 +4269,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "06362ad7801cfcefa0beef70f2473a7beb1d0a8b02e18ed892f32a45a9b1b697"
+content-hash = "9f8ae7b5a3e072c5a21666a3da7c85877c31054bf9b107a0f6a7d812ae431e9f"

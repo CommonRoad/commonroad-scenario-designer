@@ -25,8 +25,8 @@ from PyQt6.QtCore import QPoint
 from PyQt6.QtGui import QCursor, QMouseEvent
 from PyQt6.QtWidgets import QSizePolicy
 
-from crdesigner.config.gui_config import DrawParamsCustom, gui_config
-from crdesigner.config.logging import logger
+from crdesigner.common.config.gui_config import DrawParamsCustom, gui_config
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.utilities.aerial_data import (
     get_aerial_image_bing,
     get_aerial_image_ldbv,

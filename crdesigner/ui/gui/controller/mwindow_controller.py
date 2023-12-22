@@ -6,8 +6,8 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QGuiApplication
 from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
-from crdesigner.config.gui_config import gui_config
-from crdesigner.config.logging import logger
+from crdesigner.common.config.gui_config import gui_config
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
 from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_wrapper_controller import (
     AnimatedViewerWrapperController,

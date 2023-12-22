@@ -1,6 +1,6 @@
 from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
 
-from crdesigner.config.logging import logger
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.intersections_ui import (
     AddIntersectionUI,

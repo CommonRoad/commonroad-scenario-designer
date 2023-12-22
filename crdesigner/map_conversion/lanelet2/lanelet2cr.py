@@ -33,8 +33,8 @@ from commonroad.scenario.traffic_sign import (
 from pyproj import CRS, Transformer
 from shapely.geometry import LineString  # type: ignore
 
-from crdesigner.config.general_config import GeneralConfig, general_config
-from crdesigner.config.lanelet2_config import Lanelet2Config, lanelet2_config
+from crdesigner.common.config.general_config import GeneralConfig, general_config
+from crdesigner.common.config.lanelet2_config import Lanelet2Config, lanelet2_config
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.conversion_lanelet_network import (
     ConversionLaneletNetwork,

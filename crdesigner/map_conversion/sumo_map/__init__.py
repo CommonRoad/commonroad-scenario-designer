@@ -1,11 +1,7 @@
 """
-Configures the necessary variables for the module to work correctly
+Configures the necessary variables for SUMO to work correctly
 """
 
-import os
-import sys
+from crdesigner.common.helper import init_sumo
 
-# import $SUMO_HOME/tools into the PYTHONPATH once this module is loaded
-if "SUMO_HOME" in os.environ:
-    tools = os.path.join(os.environ["SUMO_HOME"], "tools")
-    sys.path.append(tools)
+init_sumo()

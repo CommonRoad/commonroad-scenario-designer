@@ -4,7 +4,7 @@ from commonroad.scenario.lanelet import Lanelet
 from PyQt6.QtCore import Qt, pyqtSlot
 from PyQt6.QtWidgets import QDockWidget
 
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.aerial_image_controller import (
     AddAerialImageController,
 )

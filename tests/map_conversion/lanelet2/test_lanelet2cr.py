@@ -16,7 +16,7 @@ from commonroad.scenario.traffic_sign import (
 from lxml import etree
 from pyproj import CRS, Transformer
 
-from crdesigner.config.lanelet2_config import lanelet2_config
+from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.lanelet2 import (
     Node,
     RegulatoryElement,

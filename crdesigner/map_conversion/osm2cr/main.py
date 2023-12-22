@@ -11,7 +11,7 @@ from commonroad.scenario.scenario import Tag
 
 import crdesigner.map_conversion.osm2cr.converter_modules.converter as converter
 import crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export as ex
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format import (
     IntermediateFormat,
 )

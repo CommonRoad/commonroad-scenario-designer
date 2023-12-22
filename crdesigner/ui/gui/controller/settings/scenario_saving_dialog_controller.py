@@ -17,7 +17,7 @@ from commonroad.scenario.scenario import (
 )
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
-from crdesigner.config.logging import logger
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
