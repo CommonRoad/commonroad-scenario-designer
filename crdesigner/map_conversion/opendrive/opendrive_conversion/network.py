@@ -29,8 +29,8 @@ from commonroad.scenario.traffic_sign import (
 )
 from pyproj import CRS, Transformer
 
-from crdesigner.config.general_config import GeneralConfig, general_config
-from crdesigner.config.opendrive_config import OpenDriveConfig, open_drive_config
+from crdesigner.common.config.general_config import GeneralConfig, general_config
+from crdesigner.common.config.opendrive_config import OpenDriveConfig, open_drive_config
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.conversion_lanelet_network import (
     ConversionLaneletNetwork,

@@ -690,7 +690,7 @@ class Edge:
 
     def __eq__(self, other: "Edge"):
         return (
-            isinstance(self, other)
+            isinstance(other, type(self))
             and self.id == other.id
             and self.from_node == other.from_node
             and self.to_node == other.to_node
@@ -899,7 +899,7 @@ class Lane:
 
     def __eq__(self, other: "Lane"):
         return (
-            isinstance(self, other)
+            isinstance(other, type(self))
             and self.edge.id == other.edge.id
             and self.speed == other.speed
             and self.length == other.length

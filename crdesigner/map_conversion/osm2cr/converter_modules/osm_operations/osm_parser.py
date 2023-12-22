@@ -11,7 +11,7 @@ from xml.etree.ElementTree import Element
 import numpy as np
 from ordered_set import OrderedSet
 
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common.geometry import (
     Area,
     Point,

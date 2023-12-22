@@ -16,9 +16,8 @@ from PIL import Image
 from PIL.JpegImagePlugin import JpegImageFile
 from pyproj import Proj
 
-from crdesigner.config.gui_config import gui_config
-from crdesigner.config.gui_config import gui_config as config_settings
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.gui_config import gui_config
+from crdesigner.common.config.osm_config import osm_config as config
 
 # Moved to services/arial data
 
@@ -65,7 +64,7 @@ def get_bin_maps_api_response() -> None:
     """
 
     global bing_maps_api_response
-    bingMapsKey = config_settings.BING_MAPS_KEY
+    bingMapsKey = gui_config.BING_MAPS_KEY
     if bingMapsKey == "":
         print("_Warning__: No Bing Maps key specified. Go to settings and set Password.")
         return
@@ -86,7 +85,7 @@ def validate_bing_key() -> bool:
     Validates the password specified by BING_MAPS_KEY in the config of the settings.
     :return: bool: True for valid password, False for wrong password
     """
-    bingMapsKey = config_settings.BING_MAPS_KEY
+    bingMapsKey = gui_config.BING_MAPS_KEY
     request = (
         "http://dev.virtualearth.net/REST/V1/Imagery/Metadata/Aerial?output=json&include=ImageryProviders&key={"
         "}".format(bingMapsKey)
@@ -107,8 +106,8 @@ def validate_bing_key() -> bool:
 
 def validate_ldbv_credentials() -> bool:
     url = "https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi?service=wms&request=GetMap&version=1.1.1&bbox=11.65541,48.26142,11.66093,48.26386&width=100&height=100&layers=by_dop20c&format=image/jpeg&srs=EPSG:4326"
-    ldbv_username = config_settings.LDBV_USERNAME
-    ldbv_password = config_settings.LDBV_PASSWORD
+    ldbv_username = gui_config.LDBV_USERNAME
+    ldbv_password = gui_config.LDBV_PASSWORD
 
     try:
         auth_handler = HTTPBasicAuthHandler()
@@ -142,7 +141,7 @@ def get_tile(quadkey: str) -> JpegImageFile:
         try:
             if bing_maps_api_response is None:
                 get_bin_maps_api_response()
-            if config_settings.BING_MAPS_KEY == "":
+            if gui_config.BING_MAPS_KEY == "":
                 return
             request = bing_maps_api_response["imageUrl"]
             sub_domain = bing_maps_api_response["imageUrlSubdomains"][0]
@@ -302,8 +301,8 @@ def get_aerial_image_ldbv(bounds: Tuple[float, float, float, float]) -> Image.Im
     :return: Image
     """
     lat1, lon1, lat2, lon2 = bounds
-    ldbv_username = config_settings.LDBV_USERNAME
-    ldbv_password = config_settings.LDBV_PASSWORD
+    ldbv_username = gui_config.LDBV_USERNAME
+    ldbv_password = gui_config.LDBV_PASSWORD
 
     lat_diff = lat1 - lat2
     lon_diff = lon2 - lon1

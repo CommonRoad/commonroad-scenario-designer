@@ -16,7 +16,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
-from crdesigner.config.logging import logger
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.utilities.toolbox_ui import (
     CheckableComboBox,
     CollapsibleArrowBox,

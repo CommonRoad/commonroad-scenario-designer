@@ -21,7 +21,7 @@ from commonroad.scenario.state import CustomState, InitialState, TraceState
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QDockWidget, QTableWidgetItem
 
-from crdesigner.config.logging import logger
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.view.toolboxes.scenario_toolbox.scenario_toolbox_ui import (
     ScenarioToolboxUI,

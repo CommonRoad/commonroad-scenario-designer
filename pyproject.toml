@@ -65,6 +65,7 @@ similaritymeasures = ">=0.4.4"
 kdtree = "^0.16"
 pandas = "2.0.2"
 requests = "^2.31.0 "
+eclipse-sumo = "^1.19.0"
 
 [tool.poetry.group.dev]
 optional = true

@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
     QTextEdit,
 )
 
-from crdesigner.config.config_base import Attribute
+from crdesigner.common.config.config_base import Attribute
 from crdesigner.ui.gui.utilities.size_policy import (
     create_size_policy_for_settings_elements,
 )

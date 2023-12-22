@@ -18,7 +18,7 @@ from commonroad.scenario.traffic_sign import (
 )
 from pyproj import CRS, Transformer
 
-from crdesigner.config.lanelet2_config import lanelet2_config
+from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 
 # creating a testing vertices and a testing scenario from a test file (xml)

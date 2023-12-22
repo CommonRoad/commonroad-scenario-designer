@@ -8,7 +8,7 @@ import sys
 
 import matplotlib.pyplot as plt
 
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations import export
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import (
     intersection_merger,

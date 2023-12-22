@@ -1,7 +1,7 @@
 import functools
 from datetime import datetime
 
-from crdesigner.config.gui_config import gui_config
+from crdesigner.common.config.gui_config import gui_config
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
 
 

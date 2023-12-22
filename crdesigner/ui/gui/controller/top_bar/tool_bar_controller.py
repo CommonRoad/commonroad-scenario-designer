@@ -1,9 +1,9 @@
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QMessageBox
 
-from crdesigner.config.gui_config import gui_config
-from crdesigner.config.gui_config import gui_config as config
-from crdesigner.config.logging import logger
+from crdesigner.common.config.gui_config import gui_config
+from crdesigner.common.config.gui_config import gui_config as config
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.utilities.file_actions import (
     file_new,
     file_save,

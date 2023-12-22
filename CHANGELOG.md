@@ -8,7 +8,8 @@
 - Optional functionality to get geonamesID locally without API-call
 - Test Case for local geonamesID functionality
 - Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
-- Optional MGRS tag for nodes in CR to Lanelet2 conversion (comptaibility with Autoware)
+- Optional MGRS tag for nodes in CR to Lanelet2 conversion (compatibility with Autoware)
+- Eclipse-SUMO Python package dependency for better integration of SUMO
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
@@ -20,10 +21,10 @@
 - Adding existing obstacles again
 - Selecting obstacles with set-based prediction
 - Bug when editing curved lanelets in the canvas
-- lanelet2cr wrong final vertice assignment 
+- lanelet2cr wrong final vertices assignment 
 - Deleting unreferenced traffic signs/lights after deleting lanelet
 - Map verification/repairing: Checking unique ID of traffic light cycle element
-- Consider x, y translation for CR-Lanlet (and vice versa) conversion
+- Consider x-, y-translation for cr2lanelet conversion (and vice versa)
 
 ## [0.8.0] - 2023-10-31
 

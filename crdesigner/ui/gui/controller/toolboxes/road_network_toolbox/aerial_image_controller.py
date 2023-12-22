@@ -1,8 +1,8 @@
 from PyQt6.QtCore import Q_ARG, QMetaObject, QRunnable, Qt, QThreadPool
 from PyQt6.QtWidgets import QMessageBox
 
-from crdesigner.config.gui_config import gui_config as config_settings
-from crdesigner.config.logging import logger
+from crdesigner.common.config.gui_config import gui_config as config_settings
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import (
     RoadNetworkToolboxUI,

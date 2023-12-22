@@ -10,7 +10,7 @@ from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
 from pyproj import CRS, Transformer
 
-from crdesigner.config.lanelet2_config import Lanelet2Config, lanelet2_config
+from crdesigner.common.config.lanelet2_config import Lanelet2Config, lanelet2_config
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.lanelet2 import (
     Node,
