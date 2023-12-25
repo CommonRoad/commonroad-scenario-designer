@@ -228,14 +228,14 @@ class CR2LaneletConverter:
         Add traffic light relations to lanelets in lanelet2 format
         """
         # One regulatory element is created for each lanelet that has a corresponding traffic_light element
-        for ll in self.lanelet_network.lanelets:
+        for idx, ll in enumerate(self.lanelet_network.lanelets):
             traffic_light_reference_list = []
-            for lightID in ll.traffic_lights:
+            for light_id in ll.traffic_lights:
                 # find the coordinates of the CR traffic light
                 # and check them with traffic light in L2 format that we have created
 
                 # if 'position' returns 2 values, *z will be empty. Else, it will be an array with remaining values
-                x, y, *z = self.lanelet_network.find_traffic_light_by_id(lightID).position
+                x, y, *z = self.lanelet_network.find_traffic_light_by_id(light_id).position
                 if len(z) == 0:
                     z = 0
                 else:
@@ -246,9 +246,8 @@ class CR2LaneletConverter:
                     if self.osm.find_way_by_id(way).tag_dict.get("type") == "traffic_light":
                         n_lon = self.osm.find_node_by_id(self.osm.find_way_by_id(way).nodes[0]).lon
                         n_lat = self.osm.find_node_by_id(self.osm.find_way_by_id(way).nodes[0]).lat
-                        n_ele = self.osm.find_node_by_id(self.osm.find_way_by_id(way).nodes[0]).ele
 
-                        if str(lon_sign) == n_lon and str(lat_sign) == n_lat and str(z) == n_ele:
+                        if str(lon_sign) == n_lon and str(lat_sign) == n_lat:
                             # found the same traffic light, now to reference it
                             traffic_light_reference_list.append(way)
 
@@ -259,27 +258,37 @@ class CR2LaneletConverter:
                 way_tl = Way(self.id_count, [x, y])
                 self.osm.add_way(way_tl)
                 way_list = [way_tl.id_]
+                regulatory_element_id = self.id_count
                 self.osm.add_regulatory_element(
                     RegulatoryElement(
-                        self.id_count,
+                        regulatory_element_id,
                         traffic_light_reference_list,
                         ref_line=way_list,
                         tag_dict={"subtype": "traffic_light", "type": "regulatory_element"},
                     )
                 )
+                get_way_relation_key = list(self.osm.way_relations.keys())[idx]
+                way_rel = self.osm.find_way_rel_by_id(get_way_relation_key)
+                reg_elements_arr = way_rel.regulatory_elements
+                reg_elements_arr.append(regulatory_element_id)
+                new_way_rel = WayRelation(
+                    get_way_relation_key,
+                    way_rel.left_way,
+                    way_rel.right_way,
+                    tag_dict=way_rel.tag_dict,
+                    regulatory_elements=reg_elements_arr,
+                )
+                self.osm.add_way_relation(new_way_rel)
 
     def _convert_traffic_light(self, light: TrafficLight):
         """
         Add traffic light to the lanelet2 format
         """
         traffic_light_id = self.id_count
-        # create a node that represent the sign position
-        lat1, lon1 = self.transformer.transform(
-            self.origin_utm[0] + light.position[0], self.origin_utm[1] + light.position[1]
-        )
+        autoware = self._config.autoware
 
         # consider z-coordinate
-        z = 0
+        z = 5  # Set a base of 5m and replace it with new value
         if len(light.position) == 3:
             z = light.position[2]
 
@@ -287,31 +296,57 @@ class CR2LaneletConverter:
 
         # since 3 nodes are needed to represent the sign in the l2 format (only 1 in the cr format)
         # create another 2 nodes that are close to the first one
+        # create a node that represent the sign position
 
+        lat1, lon1 = self.transformer.transform(
+            self.origin_utm[0] + light.position[0], self.origin_utm[1] + light.position[1]
+        )
         lat2, lon2 = self.transformer.transform(
             self.origin_utm[0] + light.position[0] + 0.1, self.origin_utm[1] + light.position[1] + 0.1
         )
-        lat3, lon3 = self.transformer.transform(
-            self.origin_utm[0] + light.position[0] - 0.1, self.origin_utm[1] + light.position[1] - 0.1
-        )
+        if not autoware:
+            lat3, lon3 = self.transformer.transform(
+                self.origin_utm[0] + light.position[0] - 0.1, self.origin_utm[1] + light.position[1] - 0.1
+            )
+            id3 = self.id_count
+
         id2 = self.id_count
-        id3 = self.id_count
 
         # creating and adding those nodes to our osm
-        self.osm.add_node(Node(id1, lat1, lon1, z, autoware=self._config.autoware))
-        self.osm.add_node(Node(id2, lat2, lon2, z, autoware=self._config.autoware))
-        self.osm.add_node(Node(id3, lat3, lon3, z, autoware=self._config.autoware))
+        localx1, localy1, localx2, localy2, localx3, localy3 = None, None, None, None, None, None
+
+        if self._config.use_local_coordinates:
+            localx1, localy1 = light.position[0], light.position[1]
+            localx2, localy2 = light.position[0] - 0.1, light.position[1] + 0.1
+            localx3, localy3 = light.position[0] - 0.1, light.position[1] - 0.1
+        self.osm.add_node(Node(id1, lat1, lon1, z, autoware=autoware, local_x=localx1, local_y=localy1))
+        self.osm.add_node(Node(id2, lat2, lon2, z, autoware=autoware, local_x=localx2, local_y=localy2))
+        if not autoware:
+            self.osm.add_node(Node(id3, lat3, lon3, z, autoware=autoware, local_x=localx3, local_y=localy3))
 
         # get the first light color as subtype
         traffic_light_subtype = ""
         for col in light.color:
-            traffic_light_subtype += f"{col}_"
-        traffic_light_subtype = traffic_light_subtype[::-2]
+            traffic_light_subtype += f"{col.value}_"
+        traffic_light_subtype = traffic_light_subtype[:-1]
         # traffic_light_subtype = light.traffic_light_cycle.cycle_elements[0].state.value
-
-        self.osm.add_way(
-            Way(traffic_light_id, [id1, id2, id3], tag_dict={"subtype": traffic_light_subtype, "type": "traffic_light"})
-        )
+        # Autoware supports that traffic lights only consist of 2 nodes instead of 3
+        if autoware:
+            self.osm.add_way(
+                Way(
+                    traffic_light_id,
+                    [id1, id2],
+                    tag_dict={"subtype": traffic_light_subtype, "type": "traffic_light", "height": "1.2"},
+                )
+            )
+        else:
+            self.osm.add_way(
+                Way(
+                    traffic_light_id,
+                    [id1, id2, id3],
+                    tag_dict={"subtype": traffic_light_subtype, "type": "traffic_light"},
+                )
+            )
 
     def _add_right_of_way_relation(self):
         """
