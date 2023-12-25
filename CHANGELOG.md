@@ -8,14 +8,19 @@
 - Optional functionality to get geonamesID locally without API-call
 - Test Case for local geonamesID functionality
 - Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
-- Optional MGRS tag for nodes in CR to Lanelet2 conversion (compatibility with Autoware)
+- Optional MGRS tag for nodes in CR to Lanelet2 conversion (comptaibility with Autoware)
 - Eclipse-SUMO Python package dependency for better integration of SUMO
+- cr2lanelet: Option of local coordinates for traffic lights
+- cr2lanelet: Static height for traffic lights (1.2m) until official height support in CommonRoad
+- cr2lanelet: Regulatory element to corresponding way relation for lanes (required by autoware)
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
 - osm2cr: virtual traffic sign have position assigned
 - PyQt6 instead of PyQt5 as GUI backend
 - Code formatting (flake8, black, isort)
+- cr2lanelet: traffic light subtype
+- cr2lanelet: traffic light includes only two nodes (in case of autoware)
 
 ### Fixed
 - Adding existing obstacles again
