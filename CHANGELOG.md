@@ -1,31 +1,71 @@
 # Changelog
 
-## [0.8.0] - 2023-09-XX
+## [0.8.1] - 2023-12-XX
+
+### Added
+- Test cases for GUI
+- Logging actions of users
+- Optional functionality to get geonamesID locally without API-call
+- Test Case for local geonamesID functionality
+- Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
+- Optional MGRS tag for nodes in CR to Lanelet2 conversion (comptaibility with Autoware)
+- Eclipse-SUMO Python package dependency for better integration of SUMO
+- cr2lanelet: Option of local coordinates for traffic lights
+- cr2lanelet: Static height for traffic lights (1.2m) until official height support in CommonRoad
+- cr2lanelet: Regulatory element to corresponding way relation for lanes (required by autoware)
+
+### Changed
+- Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
+- osm2cr: virtual traffic sign have position assigned
+- PyQt6 instead of PyQt5 as GUI backend
+- Code formatting (flake8, black, isort)
+- cr2lanelet: traffic light subtype
+- cr2lanelet: traffic light includes only two nodes (in case of autoware)
 
 ### Fixed
-- Issue when creating adjacent lanelets through Lanelet Operations
-- No recognition of the selected lanelet of the Lanelet Operations Widget
-- Fixed the bug that changes to some lanelets messed up the lanelet
-- Obstacles will get deleted now as well within the crop Function/ Crop symbol is shown
-- KeyError when yield sign has no stop line in cr2lanelet2 conversion
-- Adaption of commonroad-io traffic light color usage in cr2lanelet2 conversion
-- Add default traffic light cycle for OpenDRIVE conversion to support 2020a format
-- Command-line interface main function call
+- Adding existing obstacles again
+- Selecting obstacles with set-based prediction
+- Bug when editing curved lanelets in the canvas
+- lanelet2cr wrong final vertices assignment 
+- Deleting unreferenced traffic signs/lights after deleting lanelet
+- Map verification/repairing: Checking unique ID of traffic light cycle element
+- Consider x-, y-translation for cr2lanelet conversion (and vice versa)
+
+## [0.8.0] - 2023-10-31
+
+### Added
+- CommonRoad map verification and repairing
+- Cropping of a map in the GUI
+- Background saves with restore functionality
+- Scenario toolbox to specify planning problems
+- Widget to edit settings of scenario
+- Editing and adding curved lanelet via matplotlib visualization
+- Support for visualizing scenarios with 3D coordinates on 2D plane
+- cr2lanelet line marking conversion
+- cr2lanelet bidirectional users conversion
+- Possibility to change look of the GUI into a more modern style
 
 ### Changed
 - GUI backend using MVC pattern
 - Config model
 - Automated creation of settings windows
+- Support for commonroad-io 2023.3
+- Commandline interface to use typer
 
-### Added
-- Cropping of a map in the GUI
-- Background saves and with restore functionality
-- Scenario Toolbox to specify planning problems
-- Widget to edit settings of scenario
-- Editing and adding curved lanelet via matplotlib visualization
-- Handling projection strings which contain elements which third-party does not support
-- Support for visualizing scenarios with 3D coordinates on 2D plane
-- cr2lanelet line marking conversion
+### Fixed
+- Handling of projection strings which contain elements which third-party tool does not support
+- Issue when creating adjacent lanelets through *lanelet operations*
+- No recognition of the selected lanelet by the *lanelet operations* widget
+- Changes to some lanelets messing up the lanelet
+- KeyError when yield sign has no stop line in cr2lanelet2 conversion
+- Adaption of commonroad-io traffic light color usage in CommonRoad to lanelet2 conversion
+- Add default traffic light cycle for OpenDRIVE conversion to support 2020a format
+- Rotating lanelet cannot be selected through canvas anymore
+- OpenDRIVE/Lanelet2 conversion intersection incoming lanelets as set instead of list/tuple
+- Relationship of predecessor/successor when creating adjacent lanelets
+- Obstacle information no longer crashes when selecting static obstacle or required state value is missing
+- Visualization of obstacle colors
+- Obstacles are not shown after time step 200
 
 ## [0.7.2] - 2023-07-29
 

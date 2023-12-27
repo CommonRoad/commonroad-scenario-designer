@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 import warnings
 from typing import Union
 
@@ -72,16 +71,16 @@ class Link:
         :setter: sets neighbors
         :type: instance of class Neighbor()
         """
-        warnings.warn("Neighbors element was used in OpenDRIVE V1.4 for legacy purposes. V1.7 does not contain"
-                      " neighbors elements. It is also not used for conversion into lanelet network.",
-                      DeprecationWarning)
+        warnings.warn(
+            "Neighbors element was used in OpenDRIVE V1.4 for legacy purposes. V1.7 does not contain"
+            " neighbors elements. It is also not used for conversion into lanelet network.",
+            DeprecationWarning,
+        )
         return self._neighbors
 
     @neighbors.setter
     def neighbors(self, value: list[Neighbor]):
-        if not isinstance(value, list) or not all(
-            isinstance(x, Neighbor) for x in value
-        ):
+        if not isinstance(value, list) or not all(isinstance(x, Neighbor) for x in value):
             raise TypeError("Value must be list of instances of Neighbor.")
 
         # pylint: disable=W0201
@@ -116,13 +115,7 @@ class Predecessor:
         self.contactPoint = contact_point
 
     def __str__(self):
-        return (
-            str(self._elementType)
-            + " with id "
-            + str(self._elementId)
-            + " contact at "
-            + str(self._contactPoint)
-        )
+        return str(self._elementType) + " with id " + str(self._elementId) + " contact at " + str(self._contactPoint)
 
     @property
     def elementType(self) -> str:

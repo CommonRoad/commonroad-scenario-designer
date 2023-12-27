@@ -1,11 +1,12 @@
 """
 This module provides various methods to handle geometric problems.
 """
-from typing import List, Tuple, Optional, Iterable
+from typing import Iterable, List, Optional, Tuple
 
 import numpy as np
 import scipy.special
-from crdesigner.config.osm_config import osm_config as config
+
+from crdesigner.common.config.osm_config import osm_config as config
 
 
 class Point:
@@ -65,21 +66,15 @@ class Area:
         self.y_max = y_max
 
     def __contains__(self, item):
-        if type(item) == Point:
-            return (self.x_min <= item.x <= self.x_max) and (
-                self.y_min <= item.y <= self.y_max
-            )
-        elif type(item) == np.ndarray:
-            return (self.x_min <= item[0] <= self.x_max) and (
-                self.y_min <= item[1] <= self.y_max
-            )
+        if isinstance(item, Point):
+            return (self.x_min <= item.x <= self.x_max) and (self.y_min <= item.y <= self.y_max)
+        elif isinstance(item, np.ndarray):
+            return (self.x_min <= item[0] <= self.x_max) and (self.y_min <= item[1] <= self.y_max)
         else:
             raise TypeError("the tested Object must be either a Point or a numpy array")
 
     def __str__(self):
-        return "Area: x in [{}, {}], y in [{}, {}]".format(
-            self.x_min, self.x_max, self.y_min, self.y_max
-        )
+        return "Area: x in [{}, {}], y in [{}, {}]".format(self.x_min, self.x_max, self.y_min, self.y_max)
 
 
 def points_to_array(points: List[Point]) -> np.ndarray:
@@ -106,9 +101,7 @@ def get_orthogonal(vector: np.ndarray) -> np.ndarray:
     return orthogonal_vector / magnitude
 
 
-def offset_polyline(
-    waypoints: List[np.ndarray], size: float, at_first: bool
-) -> List[np.ndarray]:
+def offset_polyline(waypoints: List[np.ndarray], size: float, at_first: bool) -> List[np.ndarray]:
     """
     offsets a polyline
     one end is offset by the full size, the other end remains unchanged
@@ -234,9 +227,9 @@ def create_tilted_parallels(
         vector = [x2 - x1, y2 - y1]
         orthogonal_vector = np.array([vector[1], -vector[0]])
         magnitude = np.linalg.norm(orthogonal_vector)
-        width = width1 * (
-            1 - waypoint_counter / (len(waypoints) - 1)
-        ) + width2 * waypoint_counter / (len(waypoints) - 1)
+        width = width1 * (1 - waypoint_counter / (len(waypoints) - 1)) + width2 * waypoint_counter / (
+            len(waypoints) - 1
+        )
         orthogonal_vector = orthogonal_vector / magnitude * width
         left_bound.append(
             np.array(
@@ -270,7 +263,7 @@ def bernstein(n: int, i: int, t: float) -> float:
     :return: result of the polynomial
     :rtype: float
     """
-    return scipy.special.binom(n, i) * t ** i * (1 - t) ** (n - i)
+    return scipy.special.binom(n, i) * t**i * (1 - t) ** (n - i)
 
 
 def bezier(points: np.ndarray, t: float) -> np.ndarray:
@@ -309,9 +302,7 @@ def evaluate_bezier(points: np.ndarray, n: int) -> List[np.ndarray]:
     return curve_points
 
 
-def get_inner_bezier_point(
-    p1: np.ndarray, p2: np.ndarray, p3: np.ndarray, d: float
-) -> np.ndarray:
+def get_inner_bezier_point(p1: np.ndarray, p2: np.ndarray, p3: np.ndarray, d: float) -> np.ndarray:
     """
     calculates the location for a control point to generate a bezier curve
     the control point is created between p2 and p3 at a distance of d*||p2-p3|| to p2
@@ -341,9 +332,7 @@ def get_inner_bezier_point(
     orthogonal_vector /= np.linalg.norm(orthogonal_vector)
     orthogonal_vector *= d * np.linalg.norm(p2 - p3)
     # orthogonal_vector has to point in direction of p3
-    if np.linalg.norm(p2 + orthogonal_vector - p3) > np.linalg.norm(
-        p2 - orthogonal_vector - p3
-    ):
+    if np.linalg.norm(p2 + orthogonal_vector - p3) > np.linalg.norm(p2 - orthogonal_vector - p3):
         orthogonal_vector *= -1
     return p2 + orthogonal_vector
 
@@ -389,9 +378,7 @@ def distance(point: np.ndarray, polyline: Iterable[np.ndarray]) -> float:
     return min(distances)
 
 
-def create_middle_line(
-    polyline1: List[np.ndarray], polyline2: List[np.ndarray]
-) -> List[np.ndarray]:
+def create_middle_line(polyline1: List[np.ndarray], polyline2: List[np.ndarray]) -> List[np.ndarray]:
     """
     creates a line between two polylines
     the lines should have the same amount of way points for good results
@@ -419,9 +406,7 @@ def create_middle_line(
     return result
 
 
-def offset_over_line(
-    polyline1: List[np.ndarray], polyline2: List[np.ndarray]
-) -> List[np.ndarray]:
+def offset_over_line(polyline1: List[np.ndarray], polyline2: List[np.ndarray]) -> List[np.ndarray]:
     """
     offsets a polyline over another polyline
     the lines should have the same amount of way points for good results
@@ -463,7 +448,7 @@ def angle_to(v1: np.ndarray, v2: np.ndarray) -> float:
     return angle
 
 
-def get_angle(v1: np.ndarray, v2:np.ndarray) -> float:
+def get_angle(v1: np.ndarray, v2: np.ndarray) -> float:
     """
     Get clockwise angle between vectors
     :param v1: one vector
@@ -479,6 +464,7 @@ def get_angle(v1: np.ndarray, v2:np.ndarray) -> float:
     diff1 = angles[0] - angles[1]
     angle = diff1 / np.pi * 180
     return angle
+
 
 def curvature(polyline: List[np.ndarray]) -> float:
     """
@@ -562,9 +548,7 @@ def get_evaluation_point(line: List[np.ndarray], start_point: int, length: float
     return current_point, remaining_length
 
 
-def evaluate_line(
-    line: List[np.ndarray], length: float, start_point: int = 0
-) -> Tuple[np.ndarray, int, float]:
+def evaluate_line(line: List[np.ndarray], length: float, start_point: int = 0) -> Tuple[np.ndarray, int, float]:
     """
     returns the point after a given length on a polyline
 
@@ -604,17 +588,13 @@ def set_line_points(line: List[np.ndarray], n: int) -> List[np.ndarray]:
     remaining_length = 0
     delta = total_length / (n - 1)
     for i in range(n - 2):
-        new_point, current_point, remaining_length = evaluate_line(
-            line, delta + remaining_length, current_point
-        )
+        new_point, current_point, remaining_length = evaluate_line(line, delta + remaining_length, current_point)
         newline.append(new_point)
     newline.append(line[-1])
     return newline
 
 
-def intersection_polylines(
-    pline1: List[np.ndarray], pline2: List[np.ndarray]
-) -> np.ndarray:
+def intersection_polylines(pline1: List[np.ndarray], pline2: List[np.ndarray]) -> np.ndarray:
     """
     calculates the intersection point of two polylines
 
@@ -717,9 +697,7 @@ def cartesian_to_lon_lat(waypoint: np.ndarray, origin: np.ndarray) -> np.ndarray
     return res
 
 
-def point_to_line_distance(
-    point: np.ndarray, line_start: np.ndarray, line_end: np.ndarray
-) -> float:
+def point_to_line_distance(point: np.ndarray, line_start: np.ndarray, line_end: np.ndarray) -> float:
     """
     calculates the distance of a point to a line defined by two points
 
@@ -728,9 +706,7 @@ def point_to_line_distance(
     :param line_end:
     :return: the perpendicular distance of the point to the line
     """
-    return np.linalg.norm(
-        np.cross(line_end - line_start, line_start - point)
-    ) / np.linalg.norm(line_end - line_start)
+    return np.linalg.norm(np.cross(line_end - line_start, line_start - point)) / np.linalg.norm(line_end - line_start)
 
 
 def pre_filter_points(lines: List[List[np.ndarray]]) -> List[List[np.ndarray]]:
@@ -749,14 +725,8 @@ def pre_filter_points(lines: List[List[np.ndarray]]) -> List[List[np.ndarray]]:
         angle = angle_to(v1, v2)
         return angle >= 179.99
 
-    negligible = [
-        all([is_straight(line, index) for line in lines])
-        for index in range(len(lines[0]))
-    ]
-    result = [
-        [point for index, point in enumerate(line) if not negligible[index]]
-        for line in lines
-    ]
+    negligible = [all([is_straight(line, index) for line in lines]) for index in range(len(lines[0]))]
+    result = [[point for index, point in enumerate(line) if not negligible[index]] for line in lines]
 
     # set waypoints to at least three
     if len(result[0]) == 2:
@@ -766,9 +736,7 @@ def pre_filter_points(lines: List[List[np.ndarray]]) -> List[List[np.ndarray]]:
     return result
 
 
-def filter_points(
-    lines: List[List[np.ndarray]], threshold: float
-) -> List[List[np.ndarray]]:
+def filter_points(lines: List[List[np.ndarray]], threshold: float) -> List[List[np.ndarray]]:
     """
     filters points of poly-lines so that only points which affect the course of the line remain
     returns lines with at least three way points
@@ -778,9 +746,7 @@ def filter_points(
     :return:
     """
 
-    def point_negligible(
-        original_lines: List[List[np.ndarray]], omitted_point_interval: Tuple[int, int]
-    ) -> bool:
+    def point_negligible(original_lines: List[List[np.ndarray]], omitted_point_interval: Tuple[int, int]) -> bool:
         """
         checks if the resulting lines will have a distance below the threshold to the original lines
 
@@ -789,40 +755,25 @@ def filter_points(
         :param omitted_point_interval: the interval of points which will be deleted
         :return:
         """
-        assert (
-            omitted_point_interval[0] > 0
-        ), "the first point of a line cannot be ommited"
-        assert omitted_point_interval[1] + 1 < len(
-            original_lines[0]
-        ), "the last point of a line cannot be omitted"
+        assert omitted_point_interval[0] > 0, "the first point of a line cannot be ommited"
+        assert omitted_point_interval[1] + 1 < len(original_lines[0]), "the last point of a line cannot be omitted"
         for line in original_lines:
             new_line_start = line[omitted_point_interval[0] - 1]
             new_line_end = line[omitted_point_interval[1] + 1]
-            for point_index in range(
-                omitted_point_interval[0], omitted_point_interval[1] + 1
-            ):
-                if (
-                    point_to_line_distance(
-                        line[point_index], new_line_start, new_line_end
-                    )
-                    > threshold
-                ):
+            for point_index in range(omitted_point_interval[0], omitted_point_interval[1] + 1):
+                if point_to_line_distance(line[point_index], new_line_start, new_line_end) > threshold:
                     return False
         return True
 
     nr_of_waypoints = len(lines[0])
     for line in lines:
-        assert (
-            len(line) == nr_of_waypoints
-        ), "all lines must have the same number of waypoints"
+        assert len(line) == nr_of_waypoints, "all lines must have the same number of waypoints"
 
     result = [line[:1] for line in lines]
     delete_interval = (1, 1)
 
     while delete_interval[1] < len(lines[0]):
-        while delete_interval[1] + 1 < len(lines[0]) and point_negligible(
-            lines, delete_interval
-        ):
+        while delete_interval[1] + 1 < len(lines[0]) and point_negligible(lines, delete_interval):
             delete_interval = (delete_interval[0], delete_interval[1] + 1)
         # found a point which cannot be deleted
         next_point: int = delete_interval[1]

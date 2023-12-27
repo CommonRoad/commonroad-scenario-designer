@@ -1,16 +1,16 @@
-
 """
 This module holds the classes required for the intermediate format
 """
 
 __author__ = "Behtarin Ferdousi"
 
-from typing import List, Set
 import warnings
-import numpy as np
+from typing import List, Set
 
+import numpy as np
 from commonroad.scenario.lanelet import Lanelet, LaneletType
-from crdesigner.config.osm_config import osm_config as config
+
+from crdesigner.common.config.osm_config import osm_config as config
 
 from ._intermediate_node import Node
 
@@ -19,22 +19,25 @@ class Edge:
     """
     Class to represent the edges in the intermediate format
     """
-    def __init__(self,
-                 edge_id: int,
-                 node1: Node,
-                 node2: Node,
-                 left_bound: List[np.ndarray],
-                 right_bound: List[np.ndarray],
-                 center_points: List[np.ndarray],
-                 adjacent_right: int,
-                 adjacent_right_direction_equal: bool,
-                 adjacent_left: int,
-                 adjacent_left_direction_equal: bool,
-                 successors: List[int],
-                 predecessors: List[int],
-                 traffic_signs: Set[int],
-                 traffic_lights: Set[int],
-                 edge_type: str = config.LANELETTYPE):
+
+    def __init__(
+        self,
+        edge_id: int,
+        node1: Node,
+        node2: Node,
+        left_bound: List[np.ndarray],
+        right_bound: List[np.ndarray],
+        center_points: List[np.ndarray],
+        adjacent_right: int,
+        adjacent_right_direction_equal: bool,
+        adjacent_left: int,
+        adjacent_left_direction_equal: bool,
+        successors: List[int],
+        predecessors: List[int],
+        traffic_signs: Set[int],
+        traffic_lights: Set[int],
+        edge_type: str = config.LANELETTYPE,
+    ):
         """
         Initialize an edge
 
@@ -89,19 +92,21 @@ class Edge:
 
         :return: CommonRoad Lanelet
         """
-        lanelet = Lanelet(np.array(self.left_bound),
-                          np.array(self.center_points),
-                          np.array(self.right_bound),
-                          self.id,
-                          self.predecessors,
-                          self.successors,
-                          self.adjacent_left,
-                          self.adjacent_left_direction_equal,
-                          self.adjacent_right,
-                          self.adjacent_right_direction_equal,
-                          traffic_signs=self.traffic_signs,
-                          traffic_lights=self.traffic_lights,
-                          lanelet_type={LaneletType(self.edge_type)})
+        lanelet = Lanelet(
+            np.array(self.left_bound),
+            np.array(self.center_points),
+            np.array(self.right_bound),
+            self.id,
+            self.predecessors,
+            self.successors,
+            self.adjacent_left,
+            self.adjacent_left_direction_equal,
+            self.adjacent_right,
+            self.adjacent_right_direction_equal,
+            traffic_signs=self.traffic_signs,
+            traffic_lights=self.traffic_lights,
+            lanelet_type={LaneletType(self.edge_type)},
+        )
         self.is_valid(lanelet)
         return lanelet
 
@@ -154,6 +159,19 @@ class Edge:
         from_node = Node(lane.from_node.id, lane.from_node.get_point())
         to_node = Node(lane.to_node.id, lane.to_node.get_point())
 
-        return Edge(current_id, from_node, to_node, lane.left_bound, lane.right_bound, lane.waypoints, adjacent_right,
-                    adjacent_right_direction_equal, adjacent_left, adjacent_left_direction_equal, successors,
-                    predecessors, traffic_signs, traffic_lights)
+        return Edge(
+            current_id,
+            from_node,
+            to_node,
+            lane.left_bound,
+            lane.right_bound,
+            lane.waypoints,
+            adjacent_right,
+            adjacent_right_direction_equal,
+            adjacent_left,
+            adjacent_left_direction_equal,
+            successors,
+            predecessors,
+            traffic_signs,
+            traffic_lights,
+        )

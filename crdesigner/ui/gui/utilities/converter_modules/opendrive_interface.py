@@ -1,17 +1,17 @@
 import os
+
 from lxml import etree
+from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
-
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
-
-from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
-from crdesigner.ui.gui.utilities.converter_modules.converter_interface import ConverterInterface
-from crdesigner.configurations.get_configs import get_configs
+from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
+from crdesigner.ui.gui.utilities.converter_modules.converter_interface import (
+    ConverterInterface,
+)
+
 
 # TODO: UNCERTAIN (either it goes into the utilities or becomes part of a controller in a different form).
 class OpenDRIVEInterface(ConverterInterface):
-
     def __init__(self, parent):
         self.cr_designer = parent
         self.loadedRoadNetwork = None
@@ -19,7 +19,7 @@ class OpenDRIVEInterface(ConverterInterface):
         self.filename = None
 
     def start_import(self):
-        """  """
+        """ """
         file_path, _ = QFileDialog.getOpenFileName(
             self.cr_designer,
             "select OpenDRIVE file to convert",
@@ -36,13 +36,12 @@ class OpenDRIVEInterface(ConverterInterface):
         try:
             with open(file_path, "r") as fd:
                 openDriveXml = parse_opendrive(etree.parse(fd).getroot())
-        except (etree.XMLSyntaxError) as e:
+        except etree.XMLSyntaxError as e:
             errorMsg = "XML Syntax Error: {}".format(e)
             QMessageBox.warning(
                 self.cr_designer,
                 "OpenDRIVE error",
-                "There was an error during the loading of the selected OpenDRIVE file.\n\n{}"
-                    .format(errorMsg),
+                "There was an error during the loading of the selected OpenDRIVE file.\n\n{}".format(errorMsg),
                 QMessageBox.Ok,
             )
             return
@@ -51,8 +50,7 @@ class OpenDRIVEInterface(ConverterInterface):
             QMessageBox.warning(
                 self.cr_designer,
                 "OpenDRIVE error",
-                "There was an error during the loading of the selected OpenDRIVE file.\n\n{}"
-                    .format(errorMsg),
+                "There was an error during the loading of the selected OpenDRIVE file.\n\n{}".format(errorMsg),
                 QMessageBox.Ok,
             )
             return
@@ -64,9 +62,7 @@ class OpenDRIVEInterface(ConverterInterface):
             """Name: {}<br>Version: {}<br>Date: {}<br><br>OpenDRIVE
             Version {}.{}<br><br>Number of roads: {}<br>Total length
             of road network: {:.2f} meters""".format(
-                openDriveXml.header.name 
-                if openDriveXml.header.name
-                else "<i>unset</i>",
+                openDriveXml.header.name if openDriveXml.header.name else "<i>unset</i>",
                 openDriveXml.header.version,
                 openDriveXml.header.date,
                 openDriveXml.header.revMajor,

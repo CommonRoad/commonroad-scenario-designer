@@ -1,5 +1,8 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.eulerspiral import *
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.eulerspiral import (
+    EulerSpiral,
+)
 
 
 class TestEulerSpiral(unittest.TestCase):
@@ -81,5 +84,5 @@ class TestEulerSpiral(unittest.TestCase):
         self.assertAlmostEqual(Cs_imag, result.imag)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

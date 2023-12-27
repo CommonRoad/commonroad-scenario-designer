@@ -1,11 +1,11 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-import os
 import logging
+import os
 
-from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.common.file_reader import CommonRoadFileReader, FileFormat
+from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.scenario.scenario import Scenario
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 
@@ -33,15 +33,18 @@ def open_commonroad_file(mwindow, path=None):
     Opens a file. If no path is given it opens a FileDialog, otherwise it uses the given Path
     """
     if path is None:
-        path, _ = QFileDialog.getOpenFileName(mwindow.mwindow_ui, "Open a CommonRoad scenario", "",
-                                          "CommonRoad scenario *.xml file (*.xml);; "
-                                          "CommonRoad scenario *.pb file (*.pb)", options=QFileDialog.Options(), )
+        path, _ = QFileDialog.getOpenFileName(
+            mwindow.mwindow_ui,
+            "Open a CommonRoad scenario",
+            "",
+            "CommonRoad scenario *.xml file (*.xml);; " "CommonRoad scenario *.pb file (*.pb)",
+        )
     if not path:
         return
-    _open_path(mwindow=mwindow, path=path)
+    open_path(mwindow=mwindow, path=path)
 
 
-def _open_path(mwindow, path):
+def open_path(mwindow, path):
     """ """
     try:
         if ".pb" in path:
@@ -50,9 +53,12 @@ def _open_path(mwindow, path):
             commonroad_reader = CommonRoadFileReader(path, file_format=FileFormat.XML)
         scenario, pps = commonroad_reader.open()
     except Exception as e:
-        QMessageBox.warning(mwindow.mwindow_ui, "CommonRoad XML error",
-                            "There was an error during the loading of the selected CommonRoad file.\n\n" +
-                            "Syntax Error: {}".format(e), QMessageBox.Ok, )
+        QMessageBox.warning(
+            mwindow.mwindow_ui,
+            "CommonRoad XML error",
+            "There was an error during the loading of the selected CommonRoad file.\n\n" + "Syntax Error: {}".format(e),
+            QMessageBox.StandardButton.Ok,
+        )
         return
 
     filename = os.path.splitext(os.path.basename(path))[0]
@@ -67,8 +73,9 @@ def _open_scenario(mwindow, new_scenario, filename="new_scenario"):
         return
     mwindow.filename = filename
     if SUMO_AVAILABLE:
-        mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(mwindow.obstacle_toolbox.sumo_simulation.config,
-                                                                new_file_added=True)
+        mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(
+            mwindow.obstacle_toolbox.sumo_simulation.config, new_file_added=True
+        )
         mwindow.obstacle_toolbox.sumo_simulation.scenario = mwindow.scenario_model.get_current_scenario()
     else:
         mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(new_file_added=True)
@@ -89,7 +96,13 @@ def file_save(mwindow):
     """Function to save a CR .xml file."""
     if not mwindow.scenario_model.scenario_created():
         messbox = QMessageBox()
-        messbox.warning(mwindow.mwindow_ui, "Warning", "There is no file to save!", QMessageBox.Ok, QMessageBox.Ok)
+        messbox.warning(
+            mwindow.mwindow_ui,
+            "Warning",
+            "There is no file to save!",
+            QMessageBox.StandardButton.Ok,
+            QMessageBox.StandardButton.Ok,
+        )
         messbox.close()
         return
 
@@ -97,17 +110,22 @@ def file_save(mwindow):
 
 
 def update_max_step(mwindow, value: int = -1):
-    logging.info('update_max_step')
+    logging.info("update_max_step")
     value = value if value > -1 else mwindow.animated_viewer_wrapper.cr_viewer.max_timestep
-    mwindow.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.label2.setText(' / ' + str(value))
+    mwindow.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.label2.setText(" / " + str(value))
     mwindow.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.slider.setMaximum(value)
 
 
 def close_window(mwindow):
     """
-        For closing the window.
+    For closing the window.
     """
-    reply = QMessageBox.warning(mwindow, "Warning", "Do you really want to quit?", QMessageBox.Yes | QMessageBox.No,
-                                QMessageBox.Yes)
-    if reply == QMessageBox.Yes:
-        qApp.quit()
+    reply = QMessageBox.warning(
+        mwindow,
+        "Warning",
+        "Do you really want to quit?",
+        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        QMessageBox.StandardButton.Yes,
+    )
+    if reply == QMessageBox.StandardButton.Yes:
+        QApplication.quit()

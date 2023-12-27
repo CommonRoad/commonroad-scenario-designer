@@ -6,14 +6,21 @@ An Internet connection is needed and a valid Mapillary ClinetID has to be provid
 import json
 from urllib.error import URLError
 from urllib.request import urlopen
-from crdesigner.config.osm_config import osm_config as config
-from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
+
+from crdesigner.common.config.osm_config import osm_config as config
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph import (
+    Graph,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_traffic_sign import (
+    GraphTrafficSign,
+)
 
 
 class Bbox:
     """
     Helper class for Bbox representation
     """
+
     west: float
     south: float
     east: float
@@ -37,17 +44,21 @@ def get_mappilary_traffic_signs(bbox: Bbox):
 
     # try to request information for the given scenario center
     try:
-        if config.MAPILLARY_CLIENT_ID == 'demo':
-            raise ValueError('mapillary demo ID used')
+        if config.MAPILLARY_CLIENT_ID == "demo":
+            raise ValueError("mapillary demo ID used")
 
-        query = "https://a.mapillary.com/v3/map_features?layers=trafficsigns&bbox={},{},{},{}&per_page=1000&client_id" \
-                "={}".format(bbox.west, bbox.south, bbox.east, bbox.north, config.MAPILLARY_CLIENT_ID)
-        data = urlopen(query).read().decode('utf-8')
+        query = (
+            "https://a.mapillary.com/v3/map_features?layers=trafficsigns&bbox={},{},{},{}&per_page=1000&client_id"
+            "={}".format(bbox.west, bbox.south, bbox.east, bbox.north, config.MAPILLARY_CLIENT_ID)
+        )
+        data = urlopen(query).read().decode("utf-8")
         response = json.loads(data)
 
-        feature_list = response['features']
-        signs = [[feature['properties']['value'], feature['geometry']['coordinates'],
-                  feature['properties']['direction']] for feature in feature_list]
+        feature_list = response["features"]
+        signs = [
+            [feature["properties"]["value"], feature["geometry"]["coordinates"], feature["properties"]["direction"]]
+            for feature in feature_list
+        ]
         return signs
 
     except ValueError:
@@ -58,7 +69,7 @@ def get_mappilary_traffic_signs(bbox: Bbox):
         return None
 
 
-def add_mapillary_signs_to_graph(graph: rg.Graph):
+def add_mapillary_signs_to_graph(graph: Graph):
     """
     Add Mapillary sings to the road graph
 
@@ -74,6 +85,7 @@ def add_mapillary_signs_to_graph(graph: rg.Graph):
         for sign in signs:
             edge = graph.find_closest_edge_by_lat_lng(sign[1], direction=sign[2])
             # add to graph traffic signs
-            traffic_sign = rg.GraphTrafficSign({'mapillary': sign[0]}, node=None, edges=[[edge]],
-                                               direction=sign[2])  # TODO virutal
+            traffic_sign = GraphTrafficSign(
+                {"mapillary": sign[0]}, node=None, edges=[[edge]], direction=sign[2]
+            )  # TODO virutal
             graph.traffic_signs.append(traffic_sign)

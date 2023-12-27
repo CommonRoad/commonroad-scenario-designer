@@ -3,26 +3,27 @@ Graph class. It also provides several methods to perform operations on elements 
 """
 
 import logging
-from typing import List, Set, Tuple, Optional
-from ordered_set import OrderedSet
+from typing import List, Optional, Set, Tuple
+
 import numpy as np
+from ordered_set import OrderedSet
 from pyproj import Transformer
 
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common import geometry
 
-from ._graph_node import GraphNode
 from ._graph_edge import GraphEdge
+from ._graph_functions import (
+    find_adjacents,
+    get_lane_waypoints,
+    graph_search,
+    set_points,
+    sort_adjacent_lanes,
+)
+from ._graph_lane import Lane
+from ._graph_node import GraphNode
 from ._graph_traffic_light import GraphTrafficLight
 from ._graph_traffic_sign import GraphTrafficSign
-from ._graph_lane import Lane
-from ._graph_functions import (
-    graph_search,
-    find_adjacents,
-    sort_adjacent_lanes,
-    get_lane_waypoints,
-    set_points
-)
 
 
 class Graph:
@@ -34,7 +35,7 @@ class Graph:
         bounds: Tuple[float, float, float, float],
         transformer: Transformer,
         traffic_signs: List[GraphTrafficSign],
-        traffic_lights: List[GraphTrafficLight]
+        traffic_lights: List[GraphTrafficLight],
     ) -> None:
         """
         creates a new graph
@@ -91,7 +92,7 @@ class Graph:
             if node.get_degree() > 1:
                 edges = list(node.edges)
                 for index, edge in enumerate(edges):
-                    other_edges = edges[:index] + edges[index + 1:]
+                    other_edges = edges[:index] + edges[index + 1 :]
                     angles = []
                     for other_edge in other_edges:
                         angles.append(edge.angle_to(other_edge, node))
@@ -115,9 +116,7 @@ class Graph:
         for edge in self.edges:
             # width = config.LANEWIDTHS[edge.roadtype]
             width = edge.lanewidth
-            waypoints = get_lane_waypoints(
-                edge.nr_of_lanes, width, edge.get_interpolated_waypoints()
-            )
+            waypoints = get_lane_waypoints(edge.nr_of_lanes, width, edge.get_interpolated_waypoints())
             assert len(edge.lanes) == edge.nr_of_lanes
             assert len(waypoints) == len(edge.lanes)
             for index, lane in enumerate(edge.lanes):
@@ -150,7 +149,7 @@ class Graph:
         to_delete = []
         for node in self.nodes:
             if node.is_crossing:
-                cropping_dist = intersection_dist/10.0
+                cropping_dist = intersection_dist / 10.0
             else:
                 cropping_dist = intersection_dist
             node_point = np.array([node.x, node.y])
@@ -160,7 +159,7 @@ class Graph:
                 edgewaypoints = edge.get_interpolated_waypoints()
                 if edge.points_to(node):
                     edgewaypoints = edgewaypoints[::-1]
-                other_edges = node_edges[index + 1:] + node_edges[:index]
+                other_edges = node_edges[index + 1 :] + node_edges[:index]
                 if len(other_edges) <= 0:
                     # this node has degree of 1 and does not need to be cropped
                     pass
@@ -171,22 +170,16 @@ class Graph:
                             otherwaypoints = otherwaypoints[::-1]
                         i = 0
                         if config.INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS:
-                            distance_to_edge = (
-                                edge.get_width() / 2
-                                + other_edge.get_width() / 2
-                                + cropping_dist
-                            )
+                            distance_to_edge = edge.get_width() / 2 + other_edge.get_width() / 2 + cropping_dist
                             while (
                                 i < min(len(edgewaypoints), len(otherwaypoints))
-                                and np.linalg.norm(edgewaypoints[i] - otherwaypoints[i])
-                                < distance_to_edge
+                                and np.linalg.norm(edgewaypoints[i] - otherwaypoints[i]) < distance_to_edge
                             ):
                                 i += 1
                         else:
                             while (
                                 i < min(len(edgewaypoints), len(otherwaypoints))
-                                and np.linalg.norm(edgewaypoints[i] - edgewaypoints[0])
-                                < cropping_dist
+                                and np.linalg.norm(edgewaypoints[i] - edgewaypoints[0]) < cropping_dist
                             ):
                                 i += 1
                         if i >= len(edgewaypoints):
@@ -196,9 +189,7 @@ class Graph:
                             if other_edge not in edges_to_delete:
                                 edges_to_delete.append(other_edge)
                         i = min(i, len(edgewaypoints) - 1, len(otherwaypoints) - 1)
-                        distance = max(
-                            distance, np.linalg.norm(edgewaypoints[i] - node_point)
-                        )
+                        distance = max(distance, np.linalg.norm(edgewaypoints[i] - node_point))
                     to_delete.append((edge, distance, node))
         cropping = {}
         for edge, distance, node in to_delete:
@@ -346,13 +337,9 @@ class Graph:
         def update_forward(lane: Lane, forward: bool):
             lane.forward = forward
             if lane.adjacent_right is not None and lane.adjacent_right.forward is None:
-                update_forward(
-                    lane.adjacent_right, lane.adjacent_right_direction_equal == forward
-                )
+                update_forward(lane.adjacent_right, lane.adjacent_right_direction_equal == forward)
             if lane.adjacent_left is not None and lane.adjacent_left.forward is None:
-                update_forward(
-                    lane.adjacent_left, lane.adjacent_left_direction_equal == forward
-                )
+                update_forward(lane.adjacent_left, lane.adjacent_left_direction_equal == forward)
             return
 
         for lane in self.lanelinks:
@@ -390,10 +377,7 @@ class Graph:
                     segment.waypoints = waypoints
 
                     # segment is only added if it does not form a turn
-                    if (
-                        successor.edge != predecessor.edge
-                        and geometry.curvature(waypoints) > config.LANE_SEGMENT_ANGLE
-                    ):
+                    if successor.edge != predecessor.edge and geometry.curvature(waypoints) > config.LANE_SEGMENT_ANGLE:
                         self.lanelinks.add(segment)
 
         self.set_adjacents()
@@ -454,32 +438,22 @@ class Graph:
         if config.FILTER:
             logging.info("filtering points")
             for edge in self.edges:
-                lines = [
-                    lane.waypoints if lane.forward else lane.waypoints[::-1]
-                    for lane in edge.lanes
-                ]
+                lines = [lane.waypoints if lane.forward else lane.waypoints[::-1] for lane in edge.lanes]
                 lines = geometry.pre_filter_points(lines)
                 lines = geometry.filter_points(lines, config.COMPRESSION_THRESHOLD)
                 for index, lane in enumerate(edge.lanes):
-                    lane.waypoints = (
-                        lines[index] if lane.forward else lines[index][::-1]
-                    )
+                    lane.waypoints = lines[index] if lane.forward else lines[index][::-1]
             visited = set()
             for lane_link in self.lanelinks:
                 if lane_link in visited:
                     continue
                 lane_list, forward = sort_adjacent_lanes(lane_link)
                 visited |= set(lane_list)
-                lines = [
-                    lane.waypoints if forward[i] else lane.waypoints[::-1]
-                    for i, lane in enumerate(lane_list)
-                ]
+                lines = [lane.waypoints if forward[i] else lane.waypoints[::-1] for i, lane in enumerate(lane_list)]
                 lines = geometry.pre_filter_points(lines)
                 lines = geometry.filter_points(lines, config.COMPRESSION_THRESHOLD)
                 for index, lane in enumerate(lane_list):
-                    lane.waypoints = (
-                        lines[index] if forward[index] else lines[index][::-1]
-                    )
+                    lane.waypoints = lines[index] if forward[index] else lines[index][::-1]
 
         # create_lane_bounds
         for lane in self.get_all_lanes():
@@ -634,7 +608,9 @@ class Graph:
                 sign.node.add_traffic_sign(sign)
             for edge in sign.edges:
                 for sub_edge in edge:
-                    sub_edge.add_traffic_sign(sign)
+                    sub_edge.add_traffic_sign(
+                        sign,
+                    )
 
     def apply_traffic_lights(self) -> None:
         # for each traffic light
@@ -725,7 +701,7 @@ class Graph:
         try:
             points = np.asarray(points)
             # https://codereview.stackexchange.com/a/28210
-            dist_2 = np.sum((points - given_point)**2, axis=1)
+            dist_2 = np.sum((points - given_point) ** 2, axis=1)
             closest_edge_index = np.argmin(dist_2)
             found_point = points[closest_edge_index]
 
