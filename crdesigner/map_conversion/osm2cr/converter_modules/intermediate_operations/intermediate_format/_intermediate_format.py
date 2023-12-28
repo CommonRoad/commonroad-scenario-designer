@@ -1,7 +1,6 @@
 import copy
 from typing import Dict, List, Set, Tuple
 
-import commonroad
 from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.obstacle import Obstacle
