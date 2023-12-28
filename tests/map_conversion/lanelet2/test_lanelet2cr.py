@@ -16,6 +16,8 @@ from commonroad.scenario.traffic_sign import (
 from lxml import etree
 from pyproj import CRS, Transformer
 
+from crdesigner.common.config.general_config import general_config
+from crdesigner.common.config.gui_config import lanelet2_default
 from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.lanelet2 import (
     Node,
@@ -94,15 +96,15 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertIsNone(l2cr.origin_utm)
 
         # testing the default proj
-        crs_to = CRS(self._config.proj_string_l2)
-        crs_from = CRS("ETRF89")
+        crs_to = CRS(general_config.proj_string_cr)
+        crs_from = CRS(lanelet2_default)
         transformer = Transformer.from_proj(crs_from, crs_to)
         self.assertEqual(l2cr.transformer.definition, transformer.definition)
 
     def test_custom_proj_string_init(self):
-        self._config.proj_string_l2 = "+proj=utm +zone=59 +south"
-        crs_to = CRS(self._config.proj_string_l2)
-        crs_from = CRS("ETRF89")
+        general_config.proj_string_cr = "+proj=utm +zone=59 +south"
+        crs_to = CRS(general_config.proj_string_cr)
+        crs_from = CRS(lanelet2_default)
         transformer = Transformer.from_proj(crs_from, crs_to)
         l2cr = Lanelet2CRConverter()
         self.assertEqual(l2cr.transformer.definition, transformer.definition)
@@ -131,7 +133,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
             Location(
                 gps_latitude=origin_lat,
                 gps_longitude=origin_lon,
-                geo_transformation=GeoTransformation(geo_reference=lanelet2_config.proj_string_l2),
+                geo_transformation=GeoTransformation(geo_reference=general_config.proj_string_cr),
             ),
         )
 

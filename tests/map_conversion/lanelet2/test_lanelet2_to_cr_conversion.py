@@ -10,7 +10,8 @@ from commonroad.planning.planning_problem import PlanningProblemSet  # type: ign
 from commonroad.scenario.scenario import Scenario, Tag  # type: ignore
 from lxml import etree  # type: ignore
 
-from crdesigner.common.config.gui_config import pseudo_mercator, utm_default
+from crdesigner.common.config.general_config import general_config
+from crdesigner.common.config.gui_config import utm_default
 from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
@@ -25,10 +26,6 @@ def get_tmp_dir():
 
 class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
     """Tests the conversion from an osm file to a CommonRoad xml file."""
-
-    @classmethod
-    def setUpClass(cls):
-        lanelet2_config.proj_string_l2 = pseudo_mercator
 
     @staticmethod
     def load_and_convert(
@@ -62,7 +59,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
             osm = Lanelet2Parser(etree.parse(fh).getroot()).parse()
 
         if proj_string is not None:
-            lanelet2_config.proj_string_l2 = proj_string
+            general_config.proj_string_cr = proj_string
         if translate is not None:
             lanelet2_config.translate = translate
         osm2l = Lanelet2CRConverter()

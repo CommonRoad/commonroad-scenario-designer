@@ -10,6 +10,8 @@ from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
 from pyproj import CRS, Transformer
 
+from crdesigner.common.config.general_config import GeneralConfig, general_config
+from crdesigner.common.config.gui_config import lanelet2_default
 from crdesigner.common.config.lanelet2_config import Lanelet2Config, lanelet2_config
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.lanelet2 import (
@@ -130,7 +132,7 @@ class CR2LaneletConverter:
     Class to convert CommonRoad lanelet to the OSM representation.
     """
 
-    def __init__(self, config: Lanelet2Config = lanelet2_config):
+    def __init__(self, config: Lanelet2Config = lanelet2_config, cr_config: GeneralConfig = general_config):
         """
         Initialization of CR2LaneletConverter
 
@@ -138,6 +140,7 @@ class CR2LaneletConverter:
         """
         generate_unique_id(0)  # reset ID counter for next test case
         self._config = config
+        self._cr_config = cr_config
         self.transformer = None
         self.osm = None
         self._id_count = 1
@@ -168,9 +171,9 @@ class CR2LaneletConverter:
             if geo_trans.z_rotation != 0.0 or geo_trans.scaling != 1:
                 warnings.warn("<CR2LaneletConverter>: z_rotation and scaling are not considered during transformation")
         if proj_string_from is None:
-            proj_string_from = self._config.proj_string_l2
+            proj_string_from = self._cr_config.proj_string_cr
         crs_from = CRS(proj_string_from)
-        crs_to = CRS("ETRF89")
+        crs_to = CRS(lanelet2_default)
         self.transformer = Transformer.from_proj(crs_from, crs_to)
 
     @property

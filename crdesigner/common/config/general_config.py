@@ -1,4 +1,5 @@
 from crdesigner.common.config.config_base import Attribute, BaseConfig
+from crdesigner.common.config.gui_config import pseudo_mercator
 
 
 class GeneralConfig(BaseConfig):
@@ -20,6 +21,26 @@ class GeneralConfig(BaseConfig):
     affiliation = Attribute("Technical University of Munich", "CommonRoad scenario/map author affiliation")
     # CommonRoad scenario/map source
     source = Attribute("CommonRoad Scenario Designer", "CommonRoad scenario/map source")
+    # projection used
+    # additional tags for the benchmark
+    tags = Attribute("urban", "CommonRoad Tags")
+    # projection used for the CommonRoad scenario
+    proj_string_cr = Attribute(pseudo_mercator, "Projection string", "String used for the initialization of projection")
+
+    LAYOUT = [
+        [
+            "Default CommonRoad Scenario Information",
+            country_id,
+            map_name,
+            map_id,
+            time_step_size,
+            author,
+            affiliation,
+            source,
+            tags,
+            proj_string_cr,
+        ],
+    ]
 
 
 general_config = GeneralConfig()

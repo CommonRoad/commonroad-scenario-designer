@@ -9,6 +9,7 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Scenario, Tag
 from typing_extensions import Annotated
 
+from crdesigner.common.config.general_config import general_config
 from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.map_conversion_interface import (
     commonroad_to_lanelet,
@@ -139,7 +140,7 @@ def lanelet2cr(
 ):
     config_lanelet2 = lanelet2_config
     if proj is not None:
-        config_lanelet2.proj_string_l2 = proj
+        general_config.proj_string_cr = proj
     config_lanelet2.adjacencies = adjacencies
     config_lanelet2.left_driving = left_driving
     scenario = lanelet_to_commonroad(ctx.obj["input_file"], lanelet2_conf=config_lanelet2)
@@ -162,7 +163,7 @@ def crlanelet2(
 ):
     config = lanelet2_config
     if proj is not None:
-        config.proj_string_l2 = proj
+        general_config.proj_string_cr = proj
     config.autoware = autoware
     config.use_local_coordinates = local_coordinates
     commonroad_to_lanelet(ctx.obj["input_file"], ctx.obj["output_file"], config=config)
