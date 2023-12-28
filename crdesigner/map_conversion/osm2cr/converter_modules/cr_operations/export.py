@@ -1,7 +1,8 @@
 from typing import Tuple
 
-from commonroad.scenario.scenario import Location, Scenario, Tag
+from commonroad.scenario.scenario import GeoTransformation, Location, Scenario, Tag
 
+from crdesigner.common.config.general_config import general_config
 from crdesigner.common.config.osm_config import osm_config
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.cleanup import (
     sanitize,
@@ -41,20 +42,20 @@ def convert_to_scenario(graph: Graph) -> Scenario:
     # scenario = create_scenario(graph)
     scenario, intermediate_format = create_scenario_intermediate(graph)
 
-    scenario.author = osm_config.AUTHOR
-    scenario.affiliation = osm_config.AFFILIATION
-    source = osm_config.SOURCE
+    scenario.author = general_config.author
+    scenario.affiliation = general_config.affiliation
+    source = general_config.source
     if osm_config.MAPILLARY_CLIENT_ID != "demo":
         source += ", Mapillary"
     scenario.source = source
-    scenario.tags = create_tags(osm_config.TAGS)
+    scenario.tags = create_tags(general_config.tags)
 
     # create location tag automatically. Retreive geonamesID from the Internet.
     scenario.location = Location(
         gps_latitude=graph.center_point[0],
         gps_longitude=graph.center_point[1],
         geo_name_id=get_geonamesID(graph.center_point[0], graph.center_point[1]),
-        geo_transformation=None,
+        geo_transformation=GeoTransformation(geo_reference=osm_config.PROJ_STRING_TO),
     )
 
     # removing converting errors before writing to xml

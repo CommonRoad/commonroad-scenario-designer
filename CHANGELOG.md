@@ -33,6 +33,7 @@
 - Deleting unreferenced traffic signs/lights after deleting lanelet
 - Map verification/repairing: Checking unique ID of traffic light cycle element
 - Consider x-, y-translation for cr2lanelet conversion (and vice versa)
+- osm2cr projection
 
 ### Removed
 - Unused osm2cr functions, e.g., for plotting graphs

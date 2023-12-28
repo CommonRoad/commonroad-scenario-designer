@@ -7,24 +7,10 @@ class OsmConfig(BaseConfig):
     This class contains all settings for the OSM import.
     """
 
-    # Benchmark Settings
-    # name of the benchmark
-    BENCHMARK_ID = Attribute("ZAM_Test-1_1_T-1", "Benchmark ID")
-    # author of the benchmark
-    AUTHOR = Attribute("Automated converter by Maximilian Rieger", "Author")
-    # affiliation of the benchmark
-    AFFILIATION = Attribute("Technical University of Munich, Germany", "Affiliation")
-    # source of the benchmark
-    SOURCE = Attribute("OpenStreetMaps (OSM)", "Source")
-    # additional tags for the benchmark
-    TAGS = Attribute("urban", "Tags")
-    # Geonames username to retrieve geonamesID for created scenarios
     GEONAMES_USERNAME = Attribute("demo", "Geonames Username")
     # Mapillary Client ID which can be set to extract additional traffic signs. If set to "demo",
     # mapillary signs will be disabled
     MAPILLARY_CLIENT_ID = Attribute("demo", "Mapillary Client ID")
-    # time step size for the benchmark in seconds
-    TIMESTEPSIZE = Attribute(0.1, "Timestep Size")
 
     # Proj string used by OSM; should not be changed in general.
     # See: https://osmdata.openstreetmap.de/info/projections.html
@@ -272,19 +258,8 @@ class OsmConfig(BaseConfig):
     # exclude traffic signs based on their id, e.g. "MAX_SPEED". "ALL" has to be set in ACCEPTED_TRAFFIC_SIGNS
     EXCLUDED_TRAFFIC_SIGNS = []
 
-    # User edit activation
-    # Toggle edit for user
-    USER_EDIT = False
-
     LAYOUT = [
         [
-            "Benchmark",
-            BENCHMARK_ID,
-            AUTHOR,
-            AFFILIATION,
-            SOURCE,
-            TAGS,
-            TIMESTEPSIZE,
             "Scenario Settings",
             LOAD_TUNNELS,
             MAKE_CONTIGUOUS,

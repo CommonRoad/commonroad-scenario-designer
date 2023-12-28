@@ -14,6 +14,7 @@ from commonroad.scenario.scenario import (
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
 
+from crdesigner.common.config.general_config import general_config
 from crdesigner.common.config.osm_config import osm_config
 from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common import geometry
@@ -348,8 +349,10 @@ class IntermediateFormat:
         )
 
         scenario = Scenario(
-            config.TIMESTEPSIZE,
-            ScenarioID.from_benchmark_id(config.BENCHMARK_ID, commonroad.SCENARIO_VERSION),
+            general_config.time_step_size,
+            ScenarioID(
+                country_id=general_config.country_id, map_name=general_config.map_name, map_id=general_config.map_id
+            ),
             location=location,
         )
         net = LaneletNetwork()
