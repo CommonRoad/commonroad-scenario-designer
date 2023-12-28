@@ -1,10 +1,18 @@
-"""
-GraphNode class
-"""
+from __future__ import annotations
 
-from typing import Set
+from typing import TYPE_CHECKING, Set
+
 import numpy as np
+
 from crdesigner.map_conversion.common import geometry
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_traffic_sign import (
+    GraphTrafficSign,
+)
+
+if TYPE_CHECKING:
+    from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_edge import (
+        GraphEdge,
+    )
 
 
 class GraphNode:
@@ -13,7 +21,7 @@ class GraphNode:
 
     """
 
-    def __init__(self, id: int, x: float, y: float, edges: Set["GraphEdge"]):
+    def __init__(self, id: int, x: float, y: float, edges: Set[GraphEdge]):
         """
         creates a graph node
 
@@ -78,13 +86,9 @@ class GraphNode:
         result = 0.0
         for edge in self.edges:
             if edge.node1 == self:
-                distance = np.linalg.norm(
-                    edge.get_interpolated_waypoints()[0] - self.get_cooridnates()
-                )
+                distance = np.linalg.norm(edge.get_interpolated_waypoints()[0] - self.get_cooridnates())
             elif edge.node2 == self:
-                distance = np.linalg.norm(
-                    edge.get_interpolated_waypoints()[-1] - self.get_cooridnates()
-                )
+                distance = np.linalg.norm(edge.get_interpolated_waypoints()[-1] - self.get_cooridnates())
             else:
                 raise ValueError("Graph is malformed")
             result = max(result, distance)
@@ -127,15 +131,14 @@ class GraphNode:
             elif edge.node2 == self:
                 edge.waypoints[-1].set_position(position)
             else:
-                raise ValueError(
-                    "malformed graph, node has edges assigned to it, which start elsewhere"
-                )
+                raise ValueError("malformed graph, node has edges assigned to it, which start elsewhere")
 
-    def add_traffic_sign(self, sign: "GraphTrafficSign"):
-
+    def add_traffic_sign(self, sign: GraphTrafficSign):
         for edge in self.edges:
             for lane in edge.lanes:
                 # add to forward lanes
                 # TODO determine in which direction
                 if lane.forward:
-                    lane.add_traffic_sign(sign)
+                    lane.add_traffic_sign(
+                        sign,
+                    )

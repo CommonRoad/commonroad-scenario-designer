@@ -1,43 +1,47 @@
-from typing import Union
+import math
+from typing import List, Union
+
 import matplotlib as mpl
-from PyQt5.QtWidgets import *
-from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-from commonroad.prediction.prediction import TrajectoryPrediction
-from commonroad.geometry.polyline_util import *
-from commonroad.geometry.shape import Rectangle, Circle, Polygon
-from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
+import numpy as np
+from commonroad.geometry.shape import Circle, Polygon, Rectangle
+from commonroad.prediction.prediction import SetBasedPrediction, TrajectoryPrediction
+from commonroad.scenario.obstacle import (
+    DynamicObstacle,
+    Obstacle,
+    ObstacleType,
+    StaticObstacle,
+)
+from commonroad.scenario.state import ExtendedPMState, InitialState, State
 from commonroad.scenario.trajectory import Trajectory
-from commonroad.scenario.state import InitialState, State, PMState, KSState
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QColorDialog, QDockWidget
 
+from crdesigner.common.logging import logger
 
-from PyQt5.QtCore import *
-from crdesigner.ui.gui.view.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
+# TODO to change the call
+from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.ui.gui.view.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import (
+    ObstacleToolboxUI,
+)
 
-
- #TODO to change the call
-from crdesigner.ui.gui.utilities.gui_sumo_simulation import  SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMOSimulation
-from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import DynamicCanvasController
 
-#TODO: Controller
-def create_obstacle_toolbox(mwindow):
-    """ Create the obstacle toolbar_wrapper."""
-    mwindow.obstacle_toolbox = ObstacleController(
-        scenario_model=mwindow.animated_viewer_wrapper.cr_viewer.scenario_model,
-        text_browser=mwindow.crdesigner_console_wrapper.text_browser, mwindow=mwindow)
-    mwindow.addDockWidget(Qt.RightDockWidgetArea, mwindow.obstacle_toolbox)
-    return mwindow.obstacle_toolbox
+from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import (
+    DynamicCanvasController,
+)
 
 
-class ObstacleController(QDockWidget, ):
-
+class ObstacleController(
+    QDockWidget,
+):
     def __init__(self, mwindow):
         super().__init__("Obstacle Toolbox")
 
         self.scenario_model = mwindow.scenario_model
-        #self.callback = callback
-        self.obstacle_toolbox_ui = ObstacleToolboxUI(mwindow.crdesigner_console_wrapper.text_browser, mwindow)
+        self.obstacle_toolbox_ui = ObstacleToolboxUI(
+            self.scenario_model, mwindow.crdesigner_console_wrapper.text_browser, mwindow
+        )
         self.adjust_ui()
         self.connect_gui_elements()
         self.tmp_folder = mwindow.tmp_folder
@@ -47,6 +51,7 @@ class ObstacleController(QDockWidget, ):
         self.amount_obstacles = 0
         self.canvas = DynamicCanvasController()
         self.obstacle_color = None
+        self.mwindow = mwindow
 
         # for profile visualisation
         self.sel_point = None
@@ -59,126 +64,163 @@ class ObstacleController(QDockWidget, ):
         else:
             self.sumo_simulation = None
 
-
     def init_canvas(self):
         """
         so profile visualization canvas can handle events
         """
-        self.obstacle_toolbox_ui.canvas.mpl_connect('button_press_event', self.on_button_press)
-        self.obstacle_toolbox_ui.canvas.mpl_connect('button_release_event', self.on_button_release)
-        self.obstacle_toolbox_ui.canvas.mpl_connect('motion_notify_event', self.on_mouse_move)
-
+        self.obstacle_toolbox_ui.canvas.mpl_connect("button_press_event", self.on_button_press)
+        self.obstacle_toolbox_ui.canvas.mpl_connect("button_release_event", self.on_button_release)
+        self.obstacle_toolbox_ui.canvas.mpl_connect("motion_notify_event", self.on_mouse_move)
 
     def adjust_ui(self):
         """
         Updates GUI properties like width, etc.
         """
         self.setFloating(True)
-        self.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.setAllowedAreas(Qt.RightDockWidgetArea)
+        self.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea)
         self.setWidget(self.obstacle_toolbox_ui)
         self.obstacle_toolbox_ui.setMinimumWidth(450)
-
 
     def connect_gui_elements(self):
         """
         adds functionality to gui elements like buttons, menus etc
         """
-        self.initialize_obstacle_information()
+        self.obstacle_toolbox_ui.obstacle_type.currentTextChanged.connect(
+            lambda: self.obstacle_toolbox_ui.init_obstacle_defaults()
+        )
+
+        self.obstacle_toolbox_ui.initialize_obstacle_information()
 
         self.obstacle_toolbox_ui.selected_obstacle.currentTextChanged.connect(
-                lambda: self.update_obstacle_information())
+            lambda: self.update_obstacle_information()
+        )
         self.obstacle_toolbox_ui.button_update_obstacle.clicked.connect(lambda: self.update_obstacle())
 
         self.obstacle_toolbox_ui.obstacle_state_variable.currentTextChanged.connect(
-                lambda: self.plot_obstacle_state_profile())
+            lambda: self.plot_obstacle_state_profile()
+        )
 
         self.obstacle_toolbox_ui.button_remove_obstacle.clicked.connect(lambda: self.remove_obstacle())
 
         self.obstacle_toolbox_ui.button_add_static_obstacle.clicked.connect(lambda: self.add_obstacle())
 
-        self.obstacle_toolbox_ui.obstacle_shape.currentTextChanged.connect(
-            lambda: self.obstacle_toolbox_ui.toggle_sections())
+        self.obstacle_toolbox_ui.obstacle_shape.currentTextChanged.connect(lambda: self.toggle_sections())
 
-        self.obstacle_toolbox_ui.obstacle_dyn_stat.currentTextChanged.connect(
-            lambda: self.obstacle_toolbox_ui.toggle_dynamic_static())
+        self.obstacle_toolbox_ui.obstacle_dyn_stat.currentTextChanged.connect(lambda: self.toggle_dynamic_static())
 
-        self.obstacle_toolbox_ui.color_btn.clicked.connect(
-            lambda: self.obstacle_toolbox_ui.color_picker())
+        self.obstacle_toolbox_ui.color_btn.clicked.connect(lambda: self.color_picker())
 
         self.obstacle_toolbox_ui.default_color.stateChanged.connect(
-            lambda: self.obstacle_toolbox_ui.set_default_color())
+            lambda: self.obstacle_toolbox_ui.set_default_color()
+        )
 
         if SUMO_AVAILABLE:
             self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(lambda: self.start_sumo_simulation())
 
+    @logger.log
+    def toggle_sections(self):
+        """
+        Depending on the selected shape of the obstacle the specific fields of the toolbox are displayed
+        """
+        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
+            self.obstacle_toolbox_ui.remove_rectangle_fields()
+            self.obstacle_toolbox_ui.remove_polygon_fields()
+            self.obstacle_toolbox_ui.remove_position()
 
-    def refresh_toolbox(self, model: ScenarioModel):
-        self.scenario_model = model
-        self.initialize_toolbox()
+            self.obstacle_toolbox_ui.init_circle_fields()
+            self.obstacle_toolbox_ui.init_position()
 
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
+            self.obstacle_toolbox_ui.remove_circle_fields()
+            self.obstacle_toolbox_ui.remove_polygon_fields()
+            self.obstacle_toolbox_ui.remove_position()
+
+            self.obstacle_toolbox_ui.init_rectangle_fields()
+            self.obstacle_toolbox_ui.init_position()
+
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
+            self.obstacle_toolbox_ui.remove_circle_fields()
+            self.obstacle_toolbox_ui.remove_rectangle_fields()
+            self.obstacle_toolbox_ui.remove_position()
+            self.obstacle_toolbox_ui.init_polygon_fields()
+
+        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
+            self.toggle_dynamic_static()
+
+        self.obstacle_toolbox_ui.init_obstacle_defaults()
+
+    @logger.log
+    def toggle_dynamic_static(self):
+        """
+        adds/removes fields unique for the dynamic obstacle
+        """
+        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
+            self.obstacle_toolbox_ui.remove_position()
+        elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
+            self.obstacle_toolbox_ui.init_position()
+
+        self.obstacle_toolbox_ui.init_obstacle_defaults()
 
     def static_obstacle_details(self, obstacle_id: int):
         """
         Creates static obstacles
         :param obstacle_id: id of static obstacle to be created
         """
-        # TODO: Controller
         if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
-            static_obstacle = StaticObstacle(obstacle_id=obstacle_id,
-                                             obstacle_type=ObstacleType(
-                                                     self.obstacle_toolbox_ui.obstacle_type.currentText()),
-                                             obstacle_shape=Rectangle(
-                                                     length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
-                                                     width=float(self.obstacle_toolbox_ui.obstacle_width.text())),
-                                             initial_state=InitialState(**{'position': np.array(
-                                                     [float(self.obstacle_toolbox_ui.obstacle_x_Position.text()),
-                                                      float(self.obstacle_toolbox_ui.obstacle_y_Position.text())]),
-                                                 'orientation': math.radians(float(
-                                                         self.obstacle_toolbox_ui.obstacle_orientation.text())),
-                                                 'time_step': 1}))
+            static_obstacle = StaticObstacle(
+                obstacle_id=obstacle_id,
+                obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
+                obstacle_shape=Rectangle(
+                    length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
+                    width=float(self.obstacle_toolbox_ui.obstacle_width.text()),
+                ),
+                initial_state=InitialState(
+                    **{
+                        "position": np.array(
+                            [
+                                float(self.obstacle_toolbox_ui.obstacle_x_Position.text()),
+                                float(self.obstacle_toolbox_ui.obstacle_y_Position.text()),
+                            ]
+                        ),
+                        "orientation": math.radians(float(self.obstacle_toolbox_ui.obstacle_orientation.text())),
+                        "time_step": 1,
+                    }
+                ),
+            )
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
-            static_obstacle = StaticObstacle(obstacle_id=obstacle_id,
-                                             obstacle_type=ObstacleType(
-                                                     self.obstacle_toolbox_ui.obstacle_type.currentText()),
-                                             obstacle_shape=Circle(
-                                                     radius=float(self.obstacle_toolbox_ui.obstacle_radius.text())),
-                                             initial_state=InitialState(**{'position': np.array(
-                                                     [float(self.obstacle_toolbox_ui.obstacle_x_Position.text()),
-                                                      float(self.obstacle_toolbox_ui.obstacle_y_Position.text())]),
-                                                 'orientation': 0, 'time_step': 1}))
+            static_obstacle = StaticObstacle(
+                obstacle_id=obstacle_id,
+                obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
+                obstacle_shape=Circle(radius=float(self.obstacle_toolbox_ui.obstacle_radius.text())),
+                initial_state=InitialState(
+                    **{
+                        "position": np.array(
+                            [
+                                float(self.obstacle_toolbox_ui.obstacle_x_Position.text()),
+                                float(self.obstacle_toolbox_ui.obstacle_y_Position.text()),
+                            ]
+                        ),
+                        "orientation": 0,
+                        "time_step": 1,
+                    }
+                ),
+            )
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
             static_obstacle = StaticObstacle(
                 obstacle_id=obstacle_id,
-
                 obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
-                obstacle_shape=Polygon(
-                    vertices=self.polygon_array()
-                ),
-
-                initial_state=InitialState(**{'position': np.array([
-                                        0,
-                                        0
-                                    ]),
-                                    'orientation': 0,
-                                    'time_step': 1
-                                    })
+                obstacle_shape=Polygon(vertices=self.polygon_array()),
+                initial_state=InitialState(**{"position": np.array([0, 0]), "orientation": 0, "time_step": 1}),
             )
-        # TODO: CONTROLLER
+
         if self.obstacle_toolbox_ui.default_color.isChecked():
             self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id)
-        else:
-            if self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
-                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id,
-                                                      self.obstacle_color)
-            else:
-                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id,
-                                                      self.obstacle_toolbox_ui.obstacle_color.name())
+        elif self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
+            self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id, self.obstacle_color.name())
+
         self.obstacle_color = None
         self.scenario_model.add_obstacle(static_obstacle)
-        self.initialize_obstacle_toolbox()
-
-
+        self.obstacle_toolbox_ui.initialize_obstacle_information()
 
     def dynamic_obstacle_details(self, obstacle_id: int):
         """
@@ -187,107 +229,93 @@ class ObstacleController(QDockWidget, ):
         """
         if self.xyova:
             initial_position = np.array([self.xyova[0][0], self.xyova[0][1]])
-            state_dictionary = {'position': initial_position,
-                                'velocity': self.xyova[0][3],
-                                'orientation': self.xyova[0][2], 'time_step': 0}
+            state_dictionary = {
+                "position": initial_position,
+                "velocity": self.xyova[0][3],
+                "orientation": self.xyova[0][2],
+                "time_step": 0,
+            }
 
             if self.xyova[0][4] is not None:
-                state_dictionary.update({'acceleration': self.xyova[0][4]})
+                state_dictionary.update({"acceleration": self.xyova[0][4]})
             if self.xyova[0][5] is not None:
-                state_dictionary.update({'yaw_rate': self.xyova[0][5]})
+                state_dictionary.update({"yaw_rate": self.xyova[0][5]})
             if self.xyova[0][6] is not None:
-                state_dictionary.update({'slip_angle': self.xyova[0][6]})
+                state_dictionary.update({"slip_angle": self.xyova[0][6]})
 
         elif self.temp_obstacle is not None:  # is not None during an update
-            initial_position = np.array([self.temp_obstacle.initial_state.__getattribute__("position")[0],
-                                        self.temp_obstacle.initial_state.__getattribute__("position")[1]])
-            state_dictionary = {'position': initial_position,
-                                'velocity': self.temp_obstacle.initial_state.__getattribute__("velocity"),
-                                'orientation': self.temp_obstacle.initial_state.__getattribute__("orientation"),
-                                'time_step': 0}
+            initial_position = np.array(
+                [
+                    self.temp_obstacle.initial_state.__getattribute__("position")[0],
+                    self.temp_obstacle.initial_state.__getattribute__("position")[1],
+                ]
+            )
+            state_dictionary = {
+                "position": initial_position,
+                "velocity": self.temp_obstacle.initial_state.__getattribute__("velocity"),
+                "orientation": self.temp_obstacle.initial_state.__getattribute__("orientation"),
+                "time_step": 0,
+            }
 
             if "acceleration" in self.temp_obstacle.initial_state.attributes:
                 state_dictionary.update(
-                        {'acceleration': self.temp_obstacle.initial_state.__getattribute__("acceleration")})
+                    {"acceleration": self.temp_obstacle.initial_state.__getattribute__("acceleration")}
+                )
             if "yaw_rate" in self.temp_obstacle.initial_state.attributes:
-                state_dictionary.update({'yaw_rate': self.temp_obstacle.initial_state.__getattribute__("yaw_rate")})
+                state_dictionary.update({"yaw_rate": self.temp_obstacle.initial_state.__getattribute__("yaw_rate")})
             if "slip_angle" in self.temp_obstacle.initial_state.attributes:
-                state_dictionary.update({'slip_angle': self.temp_obstacle.initial_state.__getattribute__("slip_angle")})
+                state_dictionary.update({"slip_angle": self.temp_obstacle.initial_state.__getattribute__("slip_angle")})
 
         if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
             dynamic_obstacle = DynamicObstacle(
                 obstacle_id=obstacle_id,
-
                 obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
                 obstacle_shape=Rectangle(
                     length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
                     width=float(self.obstacle_toolbox_ui.obstacle_width.text()),
-                    orientation=float(self.obstacle_toolbox_ui.obstacle_orientation.text())
+                    orientation=float(self.obstacle_toolbox_ui.obstacle_orientation.text()),
                 ),
-
                 initial_state=InitialState(**state_dictionary),
                 prediction=TrajectoryPrediction(
-                    shape=Rectangle(float(self.obstacle_toolbox_ui.obstacle_length.text()),
-                                    width=float(self.obstacle_toolbox_ui.obstacle_width.text())),
-                    trajectory=Trajectory(
-                        initial_time_step=1,
-                        state_list=self.calc_state_list()
-                    )
-                )
+                    shape=Rectangle(
+                        float(self.obstacle_toolbox_ui.obstacle_length.text()),
+                        width=float(self.obstacle_toolbox_ui.obstacle_width.text()),
+                    ),
+                    trajectory=Trajectory(initial_time_step=1, state_list=self.calc_state_list()),
+                ),
             )
 
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
             dynamic_obstacle = DynamicObstacle(
                 obstacle_id=obstacle_id,
-
                 obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
-                obstacle_shape=Circle(
-                    radius=float(self.obstacle_toolbox_ui.obstacle_radius.text())
-                ),
-
+                obstacle_shape=Circle(radius=float(self.obstacle_toolbox_ui.obstacle_radius.text())),
                 initial_state=InitialState(**state_dictionary),
                 prediction=TrajectoryPrediction(
                     shape=Circle(float(self.obstacle_toolbox_ui.obstacle_radius.text())),
-                    trajectory=Trajectory(
-                        initial_time_step=1,
-                        state_list=self.calc_state_list()
-                    )
-                )
+                    trajectory=Trajectory(initial_time_step=1, state_list=self.calc_state_list()),
+                ),
             )
 
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
             dynamic_obstacle = DynamicObstacle(
                 obstacle_id=obstacle_id,
-
                 obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
-                obstacle_shape=Polygon(
-
-                    vertices=self.polygon_array()
-                ),
-
+                obstacle_shape=Polygon(vertices=self.polygon_array()),
                 initial_state=InitialState(**state_dictionary),
                 prediction=TrajectoryPrediction(
                     shape=Polygon(vertices=self.polygon_array()),
-                    trajectory=Trajectory(
-                        initial_time_step=1,
-                        state_list=self.initial_trajectory()
-                    )
-                )
-
+                    trajectory=Trajectory(initial_time_step=1, state_list=self.initial_trajectory()),
+                ),
             )
 
         if self.obstacle_toolbox_ui.default_color.isChecked():
             self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id)
-        else:
-            if self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
-                self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id,
-                                                       self.obstacle_color)
-            else:
-                self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id,
-                                                      self.obstacle_toolbox_ui.obstacle_color.name())
+        elif self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
+            self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id, self.obstacle_color.name())
         self.obstacle_color = None
         self.scenario_model.add_obstacle(dynamic_obstacle)
-
+        self.obstacle_toolbox_ui.initialize_obstacle_information()
 
     def calc_state_list(self) -> List[State]:
         """
@@ -302,40 +330,44 @@ class ObstacleController(QDockWidget, ):
         if self.xyova:
             for j in range(1, len(self.xyova)):
                 new_position = np.array([self.xyova[j][0], self.xyova[j][1]])
-                state_dictionary = {'position': new_position, 'velocity': self.xyova[j][3],
-                                    'orientation': self.xyova[j][2], 'time_step': j}
+                state_dictionary = {
+                    "position": new_position,
+                    "velocity": self.xyova[j][3],
+                    "orientation": self.xyova[j][2],
+                    "time_step": j,
+                }
 
                 if self.xyova[j][4] is not None:
-                    state_dictionary.update({'acceleration': self.xyova[j][4]})
+                    state_dictionary.update({"acceleration": self.xyova[j][4]})
                 if self.xyova[j][5] is not None:
-                    state_dictionary.update({'yaw_rate': self.xyova[j][5]})
+                    state_dictionary.update({"yaw_rate": self.xyova[j][5]})
                 if self.xyova[j][6] is not None:
-                    state_dictionary.update({'slip_angle': self.xyova[j][6]})
+                    state_dictionary.update({"slip_angle": self.xyova[j][6]})
 
-                new_state = PMState(**state_dictionary)
+                new_state = ExtendedPMState(**state_dictionary)
                 state_list.append(new_state)
             return state_list
 
         else:
             for state in self.temp_obstacle.prediction.trajectory.state_list:
-                new_position = np.array([state.__getattribute__("position")[0],
-                                         state.__getattribute__("position")[1]])
-                state_dictionary = {'position': new_position,
-                                    'velocity': state.__getattribute__("velocity"),
-                                    'orientation': state.__getattribute__("orientation"),
-                                    'time_step': state.__getattribute__("time_step")}
+                new_position = np.array([state.__getattribute__("position")[0], state.__getattribute__("position")[1]])
+                state_dictionary = {
+                    "position": new_position,
+                    "velocity": state.__getattribute__("velocity"),
+                    "orientation": state.__getattribute__("orientation"),
+                    "time_step": state.__getattribute__("time_step"),
+                }
 
                 if "acceleration" in state.attributes:
-                    state_dictionary.update({'acceleration': state.__getattribute__("acceleration")})
+                    state_dictionary.update({"acceleration": state.__getattribute__("acceleration")})
                 if "yaw_rate" in state.attributes:
-                    state_dictionary.update({'yaw_rate': state.__getattribute__("yaw_rate")})
+                    state_dictionary.update({"yaw_rate": state.__getattribute__("yaw_rate")})
                 if "slip_angle" in state.attributes:
-                    state_dictionary.update({'slip_angle': state.__getattribute__("slip_angle")})
+                    state_dictionary.update({"slip_angle": state.__getattribute__("slip_angle")})
 
-                new_state = KSState(**state_dictionary)
+                new_state = ExtendedPMState(**state_dictionary)
                 state_list.append(new_state)
             return state_list
-
 
     def polygon_array(self) -> Union[List[float], None]:
         """
@@ -344,10 +376,14 @@ class ObstacleController(QDockWidget, ):
         """
         vertices = []
         for i in range(self.obstacle_toolbox_ui.amount_vertices):
-            if self.obstacle_toolbox_ui.vertices_x[i].text() != "" and \
-                    self.obstacle_toolbox_ui.vertices_y[i].text() != "":
-                temp = [float(self.obstacle_toolbox_ui.vertices_x[i].text()),
-                        float(self.obstacle_toolbox_ui.vertices_y[i].text())]
+            if (
+                self.obstacle_toolbox_ui.vertices_x[i].text() != ""
+                and self.obstacle_toolbox_ui.vertices_y[i].text() != ""
+            ):
+                temp = [
+                    float(self.obstacle_toolbox_ui.vertices_x[i].text()),
+                    float(self.obstacle_toolbox_ui.vertices_y[i].text()),
+                ]
                 vertices.append(temp)
 
         if len(vertices) < 3:
@@ -356,7 +392,6 @@ class ObstacleController(QDockWidget, ):
 
         vertices = np.asarray(vertices)
         return vertices
-
 
     def get_current_obstacle_id(self) -> Union[int, None]:
         """
@@ -367,47 +402,58 @@ class ObstacleController(QDockWidget, ):
         else:
             return None
 
-
     def get_current_obstacle(self) -> Union[Obstacle, None]:
         """
         :return: current selected obstacle
         """
         obstacle_id = self.get_current_obstacle_id()
         if obstacle_id is not None:
-            selected_obstacle = self.scenario_model.obstacle_by_id(obstacle_id)
+            selected_obstacle = self.scenario_model.find_obstacle_by_id(obstacle_id)
             return selected_obstacle
         else:
             return None
 
-
+    @logger.log
     def add_obstacle(self):
         """
         generates an object_id (id for obstacle) and then calls function
         to create a static or dynamic obstacle
         """
-        if self.scenario_model.scenario_created() :
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
+        if self.obstacle_toolbox_ui.selected_obstacle.currentText() != "None":
+            self.text_browser.append("The obstacle already exists. Please update the obstacle!")
+            return
+
+        if self.scenario_model.scenario_created():
             obstacle_id = self.scenario_model.generate_object_id()
             self.amount_obstacles = self.scenario_model.generate_object_id()
 
             if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
                 try:
                     self.dynamic_obstacle_details(obstacle_id)
-                except Exception as e:
+                except Exception:
                     self.text_browser.append("Error when adding dynamic obstacle")
             elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
                 try:
                     self.static_obstacle_details(obstacle_id)
-                except Exception as e:
+                except Exception:
                     self.text_browser.append("Error when adding static obstacle")
         else:
             self.text_browser.append("Warning: Scenario does not exist yet. Please create or load a scenario first.")
-        self.initialize_obstacle_toolbox()
+        self.obstacle_toolbox_ui.initialize_obstacle_information()
 
-
+    @logger.log
     def update_obstacle(self):
         """
         updates obstacle by deleting it and then adding it again with same id
         """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         selected_obstacle = self.get_current_obstacle()
         obstacle_id = self.get_current_obstacle_id()
         self.temp_obstacle = selected_obstacle
@@ -415,10 +461,8 @@ class ObstacleController(QDockWidget, ):
             self.text_browser.append("Warning: Scenario does not exist yet. Please create or load a scenario first.")
             return
         else:
-
             self.canvas.remove_obstacle(obstacle_id)
             self.scenario_model.remove_obstacle(selected_obstacle)
-
 
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
             try:
@@ -431,14 +475,9 @@ class ObstacleController(QDockWidget, ):
             try:
                 self.dynamic_obstacle_details(obstacle_id)
                 self.xyova.clear()
-            except Exception as e:
+            except Exception:
                 self.text_browser.append("Error when updating dynamic obstacle")
         self.temp_obstacle = None
-
-
-    def initialize_obstacle_toolbox(self):
-        self.initialize_obstacle_information()
-
 
     def calc_velocity(self, point1: float, point2: float) -> float:
         """
@@ -449,34 +488,18 @@ class ObstacleController(QDockWidget, ):
         velocity = distance / self.scenario_model.get_scenario_dt()
         return velocity
 
-
     def calc_acceleration(self, velocity1: float, velocity2: float) -> float:
         """calculates acceleration based on the velocity at 2 points"""
         delta_v = velocity2 - velocity1
         acceleration = delta_v / self.scenario_model.get_scenario_dt()
         return acceleration
 
-
-    def initialize_obstacle_information(self):
-        """
-        Initializes GUI elements with intersection information.
-        """
-        self.clear_obstacle_fields()
-
-        self.obstacle_toolbox_ui.selected_obstacle.clear()
-        self.obstacle_toolbox_ui.selected_obstacle.addItems(
-                ["None"] + [str(item) for item in self.scenario_model.collect_obstacle_ids()])
-        self.obstacle_toolbox_ui.selected_obstacle.setCurrentIndex(0)
-
-
-
     def delete_point(self):
         """
         deletes right-clicked point
-         """
+        """
         time = []
         profile = []
-        state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
 
         if self.sel_point:
             if not self.xyova:
@@ -493,9 +516,9 @@ class ObstacleController(QDockWidget, ):
 
         self.sel_point = None
 
-
+    @logger.log
     def on_button_press(self, event):
-        """"
+        """ "
         when left or right mouse button is pressed
         """
         if event.inaxes is None:
@@ -505,7 +528,7 @@ class ObstacleController(QDockWidget, ):
         # if using zoom or move tool (0 is standard cursor)
         if self.obstacle_toolbox_ui.figure.canvas.cursor().shape() != 0:
             return
-        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == 'Static':
+        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
             return
         if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "velocity":
             return
@@ -518,7 +541,7 @@ class ObstacleController(QDockWidget, ):
         if event.button == 3:
             self.delete_point()
 
-
+    @logger.log
     def on_button_release(self, event):
         """
         Updates obstacle when left mouse button is released
@@ -533,14 +556,13 @@ class ObstacleController(QDockWidget, ):
             return
         if self.obstacle_toolbox_ui.figure.canvas.cursor().shape() != 0:
             return
-        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == 'Static':
+        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
             return
         if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "velocity":
             return
         if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "acceleration":
             return
 
-        selected_obstacle = self.get_current_obstacle()
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
         i = 0
         k = 1
@@ -550,18 +572,20 @@ class ObstacleController(QDockWidget, ):
                 if state_variable_name == "x-position":
                     j[0] = self.pos[i][1]
                     # change velocity based on changes in x-position
-                    self.xyova[k][3] = self.calc_velocity([self.pos[k-1][1], self.xyova[k-1][1]],
-                                                          [self.pos[k][1], self.xyova[k][1]])
+                    self.xyova[k][3] = self.calc_velocity(
+                        [self.pos[k - 1][1], self.xyova[k - 1][1]], [self.pos[k][1], self.xyova[k][1]]
+                    )
                     # change acceleration based on changes in velocity
                     if self.xyova[i][4] is not None:
-                        self.xyova[k][4] = self.calc_acceleration(self.xyova[k-1][3], self.xyova[k][3])
+                        self.xyova[k][4] = self.calc_acceleration(self.xyova[k - 1][3], self.xyova[k][3])
                 elif state_variable_name == "y-position":
                     j[1] = self.pos[i][1]
 
-                    self.xyova[k][3] = self.calc_velocity([self.xyova[k-1][0], self.pos[k-1][1]],
-                                                          [self.xyova[k][0], self.pos[k][1]])
+                    self.xyova[k][3] = self.calc_velocity(
+                        [self.xyova[k - 1][0], self.pos[k - 1][1]], [self.xyova[k][0], self.pos[k][1]]
+                    )
                     if self.xyova[i][4] is not None:
-                        self.xyova[k][4] = self.calc_acceleration(self.xyova[k-1][3], self.xyova[k][3])
+                        self.xyova[k][4] = self.calc_acceleration(self.xyova[k - 1][3], self.xyova[k][3])
 
                 elif state_variable_name == "orientation":
                     j[2] = self.pos[i][1]
@@ -583,7 +607,7 @@ class ObstacleController(QDockWidget, ):
 
         self.sel_point = None
 
-
+    @logger.log
     def on_mouse_move(self, event):
         """
         update position of selected point by moving mouse
@@ -597,15 +621,13 @@ class ObstacleController(QDockWidget, ):
             return
         if self.obstacle_toolbox_ui.figure.canvas.cursor().shape() != 0:
             return
-        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == 'Static':
+        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
             return
         if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "velocity":
             return
         if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "acceleration":
             return
 
-        selected_obstacle = self.get_current_obstacle()
-        state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
         time = []
         profile = []
 
@@ -618,7 +640,6 @@ class ObstacleController(QDockWidget, ):
             profile.append(i[1])
 
         self.draw_plot(time, profile, self.xmin, self.xmax, self.ymin, self.ymax)
-
 
     def calculate_xyova(self):
         """
@@ -647,7 +668,7 @@ class ObstacleController(QDockWidget, ):
             except Exception:
                 slip_angle = None
 
-            v = self.calc_velocity([self.pos[k-1][1], y], [self.pos[k][1], y])
+            v = self.calc_velocity([self.pos[k - 1][1], y], [self.pos[k][1], y])
             self.xyova.append([self.pos[i][1], y, o, v, a, yaw_rate, slip_angle])
 
         elif state_variable_name == "y-position":
@@ -666,7 +687,7 @@ class ObstacleController(QDockWidget, ):
             except Exception:
                 slip_angle = None
 
-            v = self.calc_velocity([x, self.pos[k-1][1]], [x, self.pos[k][1]])
+            v = self.calc_velocity([x, self.pos[k - 1][1]], [x, self.pos[k][1]])
             self.xyova.append([x, self.pos[i][1], o, v, a, yaw_rate, slip_angle])
 
         elif state_variable_name == "orientation":
@@ -737,8 +758,8 @@ class ObstacleController(QDockWidget, ):
                     slip_angle = None
 
                 v_previous = v
-                v = self.calc_velocity([self.pos[k-1][1], y], [self.pos[k][1], y])
-                if a is not None:   # if accelaration is a part of the state
+                v = self.calc_velocity([self.pos[k - 1][1], y], [self.pos[k][1], y])
+                if a is not None:  # if accelaration is a part of the state
                     a = self.calc_acceleration(v_previous, v)
 
                 self.xyova.append([self.pos[i][1], y, o, v, a, yaw_rate, slip_angle])
@@ -756,7 +777,7 @@ class ObstacleController(QDockWidget, ):
                     slip_angle = None
 
                 v_previous = v
-                v = self.calc_velocity([x, self.pos[k-1][1]], [x, self.pos[k][1]])
+                v = self.calc_velocity([x, self.pos[k - 1][1]], [x, self.pos[k][1]])
                 if a is not None:
                     a = self.calc_acceleration(v_previous, v)
 
@@ -816,7 +837,6 @@ class ObstacleController(QDockWidget, ):
             if k < len(selected_obstacle.prediction.trajectory.state_list):
                 k += 1
 
-
     def calculate_pos(self):
         """
         calculates the self.pos array which is the array that
@@ -845,7 +865,6 @@ class ObstacleController(QDockWidget, ):
                     self.pos.append([t, slip_angle])
                 t += 1
         else:
-
             if state_variable_name == "x-position":
                 x = selected_obstacle.initial_state.__getattribute__("position")[0]
                 self.pos.append([t, x])
@@ -886,14 +905,11 @@ class ObstacleController(QDockWidget, ):
     def on_ylim_change(self, event):
         self.ymin, self.ymax = event.get_ylim()
 
-
     def selected_point(self, event) -> List[float]:
         """
         get the time step of the where the point is located
         :return: sel_point, the time step of the selected point
         """
-
-        pos = []
         sel_point = None
 
         self.calculate_pos()
@@ -909,17 +925,19 @@ class ObstacleController(QDockWidget, ):
                 sel_point = self.pos[i]
         return sel_point
 
-
+    @logger.log
     def plot_obstacle_state_profile(self):
         """
         Gets the values based on which profile is selected.
         If non updated changes, these values come from the xyova array,
         otherwise directly from the obstacle state_list
         """
-        # TODO: CONTROLLER
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"] and not self.update_ongoing:
             obstacle = self.get_current_obstacle()
             state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
+            message = "This Graph is only available for dynamic obstacles"
+            if isinstance(obstacle.prediction, SetBasedPrediction):
+                return
             if state_variable_name == "x-position":
                 if isinstance(obstacle, StaticObstacle):
                     profile = [obstacle.initial_state.__getattribute__("position")[0]]
@@ -928,8 +946,9 @@ class ObstacleController(QDockWidget, ):
                         profile = [j[0] for j in self.xyova]
                     else:
                         profile = [obstacle.initial_state.__getattribute__("position")[0]]
-                        profile += [state.__getattribute__("position")[0] for state in
-                                    obstacle.prediction.trajectory.state_list]
+                        profile += [
+                            state.__getattribute__("position")[0] for state in obstacle.prediction.trajectory.state_list
+                        ]
             elif state_variable_name == "y-position":
                 if isinstance(obstacle, StaticObstacle):
                     profile = [obstacle.initial_state.__getattribute__("position")[1]]
@@ -938,40 +957,51 @@ class ObstacleController(QDockWidget, ):
                         profile = [j[1] for j in self.xyova]
                     else:
                         profile = [obstacle.initial_state.__getattribute__("position")[1]]
-                        profile += [state.__getattribute__("position")[1] for state in
-                                    obstacle.prediction.trajectory.state_list]
+                        profile += [
+                            state.__getattribute__("position")[1] for state in obstacle.prediction.trajectory.state_list
+                        ]
 
-            elif (state_variable_name == "velocity" and isinstance(obstacle, DynamicObstacle)):
+            elif state_variable_name == "velocity" and isinstance(obstacle, DynamicObstacle):
                 if self.xyova:
                     profile = [j[3] for j in self.xyova]
                 else:
                     profile = [obstacle.initial_state.__getattribute__("velocity")]
-                    profile += [state.__getattribute__("velocity") for state in
-                                obstacle.prediction.trajectory.state_list]
+                    profile += [
+                        state.__getattribute__("velocity") for state in obstacle.prediction.trajectory.state_list
+                    ]
 
-            elif (state_variable_name == "acceleration" and isinstance(obstacle, DynamicObstacle)):
+            elif state_variable_name == "acceleration" and isinstance(obstacle, DynamicObstacle):
                 if self.xyova:
                     profile = [j[4] for j in self.xyova]
-                else:
+                elif "acceleration" in obstacle.prediction.trajectory.final_state.attributes:
                     profile = [obstacle.initial_state.__getattribute__("acceleration")]
-                    profile += [state.__getattribute__("acceleration") for state in
-                                obstacle.prediction.trajectory.state_list]
+                    profile += [
+                        state.__getattribute__("acceleration") for state in obstacle.prediction.trajectory.state_list
+                    ]
+                else:
+                    message = "This Obstacle has no information about the Acceleration"
 
             elif state_variable_name == "yaw_rate" and isinstance(obstacle, DynamicObstacle):
                 if self.xyova:
                     profile = [j[5] for j in self.xyova]
-                else:
+                elif "yaw_rate" in obstacle.prediction.trajectory.final_state.attributes:
                     profile = [obstacle.initial_state.__getattribute__("yaw_rate")]
-                    profile += [state.__getattribute__("yaw_rate") for state in
-                                obstacle.prediction.trajectory.state_list]
+                    profile += [
+                        state.__getattribute__("yaw_rate") for state in obstacle.prediction.trajectory.state_list
+                    ]
+                else:
+                    message = "This Obstacle has no information about the yaw_rate"
 
-            elif (state_variable_name == "slip_angle" and isinstance(obstacle, DynamicObstacle)):
+            elif state_variable_name == "slip_angle" and isinstance(obstacle, DynamicObstacle):
                 if self.xyova:
                     profile = [j[6] for j in self.xyova]
-                else:
+                elif "slip_angle" in obstacle.prediction.trajectory.final_state.attributes:
                     profile = [obstacle.initial_state.__getattribute__("slip_angle")]
-                    profile += [state.__getattribute__("slip_angle") for state in
-                                obstacle.prediction.trajectory.state_list]
+                    profile += [
+                        state.__getattribute__("slip_angle") for state in obstacle.prediction.trajectory.state_list
+                    ]
+                else:
+                    message = "This Obstacle has no information about the slip_angle"
 
             elif state_variable_name == "orientation":
                 if isinstance(obstacle, StaticObstacle):
@@ -981,8 +1011,9 @@ class ObstacleController(QDockWidget, ):
                         profile = [j[2] for j in self.xyova]
                     else:
                         profile = [obstacle.initial_state.__getattribute__("orientation")]
-                        profile += [state.__getattribute__("orientation") for state in
-                                    obstacle.prediction.trajectory.state_list]
+                        profile += [
+                            state.__getattribute__("orientation") for state in obstacle.prediction.trajectory.state_list
+                        ]
 
             if isinstance(obstacle, DynamicObstacle):
                 if self.xyova:
@@ -997,7 +1028,10 @@ class ObstacleController(QDockWidget, ):
             self.xmax = None
             self.ymin = None
             self.ymax = None
-            self.draw_plot(time, profile)
+            if "profile" in locals():
+                self.draw_plot(time, profile)
+            else:
+                self.text_browser.append(message)
 
     @staticmethod
     def resolve_y_label(state_variable_name: str) -> str:
@@ -1020,88 +1054,17 @@ class ObstacleController(QDockWidget, ):
         else:
             return ""
 
-
+    @logger.log
     def update_obstacle_information(self):
         """
         retrieves obstacle details to the gui when an obstacle is pressed or the id
         is selected in the obstacle toolbox
         """
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]:
-
             self.update_ongoing = True
             obstacle = self.get_current_obstacle()
             obstacle_id = self.get_current_obstacle_id()
-
-            if isinstance(obstacle.obstacle_shape, Rectangle):
-
-                if self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Rectangle":
-                    self.obstacle_toolbox_ui.obstacle_shape.setCurrentIndex(0)
-
-                self.obstacle_toolbox_ui.obstacle_width.setText(str(obstacle.obstacle_shape.width))
-                self.obstacle_toolbox_ui.obstacle_length.setText(str(obstacle.obstacle_shape.length))
-                if isinstance(obstacle, StaticObstacle):
-                    self.obstacle_toolbox_ui.obstacle_x_Position.setText(
-                        str(obstacle.initial_state.__getattribute__("position")[0]))
-                    self.obstacle_toolbox_ui.obstacle_y_Position.setText(
-                        str(obstacle.initial_state.__getattribute__("position")[1]))
-                    self.obstacle_toolbox_ui.obstacle_orientation.setText(
-                        str(math.degrees(obstacle.initial_state.__getattribute__("orientation"))))
-                else:
-                    self.obstacle_toolbox_ui.obstacle_orientation.setText(
-                        str(math.degrees(obstacle.obstacle_shape.__getattribute__("orientation"))))
-
-            elif isinstance(obstacle.obstacle_shape, Circle):
-
-                if self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Circle":
-                    self.obstacle_toolbox_ui.obstacle_shape.setCurrentIndex(1)
-
-                self.obstacle_toolbox_ui.obstacle_radius.setText(str(obstacle.obstacle_shape.radius))
-                if isinstance(obstacle, StaticObstacle):
-                    self.obstacle_toolbox_ui.obstacle_x_Position.setText(
-                        str(obstacle.initial_state.__getattribute__("position")[0]))
-                    self.obstacle_toolbox_ui.obstacle_y_Position.setText(
-                        str(obstacle.initial_state.__getattribute__("position")[1]))
-
-            elif isinstance(obstacle.obstacle_shape, Polygon):
-                if self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon":
-                    self.obstacle_toolbox_ui.obstacle_shape.setCurrentIndex(2)
-
-                    # because numpy array has weird formatting I want to get rid of
-                temp = obstacle.obstacle_shape.vertices
-                vertices = temp.tolist()
-
-                # remove extra vertice(s) in toolbox
-                if len(vertices) - 1 < self.obstacle_toolbox_ui.amount_vertices:
-                    j = self.obstacle_toolbox_ui.amount_vertices - (len(vertices) - 1)
-                    for i in range(j):
-                        self.obstacle_toolbox_ui.remove_vertice(i)
-
-                for i in range(len(vertices) - 1):
-                    # adds another vertice if there are too few in the toolbox
-                    if i >= self.obstacle_toolbox_ui.amount_vertices:
-                        self.obstacle_toolbox_ui.add_vertice()
-
-                    vertice_string_x = str(vertices[i][0])
-                    vertice_string_y = str(vertices[i][1])
-                    self.obstacle_toolbox_ui.vertices_x[i].setText(vertice_string_x)
-                    self.obstacle_toolbox_ui.vertices_y[i].setText(vertice_string_y)
-
-            if isinstance(obstacle, DynamicObstacle):
-
-                if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() != "Dynamic":
-                    self.obstacle_toolbox_ui.obstacle_dyn_stat.setCurrentIndex(1)
-
-            elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() != "Static":
-                self.obstacle_toolbox_ui.obstacle_dyn_stat.setCurrentIndex(0)
-
-            self.obstacle_toolbox_ui.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
-            self.obstacle_toolbox_ui.obstacle_state_variable.clear()
-            state_variables = [var for var in obstacle.initial_state.attributes if var not in ["position", "time_step"]]
-
-            if "position" in obstacle.initial_state.attributes:
-                state_variables += ["x-position", "y-position"]
-
-            self.obstacle_toolbox_ui.obstacle_state_variable.addItems(state_variables)
+            self.obstacle_toolbox_ui.update_obstacle_information_ui(obstacle)
             self.update_ongoing = False
             # clear xyo if switch to another obstacle
             self.xyova.clear()
@@ -1113,54 +1076,37 @@ class ObstacleController(QDockWidget, ):
             else:
                 color = self.canvas.get_color(obstacle_id)
                 self.obstacle_toolbox_ui.selected_color.setStyleSheet(
-                    "QWidget { border:1px solid black; background-color: %s}" % color)
+                    "QWidget { border:1px solid black; background-color: %s}" % color
+                )
                 self.obstacle_color = color
                 if color == "#d95558" or color == "#1d7eea":
                     self.obstacle_toolbox_ui.default_color.setChecked(True)
+                else:
+                    self.obstacle_toolbox_ui.default_color.setChecked(False)
             self.obstacle_toolbox_ui.change_color = False
 
         # if set to "None": clear QLineEdits
         else:
-            self.clear_obstacle_fields()
+            self.obstacle_toolbox_ui.clear_obstacle_fields()
             self.obstacle_toolbox_ui.obstacle_state_variable.clear()
             self.obstacle_toolbox_ui.figure.clear()
             self.obstacle_toolbox_ui.canvas.draw()
 
-
-    def clear_obstacle_fields(self):
-
-        """
-        clears the obstacle QLineEdits
-        """
-        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
-            self.obstacle_toolbox_ui.obstacle_radius.setText("")
-
-
-        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
-            self.obstacle_toolbox_ui.obstacle_width.setText("")
-            self.obstacle_toolbox_ui.obstacle_length.setText("")
-            self.obstacle_toolbox_ui.obstacle_orientation.setText("")
-
-        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
-            for i in range(self.obstacle_toolbox_ui.amount_vertices):
-                self.obstacle_toolbox_ui.vertices_x[i].setText("")
-                self.obstacle_toolbox_ui.vertices_y[i].setText("")
-        if (self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static" and
-                self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon"):
-            self.obstacle_toolbox_ui.obstacle_x_Position.setText("")
-            self.obstacle_toolbox_ui.obstacle_y_Position.setText("")
-
-
+    @logger.log
     def start_sumo_simulation(self):
         num_time_steps = self.obstacle_toolbox_ui.sumo_simulation_length.value()
         self.sumo_simulation.set_simulation_length(num_time_steps)
         self.sumo_simulation.simulate()
 
-
+    @logger.log
     def remove_obstacle(self):
         """
         Removes the selected obstacle from the scenario.
         """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]:
             try:
                 obstacle_id = self.get_current_obstacle_id()
@@ -1174,11 +1120,9 @@ class ObstacleController(QDockWidget, ):
 
         if not self.scenario_model.scenario_created():
             self.text_browser.append("Warning: Scenario does not exist yet. Please create or load a scenario first.")
-        self.initialize_obstacle_toolbox()
+        self.obstacle_toolbox_ui.initialize_obstacle_information()
 
-
-    def draw_plot(self, time, profile, xmin: float = None,
-                  xmax: float = None, ymin: float = None, ymax: float = None):
+    def draw_plot(self, time, profile, xmin: float = None, xmax: float = None, ymin: float = None, ymax: float = None):
         """
         draws the state plot in the obstacle toolbox
         :param time: time steps
@@ -1195,20 +1139,33 @@ class ObstacleController(QDockWidget, ):
         ax = self.obstacle_toolbox_ui.figure.add_subplot(111)
 
         # plot data
-        ax.plot(time, profile, '.-', markersize=4)
-        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+        ax.plot(time, profile, ".-", markersize=4)
+        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter("{x:,.1f}"))
         ax.set_xlabel("time [s]")
         ax.set_ylabel(self.resolve_y_label(state_variable_name))
         self.obstacle_toolbox_ui.figure.tight_layout()
 
         # to get reasonable limits. If the difference is very small: it will be difficult to make changes
-        ax.set_ylim([min(profile)-0.5, max(profile)+0.5])
+        ax.set_ylim([min(profile) - 0.5, max(profile) + 0.5])
         # if zoomed in the new plot should be drawn with previous x and y limits
         # (so it doesnt zoom out on mouse event if zoomed in)
-        if (self.xmin and self.xmax and self.ymin and self.ymax):
+        if self.xmin and self.xmax and self.ymin and self.ymax:
             ax.set_xlim([self.xmin, self.xmax])
             ax.set_ylim([self.ymin, self.ymax])
         # refresh canvas
         self.obstacle_toolbox_ui.canvas.draw()
-        #ax.callbacks.connect('xlim_changed', self.on_xlim_change)
-        #ax.callbacks.connect('ylim_changed', self.on_ylim_change)
+        # ax.callbacks.connect('xlim_changed', self.on_xlim_change)
+        # ax.callbacks.connect('ylim_changed', self.on_ylim_change)
+
+    @logger.log
+    def color_picker(self):
+        """
+        opens color dialogue window
+        """
+        self.obstacle_color = QColorDialog.getColor()
+
+        self.obstacle_toolbox_ui.default_color.setChecked(False)
+        self.obstacle_toolbox_ui.selected_color.setStyleSheet(
+            "QWidget { border:1px solid black; background-color: %s}" % self.obstacle_color.name()
+        )
+        self.change_color = True

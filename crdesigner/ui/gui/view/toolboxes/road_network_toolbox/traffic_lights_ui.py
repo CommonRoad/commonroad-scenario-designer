@@ -1,16 +1,18 @@
 from commonroad.scenario.traffic_light import TrafficLightState
 
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
-    RoadNetworkToolboxUI
+from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import (
+    RoadNetworkToolboxUI,
+)
 
 
 class AddTrafficLightsUI:
-
     def __init__(self, scenario_model: ScenarioModel, road_network_toolbox_ui: RoadNetworkToolboxUI):
         self.road_network_toolbox_ui = road_network_toolbox_ui
         self.scenario_model = scenario_model
 
+    @logger.log
     def update_traffic_light_information(self):
         """
         Updates information of traffic light widget based on traffic light ID selected by the user.
@@ -46,19 +48,24 @@ class AddTrafficLightsUI:
 
             self.road_network_toolbox_ui.traffic_light_directions.setCurrentText(str(traffic_light.direction.value))
 
-            referenced_lanelets = [str(la.lanelet_id) for la in self.scenario_model.get_lanelets() if
-                                   selected_traffic_light_id in la.traffic_lights]
+            referenced_lanelets = [
+                str(la.lanelet_id)
+                for la in self.scenario_model.get_lanelets()
+                if selected_traffic_light_id in la.traffic_lights
+            ]
             self.road_network_toolbox_ui.referenced_lanelets_traffic_light.set_checked_items(referenced_lanelets)
 
     def set_default_traffic_lights_information(self):
         self.road_network_toolbox_ui.referenced_lanelets_traffic_light.clear()
         self.road_network_toolbox_ui.referenced_lanelets_traffic_light.addItems(
-                ["None"] + [str(item) for item in self.scenario_model.collect_lanelet_ids()])
+            ["None"] + [str(item) for item in self.scenario_model.collect_lanelet_ids()]
+        )
         self.road_network_toolbox_ui.referenced_lanelets_traffic_light.setCurrentIndex(0)
 
         self.road_network_toolbox_ui.selected_traffic_light.clear()
         self.road_network_toolbox_ui.selected_traffic_light.addItems(
-                ["None"] + [str(item) for item in self.scenario_model.collect_traffic_light_ids()])
+            ["None"] + [str(item) for item in self.scenario_model.collect_traffic_light_ids()]
+        )
         self.road_network_toolbox_ui.selected_traffic_light.setCurrentIndex(0)
 
     def initialize_traffic_light_information(self):

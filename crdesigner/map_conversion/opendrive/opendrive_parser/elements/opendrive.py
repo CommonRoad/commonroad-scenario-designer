@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from typing import Union
 
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import *
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import (
+    Junction,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 
 
 class OpenDrive:
@@ -160,4 +163,4 @@ class Header:
         self.west = west
         self.vendor = vendor
         self.geo_reference = None
-        self.offset = {"x": "0.0", "y": "0.0", "z": "0.0", "hdg":  "0.0"}
+        self.offset = {"x": "0.0", "y": "0.0", "z": "0.0", "hdg": "0.0"}

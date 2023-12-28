@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import *
+from typing import List, Set, Tuple, Union
 
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.scenario import Scenario
@@ -18,8 +18,9 @@ def merge(to_merge: List[int], scenario: Scenario) -> Tuple[Scenario, int]:
     merged_lanelet._traffic_signs = {t for lanelet in lanelets for t in lanelet.traffic_signs}
     merged_lanelet._traffic_lights = {t for lanelet in lanelets for t in lanelet.traffic_lights}
 
-    lanelet_network._lanelets = {la.lanelet_id: la for la in lanelet_network.lanelets + [merged_lanelet]
-                                 if la.lanelet_id not in to_merge}
+    lanelet_network._lanelets = {
+        la.lanelet_id: la for la in lanelet_network.lanelets + [merged_lanelet] if la.lanelet_id not in to_merge
+    }
     to_merge = set(to_merge)
 
     # update other lanelets
@@ -36,10 +37,12 @@ def merge(to_merge: List[int], scenario: Scenario) -> Tuple[Scenario, int]:
     # intersection handling
     for intersection in lanelet_network.intersections:
         for incoming in intersection.incomings:
+
             def update_incoming():
                 if merged_lanelet.lanelet_id in incoming.incoming_lanelets:
                     incoming._incoming_lanelets = incoming.incoming_lanelets - {merged_lanelet.lanelet_id} | set(
-                        merged_lanelet.predecessor)
+                        merged_lanelet.predecessor
+                    )
 
             if to_merge & set(incoming.incoming_lanelets):
                 incoming._incoming_lanelets = set(update(incoming.incoming_lanelets))

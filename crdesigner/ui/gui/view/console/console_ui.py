@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QDockWidget, QTextBrowser, QWidget
 
 
 class ConsoleUI:
@@ -16,5 +16,5 @@ class ConsoleUI:
         self.text_browser.setObjectName("textBrowser")
         self.console.setWidget(self.text_browser)
         self.console.setFloating(False)  # set if crdesigner_console_wrapper can float
-        self.console.setFeatures(QDockWidget.NoDockWidgetFeatures)
-        mwindow.mwindow_ui.addDockWidget(Qt.BottomDockWidgetArea, self.console)
+        self.console.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
+        mwindow.mwindow_ui.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.console)
