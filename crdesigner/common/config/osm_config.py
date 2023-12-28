@@ -178,9 +178,6 @@ class OsmConfig(BaseConfig):
     INTERPOLATION_DISTANCE = Attribute(0.5, "Interpolation Distance")
     # allowed inaccuracy of exported lines to reduce number of way points in meters
     COMPRESSION_THRESHOLD = Attribute(0.05, "Compression Threshold")
-    # export the scenario in UTM coordinates
-    # TODO can probably be removed --> PROJ_STRING_TO can be used for that feature
-    EXPORT_IN_UTM = Attribute(False, "Export in UTM")
     # toggle filtering of negligible waypoints
     FILTER = Attribute(True, "Filter")
     # delete invalid lanes before export
@@ -268,7 +265,6 @@ class OsmConfig(BaseConfig):
             "Export Settings",
             INTERPOLATION_DISTANCE,
             COMPRESSION_THRESHOLD,
-            EXPORT_IN_UTM,
             FILTER,
         ],
         [
