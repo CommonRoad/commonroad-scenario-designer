@@ -1,3 +1,4 @@
+import copy
 from typing import Tuple, List
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLane, \
     ParametricLaneBorderGroup
@@ -104,7 +105,20 @@ class OpenDriveConverter:
                         if len(parent_lane_section.centerLanes) > 0:
                             # check if the center lane has a road mark
                             if len(parent_lane_section.centerLanes[0].road_mark) > 0:
-                                inner_linemarking = parent_lane_section.centerLanes[0].road_mark[0]
+                                # assign the road mark to the inner linemarking
+                                inner_linemarking = copy.deepcopy(parent_lane_section.centerLanes[0].road_mark[0])
+                                # check if the road mark type is made up of 2 different markings,
+                                # assume right hand drive
+                                if parent_lane_section.centerLanes[0].road_mark[0].type == "solid broken":
+                                    if lane.id == 1:
+                                        inner_linemarking.type = "solid"
+                                    if lane.id == -1:
+                                        inner_linemarking.type = "broken"
+                                if parent_lane_section.centerLanes[0].road_mark[0].type == "broken solid":
+                                    if lane.id == 1:
+                                        inner_linemarking.type = "broken"
+                                    if lane.id == -1:
+                                        inner_linemarking.type = "solid"
 
                 plane_group = ParametricLaneGroup(
                     id_=encode_road_section_lane_width_id(
