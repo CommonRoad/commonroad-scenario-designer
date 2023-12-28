@@ -55,7 +55,7 @@ def convert_to_scenario(graph: Graph) -> Scenario:
         gps_latitude=graph.center_point[0],
         gps_longitude=graph.center_point[1],
         geo_name_id=get_geonamesID(graph.center_point[0], graph.center_point[1]),
-        geo_transformation=GeoTransformation(geo_reference=osm_config.PROJ_STRING_TO),
+        geo_transformation=GeoTransformation(geo_reference=general_config.proj_string_cr),
     )
 
     # removing converting errors before writing to xml

@@ -344,7 +344,7 @@ class IntermediateFormat:
         """
         location_kwargs = dict(gps_latitude=self.center_point[0], gps_longitude=self.center_point[1])
         location = Location(
-            geo_transformation=GeoTransformation(geo_reference=osm_config.PROJ_STRING_TO), **location_kwargs
+            geo_transformation=GeoTransformation(geo_reference=general_config.proj_string_cr), **location_kwargs
         )
 
         scenario = Scenario(
