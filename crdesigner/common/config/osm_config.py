@@ -19,9 +19,6 @@ class OsmConfig(BaseConfig):
         "Projection string",
         "String describing the projection of the OSM map",
     )
-    PROJ_STRING_TO = Attribute(
-        gui_config.pseudo_mercator, "Projection string", "String used for the initialization of projection"
-    )
 
     # Lanelet type each lanelet should have
     LANELETTYPE = Attribute("urban", "Lanelet Type")

@@ -15,6 +15,7 @@ import numpy as np
 from ordered_set import OrderedSet
 from pyproj import CRS, Transformer
 
+from crdesigner.common.config.general_config import general_config
 from crdesigner.common.config.osm_config import osm_config
 from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common.geometry import (
@@ -365,7 +366,7 @@ def parse_file(
 
     # create transformer for projecting lat/lon
     crs_from = CRS(osm_config.PROJ_STRING_FROM)
-    crs_to = CRS(osm_config.PROJ_STRING_TO)
+    crs_to = CRS(general_config.proj_string_cr)
     transformer = Transformer.from_proj(crs_from, crs_to)
 
     road_points = transform_lat_lon(road_ids, road_lats, road_lons, transformer)
