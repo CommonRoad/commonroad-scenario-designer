@@ -1,5 +1,4 @@
 from crdesigner.common.config.config_base import Attribute, BaseConfig
-from crdesigner.common.config.gui_config import gui_config
 
 
 class OsmConfig(BaseConfig):
@@ -267,7 +266,6 @@ class OsmConfig(BaseConfig):
             LANECOUNTS,
             SPEED_LIMITS,
             "Export Settings",
-            PROJ_STRING_TO,
             INTERPOLATION_DISTANCE,
             COMPRESSION_THRESHOLD,
             EXPORT_IN_UTM,
