@@ -29,7 +29,6 @@ from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloade
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.util import select_local_file
-from crdesigner.config.osm_config import osm_config as config
 from crdesigner.ui.gui.utilities.waitingspinnerwidget import QtWaitingSpinner
 from crdesigner.ui.gui.view.toolboxes.converter_toolbox.converter_toolbox_ui import (
     MapConversionToolboxUI,
@@ -37,8 +36,8 @@ from crdesigner.ui.gui.view.toolboxes.converter_toolbox.converter_toolbox_ui imp
 
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
-    from crdesigner.ui.gui.utilities.converter_modules.sumo_settings import SUMOSettings
     from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMOSimulation
+    from crdesigner.ui.gui.utilities.sumo_settings import SUMOSettings
 
 
 class RequestRunnable(QRunnable):

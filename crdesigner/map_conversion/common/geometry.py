@@ -688,15 +688,6 @@ def lon_lat_to_cartesian(waypoint: np.ndarray, origin: np.ndarray) -> np.ndarray
     return np.array([x, y])
 
 
-def cartesian_to_lon_lat(waypoint: np.ndarray, origin: np.ndarray) -> np.ndarray:
-    lon_constant, lat_constant = get_lon_lat_constants(origin)
-
-    lon = waypoint[0] / lon_constant + origin[1]
-    lat = waypoint[1] / lat_constant + origin[0]
-    res = np.array([lon, lat])
-    return res
-
-
 def point_to_line_distance(point: np.ndarray, line_start: np.ndarray, line_end: np.ndarray) -> float:
     """
     calculates the distance of a point to a line defined by two points

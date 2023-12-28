@@ -25,9 +25,7 @@ class SublayeredGraph(Graph):
         traffic_lights: List[GraphTrafficLight],
         sublayer_graph: Graph,
     ):
-        super().__init__(
-            nodes, edges, center_point, bounds, transformer, traffic_signs, traffic_lights
-        )
+        super().__init__(nodes, edges, center_point, bounds, transformer, traffic_signs, traffic_lights)
         # graph that is connected by crossings only (e.g. pedestrian path)
         self.sublayer_graph = sublayer_graph
         self.apply_on_sublayer = True

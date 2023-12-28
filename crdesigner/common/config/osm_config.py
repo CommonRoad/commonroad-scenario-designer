@@ -1,4 +1,5 @@
 from crdesigner.common.config.config_base import Attribute, BaseConfig
+from crdesigner.common.config.gui_config import gui_config
 
 
 class OsmConfig(BaseConfig):
@@ -28,20 +29,20 @@ class OsmConfig(BaseConfig):
     # Proj string used by OSM; should not be changed in general.
     # See: https://osmdata.openstreetmap.de/info/projections.html
     PROJ_STRING_FROM = Attribute(
-            "+proj=tmerc +lat_0=%.6f +lon_0=%.6f +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +vunits=m +no_defs",
-                                 "Projection string", "String describing the projection of the OSM map")
-    PROJ_STRING_TO = Attribute(gui_config.pseudo_mercator, "Projection string", "String used for the initialization of projection")
+        "EPSG:4326",
+        "Projection string",
+        "String describing the projection of the OSM map",
+    )
+    PROJ_STRING_TO = Attribute(
+        gui_config.pseudo_mercator, "Projection string", "String used for the initialization of projection"
+    )
 
     # Lanelet type each lanelet should have
     LANELETTYPE = Attribute("urban", "Lanelet Type")
 
     # Aerial Image Settings
-    # Use aerial images for edit
-    AERIAL_IMAGES = Attribute(False, "Use Aerial Images")
     # Path to save downloaded aerial images
     IMAGE_SAVE_PATH = Attribute("files/imagery/", "Image Save Path")
-    # The zoom level of Bing Maps tiles
-    ZOOM_LEVEL = Attribute(19, "Zoom Level")
     # aerial image area threshold limiting the user input for the coordinates
     AERIAL_IMAGE_THRESHOLD = Attribute(0.01, "Aerial Image Threshold")
 
@@ -294,6 +295,7 @@ class OsmConfig(BaseConfig):
             LANECOUNTS,
             SPEED_LIMITS,
             "Export Settings",
+            PROJ_STRING_TO,
             INTERPOLATION_DISTANCE,
             COMPRESSION_THRESHOLD,
             EXPORT_IN_UTM,

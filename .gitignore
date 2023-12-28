@@ -118,3 +118,9 @@ ENV/
 /crdesigner/ui/gui/autosaves/logging_file.txt
 
 *.whl
+/tutorials/conversion_examples/example_files/lanelet2/merging_lanelets_utm.osm
+/tutorials/conversion_examples/example_files/lanelet2/merging_lanelets_utm.xml
+/tutorials/conversion_examples/example_files/osm/munich.xml
+/tutorials/conversion_examples/example_files/opendrive/opendrive-1.xml
+/tests/map_conversion/test_maps/osm/ped_crossing.osm.xodr
+/tutorials/conversion_examples/example_files/osm/test_ped_crossing.xml

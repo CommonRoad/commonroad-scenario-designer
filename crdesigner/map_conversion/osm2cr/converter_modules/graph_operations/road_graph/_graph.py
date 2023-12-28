@@ -1,9 +1,7 @@
-"""
-Graph class. It also provides several methods to perform operations on elements of the graph.
-"""
+from __future__ import annotations
 
 import logging
-from typing import List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, List, Optional, Set, Tuple
 
 import numpy as np
 from ordered_set import OrderedSet
@@ -25,6 +23,9 @@ from ._graph_node import GraphNode
 from ._graph_traffic_light import GraphTrafficLight
 from ._graph_traffic_sign import GraphTrafficSign
 
+if TYPE_CHECKING:
+    from ...osm_operations.osm_parser import Bounds
+
 
 class Graph:
     def __init__(
@@ -32,7 +33,7 @@ class Graph:
         nodes: Set[GraphNode],
         edges: Set[GraphEdge],
         center_point: Tuple[float, float],
-        bounds: Tuple[float, float, float, float],
+        bounds: Bounds,
         transformer: Transformer,
         traffic_signs: List[GraphTrafficSign],
         traffic_lights: List[GraphTrafficLight],
@@ -694,7 +695,7 @@ class Graph:
         points_to_edge = dict()
         for edge in edges:
             edge_orientation = edge.get_compass_degrees()
-            if direction is None or abs(edge_orientation-direction) < 60:  # degrees threshold
+            if direction is None or abs(edge_orientation - direction) < 60:  # degrees threshold
                 for waypoint in edge.get_waypoints():
                     points.append(waypoint)
                     points_to_edge[tuple(waypoint)] = edge
