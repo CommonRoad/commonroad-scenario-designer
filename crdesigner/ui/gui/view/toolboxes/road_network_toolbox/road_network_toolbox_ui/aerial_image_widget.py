@@ -95,6 +95,9 @@ class AerialImageWidget:
         self.toolbox.southern_bound.setText("48.261424")
         self.toolbox.eastern_bound.setText("11.660930")
 
+        self.toolbox.current_position = QPushButton("Select current Position")
+        self.toolbox.layout_aerial_image_groupbox.addRow(self.toolbox.current_position)
+
         self.toolbox.Spinner = QtWaitingSpinner(self.toolbox, centerOnParent=True)
         self.toolbox.Spinner.setInnerRadius(7)
         self.toolbox.Spinner.setNumberOfLines(10)
