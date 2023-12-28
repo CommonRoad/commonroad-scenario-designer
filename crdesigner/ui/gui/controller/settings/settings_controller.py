@@ -1,8 +1,9 @@
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
-from crdesigner.config.gui_config import gui_config as gui_settings_model
-from crdesigner.config.settings_config import settings as settings_model, CONFIGS_TO_RENDER
-from crdesigner.ui.gui.utilities.draw_params_updater import set_draw_params
+from crdesigner.common.config.gui_config import gui_config
+from crdesigner.common.config.settings_config import CONFIGS_TO_RENDER
+from crdesigner.common.config.settings_config import settings as settings_model
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.view.settings.settings_ui import SettingsUI
 
 
@@ -19,6 +20,7 @@ class SettingsController:
         self.cr_designer = parent.mwindow_ui
         self.scenario_model = parent.scenario_model
         self.canvas = parent.animated_viewer_wrapper.cr_viewer.dynamic
+        self.parent = parent
 
         self.settings_ui = SettingsUI(self.cr_designer)
 
@@ -36,11 +38,12 @@ class SettingsController:
         """
         Connect buttons to callables.
         """
-        self.settings_ui.button_select_directory.clicked.connect(_select_directory)
-        self.settings_ui.button_ok.clicked.connect(self.apply_close)
-        self.settings_ui.button_cancel.clicked.connect(self.close)
-        self.settings_ui.button_set_to_default.clicked.connect(_set_default)
+        self.settings_ui.button_select_directory.clicked.connect(lambda: _select_directory())
+        self.settings_ui.button_ok.clicked.connect(lambda: self.apply_close())
+        self.settings_ui.button_cancel.clicked.connect(lambda: self.close())
+        self.settings_ui.button_set_to_default.clicked.connect(lambda: _set_default())
 
+    @logger.log
     def close(self):
         """
         Reset the settings to their previous values and close the settings window.
@@ -49,6 +52,7 @@ class SettingsController:
 
         self._hide_and_update()
 
+    @logger.log
     def apply_close(self):
         """
         Save the settings to their respective files and close the settings window.
@@ -57,6 +61,12 @@ class SettingsController:
             return
         _save_all_to_yaml()
         self._hide_and_update()
+        if self.scenario_model.scenario_created():
+            self.scenario_model.notify_all()
+        self.parent.mwindow_ui.set_stylesheet(gui_config.get_stylesheet())
+        self.parent.mwindow_ui.update_window()
+        for config in CONFIGS_TO_RENDER:
+            config.notify_all()
 
     def show(self):
         """
@@ -66,26 +76,10 @@ class SettingsController:
         self.settings_ui.settings.show()
 
     def _hide_and_update(self):
-        self._update_all_dependents()
         self.settings_ui.settings.hide()
 
-    def _update_all_dependents(self):
-        # GUI updates
-        set_draw_params(trajectory=gui_settings_model.DRAW_TRAJECTORY,
-                        intersection=gui_settings_model.DRAW_INTERSECTIONS,
-                        obstacle_label=gui_settings_model.DRAW_OBSTACLE_LABELS,
-                        obstacle_icon=gui_settings_model.DRAW_OBSTACLE_ICONS,
-                        obstacle_direction=gui_settings_model.DRAW_OBSTACLE_DIRECTION,
-                        obstacle_signal=gui_settings_model.DRAW_OBSTACLE_SIGNALS,
-                        occupancy=gui_settings_model.DRAW_OCCUPANCY,
-                        traffic_signs=gui_settings_model.DRAW_TRAFFIC_SIGNS,
-                        traffic_lights=gui_settings_model.DRAW_TRAFFIC_LIGHTS,
-                        incoming_lanelets=gui_settings_model.DRAW_INCOMING_LANELETS,
-                        successors=gui_settings_model.DRAW_SUCCESSORS,
-                        intersection_labels=gui_settings_model.DRAW_INTERSECTION_LABELS,
-                        colorscheme=self.cr_designer.colorscheme())
 
-
+@logger.log
 def _set_default():
     """
     Sets the default settings for all settings models.
@@ -94,6 +88,7 @@ def _set_default():
         config.reset_settings()
 
 
+@logger.log
 def _select_directory():
     """
     Opens a file dialog to select a directory. If a directory is selected, the

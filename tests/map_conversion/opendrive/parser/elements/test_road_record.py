@@ -1,5 +1,8 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road_record import *
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road_record import (
+    RoadRecord,
+)
 
 
 class TestRoadRecord(unittest.TestCase):
@@ -13,5 +16,5 @@ class TestRoadRecord(unittest.TestCase):
         self.assertEqual([a, b, c, d], road_record.polynomial_coefficients)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -1,18 +1,20 @@
-"""
-Lane class of road graph
-"""
+from __future__ import annotations
 
 import math
-from typing import List, Set, Optional
-import numpy as np
+from typing import TYPE_CHECKING, List, Optional, Set
 
+import numpy as np
 from commonroad.geometry.shape import Polygon
-from crdesigner.map_conversion.osm2cr.converter_modules.utility import idgenerator
+
 from crdesigner.map_conversion.common import geometry
+from crdesigner.map_conversion.osm2cr.converter_modules.utility import idgenerator
 
 from ._graph_node import GraphNode
 from ._graph_traffic_light import GraphTrafficLight
 from ._graph_traffic_sign import GraphTrafficSign
+
+if TYPE_CHECKING:
+    from ._graph_edge import GraphEdge
 
 
 class Lane:
@@ -23,7 +25,7 @@ class Lane:
 
     def __init__(
         self,
-        edge: Optional["GraphEdge"],
+        edge: Optional[GraphEdge],
         successors: Set["Lane"],
         predecessors: Set["Lane"],
         turnlane: str,
@@ -100,9 +102,7 @@ class Lane:
         :param other: the other lane
         :return: True if lanes intersect, else False
         """
-        result = bool(self.successors & other.successors) or bool(
-            self.predecessors & other.predecessors
-        )
+        result = bool(self.successors & other.successors) or bool(self.predecessors & other.predecessors)
         return result
 
     def get_node(self, start: bool) -> GraphNode:
@@ -143,9 +143,7 @@ class Lane:
                 # do not copy bounds of faulty length
                 left_bound = None
         if left_bound is None:
-            left_bound, _ = geometry.create_tilted_parallels(
-                self.waypoints, self.width1 / 2, self.width2 / 2
-            )
+            left_bound, _ = geometry.create_tilted_parallels(self.waypoints, self.width1 / 2, self.width2 / 2)
         right_bound = None
         if self.adjacent_right is not None and not self.intersects(self.adjacent_right):
             assert self.adjacent_right_direction_equal is not None
@@ -157,9 +155,7 @@ class Lane:
                 # do not copy bounds of faulty length
                 right_bound = None
         if right_bound is None:
-            _, right_bound = geometry.create_tilted_parallels(
-                self.waypoints, self.width1 / 2, self.width2 / 2
-            )
+            _, right_bound = geometry.create_tilted_parallels(self.waypoints, self.width1 / 2, self.width2 / 2)
         assert left_bound is not None
         assert right_bound is not None
         self.left_bound = left_bound
@@ -249,11 +245,13 @@ class Lane:
         https://en.wikipedia.org/wiki/Points_of_the_compass#/media/File:Compass_Card_B+W.svg
         :return: compass orientation in degrees
         """
+
         def get_orientation():
             # since self.waypoints is not always available, self.from_node and self.to_node are used instead.
             x = self.from_node.x - self.to_node.x
             y = self.from_node.y - self.to_node.y
             return np.arctan2(y, x) + np.pi
+
         lane_compass_degrees = math.degrees(get_orientation()) - 45
         if lane_compass_degrees < 0.0:
             lane_compass_degrees += 360.0

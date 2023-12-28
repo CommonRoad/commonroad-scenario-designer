@@ -1,55 +1,46 @@
-image: python:3.11
-
 stages:
-    - static_check
+    - style_check
     - test
     - deploy
 
-before_script:
-  - pip install poetry
-  - poetry config installer.modern-installation false # this should be removed in the future, required because of invalid third-party wheels (https://github.com/python-poetry/poetry/issues/7686)
-  - poetry config virtualenvs.in-project true
-  - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
-  - poetry install --with tests,docs,tutorials
-  - source .venv/bin/activate
+default:
+  image: python:3.10
+  before_script:
+    - apt-get update && apt-get install -y cmake build-essential git pkg-config ca-certificates wget libomp-dev libeigen3-dev libboost-all-dev uuid-dev libcgal-dev
+    - pip install poetry
+    - poetry config virtualenvs.in-project true
+    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
+    - poetry install --with tests,docs,tutorials
+    - source .venv/bin/activate
 
 .run-test-with-coverage: &run-test-with-coverage
-  - apt-get update && apt-get install -y ffmpeg sumo sumo-tools sumo-doc
+  - apt-get update && apt-get install -y ffmpeg libegl1
   - coverage run --source ./crdesigner -m pytest tests/
   - coverage report -m || true
 
 
 # static_check
-prospector_source:
-  stage: static_check
-  image: python:3.11
+formatting_check:
+  stage: style_check
+  before_script: [ ]
   script:
-    - prospector crdesigner/
-  allow_failure: true
-  needs: []
+    - pip install black isort
+    - black --check .
+    - isort --check-only .
 
-prospector_test:
-  stage: static_check
-  image: python:3.11
+lint_flake8:
+  stage: style_check
+  before_script: [ ]
   script:
-    - prospector tests/
-  allow_failure: true
-  needs: []
-
-prospector_tutorials:
-  stage: static_check
-  image: python:3.11
-  script:
-    - prospector tutorials/
-  allow_failure: true
-  needs: []
+    - pip install flake8
+    - flake8 .
 
 build_and_test_python:
   image : python:$PYTHON_VERSIONS
   stage: test
   parallel :
     matrix :
-      - PYTHON_VERSIONS : [ "3.8", "3.9", "3.10" ]
+      - PYTHON_VERSIONS : [ "3.8", "3.9", "3.10"]
   variables:
     QT_QPA_PLATFORM : "offscreen"
   script:
@@ -57,8 +48,8 @@ build_and_test_python:
   needs: []
 
 build_and_test_with_coverage:
-  image: python:3.11
   stage : test
+  image: python:3.11
   variables :
     QT_QPA_PLATFORM : "offscreen"
   script :
@@ -118,7 +109,7 @@ push_to_external_pipy_test_registry:
   script:
     - poetry config repositories.test https://test.pypi.org/legacy/
     - poetry build
-    - poetry publish --repository test -u ${CR_PYPI_TEST_USERNAME} -p ${CR_PYPI_TEST_PASSWORD}
+    - poetry publish --repository test -u __token__ -p ${CR_PYPI_TEST_API_TOKEN}
 
 push_to_external_pipy_release_registry:
   stage: deploy
@@ -127,4 +118,4 @@ push_to_external_pipy_release_registry:
     - master
   script:
     - poetry build
-    - poetry publish -u ${CR_PYPI_RELEASE_USERNAME} -p ${CR_PYPI_RELEASE_PASSWORD}
+    - poetry publish -u __token__ -p ${CR_PYPI_RELEASE_API_TOKEN}

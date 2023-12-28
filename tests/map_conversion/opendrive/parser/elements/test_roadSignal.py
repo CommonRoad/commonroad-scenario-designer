@@ -1,5 +1,9 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import *
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import (
+    Signal,
+    SignalReference,
+)
 
 
 class TestRoadSignal(unittest.TestCase):
@@ -72,5 +76,5 @@ class TestRoadSignal(unittest.TestCase):
             signal_reference.orientation = "test"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

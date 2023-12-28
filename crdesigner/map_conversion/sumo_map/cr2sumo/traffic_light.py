@@ -1,10 +1,25 @@
 from collections import defaultdict
-from typing import Set, List, Dict, Tuple
+from typing import Dict, List, Set, Tuple
 
 import numpy as np
-from commonroad.scenario.traffic_light import TrafficLight, TrafficLightCycleElement, TrafficLightState
-from crdesigner.map_conversion.sumo_map.sumolib_net import TLSProgram, Connection, NodeType, SignalState, Node, Phase
-from crdesigner.map_conversion.sumo_map.util import lines_intersect, compute_max_curvature_from_polyline
+from commonroad.scenario.traffic_light import (
+    TrafficLight,
+    TrafficLightCycleElement,
+    TrafficLightState,
+)
+
+from crdesigner.map_conversion.sumo_map.sumolib_net import (
+    Connection,
+    Node,
+    NodeType,
+    Phase,
+    SignalState,
+    TLSProgram,
+)
+from crdesigner.map_conversion.sumo_map.util import (
+    compute_max_curvature_from_polyline,
+    lines_intersect,
+)
 
 from .mapping import traffic_light_states_CR2SUMO
 
@@ -14,9 +29,9 @@ class TrafficLightEncoder:
         self.index = -1
         self.conf = conf
 
-    def encode(self, node: Node, traffic_lights: List[TrafficLight],
-               light_2_connections: Dict[TrafficLight, Set[Connection]]) -> Tuple[TLSProgram,
-                                                                                  List[Connection]]:
+    def encode(
+        self, node: Node, traffic_lights: List[TrafficLight], light_2_connections: Dict[TrafficLight, Set[Connection]]
+    ) -> Tuple[TLSProgram, List[Connection]]:
         # create SUMO Traffic Light Node
         self.index += 1
         program_id = f"tl_program_{self.index}"
@@ -30,9 +45,7 @@ class TrafficLightEncoder:
         light_states = _sync_traffic_light_cycles(traffic_lights)
         # ungroup light states
         light_states = [
-            [s for i, s in enumerate(state)
-             for _ in light_2_connections[traffic_lights[i]]]
-            for state in light_states
+            [s for i, s in enumerate(state) for _ in light_2_connections[traffic_lights[i]]] for state in light_states
         ]
         connections: List[Connection] = [conn for tl in traffic_lights for conn in light_2_connections[tl]]
 
@@ -53,14 +66,20 @@ class TrafficLightEncoder:
 
                 def dot_connections(a, b):
                     return np.dot(a.shape[-1] - a.shape[0], b.shape[-1] - b.shape[0])
-                foes = ([i, j] for i in green_connections for j in green_connections
-                        if i < j
-                        and lines_intersect(connections[i].shape, connections[j].shape)
-                        and dot_connections(connections[i], connections[j]) < 0)
+
+                foes = (
+                    [i, j]
+                    for i in green_connections
+                    for j in green_connections
+                    if i < j
+                    and lines_intersect(connections[i].shape, connections[j].shape)
+                    and dot_connections(connections[i], connections[j]) < 0
+                )
                 for foe in foes:
                     # make sure foe[0] is more straight than foe[1]
-                    if compute_max_curvature_from_polyline(connections[foe[0]].shape) \
-                            > compute_max_curvature_from_polyline(connections[foe[1]].shape):
+                    if compute_max_curvature_from_polyline(
+                        connections[foe[0]].shape
+                    ) > compute_max_curvature_from_polyline(connections[foe[1]].shape):
                         foe[0], foe[1] = foe[1], foe[0]
                     # give foe[0] priority
                     sumo_state[foe[0]] = SignalState.GREEN_PRIORITY
@@ -87,9 +106,15 @@ def _sync_traffic_light_cycles(traffic_lights: List[TrafficLight]) -> List[List[
     :param traffic_lights:
     :return: list of synchronized states
     """
-    time_steps = np.lcm.reduce([sum(cycle.duration for cycle in tl.traffic_light_cycle.cycle_elements) for tl in traffic_lights])
-    states = np.array([_cycles_to_states(traffic_light.traffic_light_cycle.cycle_elements, time_steps)
-                       for traffic_light in traffic_lights]).T
+    time_steps = np.lcm.reduce(
+        [sum(cycle.duration for cycle in tl.traffic_light_cycle.cycle_elements) for tl in traffic_lights]
+    )
+    states = np.array(
+        [
+            _cycles_to_states(traffic_light.traffic_light_cycle.cycle_elements, time_steps)
+            for traffic_light in traffic_lights
+        ]
+    ).T
     res: List[List[TrafficLightCycleElement]] = []
     i = 0
     j = 0
@@ -116,7 +141,7 @@ def _cycles_to_states(cycles: List[TrafficLightCycleElement], max_time: int) -> 
     cycle_idx = 0
     length = sum(c.duration for c in cycles)
     for i in range(max_time):
-        if (i % length) >= sum(c.duration for c in cycles[:cycle_idx + 1]):
+        if (i % length) >= sum(c.duration for c in cycles[: cycle_idx + 1]):
             cycle_idx = (cycle_idx + 1) % len(cycles)
         states.append(cycles[cycle_idx].state)
     return states
