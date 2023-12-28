@@ -321,19 +321,26 @@ def get_aerial_image_ldbv(bounds: Tuple[float, float, float, float]) -> Image.Im
     #   longitude and latitude);
     #   for other options, see https://geodatenonline.bayern.de/geodatenonline/seiten/wms_dop20cm?36
     ref_system = "EPSG:4326"
-    url = f"https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi?service=wms&request=GetMap&version=1.1.1&bbox={str(lon1)},{str(lat2)},{str(lon2)},{str(lat1)}&width={str(lat_pixels)}&height={str(lon_pixels)}&layers=by_dop20c&format=image/jpeg&srs={ref_system}"
-
-    auth_handler = HTTPBasicAuthHandler()
-    auth_handler.add_password(
-        realm="WMS DOP20",
-        uri="https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi",
-        user=ldbv_username,
-        passwd=ldbv_password,
-    )
-    opener = build_opener(auth_handler)
-    install_opener(opener)
-    tile = urlopen(url).read()
-    image = Image.open(BytesIO(tile))
+    if ldbv_username == "" or ldbv_password == "":
+        url = f"https://geoservices.bayern.de/wms/v2/ogc_dop80_oa.cgi?service=wms&request=GetMap&version=1.1.1&bbox={str(lon1)},{str(lat2)},{str(lon2)},{str(lat1)}&width={str(lat_pixels)}&height={str(lon_pixels)}&layers=by_dop80c&format=image/jpeg&srs={ref_system}"
+        auth_handler = HTTPBasicAuthHandler()
+        opener = build_opener(auth_handler)
+        install_opener(opener)
+        tile = urlopen(url).read()
+        image = Image.open(BytesIO(tile))
+    else:
+        url = f"https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi?service=wms&request=GetMap&version=1.1.1&bbox={str(lon1)},{str(lat2)},{str(lon2)},{str(lat1)}&width={str(lat_pixels)}&height={str(lon_pixels)}&layers=by_dop20c&format=image/jpeg&srs={ref_system}"
+        auth_handler = HTTPBasicAuthHandler()
+        auth_handler.add_password(
+            realm="WMS DOP20",
+            uri="https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi",
+            user=ldbv_username,
+            passwd=ldbv_password,
+        )
+        opener = build_opener(auth_handler)
+        install_opener(opener)
+        tile = urlopen(url).read()
+        image = Image.open(BytesIO(tile))
 
     return image
 
@@ -356,4 +363,9 @@ def get_aerial_image_limits(
     proj = Proj(proj_string)
     lower_left = proj(longitude=lon1, latitude=lat2)
     upper_right = proj(longitude=lon2, latitude=lat1)
-    return lower_left[0], upper_right[0], lower_left[1], upper_right[1]
+    return (
+        lower_left[0] - scenario.location.geo_transformation.x_translation,
+        upper_right[0] - scenario.location.geo_transformation.x_translation,
+        lower_left[1] - scenario.location.geo_transformation.y_translation,
+        upper_right[1] - scenario.location.geo_transformation.y_translation,
+    )

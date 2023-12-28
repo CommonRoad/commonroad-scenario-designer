@@ -13,6 +13,8 @@
 - cr2lanelet: Option of local coordinates for traffic lights
 - cr2lanelet: Static height for traffic lights (1.2m) until official height support in CommonRoad
 - cr2lanelet: Regulatory element to corresponding way relation for lanes (required by autoware)
+- Option to display the aerial image of the current position
+- By default, if no lbdv creditials are stored, the open source credentials are used
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
