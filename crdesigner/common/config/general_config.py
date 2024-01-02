@@ -16,7 +16,7 @@ class GeneralConfig(BaseConfig):
     # CommonRoad scenario time step size
     time_step_size = Attribute(0.1, "CommonRoad scenario time step size")
     # CommonRoad map/scenario author
-    author = Attribute("Sebastian Maierhofer", "CommonRoad map/scenario author")
+    author = Attribute("Max Mustermann", "CommonRoad map/scenario author")
     # CommonRoad scenario/map author affiliation
     affiliation = Attribute("Technical University of Munich", "CommonRoad scenario/map author affiliation")
     # CommonRoad scenario/map source

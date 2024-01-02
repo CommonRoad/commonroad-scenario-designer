@@ -23,6 +23,7 @@
 - Code formatting (flake8, black, isort)
 - cr2lanelet: traffic light subtype
 - cr2lanelet: traffic light includes only two nodes (in case of autoware)
+- osm2cr: use pyproj for projection
 
 ### Fixed
 - Adding existing obstacles again
@@ -32,6 +33,10 @@
 - Deleting unreferenced traffic signs/lights after deleting lanelet
 - Map verification/repairing: Checking unique ID of traffic light cycle element
 - Consider x-, y-translation for cr2lanelet conversion (and vice versa)
+- osm2cr projection
+
+### Removed
+- Unused osm2cr functions, e.g., for plotting graphs
 
 ## [0.8.0] - 2023-10-31
 

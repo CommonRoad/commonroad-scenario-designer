@@ -146,7 +146,7 @@ class MapConversionToolboxUI(Toolbox):
             self.osm_conversion_coordinate_longitude = QLineEdit()
             self.osm_conversion_coordinate_longitude.setValidator(QDoubleValidator())
             self.osm_conversion_coordinate_longitude.setAlignment(Qt.AlignmentFlag.AlignRight)
-            self.osm_conversion_coordinate_longitude.setText("11.668124")
+            self.osm_conversion_coordinate_longitude.setText("11.658142")
             self.osm_download_map_range = QSpinBox()
             self.osm_download_map_range.setMinimum(0)
             self.osm_download_map_range.setMaximum(10000)

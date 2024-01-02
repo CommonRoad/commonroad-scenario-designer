@@ -36,8 +36,8 @@ from crdesigner.ui.gui.view.toolboxes.converter_toolbox.converter_toolbox_ui imp
 
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
-    from crdesigner.ui.gui.utilities.converter_modules.sumo_settings import SUMOSettings
     from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMOSimulation
+    from crdesigner.ui.gui.utilities.sumo_settings import SUMOSettings
 
 
 class RequestRunnable(QRunnable):
