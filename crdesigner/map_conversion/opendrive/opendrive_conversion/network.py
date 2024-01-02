@@ -74,22 +74,26 @@ def update_line_markings(lanelet_network: ConversionLaneletNetwork) -> Conversio
             if la.adj_left is not None:
                 # if the adjacent left lanelet is of the same direction, copy the line marking of the right vertices
                 if la.adj_left_same_direction is True:
-                    la.line_marking_left_vertices = (lanelet_network.find_lanelet_by_id(la.adj_left).
-                                                     line_marking_right_vertices)
+                    la.line_marking_left_vertices = lanelet_network.find_lanelet_by_id(
+                        la.adj_left
+                    ).line_marking_right_vertices
                 else:
-                    la.line_marking_left_vertices = (lanelet_network.find_lanelet_by_id(la.adj_left).
-                                                     line_marking_left_vertices)
+                    la.line_marking_left_vertices = lanelet_network.find_lanelet_by_id(
+                        la.adj_left
+                    ).line_marking_left_vertices
         # right vertices line marking
         if la.line_marking_right_vertices is LineMarking.UNKNOWN:
             # check if there exists an adjacent right lanelet
             if la.adj_right is not None:
                 # if the adjacent right lanelet is of the same direction, copy the line marking of the left
                 if la.adj_right_same_direction is True:
-                    la.line_marking_right_vertices = (lanelet_network.find_lanelet_by_id(la.adj_right).
-                                                      line_marking_left_vertices)
+                    la.line_marking_right_vertices = lanelet_network.find_lanelet_by_id(
+                        la.adj_right
+                    ).line_marking_left_vertices
                 else:
-                    la.line_marking_right_vertices = (lanelet_network.find_lanelet_by_id(la.adj_right).
-                                                      line_marking_right_vertices)
+                    la.line_marking_right_vertices = lanelet_network.find_lanelet_by_id(
+                        la.adj_right
+                    ).line_marking_right_vertices
 
     return lanelet_network
 

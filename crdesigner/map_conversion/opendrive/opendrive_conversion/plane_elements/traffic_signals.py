@@ -226,8 +226,8 @@ def calculate_stop_line_position(
                     lane_width = (
                         coefficients[0]
                         + coefficients[1] * signal.s
-                        + coefficients[2] * signal.s**2
-                        + coefficients[3] * signal.s**3
+                        + coefficients[2] * signal.s ** 2
+                        + coefficients[3] * signal.s ** 3
                     )
 
                     total_width += lane_width

@@ -11,8 +11,9 @@ from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanele
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import (
     ParametricLane,
 )
-
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import RoadMark
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+    RoadMark,
+)
 
 
 def convert_line_marking(plane_line_marking: RoadMark) -> LineMarking:
@@ -68,7 +69,7 @@ class ParametricLaneGroup:
         inner_neighbour=None,
         inner_neighbour_same_direction=True,
         outer_neighbour=None,
-        inner_linemarking=None
+        inner_linemarking=None,
     ):
         """Initializes a ParametricLaneGroup object.
 
@@ -95,7 +96,7 @@ class ParametricLaneGroup:
         self.signal_references = []
         if inner_linemarking is None:
             inner_linemarking = RoadMark()
-            inner_linemarking.type = 'unknown'
+            inner_linemarking.type = "unknown"
         self.inner_linemarking = inner_linemarking
 
         if parametric_lanes is not None:
@@ -254,17 +255,31 @@ class ParametricLaneGroup:
         if vehicle_set.issubset(users):
             users = set.union({"vehicle"}, set.difference(users, vehicle_set))
         if self.type == "bidirectional":
-            lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
-                                        lanelet_type=self.type, line_marking_left_vertices=convert_line_marking(self.inner_linemarking),
-                                        line_marking_right_vertices=line_marking_right_vertices,
-                                        speed=self.parametric_lanes[0].speed,
-                                        user_bidirectional=users)
+            lanelet = ConversionLanelet(
+                copy.deepcopy(self),
+                left_vertices,
+                center_vertices,
+                right_vertices,
+                self.id_,
+                lanelet_type=self.type,
+                line_marking_left_vertices=convert_line_marking(self.inner_linemarking),
+                line_marking_right_vertices=line_marking_right_vertices,
+                speed=self.parametric_lanes[0].speed,
+                user_bidirectional=users,
+            )
         else:
-            lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
-                                        lanelet_type=self.type, line_marking_left_vertices=convert_line_marking(self.inner_linemarking),
-                                        line_marking_right_vertices=line_marking_right_vertices,
-                                        speed=self.parametric_lanes[0].speed,
-                                        user_one_way=users)
+            lanelet = ConversionLanelet(
+                copy.deepcopy(self),
+                left_vertices,
+                center_vertices,
+                right_vertices,
+                self.id_,
+                lanelet_type=self.type,
+                line_marking_left_vertices=convert_line_marking(self.inner_linemarking),
+                line_marking_right_vertices=line_marking_right_vertices,
+                speed=self.parametric_lanes[0].speed,
+                user_one_way=users,
+            )
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
 

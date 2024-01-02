@@ -132,7 +132,7 @@ class OpenDriveConverter:
                     inner_neighbour=inner_neighbour_id,
                     inner_neighbour_same_direction=inner_neighbour_same_dir,
                     outer_neighbour=outer_neighbour_id,
-                    inner_linemarking=inner_linemarking
+                    inner_linemarking=inner_linemarking,
                 )
 
                 # Create new lane for each width segment

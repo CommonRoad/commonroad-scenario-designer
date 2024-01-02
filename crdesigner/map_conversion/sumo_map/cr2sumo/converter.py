@@ -548,7 +548,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             for veh_class, veh_length in self.conf.veh_params["length"].items():
                 # only disallow vehicles longer than car (class passenger)
-                if veh_length**2 > max_vehicle_length_sq and veh_length > self.conf.veh_params["length"]["passenger"]:
+                if veh_length ** 2 > max_vehicle_length_sq and veh_length > self.conf.veh_params["length"]["passenger"]:
                     disallow.append(veh_class)
                     # print("{} disallowed on lanelet {}, allowed max_vehicle_length={}".format(veh_class, lanelet_id,
                     #                                                                           max_vehicle_length))
@@ -1956,7 +1956,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
                 distance_between_points = np.diff(polyline, axis=0)
                 # noinspection PyTypeChecker
-                return np.sum(np.sqrt(np.sum(distance_between_points**2, axis=1)))
+                return np.sum(np.sqrt(np.sum(distance_between_points ** 2, axis=1)))
 
             def resample_polyline_with_length_check(polyline):
                 length = np.linalg.norm(polyline[-1] - polyline[0])
