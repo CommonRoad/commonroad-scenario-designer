@@ -7,6 +7,7 @@
 - Logging actions of users
 - Optional functionality to get geonamesID locally without API-call
 - Test Case for local geonamesID functionality
+- OpenDRIVE to CommonRoad conversion: considering line markings of inner shared lanelet boundaries
 - Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
 - Optional MGRS tag for nodes in CR to Lanelet2 conversion (comptaibility with Autoware)
 - Eclipse-SUMO Python package dependency for better integration of SUMO
