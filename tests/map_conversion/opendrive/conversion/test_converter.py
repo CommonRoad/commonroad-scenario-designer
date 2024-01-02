@@ -107,7 +107,7 @@ class TestConverter(unittest.TestCase):
         center_lane.id = 0
         center_lane.speed = 30
         center_lane.road_mark = [RoadMark()]
-        center_lane.road_mark[0].type = 'solid solid'
+        center_lane.road_mark[0].type = "solid solid"
 
         left_lane1 = Lane(road, section)
         left_lane1.id = 1
@@ -160,35 +160,35 @@ class TestConverter(unittest.TestCase):
         self.assertEquals(5.4, plane_groups_mark[2].parametric_lanes[0].line_marking.SOffset)
 
         # check the inner line markings
-        self.assertEqual(plane_groups[0].inner_linemarking.type, 'solid solid')  # id -1
-        self.assertEqual(plane_groups[1].inner_linemarking.type, 'unknown')  # id -2
-        self.assertEqual(plane_groups[2].inner_linemarking.type, 'solid solid')  # id 1
-        self.assertEqual(plane_groups[3].inner_linemarking.type, 'unknown')  # id 2
-        self.assertEqual(plane_groups[4].inner_linemarking.type, 'unknown')  # id 3
+        self.assertEqual(plane_groups[0].inner_linemarking.type, "solid solid")  # id -1
+        self.assertEqual(plane_groups[1].inner_linemarking.type, "unknown")  # id -2
+        self.assertEqual(plane_groups[2].inner_linemarking.type, "solid solid")  # id 1
+        self.assertEqual(plane_groups[3].inner_linemarking.type, "unknown")  # id 2
+        self.assertEqual(plane_groups[4].inner_linemarking.type, "unknown")  # id 3
 
-        center_lane.road_mark[0].type = 'broken solid'
+        center_lane.road_mark[0].type = "broken solid"
         plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
-        self.assertEqual(plane_groups[0].inner_linemarking.type, 'solid')  # id -1
-        self.assertEqual(plane_groups[1].inner_linemarking.type, 'unknown')  # id -2
-        self.assertEqual(plane_groups[2].inner_linemarking.type, 'broken')  # id 1
-        self.assertEqual(plane_groups[3].inner_linemarking.type, 'unknown')  # id 2
-        self.assertEqual(plane_groups[4].inner_linemarking.type, 'unknown')  # id 3
+        self.assertEqual(plane_groups[0].inner_linemarking.type, "solid")  # id -1
+        self.assertEqual(plane_groups[1].inner_linemarking.type, "unknown")  # id -2
+        self.assertEqual(plane_groups[2].inner_linemarking.type, "broken")  # id 1
+        self.assertEqual(plane_groups[3].inner_linemarking.type, "unknown")  # id 2
+        self.assertEqual(plane_groups[4].inner_linemarking.type, "unknown")  # id 3
 
-        center_lane.road_mark[0].type = 'solid broken'
+        center_lane.road_mark[0].type = "solid broken"
         plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
-        self.assertEqual(plane_groups[0].inner_linemarking.type, 'broken')  # id -1
-        self.assertEqual(plane_groups[1].inner_linemarking.type, 'unknown')  # id -2
-        self.assertEqual(plane_groups[2].inner_linemarking.type, 'solid')  # id 1
-        self.assertEqual(plane_groups[3].inner_linemarking.type, 'unknown')  # id 2
-        self.assertEqual(plane_groups[4].inner_linemarking.type, 'unknown')  # id 3
+        self.assertEqual(plane_groups[0].inner_linemarking.type, "broken")  # id -1
+        self.assertEqual(plane_groups[1].inner_linemarking.type, "unknown")  # id -2
+        self.assertEqual(plane_groups[2].inner_linemarking.type, "solid")  # id 1
+        self.assertEqual(plane_groups[3].inner_linemarking.type, "unknown")  # id 2
+        self.assertEqual(plane_groups[4].inner_linemarking.type, "unknown")  # id 3
 
-        center_lane.road_mark[0].type = 'broken'
+        center_lane.road_mark[0].type = "broken"
         plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
-        self.assertEqual(plane_groups[0].inner_linemarking.type, 'broken')  # id -1
-        self.assertEqual(plane_groups[1].inner_linemarking.type, 'unknown')  # id -2
-        self.assertEqual(plane_groups[2].inner_linemarking.type, 'broken')  # id 1
-        self.assertEqual(plane_groups[3].inner_linemarking.type, 'unknown')  # id 2
-        self.assertEqual(plane_groups[4].inner_linemarking.type, 'unknown')  # id 3
+        self.assertEqual(plane_groups[0].inner_linemarking.type, "broken")  # id -1
+        self.assertEqual(plane_groups[1].inner_linemarking.type, "unknown")  # id -2
+        self.assertEqual(plane_groups[2].inner_linemarking.type, "broken")  # id 1
+        self.assertEqual(plane_groups[3].inner_linemarking.type, "unknown")  # id 2
+        self.assertEqual(plane_groups[4].inner_linemarking.type, "unknown")  # id 3
 
     def test_create_parametric_lane(self):
         road = Road()
@@ -365,12 +365,3 @@ class TestConverter(unittest.TestCase):
         self.assertEqual(true_inner, inner_neighbour_id)
         self.assertEqual(true_outer, outer_neighbour_id)
         self.assertEqual(inner_neighbour_same_dir, True)
-
-
-
-
-
-
-
-
-
