@@ -333,7 +333,9 @@ class SettingsTabUI:
                 input_widget = QCheckBox(dialog)
                 input_widget.setChecked(value)
                 input_widget.stateChanged.connect(
-                    lambda _state, _name=name: attribute.value.update({_name: _state == QtCore.Qt.Checked})
+                    lambda _state, _name=name: attribute.value.update(
+                        {_name: _state == QtCore.Qt.CheckState.Checked.value}
+                    )
                 )
                 attribute.subscribe(lambda _value, _name=name, _iw=input_widget: _iw.setChecked(_value[_name]))
 

@@ -75,13 +75,19 @@ class AddAerialImageController:
                 )
                 return
             bounds = extract_plot_limits(self.scenario_model.get_lanelet_network())
-            if self.scenario_model.get_current_scenario().location.geo_transformation.x_translation != 0.0:
+            if (
+                self.scenario_model.get_current_scenario().location.geo_transformation is not None
+                and self.scenario_model.get_current_scenario().location.geo_transformation.x_translation != 0.0
+            ):
                 max_x = bounds[1] + self.scenario_model.get_current_scenario().location.geo_transformation.x_translation
                 min_x = bounds[0] + self.scenario_model.get_current_scenario().location.geo_transformation.x_translation
             else:
                 max_x = bounds[1]
                 min_x = bounds[0]
-            if self.scenario_model.get_current_scenario().location.geo_transformation.y_translation != 0.0:
+            if (
+                self.scenario_model.get_current_scenario().location.geo_transformation is not None
+                and self.scenario_model.get_current_scenario().location.geo_transformation.y_translation != 0.0
+            ):
                 min_y = bounds[2] + self.scenario_model.get_current_scenario().location.geo_transformation.y_translation
                 max_y = bounds[3] + self.scenario_model.get_current_scenario().location.geo_transformation.y_translation
             else:
@@ -89,7 +95,7 @@ class AddAerialImageController:
                 max_y = bounds[3]
             transformer = self._create_transformer_aerial(self.scenario_model.get_current_scenario())
             if transformer is None:
-                self.road_network_controller.text_browser.append("The current Position can't be displayed")
+                self.road_network_controller.text_browser.append("The current Position cannot be displayed")
                 return
             north, west = transformer.transform(min_x, max_y)
             south, east = transformer.transform(max_x, min_y)
