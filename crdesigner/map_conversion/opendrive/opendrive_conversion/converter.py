@@ -80,7 +80,6 @@ class OpenDriveConverter:
         plane_groups = []
 
         for side in ["right", "left"]:
-
             # lanes loaded by opendriveparser are aleady sorted by id
             # coeff_factor decides if border is left or right of the reference line
             lanes = lane_section.rightLanes if side == "right" else lane_section.leftLanes

@@ -1507,7 +1507,7 @@ class DynamicCanvasController(FigureCanvas):
         """
         dx = end_x - start_x
         dy = end_y - start_y
-        distance = math.sqrt(dx ** 2 + dy ** 2)
+        distance = math.sqrt(dx**2 + dy**2)
 
         return distance
 

@@ -291,7 +291,7 @@ class AddLaneletWidget:
                 self.toolbox.lanelet_end_position_y.text().replace(",", ".")
             )
             self.toolbox.length_changed = True
-            self.toolbox.lanelet_length.setText(str(math.sqrt(x ** 2 + y ** 2)))
+            self.toolbox.lanelet_length.setText(str(math.sqrt(x**2 + y**2)))
 
     def update_end_position(self):
         """

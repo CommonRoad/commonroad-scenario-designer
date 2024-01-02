@@ -168,7 +168,7 @@ def compute_max_curvature_from_polyline(polyline: np.ndarray) -> float:
     y_dd = np.gradient(y_d)
 
     # compute curvature
-    curvature = (x_d * y_dd - x_dd * y_d) / ((x_d ** 2 + y_d ** 2) ** (3.0 / 2.0))
+    curvature = (x_d * y_dd - x_dd * y_d) / ((x_d**2 + y_d**2) ** (3.0 / 2.0))
 
     # compute maximum curvature
     part_curvature = np.abs(curvature)
