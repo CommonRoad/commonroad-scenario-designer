@@ -1,15 +1,26 @@
-from PyQt6.QtCore import *
-from PyQt6.QtGui import *
-from PyQt6.QtWidgets import *
-import math
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QDoubleValidator, QFont, QIntValidator
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QFormLayout,
+    QFrame,
+    QGroupBox,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QTableWidget,
+    QVBoxLayout,
+)
 
 from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox
 
 
-class IntersectionsWidget():
+class IntersectionsWidget:
     """
     Inherits the intersection widget setup
     """
+
     def __init__(self, toolbox):
         self.toolbox = toolbox
 
@@ -50,7 +61,8 @@ class IntersectionsWidget():
         self.toolbox.intersection_incomings_table = QTableWidget()
         self.toolbox.intersection_incomings_table.setColumnCount(6)
         self.toolbox.intersection_incomings_table.setHorizontalHeaderLabels(
-                ['ID', 'Lanelets', 'Suc. Left', 'Suc. Straight', 'Suc. Right', 'Left Of'])
+            ["ID", "Lanelets", "Suc. Left", "Suc. Straight", "Suc. Right", "Left Of"]
+        )
         self.toolbox.intersection_incomings_table.resizeColumnsToContents()
         self.toolbox.intersection_incomings_table.setMaximumHeight(175)
         self.toolbox.button_add_incoming = QPushButton("Add Incoming")
@@ -76,8 +88,9 @@ class IntersectionsWidget():
         intersection_templates_layout.addRow("Diameter [m]:", self.toolbox.intersection_diameter)
         intersection_templates_layout.addRow("Lanelet Width [m]:", self.toolbox.intersection_lanelet_width)
         intersection_templates_layout.addRow("Incoming Length [m]:", self.toolbox.intersection_incoming_length)
-        intersection_templates_layout.addRow(self.toolbox.intersection_with_traffic_signs,
-                                             self.toolbox.intersection_with_traffic_lights)
+        intersection_templates_layout.addRow(
+            self.toolbox.intersection_with_traffic_signs, self.toolbox.intersection_with_traffic_lights
+        )
         intersection_templates_layout.addRow(self.toolbox.button_three_way_intersection)
         intersection_templates_layout.addRow(self.toolbox.button_four_way_intersection)
         intersection_templates_layout.addRow(self.toolbox.button_fit_intersection)
@@ -113,4 +126,3 @@ class IntersectionsWidget():
 
         title_intersection = "Intersection"
         return title_intersection, widget_intersection
-

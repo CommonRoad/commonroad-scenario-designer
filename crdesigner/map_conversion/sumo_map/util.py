@@ -1,20 +1,20 @@
 import os
 import warnings
 from copy import deepcopy
-from typing import Dict, List, Iterable, Tuple
+from typing import Dict, Iterable, List, Tuple
 from xml.dom import minidom
 
 import lxml.etree as et
 import matplotlib.pyplot as plt
 import numpy as np
 from commonroad.geometry.shape import Polygon
-from commonroad.scenario.lanelet import Lanelet
-from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
-from crdesigner.map_conversion.sumo_map.sumolib_net import Edge, from_shape_string
 from shapely.geometry import LineString
 from shapely.ops import unary_union
 from shapely.validation import explain_validity
+
+from crdesigner.map_conversion.sumo_map.sumolib_net import Edge, from_shape_string
 
 from .config import EGO_ID_START, SumoConfig
 
@@ -26,8 +26,7 @@ def get_scenario_name_from_crfile(filepath: str) -> str:
     :param filepath: the path of the cr file
 
     """
-    scenario_name: str = (os.path.splitext(
-        os.path.basename(filepath))[0]).split('.')[0]
+    scenario_name: str = (os.path.splitext(os.path.basename(filepath))[0]).split(".")[0]
     return scenario_name
 
 
@@ -38,8 +37,7 @@ def get_scenario_name_from_netfile(filepath: str) -> str:
     :param filepath: the path of the net file
 
     """
-    scenario_name: str = (os.path.splitext(
-        os.path.basename(filepath))[0]).split('.')[0]
+    scenario_name: str = (os.path.splitext(os.path.basename(filepath))[0]).split(".")[0]
     return scenario_name
 
 
@@ -52,8 +50,8 @@ def get_boundary_from_netfile(filepath: str) -> list:
     tree = et.parse(filepath)
     root = tree.getroot()
     location = root.find("location")
-    boundary_list = location.attrib['origBoundary']  # origBoundary
-    min_x, min_y, max_x, max_y = boundary_list.split(',')
+    boundary_list = location.attrib["origBoundary"]  # origBoundary
+    min_x, min_y, max_x, max_y = boundary_list.split(",")
     boundary = [float(min_x), float(max_x), float(min_y), float(max_y)]
     return boundary
 
@@ -67,8 +65,8 @@ def get_total_lane_length_from_netfile(filepath: str) -> float:
     tree = et.parse(filepath)
     root = tree.getroot()
     total_lane_length = 0
-    for lane in root.iter('lane'):
-        total_lane_length += float(lane.get('length'))
+    for lane in root.iter("lane"):
+        total_lane_length += float(lane.get("length"))
     return total_lane_length
 
 
@@ -85,8 +83,7 @@ def add_params_in_rou_file(rou_file: str, driving_params: dict = SumoConfig.driv
     v_type = root.find("vType")
     if v_type is not None:
         for key, value_interval in driving_params.items():
-            random_value = np.random.uniform(value_interval.start,
-                                             value_interval.end, 1)[0]
+            random_value = np.random.uniform(value_interval.start, value_interval.end, 1)[0]
             v_type.set(key, str("{0:.2f}".format(random_value)))
     tree.write(rou_file)
 
@@ -101,7 +98,7 @@ def update_edge_lengths(net_file_path: str):
     tree = et.parse(net_file_path)
     root = tree.getroot()
 
-    for edge in root.iter('edge'):
+    for edge in root.iter("edge"):
         lengths = []
         for lane in edge.iter("lane"):
             shape_str = lane.get("shape")
@@ -135,21 +132,21 @@ def write_ego_ids_to_rou_file(rou_file: str, ego_ids: List[int]) -> None:
 
     """
     tree = et.parse(rou_file)
-    vehicles = tree.findall('vehicle')
+    vehicles = tree.findall("vehicle")
     ego_str = {}
     for ego_id in ego_ids:
         ego_str.update({str(ego_id): EGO_ID_START + str(ego_id)})
 
     for veh in vehicles:
-        if veh.attrib['id'] in ego_str:
-            veh.attrib['id'] = ego_str[veh.attrib['id']]
+        if veh.attrib["id"] in ego_str:
+            veh.attrib["id"] = ego_str[veh.attrib["id"]]
 
     for elem in tree.iter():
         if elem.text:
             elem.text = elem.text.strip()
         if elem.tail:
             elem.tail = elem.tail.strip()
-    rough_string = et.tostring(tree.getroot(), encoding='utf-8')
+    rough_string = et.tostring(tree.getroot(), encoding="utf-8")
     reparsed = minidom.parseString(rough_string)
     text = reparsed.toprettyxml(indent="\t", newl="\n")
     file = open(rou_file, "w")
@@ -162,17 +159,16 @@ def compute_max_curvature_from_polyline(polyline: np.ndarray) -> float:
     :param polyline: The polyline for the curvature computation
     :return: The pseudo maximum curvature of the polyline
     """
-    assert isinstance(polyline, np.ndarray) and polyline.ndim == 2 and len(
-        polyline[:, 0]
-    ) >= 2, 'Polyline malformed for curvature computation p={}'.format(
-        polyline)
+    assert (
+        isinstance(polyline, np.ndarray) and polyline.ndim == 2 and len(polyline[:, 0]) >= 2
+    ), "Polyline malformed for curvature computation p={}".format(polyline)
     x_d = np.gradient(polyline[:, 0])
     x_dd = np.gradient(x_d)
     y_d = np.gradient(polyline[:, 1])
     y_dd = np.gradient(y_d)
 
     # compute curvature
-    curvature = (x_d * y_dd - x_dd * y_d) / ((x_d ** 2 + y_d ** 2) ** (3. / 2.))
+    curvature = (x_d * y_dd - x_dd * y_d) / ((x_d**2 + y_d**2) ** (3.0 / 2.0))
 
     # compute maximum curvature
     part_curvature = np.abs(curvature)
@@ -213,10 +209,12 @@ def resample_lanelet(lanelet: Lanelet, step=3.0):
             # add new sample and increase current position
             ratio = current_position / current_distance
             polyline_new_c.append((1 - ratio) * polyline[current_idx] + ratio * polyline[current_idx + 1])
-            polyline_new_r.append((1 - ratio) * lanelet.right_vertices[current_idx] +
-                                  ratio * lanelet.right_vertices[current_idx + 1])
-            polyline_new_l.append((1 - ratio) * lanelet.left_vertices[current_idx] +
-                                  ratio * lanelet.left_vertices[current_idx + 1])
+            polyline_new_r.append(
+                (1 - ratio) * lanelet.right_vertices[current_idx] + ratio * lanelet.right_vertices[current_idx + 1]
+            )
+            polyline_new_l.append(
+                (1 - ratio) * lanelet.left_vertices[current_idx] + ratio * lanelet.left_vertices[current_idx + 1]
+            )
             current_position += step
 
         else:
@@ -256,19 +254,25 @@ def erode_lanelet(lanelet: Lanelet, radius: float):
         cut_vertices_end = reshape_vertices(lanelet.interpolate_position(lanelet.distance[-1] - radius))
 
         # erode at start
-        lanelet._center_vertices = np.insert(lanelet._center_vertices[cut_vertices_start[3] + 1:, :], 0,
-                                             cut_vertices_start[0], axis=0)
-        lanelet._right_vertices = np.insert(lanelet._right_vertices[cut_vertices_start[3] + 1:, :], 0,
-                                            cut_vertices_start[1], axis=0)
-        lanelet._left_vertices = np.insert(lanelet._left_vertices[cut_vertices_start[3] + 1:, :], 0,
-                                           cut_vertices_start[2], axis=0)
+        lanelet._center_vertices = np.insert(
+            lanelet._center_vertices[cut_vertices_start[3] + 1 :, :], 0, cut_vertices_start[0], axis=0
+        )
+        lanelet._right_vertices = np.insert(
+            lanelet._right_vertices[cut_vertices_start[3] + 1 :, :], 0, cut_vertices_start[1], axis=0
+        )
+        lanelet._left_vertices = np.insert(
+            lanelet._left_vertices[cut_vertices_start[3] + 1 :, :], 0, cut_vertices_start[2], axis=0
+        )
         # erode at end
-        lanelet._center_vertices = np.append(lanelet._center_vertices[:cut_vertices_end[3] + 1, :],
-                                             cut_vertices_end[0], axis=0)
-        lanelet._right_vertices = np.append(lanelet._right_vertices[:cut_vertices_end[3] + 1, :],
-                                            cut_vertices_end[1], axis=0)
-        lanelet._left_vertices = np.append(lanelet._left_vertices[:cut_vertices_end[3] + 1, :],
-                                           cut_vertices_end[2], axis=0)
+        lanelet._center_vertices = np.append(
+            lanelet._center_vertices[: cut_vertices_end[3] + 1, :], cut_vertices_end[0], axis=0
+        )
+        lanelet._right_vertices = np.append(
+            lanelet._right_vertices[: cut_vertices_end[3] + 1, :], cut_vertices_end[1], axis=0
+        )
+        lanelet._left_vertices = np.append(
+            lanelet._left_vertices[: cut_vertices_end[3] + 1, :], cut_vertices_end[2], axis=0
+        )
         lanelet._distance = lanelet._compute_polyline_cumsum_dist([lanelet.center_vertices])
 
     # erode width
@@ -287,13 +291,11 @@ def erode_lanelet(lanelet: Lanelet, radius: float):
 
     # recompute polyon if present
     if lanelet._polygon:
-        lanelet._polygon = Polygon(
-            np.concatenate((lanelet.right_vertices, np.flip(lanelet.left_vertices, axis=0))))
+        lanelet._polygon = Polygon(np.concatenate((lanelet.right_vertices, np.flip(lanelet.left_vertices, axis=0))))
     return lanelet
 
 
-def _erode_lanelets(lanelet_network: LaneletNetwork,
-                    radius: float = 0.4) -> LaneletNetwork:
+def _erode_lanelets(lanelet_network: LaneletNetwork, radius: float = 0.4) -> LaneletNetwork:
     """
     Erodes the given lanelet_network by the radius.
     :param lanelet_network:
@@ -314,8 +316,9 @@ def _erode_lanelets(lanelet_network: LaneletNetwork,
     return LaneletNetwork.create_from_lanelet_list(lanelets_ero)
 
 
-def _find_intersecting_edges(edges_dict: Dict[int, List[int]], lanelet_network: LaneletNetwork,
-                             visualize=False) -> List[Tuple[int, int]]:
+def _find_intersecting_edges(
+    edges_dict: Dict[int, List[int]], lanelet_network: LaneletNetwork, visualize=False
+) -> List[Tuple[int, int]]:
     """
 
     :param lanelet_network:
@@ -342,9 +345,11 @@ def _find_intersecting_edges(edges_dict: Dict[int, List[int]], lanelet_network: 
                 if polygons_dict[lanelet_id].is_valid:
                     shape = polygons_dict[lanelet_id]
                 else:
-                    warnings.warn(f"Invalid lanelet shape! Please check the scenario, "
-                                  f"because invalid lanelet has been found: "
-                                  f"{lanelet_id}: {explain_validity(polygons_dict[lanelet_id])}")
+                    warnings.warn(
+                        f"Invalid lanelet shape! Please check the scenario, "
+                        f"because invalid lanelet has been found: "
+                        f"{lanelet_id}: {explain_validity(polygons_dict[lanelet_id])}"
+                    )
                     shape = polygons_dict[lanelet_id].buffer(0)
                 edge_shape.append(shape)
 
@@ -383,14 +388,16 @@ def remove_unreferenced_traffic_lights(lanelet_network: LaneletNetwork) -> Lanel
 
 
 def max_lanelet_network_id(lanelet_network: LaneletNetwork) -> int:
-    max_lanelet = np.max([la.lanelet_id for la in lanelet_network.lanelets]) \
-        if lanelet_network.lanelets else 0
-    max_intersection = np.max([i.intersection_id for i in lanelet_network.intersections]) \
-        if lanelet_network.intersections else 0
-    max_traffic_light = np.max([t.traffic_light_id for t in lanelet_network.traffic_lights]) \
-        if lanelet_network.traffic_lights else 0
-    max_traffic_sign = np.max([t.traffic_sign_id for t in lanelet_network.traffic_signs]) \
-        if lanelet_network.traffic_signs else 0
+    max_lanelet = np.max([la.lanelet_id for la in lanelet_network.lanelets]) if lanelet_network.lanelets else 0
+    max_intersection = (
+        np.max([i.intersection_id for i in lanelet_network.intersections]) if lanelet_network.intersections else 0
+    )
+    max_traffic_light = (
+        np.max([t.traffic_light_id for t in lanelet_network.traffic_lights]) if lanelet_network.traffic_lights else 0
+    )
+    max_traffic_sign = (
+        np.max([t.traffic_sign_id for t in lanelet_network.traffic_signs]) if lanelet_network.traffic_signs else 0
+    )
     return np.max([max_lanelet, max_intersection, max_traffic_light, max_traffic_sign])
 
 
@@ -453,17 +460,18 @@ def merge_lanelets(lanelets: List[Lanelet]) -> List[Lanelet]:
         for current in old:
             try:
                 match = next(
-                    other for other in old
+                    other
+                    for other in old
                     if other.lanelet_id != current.lanelet_id
                     and (other.lanelet_id in current.successor or current.lanelet_id in other.successor)
                 )
                 merging_ids = {match.lanelet_id, current.lanelet_id}
                 merged = Lanelet.merge_lanelets(match, current)
                 for lanelet in old:
-                    lanelet._predecessor = [p if p not in merging_ids else merged.lanelet_id
-                                            for p in lanelet.predecessor]
-                    lanelet._successor = [s if s not in merging_ids else merged.lanelet_id
-                                          for s in lanelet.successor]
+                    lanelet._predecessor = [
+                        p if p not in merging_ids else merged.lanelet_id for p in lanelet.predecessor
+                    ]
+                    lanelet._successor = [s if s not in merging_ids else merged.lanelet_id for s in lanelet.successor]
                 new = old - {current, match} | {merged}
                 break
             except StopIteration:
@@ -471,10 +479,9 @@ def merge_lanelets(lanelets: List[Lanelet]) -> List[Lanelet]:
     return list(new)
 
 
-def intersect_lanelets_line(lanelets: Iterable[Lanelet],
-                            line: np.ndarray,
-                            push_back_factor=0.25,
-                            visualize=False) -> np.ndarray:
+def intersect_lanelets_line(
+    lanelets: Iterable[Lanelet], line: np.ndarray, push_back_factor=0.25, visualize=False
+) -> np.ndarray:
     """
     Intersects a list of lanelets with a line specified by a numpy array.
     Optionally the ends of the intersection can be pushed back along the
@@ -489,9 +496,7 @@ def intersect_lanelets_line(lanelets: Iterable[Lanelet],
     :rtype:
     """
     # intersect line with convex hull of lanelets
-    convex_hull = unary_union([
-        lanelet.polygon.shapely_object for lanelet in lanelets
-    ]).convex_hull
+    convex_hull = unary_union([lanelet.polygon.shapely_object for lanelet in lanelets]).convex_hull
     shapely_line = LineString(line)
     intersect = convex_hull.intersection(shapely_line)
     res = np.array(intersect)
@@ -505,7 +510,7 @@ def intersect_lanelets_line(lanelets: Iterable[Lanelet],
 
     if visualize:
         plt.figure(figsize=(25, 25))
-        plt.axis('equal')
+        plt.axis("equal")
         plt.plot(*convex_hull.exterior.xy)
         plt.plot(*shapely_line.xy)
         plt.plot(*res.xy)

@@ -4,13 +4,23 @@ functions used for graph
 
 from queue import Queue
 from typing import List, Set, Tuple
+
 import numpy as np
 
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common import geometry
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_edge import (
+    GraphEdge,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_lane import (
+    Lane,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_node import (
+    GraphNode,
+)
 
 
-def graph_search(center_node: "GraphNode") -> Tuple[Set["GraphNode"], Set["GraphEdge"]]:
+def graph_search(center_node: GraphNode) -> Tuple[Set[GraphNode], Set[GraphEdge]]:
     """
     searches all elements connected to center_node from a graph and returns them
 
@@ -36,7 +46,7 @@ def graph_search(center_node: "GraphNode") -> Tuple[Set["GraphNode"], Set["Graph
     return nodes, edges
 
 
-def find_adjacents(newlane: "Lane", lanes: Set["Lane"]) -> Set["Lane"]:
+def find_adjacents(newlane: Lane, lanes: Set[Lane]) -> Set[Lane]:
     """
     finds all adjacent lanes to newlane
 
@@ -55,11 +65,11 @@ def find_adjacents(newlane: "Lane", lanes: Set["Lane"]) -> Set["Lane"]:
     return lanes
 
 
-def sort_adjacent_lanes(lane: "Lane") -> Tuple[List["Lane"], List[bool]]:
+def sort_adjacent_lanes(lane: Lane) -> Tuple[List[Lane], List[bool]]:
     """
     sorts the adjacent lanes as they are in edges
 
-    :param lanes: the lanes to sort
+    :param lane: start lane to sort
     :return: tuple of: 1. sorted list of lanes, 2. bool list of which is true for forward directed lanes
     """
     result = [lane]
@@ -94,9 +104,7 @@ def sort_adjacent_lanes(lane: "Lane") -> Tuple[List["Lane"], List[bool]]:
     return result, forward
 
 
-def get_lane_waypoints(
-    nr_of_lanes: int, width: float, center_waypoints: List[np.ndarray]
-) -> List[List[np.ndarray]]:
+def get_lane_waypoints(nr_of_lanes: int, width: float, center_waypoints: List[np.ndarray]) -> List[List[np.ndarray]]:
     """
     creates waypoints of lanes based on a center line and the width and count of lanes
 
@@ -122,7 +130,7 @@ def get_lane_waypoints(
     return waypoints
 
 
-def set_points(predecessor: "Lane", successor: "Lane") -> List[np.ndarray]:
+def set_points(predecessor: Lane, successor: Lane) -> List[np.ndarray]:
     """
     sets the waypoints of a link segment between two lanes
 
@@ -149,18 +157,12 @@ def set_points(predecessor: "Lane", successor: "Lane") -> List[np.ndarray]:
         return waypoints
     # use quadratic bezier if possible
     # do not use it if intersection point is to close to start or end point
-    distance_to_points = min(
-        np.linalg.norm(intersection_point - p1), np.linalg.norm(intersection_point - p4)
-    )
+    distance_to_points = min(np.linalg.norm(intersection_point - p1), np.linalg.norm(intersection_point - p4))
     total_distance = np.linalg.norm(p1 - p4)
     if not (distance_to_points > 1 or distance_to_points / total_distance > 0.1):
         # print("found something")
         pass
-    if (
-        a1 > 0
-        and a2 > 0
-        and (distance_to_points > 1 or distance_to_points / total_distance > 0.1)
-    ):
+    if a1 > 0 and a2 > 0 and (distance_to_points > 1 or distance_to_points / total_distance > 0.1):
         waypoints = geometry.evaluate_bezier(np.array([p1, intersection_point, p4]), n)
         waypoints.append(p4)
     # else use cubic bezier

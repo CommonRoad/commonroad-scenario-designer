@@ -1,29 +1,35 @@
-
-from PyQt6.QtWidgets import *
-from PyQt6.QtCore import *
+from typing import Union
 
 from commonroad.scenario.lanelet import Lanelet
-from commonroad.scenario.traffic_sign import *
+from PyQt6.QtCore import Qt, pyqtSlot
+from PyQt6.QtWidgets import QDockWidget
 
-from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.aerial_image_controller import \
-    AddAerialImageController
-from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.intersections_controller import \
-    AddIntersectionController
-from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.lanelet_controller import AddLaneletController
-from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.traffic_lights_controller import \
-    AddTrafficLightsController
-from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.traffic_signs_controller import \
-    AddTrafficSignController
+from crdesigner.common.config.osm_config import osm_config as config
+from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.aerial_image_controller import (
+    AddAerialImageController,
+)
+from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.intersections_controller import (
+    AddIntersectionController,
+)
+from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.lanelet_controller import (
+    AddLaneletController,
+)
+from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.traffic_lights_controller import (
+    AddTrafficLightsController,
+)
+from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.traffic_signs_controller import (
+    AddTrafficSignController,
+)
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.waitingspinnerwidget import QtWaitingSpinner
+from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import (
+    RoadNetworkToolboxUI,
+)
 
-from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui \
-    import RoadNetworkToolboxUI
-from crdesigner.config.osm_config import osm_config as config
 
-
-class RoadNetworkController(QDockWidget, ):
-
+class RoadNetworkController(
+    QDockWidget,
+):
     def __init__(self, mwindow):
         super().__init__("Road Network Toolbox")
         self.scenario_model = mwindow.scenario_model
@@ -41,10 +47,12 @@ class RoadNetworkController(QDockWidget, ):
 
         self.lanelet_controller = AddLaneletController(self, self.scenario_model, self.road_network_toolbox_ui)
         self.traffic_sign_controller = AddTrafficSignController(self, self.scenario_model, self.road_network_toolbox_ui)
-        self.traffic_lights_controller = AddTrafficLightsController(self, self.scenario_model,
-                                                                    self.road_network_toolbox_ui)
-        self.intersection_controller = AddIntersectionController(self, self.scenario_model,
-                                                                 self.road_network_toolbox_ui)
+        self.traffic_lights_controller = AddTrafficLightsController(
+            self, self.scenario_model, self.road_network_toolbox_ui
+        )
+        self.intersection_controller = AddIntersectionController(
+            self, self.scenario_model, self.road_network_toolbox_ui
+        )
         self.aerial_image_controller = AddAerialImageController(self, self.scenario_model, self.road_network_toolbox_ui)
 
         self.traffic_sign_controller.traffic_sign_ui.initialize_traffic_sign_information()
@@ -53,7 +61,6 @@ class RoadNetworkController(QDockWidget, ):
         self.set_default_road_network_list_information()
 
         self.connect_gui_elements()
-
 
     def adjust_ui(self):
         """Updates GUI properties like width, etc."""
@@ -70,7 +77,7 @@ class RoadNetworkController(QDockWidget, ):
         self.intersection_controller.connect_gui_intersection()
         self.aerial_image_controller.connect_gui_aerial_image()
 
-    def refresh_toolbox(self, model: ScenarioModel ):
+    def refresh_toolbox(self, model: ScenarioModel):
         self.scenario_model = model
         self.set_default_road_network_list_information()
 
@@ -89,7 +96,7 @@ class RoadNetworkController(QDockWidget, ):
         self.traffic_lights_controller.traffic_lights_ui.initialize_traffic_light_information()
         self.intersection_controller.intersection_ui.initialize_intersection_information()
         self.set_default_road_network_list_information()
-        self.initialized =True
+        self.initialized = True
 
     def get_float(self, str) -> float:
         """
@@ -113,35 +120,49 @@ class RoadNetworkController(QDockWidget, ):
 
         :param button_title: Title of the section to differentiate which button is clicked
         """
-        if self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic\
-                .current_curved_lanelet_scenario is None:
+        if (
+            self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.current_curved_lanelet_scenario
+            is None
+        ):
             return
 
         place_at_position = self.road_network_toolbox_ui.place_at_position.isChecked()
         connect_to_last_selection = self.road_network_toolbox_ui.connect_to_previous_selection.isChecked()
         connect_to_predecessors_selection = self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked()
         connect_to_successors_selection = self.road_network_toolbox_ui.connect_to_successors_selection.isChecked()
-        if button_title == "Add Lanelet" and (place_at_position or connect_to_last_selection or
-                                              connect_to_predecessors_selection or connect_to_successors_selection):
+        if button_title == "Add Lanelet" and (
+            place_at_position
+            or connect_to_last_selection
+            or connect_to_predecessors_selection
+            or connect_to_successors_selection
+        ):
             if self.road_network_toolbox_ui.curved_check_button is not None:
                 self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
-                    self.road_network_toolbox_ui.curved_check_button.button.isChecked(), True)
+                    self.road_network_toolbox_ui.curved_check_button.button.isChecked(), True
+                )
 
-        elif button_title == "Lanelet Attributes" and \
-                self.road_network_toolbox_ui.selected_curved_checkbox.button.isChecked() and \
-                self.road_network_toolbox_ui.selected_curved_checkbox.button.isEnabled():
+        elif (
+            button_title == "Lanelet Attributes"
+            and self.road_network_toolbox_ui.selected_curved_checkbox.button.isChecked()
+            and self.road_network_toolbox_ui.selected_curved_checkbox.button.isEnabled()
+        ):
             self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
-                    self.road_network_toolbox_ui.selected_curved_checkbox.button.isChecked(), False)
+                self.road_network_toolbox_ui.selected_curved_checkbox.button.isChecked(), False
+            )
 
-        elif place_at_position or connect_to_last_selection or \
-                connect_to_predecessors_selection or connect_to_successors_selection:
+        elif (
+            place_at_position
+            or connect_to_last_selection
+            or connect_to_predecessors_selection
+            or connect_to_successors_selection
+        ):
             if self.road_network_toolbox_ui.curved_check_button is not None:
-                self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic\
-                    .display_curved_lanelet(False)
+                self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+                    False
+                )
                 self.road_network_toolbox_ui.curved_check_button.setChecked(False)
         else:
-            self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic \
-                .display_curved_lanelet(False)
+            self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
             self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(False)
 
     @pyqtSlot(str)
@@ -151,6 +172,6 @@ class RoadNetworkController(QDockWidget, ):
         self.road_network_toolbox_ui.Spinner.stop()
 
     def startSpinner(self, spinner: QtWaitingSpinner):
-        if (spinner.is_spinning()):
+        if spinner.is_spinning():
             spinner.stop()
         spinner.start()

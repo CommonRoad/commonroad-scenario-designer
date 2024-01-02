@@ -1,9 +1,17 @@
 from commonroad.scenario.lanelet import LaneletNetwork
 
-from crdesigner.verification_repairing.repairing.intersection_repairing import IntersectionRepairing
-from crdesigner.verification_repairing.repairing.traffic_light_repairing import TrafficLightRepairing
-from crdesigner.verification_repairing.repairing.traffic_sign_repairing import TrafficSignRepairing
-from crdesigner.verification_repairing.repairing.lanelet_repairing import LaneletRepairing
+from crdesigner.verification_repairing.repairing.intersection_repairing import (
+    IntersectionRepairing,
+)
+from crdesigner.verification_repairing.repairing.lanelet_repairing import (
+    LaneletRepairing,
+)
+from crdesigner.verification_repairing.repairing.traffic_light_repairing import (
+    TrafficLightRepairing,
+)
+from crdesigner.verification_repairing.repairing.traffic_sign_repairing import (
+    TrafficSignRepairing,
+)
 from crdesigner.verification_repairing.verification.satisfaction import InvalidStates
 
 
@@ -34,7 +42,7 @@ class MapRepairer:
             func_names = [func for func in dir(repairing) if callable(getattr(repairing, func))]
 
             for invalid_state_id, locations in invalid_states.items():
-                repairing_name = 'repair_' + str(invalid_state_id.value)
+                repairing_name = "repair_" + str(invalid_state_id.value)
                 if repairing_name in func_names:
                     for location in locations:
                         func = getattr(repairing, repairing_name)

@@ -1,14 +1,31 @@
-from PyQt6.QtCore import *
-from PyQt6.QtGui import *
-from PyQt6.QtWidgets import *
 import math
 
-from crdesigner.config.logging import logger
-from crdesigner.ui.gui.utilities.toolbox_ui import PositionButton, CheckableComboBox, CollapsibleCheckBox, \
-    CollapsibleArrowBox
+from PyQt6.QtCore import QLocale, Qt
+from PyQt6.QtGui import QDoubleValidator, QIntValidator
+from PyQt6.QtWidgets import (
+    QButtonGroup,
+    QComboBox,
+    QFormLayout,
+    QFrame,
+    QGridLayout,
+    QGroupBox,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QRadioButton,
+    QVBoxLayout,
+)
+
+from crdesigner.common.logging import logger
+from crdesigner.ui.gui.utilities.toolbox_ui import (
+    CheckableComboBox,
+    CollapsibleArrowBox,
+    CollapsibleCheckBox,
+    PositionButton,
+)
 
 
-class AddLaneletWidget():
+class AddLaneletWidget:
     """
     Inherits the add_lanelet widget setup
     """
@@ -115,8 +132,9 @@ class AddLaneletWidget():
         self.toolbox.lanelet_start_position_x.setText("0.0")
         self.toolbox.lanelet_start_position_y.setText("0.0")
 
-        self.toolbox.button_start_position = PositionButton(self.toolbox.lanelet_start_position_x,
-                                                            self.toolbox.lanelet_start_position_y, self.toolbox)
+        self.toolbox.button_start_position = PositionButton(
+            self.toolbox.lanelet_start_position_x, self.toolbox.lanelet_start_position_y, self.toolbox
+        )
 
         self.toolbox.lanelet_start_position = QGridLayout()
         self.toolbox.lanelet_start_position.addWidget(QLabel("x: "), 1, 0)
@@ -200,8 +218,9 @@ class AddLaneletWidget():
             self.toolbox.lanelet_end_position_y.setMaxLength(8)
             self.toolbox.lanelet_end_position_y.setAlignment(Qt.AlignmentFlag.AlignRight)
 
-            self.toolbox.button_end_position = PositionButton(self.toolbox.lanelet_end_position_x,
-                                                              self.toolbox.lanelet_end_position_y, self.toolbox)
+            self.toolbox.button_end_position = PositionButton(
+                self.toolbox.lanelet_end_position_x, self.toolbox.lanelet_end_position_y, self.toolbox
+            )
             self.toolbox.button_end_position.setFlat(True)
             self.toolbox.button_start_position.setAutoFillBackground(True)
 
@@ -257,16 +276,22 @@ class AddLaneletWidget():
             if self.toolbox.end_position_y_changed:
                 self.toolbox.end_position_y_changed = False
                 return
-            pos = [self.toolbox.lanelet_start_position_x.text(), self.toolbox.lanelet_start_position_y.text(),
-                   self.toolbox.lanelet_end_position_x.text(), self.toolbox.lanelet_end_position_y.text()]
+            pos = [
+                self.toolbox.lanelet_start_position_x.text(),
+                self.toolbox.lanelet_start_position_y.text(),
+                self.toolbox.lanelet_end_position_x.text(),
+                self.toolbox.lanelet_end_position_y.text(),
+            ]
             if any("" == v for v in pos) or any("-" == v for v in pos):
                 return
             x = float(self.toolbox.lanelet_start_position_x.text().replace(",", ".")) - float(
-                    self.toolbox.lanelet_end_position_x.text().replace(",", "."))
+                self.toolbox.lanelet_end_position_x.text().replace(",", ".")
+            )
             y = float(self.toolbox.lanelet_start_position_y.text().replace(",", ".")) - float(
-                    self.toolbox.lanelet_end_position_y.text().replace(",", "."))
+                self.toolbox.lanelet_end_position_y.text().replace(",", ".")
+            )
             self.toolbox.length_changed = True
-            self.toolbox.lanelet_length.setText(str(math.sqrt(x ** 2 + y ** 2)))
+            self.toolbox.lanelet_length.setText(str(math.sqrt(x**2 + y**2)))
 
     def update_end_position(self):
         """
@@ -279,8 +304,12 @@ class AddLaneletWidget():
                 return
             if self.toolbox.lanelet_length.text() == "":
                 return
-            pos = [self.toolbox.lanelet_start_position_x.text(), self.toolbox.lanelet_start_position_y.text(),
-                   self.toolbox.lanelet_end_position_x.text(), self.toolbox.lanelet_end_position_y.text()]
+            pos = [
+                self.toolbox.lanelet_start_position_x.text(),
+                self.toolbox.lanelet_start_position_y.text(),
+                self.toolbox.lanelet_end_position_x.text(),
+                self.toolbox.lanelet_end_position_y.text(),
+            ]
             if any("" == v for v in pos) or any("-" == v for v in pos):
                 return
 
@@ -319,8 +348,11 @@ class AddLaneletWidget():
         self.toolbox.lanelet_width.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.toolbox.lanelet_width.setDisabled(True)
         self.toolbox.lanelet_width.setStyleSheet(
-                'background-color: ' + self.toolbox.mwindow.mwindow_ui.colorscheme().second_background + '; color: '
-                + self.toolbox.mwindow.mwindow_ui.colorscheme().disabled)
+            "background-color: "
+            + self.toolbox.mwindow.mwindow_ui.colorscheme().second_background
+            + "; color: "
+            + self.toolbox.mwindow.mwindow_ui.colorscheme().disabled
+        )
 
         self.toolbox.layout_lanelet_adding_groupbox.insertRow(4, "Length [m]", self.toolbox.lanelet_length)
         self.toolbox.layout_lanelet_adding_groupbox.insertRow(5, "Width [m]", self.toolbox.lanelet_width)
@@ -437,7 +469,7 @@ class AddLaneletWidget():
             self.toolbox.advanced_button.remove()
             self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.line2)
 
-        #TODO: Maybe change
+        # TODO: Maybe change
         if self.toolbox.curved_check_button is not None:
             self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
 
@@ -453,8 +485,11 @@ class AddLaneletWidget():
         self.toolbox.lanelet_width.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.toolbox.lanelet_width.setDisabled(True)
         self.toolbox.lanelet_width.setStyleSheet(
-                'background-color: ' + self.toolbox.mwindow.mwindow_ui.colorscheme().second_background + '; color: '
-                + self.toolbox.mwindow.mwindow_ui.colorscheme().disabled)
+            "background-color: "
+            + self.toolbox.mwindow.mwindow_ui.colorscheme().second_background
+            + "; color: "
+            + self.toolbox.mwindow.mwindow_ui.colorscheme().disabled
+        )
 
     def remove_end_position_method_fields(self):
         if self.toolbox.end_position_method == "select_end_position":
@@ -492,17 +527,23 @@ class AddLaneletWidget():
         self.toolbox.number_vertices.setText("20")
 
         # Signals to update the temporary lanelet when the values changed in the toolbox
-        self.toolbox.select_direction.clicked.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer
-                                                      .dynamic.change_direction_of_curve())
-        self.toolbox.curved_check_button = CollapsibleCheckBox("Curved Lanelet", layout_curved_box,
-                                                               self.toolbox.layout_lanelet_adding_groupbox, index)
-        self.toolbox.lanelet_radius.textChanged.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.
-                                                        dynamic.draw_curved_lanelet())
-        self.toolbox.lanelet_angle.textChanged.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.
-                                                       dynamic.draw_curved_lanelet())
+        self.toolbox.select_direction.clicked.connect(
+            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.change_direction_of_curve()
+        )
+        self.toolbox.curved_check_button = CollapsibleCheckBox(
+            "Curved Lanelet", layout_curved_box, self.toolbox.layout_lanelet_adding_groupbox, index
+        )
+        self.toolbox.lanelet_radius.textChanged.connect(
+            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_curved_lanelet()
+        )
+        self.toolbox.lanelet_angle.textChanged.connect(
+            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_curved_lanelet()
+        )
         self.toolbox.curved_check_button.button.clicked.connect(
-                lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.
-                dynamic.display_curved_lanelet(self.toolbox.curved_check_button.isChecked(), True))
+            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+                self.toolbox.curved_check_button.isChecked(), True
+            )
+        )
 
         if self.toolbox.place_at_position.isChecked():
             self.toolbox.curved_check_button.button.clicked.connect(lambda: self.disable_curved_select_end_pos())
@@ -548,9 +589,14 @@ class AddLaneletWidget():
 
         self.toolbox.stop_line_check_box = CollapsibleCheckBox("Stop Line", layout_stop_line, layout_line_marking, 3)
 
-        self.toolbox.line_marking_box = CollapsibleArrowBox("Line marking", layout_line_marking,
-                                                            self.toolbox.layout_lanelet_adding_groupbox, index,
-                                                            self.toolbox.mwindow, self.toolbox)
+        self.toolbox.line_marking_box = CollapsibleArrowBox(
+            "Line marking",
+            layout_line_marking,
+            self.toolbox.layout_lanelet_adding_groupbox,
+            index,
+            self.toolbox.mwindow,
+            self.toolbox,
+        )
 
     def add_neighboring_lanelets_fields(self, index):
         self.toolbox.adjacent_right = QComboBox()
@@ -595,10 +641,14 @@ class AddLaneletWidget():
         layout_neighboring_lanelets.addRow("Adjacent Left:", self.toolbox.adjacent_left)
         layout_neighboring_lanelets.addRow(self.toolbox.adjacent_left_direction_line)
 
-        self.toolbox.neighboring_lanelets_button = CollapsibleArrowBox("Neighboring Lanelets",
-                                                                       layout_neighboring_lanelets,
-                                                                       self.toolbox.layout_lanelet_adding_groupbox,
-                                                                       index, self.toolbox.mwindow, self.toolbox)
+        self.toolbox.neighboring_lanelets_button = CollapsibleArrowBox(
+            "Neighboring Lanelets",
+            layout_neighboring_lanelets,
+            self.toolbox.layout_lanelet_adding_groupbox,
+            index,
+            self.toolbox.mwindow,
+            self.toolbox,
+        )
 
     def add_advanced_fields(self, index):
         self.toolbox.lanelet_type = CheckableComboBox()
@@ -615,6 +665,11 @@ class AddLaneletWidget():
         layout_advanced.addRow("Traffic Sign IDs:", self.toolbox.lanelet_referenced_traffic_sign_ids)
         layout_advanced.addRow("Traffic Light IDs:", self.toolbox.lanelet_referenced_traffic_light_ids)
 
-        self.toolbox.advanced_button = CollapsibleArrowBox("Advanced", layout_advanced,
-                                                           self.toolbox.layout_lanelet_adding_groupbox, index,
-                                                           self.toolbox.mwindow, self.toolbox)
+        self.toolbox.advanced_button = CollapsibleArrowBox(
+            "Advanced",
+            layout_advanced,
+            self.toolbox.layout_lanelet_adding_groupbox,
+            index,
+            self.toolbox.mwindow,
+            self.toolbox,
+        )

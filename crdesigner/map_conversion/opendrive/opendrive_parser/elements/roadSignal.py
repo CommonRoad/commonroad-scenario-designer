@@ -169,7 +169,7 @@ class Signal:
 
     @signal_value.setter
     def signal_value(self, value):
-        if type(value) == str:
+        if isinstance(value, str):
             self._signal_value = float(value)
         else:
             self._signal_value = value
@@ -261,6 +261,7 @@ class SignalReference:
     :ivar _id: ID of the referenced signal within the database
     :ivar _orientation: indicates in which s-direction the traffic is valid
     """
+
     def __init__(self):
         self._s = None
         self._t = None

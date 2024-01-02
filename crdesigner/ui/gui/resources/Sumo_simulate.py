@@ -6,7 +6,8 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtWidgets
+
 
 class Ui_sumo_simulate(object):
     def setupUi(self, sumo_simulate):
@@ -103,7 +104,9 @@ class Ui_sumo_simulate(object):
         _translate = QtCore.QCoreApplication.translate
         self.label.setToolTip(_translate("sumo_simulate", "length of simulation step of the interface"))
         self.label.setText(_translate("sumo_simulate", "dt"))
-        self.label_2.setToolTip(_translate("sumo_simulate", "number of time steps before simulation with ego vehicle starts"))
+        self.label_2.setToolTip(
+            _translate("sumo_simulate", "number of time steps before simulation with ego vehicle starts")
+        )
         self.label_2.setText(_translate("sumo_simulate", "Presimulation_steps"))
         self.label_3.setToolTip(_translate("sumo_simulate", "number of simulated (and synchronized) time steps"))
         self.label_3.setText(_translate("sumo_simulate", "Simulation_steps"))

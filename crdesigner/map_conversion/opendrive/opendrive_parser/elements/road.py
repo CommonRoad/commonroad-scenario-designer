@@ -1,15 +1,28 @@
 from typing import Union
 
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import Link
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import Lanes
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import (
+    Junction,
+)
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadElevationProfile import (
     ElevationProfile,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLateralProfile import LateralProfile
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import Junction
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import Object
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import Signal, SignalReference
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+    Lanes,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLateralProfile import (
+    LateralProfile,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import Link
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import (
+    Object,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import (
+    PlanView,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import (
+    Signal,
+    SignalReference,
+)
 
 
 class Road:

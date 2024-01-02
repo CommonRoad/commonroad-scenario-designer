@@ -1,8 +1,10 @@
 from abc import ABC
-from typing import Dict, Any
+from typing import Any, Dict
 
-from crdesigner.verification_repairing.verification.hol.expression_tree.expression import Expression
 from crdesigner.verification_repairing.verification.hol.context import Context
+from crdesigner.verification_repairing.verification.hol.expression_tree.expression import (
+    Expression,
+)
 
 
 class Binary(Expression, ABC):
@@ -43,7 +45,7 @@ class Binary(Expression, ABC):
         """
         Converts binary expression to string representation.
         """
-        return '(' + self._left_expr.to_string() + ' ' + self._symbol + ' ' + self._right_expr.to_string() + ')'
+        return "(" + self._left_expr.to_string() + " " + self._symbol + " " + self._right_expr.to_string() + ")"
 
     def initialize(self, model: Context):
         """

@@ -10,20 +10,34 @@
 - OpenDRIVE to CommonRoad conversion: considering line markings of inner shared lanelet boundaries
 - Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
 - Optional MGRS tag for nodes in CR to Lanelet2 conversion (comptaibility with Autoware)
+- Eclipse-SUMO Python package dependency for better integration of SUMO
+- cr2lanelet: Option of local coordinates for traffic lights
+- cr2lanelet: Static height for traffic lights (1.2m) until official height support in CommonRoad
+- cr2lanelet: Regulatory element to corresponding way relation for lanes (required by autoware)
+- Option to display the aerial image of the current position
+- By default, if no lbdv creditials are stored, the open source credentials are used
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
 - osm2cr: virtual traffic sign have position assigned
 - PyQt6 instead of PyQt5 as GUI backend
+- Code formatting (flake8, black, isort)
+- cr2lanelet: traffic light subtype
+- cr2lanelet: traffic light includes only two nodes (in case of autoware)
+- osm2cr: use pyproj for projection
 
 ### Fixed
 - Adding existing obstacles again
 - Selecting obstacles with set-based prediction
 - Bug when editing curved lanelets in the canvas
-- lanelet2cr wrong final vertice assignment 
+- lanelet2cr wrong final vertices assignment 
 - Deleting unreferenced traffic signs/lights after deleting lanelet
 - Map verification/repairing: Checking unique ID of traffic light cycle element
-- Consider x, y translation for CR-Lanlet (and vice versa) conversion
+- Consider x-, y-translation for cr2lanelet conversion (and vice versa)
+- osm2cr projection
+
+### Removed
+- Unused osm2cr functions, e.g., for plotting graphs
 
 ## [0.8.0] - 2023-10-31
 

@@ -1,13 +1,16 @@
-import warnings
-from typing import Tuple, Optional, List
-import math
-import numpy as np
 import copy
+import math
+import warnings
+from typing import List, Optional, Tuple
+
+import numpy as np
+from commonroad.scenario.lanelet import LineMarking
 from pyproj import Transformer
 
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLane
-from commonroad.scenario.lanelet import LineMarking
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import (
+    ParametricLane,
+)
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import RoadMark
 
@@ -135,13 +138,9 @@ class ParametricLaneGroup:
         """
         if reverse:
             self._geo_lengths = np.insert(self._geo_lengths, 1, length)
-            self._geo_lengths[2:] = [
-                x + length for i, x in enumerate(self._geo_lengths) if i > 1
-            ]
+            self._geo_lengths[2:] = [x + length for i, x in enumerate(self._geo_lengths) if i > 1]
         else:
-            self._geo_lengths = np.append(
-                self._geo_lengths, length + self._geo_lengths[-1]
-            )
+            self._geo_lengths = np.append(self._geo_lengths, length + self._geo_lengths[-1])
 
     @property
     def type(self) -> str:
@@ -174,9 +173,7 @@ class ParametricLaneGroup:
 
         :return: True if every ParametricLane has width_coefficients equal to only zero
         """
-        return all(
-            [plane.has_zero_width_everywhere() for plane in self.parametric_lanes]
-        )
+        return all([plane.has_zero_width_everywhere() for plane in self.parametric_lanes])
 
     def to_lanelet(self, error_tolerance, min_delta_s, transformer: Transformer) -> ConversionLanelet:
         """Convert a ParametricLaneGroup to a Lanelet.
@@ -218,13 +215,10 @@ class ParametricLaneGroup:
             else:
                 pass
 
-        center_vertices = np.array(
-            [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
-        )
+        center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
         # access to user conversion
         user_list = [set(), set()]
-        user_set = {"car", "truck", "bus", "motorcycle", "priorityVehicle", "taxi",
-                    "bicycle", "pedestrian", "train"}
+        user_set = {"car", "truck", "bus", "motorcycle", "priorityVehicle", "taxi", "bicycle", "pedestrian", "train"}
         direct_map_set = {"truck", "bus", "motorcycle", "pedestrian", "bicycle", "taxi"}
         vehicle_set = {"car", "truck", "bus", "motorcycle", "priorityVehicle", "taxi"}
 
@@ -253,7 +247,7 @@ class ParametricLaneGroup:
                 user = "priorityVehicle"
             elif restriction[0] == "trucks":
                 user = "truck"
-            else: # ignore other lane access types
+            else:  # ignore other lane access types
                 continue
             user_list = access_map(user_list, restriction[1] == "allow", user)
         users = (user_set if user_list[0] == set() else user_list[0]).difference(user_list[1])
@@ -276,8 +270,9 @@ class ParametricLaneGroup:
 
         return lanelet
 
-    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature: bool = True) \
-            -> Tuple[Tuple[float, float], float, float, float]:
+    def calc_border(
+        self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature: bool = True
+    ) -> Tuple[Tuple[float, float], float, float, float]:
         """Calc vertices point of inner or outer Border.
 
         :param border: Which border to calculate (inner or outer)
@@ -312,7 +307,7 @@ class ParametricLaneGroup:
         mirror_interval: Tuple[float, float],
         adjacent_lanelet: ConversionLanelet,
         precision: float = 0.5,
-        transformer: Optional[Transformer] = None
+        transformer: Optional[Transformer] = None,
     ):
         """Convert a ParametricLaneGroup to a Lanelet with mirroring one of the borders.
 
@@ -343,9 +338,7 @@ class ParametricLaneGroup:
             original_width = np.linalg.norm(inner_pos - outer_pos)
 
             # if not mirroring lane or outside of range
-            if (
-                pos < mirror_interval[0] or pos > mirror_interval[1]
-            ) and not np.isclose(pos, mirror_interval[1]):
+            if (pos < mirror_interval[0] or pos > mirror_interval[1]) and not np.isclose(pos, mirror_interval[1]):
                 if transformer is not None:
                     left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
                     right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
@@ -363,16 +356,12 @@ class ParametricLaneGroup:
                 local_width_offset = distance_slope * pos + global_distance[0]
 
                 if mirror_border == "left":
-                    new_outer_pos = self.calc_border("inner", pos, local_width_offset)[
-                        0
-                    ]
+                    new_outer_pos = self.calc_border("inner", pos, local_width_offset)[0]
                     modified_width = np.linalg.norm(new_outer_pos - inner_pos)
 
                     # change width s.t. it does not mirror inner border but instead
                     # outer border
-                    local_width_offset = (
-                        math.copysign(1, local_width_offset) * last_width_difference
-                    )
+                    local_width_offset = math.copysign(1, local_width_offset) * last_width_difference
                     if modified_width < original_width:
                         new_vertex = self.calc_border("outer", pos, local_width_offset)[0]
                         if transformer is not None:
@@ -396,14 +385,10 @@ class ParametricLaneGroup:
                     else:
                         left_vertices.append(inner_pos)
                 elif mirror_border == "right":
-                    new_inner_pos = self.calc_border("outer", pos, local_width_offset)[
-                        0
-                    ]
+                    new_inner_pos = self.calc_border("outer", pos, local_width_offset)[0]
                     modified_width = np.linalg.norm(new_inner_pos - outer_pos)
 
-                    local_width_offset = (
-                        math.copysign(1, local_width_offset) * last_width_difference
-                    )
+                    local_width_offset = math.copysign(1, local_width_offset) * last_width_difference
                     if modified_width < original_width:
                         new_vertex = self.calc_border("inner", pos, local_width_offset)[0]
                         if transformer is not None:
@@ -433,12 +418,8 @@ class ParametricLaneGroup:
         )
         # right_vertices = np.array(right_vertices)
 
-        center_vertices = np.array(
-            [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
-        )
-        lanelet = ConversionLanelet(
-            copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_
-        )
+        center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
+        lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_)
 
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
@@ -463,8 +444,7 @@ class ParametricLaneGroup:
 
             poses = np.append(
                 poses,
-                np.linspace(0, parametric_lane.length, num_steps)[idx::]
-                + self._geo_lengths[i],
+                np.linspace(0, parametric_lane.length, num_steps)[idx::] + self._geo_lengths[i],
             )
 
         return poses

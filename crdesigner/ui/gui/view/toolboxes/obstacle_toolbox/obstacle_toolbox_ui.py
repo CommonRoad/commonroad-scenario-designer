@@ -1,23 +1,41 @@
 import math
 from typing import Optional
 
-from PyQt6.QtCore import *
-from PyQt6.QtGui import *
-from PyQt6.QtWidgets import *
-
-from crdesigner.config.logging import logger
-from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-from crdesigner.ui.gui.utilities.toolbox_ui import Toolbox
-from crdesigner.config.gui_config import gui_config
-from commonroad.geometry.shape import Rectangle, Circle, Polygon
-from commonroad.scenario.obstacle import ObstacleType, Obstacle, StaticObstacle, DynamicObstacle
+from commonroad.geometry.shape import Circle, Polygon, Rectangle
+from commonroad.scenario.obstacle import (
+    DynamicObstacle,
+    Obstacle,
+    ObstacleType,
+    StaticObstacle,
+)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+from PyQt6.QtCore import QLocale, Qt
+from PyQt6.QtGui import QDoubleValidator, QFont, QIcon, QIntValidator
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QColorDialog,
+    QComboBox,
+    QFormLayout,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSpinBox,
+    QVBoxLayout,
+    QWidget,
+)
 
+from crdesigner.common.config.gui_config import gui_config
+from crdesigner.common.logging import logger
+from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 
 # try to import sumo functionality
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.ui.gui.utilities.toolbox_ui import Toolbox
 
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMOSimulation
@@ -34,10 +52,8 @@ class ObstacleToolboxUI(Toolbox):
 
         self.obstacle_spec = gui_config.OBSTACLE_SPECS
 
-
     def define_sections(self):
-        """defines the sections in the obstacle toolbox
-        """
+        """defines the sections in the obstacle toolbox"""
         # this validator always has the format with a dot as decimal separator
         self.float_validator = QDoubleValidator()
         self.float_validator.setLocale(QLocale("en_US"))
@@ -166,7 +182,7 @@ class ObstacleToolboxUI(Toolbox):
 
     def init_obstacle_defaults(self):
         selected_obs_spec = self.obstacle_spec.get(self.obstacle_type.currentText())
-        if selected_obs_spec == None:
+        if selected_obs_spec is None:
             return
 
         self.obstacle_shape.setCurrentText(selected_obs_spec["shape"])
@@ -182,8 +198,7 @@ class ObstacleToolboxUI(Toolbox):
                 lineEdit.setText("0")
             for lineEdit in self.vertices_y:
                 lineEdit.setText("0")
-        if (self.obstacle_dyn_stat.currentText() == "Static" and
-                not self.obstacle_shape.currentText() == "Polygon"):
+        if self.obstacle_dyn_stat.currentText() == "Static" and not self.obstacle_shape.currentText() == "Polygon":
             self.obstacle_x_Position.setText("0.5")
             self.obstacle_y_Position.setText("0.5")
 
@@ -191,13 +206,12 @@ class ObstacleToolboxUI(Toolbox):
         """
         Updates the obstacle related information in the obstacle Toolbox
 
-        :param obstacle: obstacle which information should be displayed in the toolbox. 
+        :param obstacle: obstacle which information should be displayed in the toolbox.
         """
         if isinstance(obstacle, StaticObstacle):
             self.init_position()
 
         if isinstance(obstacle.obstacle_shape, Rectangle):
-
             if self.obstacle_shape.currentText() != "Rectangle":
                 self.obstacle_shape.setCurrentIndex(0)
 
@@ -207,13 +221,14 @@ class ObstacleToolboxUI(Toolbox):
                 self.obstacle_x_Position.setText(str(obstacle.initial_state.__getattribute__("position")[0]))
                 self.obstacle_y_Position.setText(str(obstacle.initial_state.__getattribute__("position")[1]))
                 self.obstacle_orientation.setText(
-                        str(math.degrees(obstacle.initial_state.__getattribute__("orientation"))))
+                    str(math.degrees(obstacle.initial_state.__getattribute__("orientation")))
+                )
             else:
                 self.obstacle_orientation.setText(
-                        str(math.degrees(obstacle.obstacle_shape.__getattribute__("orientation"))))
+                    str(math.degrees(obstacle.obstacle_shape.__getattribute__("orientation")))
+                )
 
         elif isinstance(obstacle.obstacle_shape, Circle):
-
             if self.obstacle_shape.currentText() != "Circle":
                 self.obstacle_shape.setCurrentIndex(1)
 
@@ -282,7 +297,7 @@ class ObstacleToolboxUI(Toolbox):
             for i in range(self.amount_vertices):
                 self.vertices_x[i].setText("")
                 self.vertices_y[i].setText("")
-        if (self.obstacle_dyn_stat.currentText() == "Static" and self.obstacle_shape.currentText() != "Polygon"):
+        if self.obstacle_dyn_stat.currentText() == "Static" and self.obstacle_shape.currentText() != "Polygon":
             self.obstacle_x_Position.setText("")
             self.obstacle_y_Position.setText("")
         if not self.default_color.isChecked():
@@ -333,7 +348,6 @@ class ObstacleToolboxUI(Toolbox):
 
         self.layout_shape_groupbox.insertRow(2, "Radius [m]", self.obstacle_radius)
 
-
     def remove_circle_fields(self):
         """
         removes the fields for the circle shape
@@ -378,7 +392,6 @@ class ObstacleToolboxUI(Toolbox):
                 self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
             self.position_initialized = True
 
-
     def remove_position(self):
         """
         removes the position fields
@@ -407,7 +420,6 @@ class ObstacleToolboxUI(Toolbox):
         self.add_vertice_btn = QPushButton("Add Vertice")
         self.add_vertice_btn.clicked.connect(lambda: self.add_vertice())
         self.layout_shape_groupbox.insertRow(len(self.vertices_x) + 2, self.add_vertice_btn)
-
 
     @logger.log
     def add_vertice(self):
@@ -477,7 +489,8 @@ class ObstacleToolboxUI(Toolbox):
 
         self.default_color.setChecked(False)
         self.selected_color.setStyleSheet(
-                "QWidget { border:1px solid black; background-color: %s}" % self.obstacle_color.name())
+            "QWidget { border:1px solid black; background-color: %s}" % self.obstacle_color.name()
+        )
         self.change_color = True
 
     @logger.log
