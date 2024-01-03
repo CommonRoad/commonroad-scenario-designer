@@ -1616,8 +1616,10 @@ class DynamicCanvasController(FigureCanvas):
             right = np.sum((self.right_vertices - np.array([x, y])) ** 2, axis=1)
             if min(left) < max_distance_to_point or min(right) < max_distance_to_point:
                 add_vertice = menu.addAction("Add Vertice")
+                delete_vertice = menu.addAction("Delete Vertice")
             else:
                 add_vertice = None
+                delete_vertice = None
             safe_changes = menu.addAction("Safe Changes")
             remove_changes = menu.addAction("Remove Changes")
             continue_editing = menu.addAction("Continue Editing")
@@ -1630,14 +1632,18 @@ class DynamicCanvasController(FigureCanvas):
                 self.create_temp_lanelet_vertices()
                 self.parent().road_network_toolbox.lanelet_controller.update_lanelet(self.temp_edited_lanelet)
 
-            elif add_vertice is not None and action == add_vertice:
+            elif ((add_vertice is not None and action == add_vertice) or
+                  (delete_vertice is not None and action == delete_vertice)):
                 if min(left) < min(right):
                     ind = np.argmin(left)
                     index = ind
                 else:
                     ind = np.argmin(right)
                     index = ind
-                self.add_vertice(index)
+                if action == add_vertice:
+                    self.add_vertice(index)
+                else:
+                    self.delete_vertice(index)
                 self.create_temp_lanelet_vertices()
                 self.draw_editable_lanelet()
                 self.ax.add_line(self.left_scatter)
@@ -1670,13 +1676,13 @@ class DynamicCanvasController(FigureCanvas):
         """
         Creates temporary lanelet and saves it. For the edit vertices.
         """
-        center_vertices = self.temp_edited_lanelet.center_vertices
+        center_vertices = copy.deepcopy(self.left_vertices)
 
-        for i in range(len(center_vertices)):
-            center_vertices[i] = np.array(
+        for i in range(len(self.left_vertices)):
+            center_vertices[i] = np.array([
                 (self.left_vertices[i][0] + self.right_vertices[i][0]) / 2,
-                (self.left_vertices[i][1] + self.right_vertices[i][1]) / 2,
-            )
+                (self.left_vertices[i][1] + self.right_vertices[i][1]) / 2
+            ])
 
         self.temp_edited_lanelet = Lanelet(
             self.left_vertices,
@@ -1760,6 +1766,12 @@ class DynamicCanvasController(FigureCanvas):
             self.right_vertices = np.insert(self.right_vertices, index + 1, new_right_point, axis=0)
 
         # Update vertice lines
+        self.left_scatter.set_data(self.left_vertices[:, 0], self.left_vertices[:, 1])
+        self.right_scatter.set_data(self.right_vertices[:, 0], self.right_vertices[:, 1])
+
+    def delete_vertice(self, index: int):
+        self.left_vertices = np.delete(self.left_vertices, index, axis=0)
+        self.right_vertices = np.delete(self.right_vertices, index, axis=0)
         self.left_scatter.set_data(self.left_vertices[:, 0], self.left_vertices[:, 1])
         self.right_scatter.set_data(self.right_vertices[:, 0], self.right_vertices[:, 1])
 
