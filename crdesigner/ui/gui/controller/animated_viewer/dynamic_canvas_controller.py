@@ -7,7 +7,7 @@ import numpy as np
 import PyQt6
 from commonroad.geometry.shape import Circle, Rectangle
 from commonroad.planning.planning_problem import PlanningProblem
-from commonroad.scenario.lanelet import LaneletType
+from commonroad.scenario.lanelet import LaneletType, Lanelet
 from commonroad.scenario.obstacle import DynamicObstacle, StaticObstacle
 from commonroad.visualization.draw_params import (
     DynamicObstacleParams,
