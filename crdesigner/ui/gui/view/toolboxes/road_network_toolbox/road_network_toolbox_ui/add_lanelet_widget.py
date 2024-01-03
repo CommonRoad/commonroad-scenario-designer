@@ -527,14 +527,17 @@ class AddLaneletWidget:
         self.toolbox.number_vertices.setText("20")
 
         # Signals to update the temporary lanelet when the values changed in the toolbox
-        self.toolbox.select_direction.clicked.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer
-                                                      .dynamic.change_direction_of_curve())
-        self.toolbox.curved_check_button = CollapsibleCheckBox("Curved Lanelet", layout_curved_box,
-                                                               self.toolbox.layout_lanelet_adding_groupbox, index)
-        self.toolbox.lanelet_radius.textChanged.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.
-                                                        dynamic.draw_editable_lanelet())
+        self.toolbox.select_direction.clicked.connect(
+            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.change_direction_of_curve()
+        )
+        self.toolbox.curved_check_button = CollapsibleCheckBox(
+            "Curved Lanelet", layout_curved_box, self.toolbox.layout_lanelet_adding_groupbox, index
+        )
+        self.toolbox.lanelet_radius.textChanged.connect(
+            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_editable_lanelet()
+        )
         self.toolbox.lanelet_angle.textChanged.connect(
-                lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_editable_lanelet()
+            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_editable_lanelet()
         )
         self.toolbox.curved_check_button.button.clicked.connect(
             lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(

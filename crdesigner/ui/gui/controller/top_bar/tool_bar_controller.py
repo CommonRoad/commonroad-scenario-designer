@@ -208,7 +208,6 @@ class ToolBarController:
         """
         self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_crop_map(is_checked)
 
-
     def _cancel_edit_vertices(self):
         """
         Cancels the display of the vertices
