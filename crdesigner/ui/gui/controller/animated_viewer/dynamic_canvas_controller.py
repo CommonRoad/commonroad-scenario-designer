@@ -1616,7 +1616,10 @@ class DynamicCanvasController(FigureCanvas):
             right = np.sum((self.right_vertices - np.array([x, y])) ** 2, axis=1)
             if min(left) < max_distance_to_point or min(right) < max_distance_to_point:
                 add_vertice = menu.addAction("Add Vertice")
-                delete_vertice = menu.addAction("Delete Vertice")
+                if len(self.left_vertices) > 2:
+                    delete_vertice = menu.addAction("Delete Vertice")
+                else:
+                    delete_vertice = None
             else:
                 add_vertice = None
                 delete_vertice = None
@@ -1770,6 +1773,11 @@ class DynamicCanvasController(FigureCanvas):
         self.right_scatter.set_data(self.right_vertices[:, 0], self.right_vertices[:, 1])
 
     def delete_vertice(self, index: int):
+        """
+        Deletes the given vertices of the given index
+
+        @param index: Index of the deleted vertice
+        """
         self.left_vertices = np.delete(self.left_vertices, index, axis=0)
         self.right_vertices = np.delete(self.right_vertices, index, axis=0)
         self.left_scatter.set_data(self.left_vertices[:, 0], self.left_vertices[:, 1])
