@@ -1635,8 +1635,9 @@ class DynamicCanvasController(FigureCanvas):
                 self.create_temp_lanelet_vertices()
                 self.parent().road_network_toolbox.lanelet_controller.update_lanelet(self.temp_edited_lanelet)
 
-            elif ((add_vertice is not None and action == add_vertice) or
-                  (delete_vertice is not None and action == delete_vertice)):
+            elif (add_vertice is not None and action == add_vertice) or (
+                delete_vertice is not None and action == delete_vertice
+            ):
                 if min(left) < min(right):
                     ind = np.argmin(left)
                     index = ind
@@ -1682,10 +1683,12 @@ class DynamicCanvasController(FigureCanvas):
         center_vertices = copy.deepcopy(self.left_vertices)
 
         for i in range(len(self.left_vertices)):
-            center_vertices[i] = np.array([
-                (self.left_vertices[i][0] + self.right_vertices[i][0]) / 2,
-                (self.left_vertices[i][1] + self.right_vertices[i][1]) / 2
-            ])
+            center_vertices[i] = np.array(
+                [
+                    (self.left_vertices[i][0] + self.right_vertices[i][0]) / 2,
+                    (self.left_vertices[i][1] + self.right_vertices[i][1]) / 2,
+                ]
+            )
 
         self.temp_edited_lanelet = Lanelet(
             self.left_vertices,
