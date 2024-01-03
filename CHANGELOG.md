@@ -10,7 +10,7 @@
 - OpenDRIVE to CommonRoad conversion: considering line markings of inner shared lanelet boundaries
 - Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
 - Optional MGRS tag for nodes in CR to Lanelet2 conversion (comptaibility with Autoware)
-- Functionality to edit the vertices of a Lanelet in the Canvas
+- Functionality to edit vertices of a lanelet in the canvas
 - Eclipse-SUMO Python package dependency for better integration of SUMO
 - cr2lanelet: Option of local coordinates for traffic lights
 - cr2lanelet: Static height for traffic lights (1.2m) until official height support in CommonRoad

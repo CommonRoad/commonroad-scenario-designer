@@ -1546,7 +1546,7 @@ class DynamicCanvasController(FigureCanvas):
             return False
 
     @logger.log
-    def show_vertices(self, lanelet):
+    def show_vertices(self, lanelet: Lanelet):
         """
         Enables the display of the point of each vertice of the lanelet to allow for a manipulation of the user
 

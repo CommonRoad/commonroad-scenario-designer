@@ -1,6 +1,6 @@
 import copy
 import math
-from typing import List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 from commonroad.scenario.lanelet import (
@@ -298,7 +298,7 @@ class AddLaneletController:
         self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
 
     @logger.log
-    def update_lanelet(self, new_lanelet: Lanelet = None):
+    def update_lanelet(self, new_lanelet: Optional[Lanelet] = None):
         """
         Updates a given lanelet based on the information configured by the user.
 
