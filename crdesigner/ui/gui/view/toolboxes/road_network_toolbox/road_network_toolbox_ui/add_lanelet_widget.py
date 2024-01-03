@@ -497,9 +497,9 @@ class AddLaneletWidget():
         self.toolbox.curved_check_button = CollapsibleCheckBox("Curved Lanelet", layout_curved_box,
                                                                self.toolbox.layout_lanelet_adding_groupbox, index)
         self.toolbox.lanelet_radius.textChanged.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.
-                                                        dynamic.draw_curved_lanelet())
+                                                        dynamic.draw_editable_lanelet())
         self.toolbox.lanelet_angle.textChanged.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.
-                                                       dynamic.draw_curved_lanelet())
+                                                       dynamic.draw_editable_lanelet())
         self.toolbox.curved_check_button.button.clicked.connect(
                 lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.
                 dynamic.display_curved_lanelet(self.toolbox.curved_check_button.isChecked(), True))

@@ -54,6 +54,8 @@ class ToolBarController:
         # Cropp Map
         self.tool_bar_ui.crop_map.triggered.connect(lambda: self._crop_map(self.tool_bar_ui.crop_map.isChecked()))
 
+        self.tool_bar_ui.cancel_edit_vertices.triggered.connect(lambda: self._cancel_edit_vertices())
+
     def _road_network_toolbox_show(self):
         """
             Show the network Toolbox.
@@ -186,3 +188,8 @@ class ToolBarController:
         self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_crop_map(is_checked)
 
 
+    def _cancel_edit_vertices(self):
+        """
+        Cancels the display of the vertices
+        """
+        self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.cancel_edit_vertices()

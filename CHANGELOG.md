@@ -9,6 +9,7 @@
 - Test Case for local geonamesID functionality
 - Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
 - Optional MGRS tag for nodes in CR to Lanelet2 conversion (comptaibility with Autoware)
+- Functionality to edit the vertices of a Lanelet in the Canvas
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
