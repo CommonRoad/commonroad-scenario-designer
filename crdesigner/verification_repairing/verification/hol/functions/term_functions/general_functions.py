@@ -1,8 +1,9 @@
 from typing import Union
+
+from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
-from commonroad.scenario.intersection import Intersection
 
 
 def el_id(element: Union[Lanelet, TrafficSign, TrafficLight, Intersection]) -> int:
@@ -21,8 +22,8 @@ def el_id(element: Union[Lanelet, TrafficSign, TrafficLight, Intersection]) -> i
     if type(element) is Intersection:
         return element.intersection_id
     # if type(element) is IncomingGroup:
-        # return element.incoming_id
+    # return element.incoming_id
     # if type(element) is OutgoingGroup:
-        # return element.outgoing_id
+    # return element.outgoing_id
     # if type(element) is StopLine:
-        # return element.stop_line_id
+    # return element.stop_line_id

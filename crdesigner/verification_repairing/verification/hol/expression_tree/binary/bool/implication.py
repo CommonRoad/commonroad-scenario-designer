@@ -1,13 +1,19 @@
-from crdesigner.verification_repairing.verification.hol.expression_tree.binary.binary import Binary
-from crdesigner.verification_repairing.verification.hol.expression_tree.expression import Expression
-from crdesigner.verification_repairing.verification.hol.expression_tree.symbols import Symbol
+from crdesigner.verification_repairing.verification.hol.expression_tree.binary.binary import (
+    Binary,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.expression import (
+    Expression,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.symbols import (
+    Symbol,
+)
 
 
 class Implication(Binary):
     """
     Class representing an implication operator.
     """
-    
+
     def __init__(self, left_expr: Expression, right_expr: Expression):
         super().__init__(Symbol.IMPLICATION.value, left_expr, right_expr)
 

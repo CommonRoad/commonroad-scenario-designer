@@ -1,15 +1,27 @@
-from PyQt6.QtCore import *
-from PyQt6.QtGui import *
-from PyQt6.QtWidgets import *
-import math
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QDoubleValidator, QFont
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QFormLayout,
+    QFrame,
+    QGridLayout,
+    QGroupBox,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QTableWidget,
+    QVBoxLayout,
+)
 
 from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox, PositionButton
 
 
-class TrafficSignWidget():
+class TrafficSignWidget:
     """
     Inherits the traffic_sign widget setup
     """
+
     def __init__(self, toolbox):
         self.toolbox = toolbox
 
@@ -38,7 +50,7 @@ class TrafficSignWidget():
         self.toolbox.traffic_sign_element_label = QLabel("Traffic Sign Elements:")
         self.toolbox.traffic_sign_element_table = QTableWidget()
         self.toolbox.traffic_sign_element_table.setColumnCount(2)
-        self.toolbox.traffic_sign_element_table.setHorizontalHeaderLabels(['Traffic Sign ID', 'Additional Value'])
+        self.toolbox.traffic_sign_element_table.setHorizontalHeaderLabels(["Traffic Sign ID", "Additional Value"])
         self.toolbox.traffic_sign_element_table.resizeColumnsToContents()
         self.toolbox.traffic_sign_element_table.setColumnWidth(0, 180)
         self.toolbox.traffic_sign_element_table.setMaximumHeight(100)
@@ -56,8 +68,9 @@ class TrafficSignWidget():
         traffic_sign_information_groupbox.setLayout(traffic_sign_information_layout)
         traffic_sign_information_layout.addRow(label_general)
 
-        button_traffic_sign_position = PositionButton(self.toolbox.x_position_traffic_sign,
-                                                      self.toolbox.y_position_traffic_sign, self.toolbox)
+        button_traffic_sign_position = PositionButton(
+            self.toolbox.x_position_traffic_sign, self.toolbox.y_position_traffic_sign, self.toolbox
+        )
         traffic_sign_position = QGridLayout()
         traffic_sign_position.addWidget(QLabel("x: "), 1, 0)
         traffic_sign_position.addWidget(self.toolbox.x_position_traffic_sign, 1, 1)
@@ -73,8 +86,9 @@ class TrafficSignWidget():
         traffic_sign_information_layout.addRow("Referenced lanelets", self.toolbox.referenced_lanelets_traffic_sign)
         traffic_sign_information_layout.addRow(self.toolbox.traffic_sign_element_label)
         traffic_sign_information_layout.addRow(self.toolbox.traffic_sign_element_table)
-        traffic_sign_information_layout.addRow(self.toolbox.button_add_traffic_sign_element,
-                                               self.toolbox.button_remove_traffic_sign_element)
+        traffic_sign_information_layout.addRow(
+            self.toolbox.button_add_traffic_sign_element, self.toolbox.button_remove_traffic_sign_element
+        )
         traffic_sign_layout.addRow(self.toolbox.button_add_traffic_sign)
         traffic_sign_layout.addRow("Selected Traffic Sign", self.toolbox.selected_traffic_sign)
         traffic_sign_layout.addRow(self.toolbox.button_update_traffic_sign)

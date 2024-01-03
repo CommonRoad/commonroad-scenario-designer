@@ -1,8 +1,14 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
-from crdesigner.verification_repairing.verification.hol.expression_tree.expression import Expression
-from crdesigner.verification_repairing.verification.hol.expression_tree.symbols import Symbol
-from crdesigner.verification_repairing.verification.hol.expression_tree.unary.unary import Unary
+from crdesigner.verification_repairing.verification.hol.expression_tree.expression import (
+    Expression,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.symbols import (
+    Symbol,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.unary.unary import (
+    Unary,
+)
 
 
 class Not(Unary):

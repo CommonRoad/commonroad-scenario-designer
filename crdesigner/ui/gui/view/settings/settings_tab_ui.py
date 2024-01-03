@@ -1,11 +1,22 @@
-from typing import Union, List
+from typing import List, Union
 
-from PyQt6 import QtCore, QtWidgets, QtGui
-from PyQt6.QtWidgets import QDialog, QCheckBox, QLabel, QFormLayout, QSpinBox, QDoubleSpinBox, QTextEdit, QLineEdit
 from commonroad.common.util import Interval
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QDialog,
+    QDoubleSpinBox,
+    QFormLayout,
+    QLabel,
+    QLineEdit,
+    QSpinBox,
+    QTextEdit,
+)
 
-from crdesigner.config.config_base import Attribute
-from crdesigner.ui.gui.utilities.size_policy import create_size_policy_for_settings_elements
+from crdesigner.common.config.config_base import Attribute
+from crdesigner.ui.gui.utilities.size_policy import (
+    create_size_policy_for_settings_elements,
+)
 
 
 def _extract_interval(interval: str) -> Interval:
@@ -41,8 +52,16 @@ class SettingsTabUI:
     Class for creating the settings tabs based of the Attributes and their layout.
     """
 
-    def __init__(self, layout: List[List[Union[Attribute, str]]], settings_ui, factor: float, widthf: int, widthm: int,
-                 height: int, font_size: int):
+    def __init__(
+        self,
+        layout: List[List[Union[Attribute, str]]],
+        settings_ui,
+        factor: float,
+        widthf: int,
+        widthm: int,
+        height: int,
+        font_size: int,
+    ):
         """Initialize the settings tab."""
         self.factor = factor
         self.widthf = int(widthf * factor)
@@ -248,8 +267,14 @@ class SettingsTabUI:
 
         return hbox, label
 
-    def _insert_in_hbox(self, attribute: Attribute, column: int, hbox: QtWidgets.QHBoxLayout, label: QtWidgets.QLabel,
-                        widget: QtWidgets.QWidget):
+    def _insert_in_hbox(
+        self,
+        attribute: Attribute,
+        column: int,
+        hbox: QtWidgets.QHBoxLayout,
+        label: QtWidgets.QLabel,
+        widget: QtWidgets.QWidget,
+    ):
         # Add label and textbox to the layout
         hbox.addWidget(label)
         hbox.addWidget(widget)
@@ -308,7 +333,10 @@ class SettingsTabUI:
                 input_widget = QCheckBox(dialog)
                 input_widget.setChecked(value)
                 input_widget.stateChanged.connect(
-                        lambda _state, _name=name: attribute.value.update({_name: _state == QtCore.Qt.Checked}))
+                    lambda _state, _name=name: attribute.value.update(
+                        {_name: _state == QtCore.Qt.CheckState.Checked.value}
+                    )
+                )
                 attribute.subscribe(lambda _value, _name=name, _iw=input_widget: _iw.setChecked(_value[_name]))
 
             elif isinstance(value, int):
@@ -336,8 +364,9 @@ class SettingsTabUI:
 
         # Create button box
         button_box = QtWidgets.QDialogButtonBox(QtCore.Qt.Orientation.Horizontal)
-        button_box.setStandardButtons(QtWidgets.QDialogButtonBox.StandardButton.Cancel |
-                                      QtWidgets.QDialogButtonBox.StandardButton.Ok)
+        button_box.setStandardButtons(
+            QtWidgets.QDialogButtonBox.StandardButton.Cancel | QtWidgets.QDialogButtonBox.StandardButton.Ok
+        )
         button_box.setObjectName("button_box")
 
         # Connect button box to dialog

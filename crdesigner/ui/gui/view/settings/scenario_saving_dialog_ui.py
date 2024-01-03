@@ -1,14 +1,24 @@
-from PyQt6.QtCore import *
-from PyQt6.QtGui import *
-from PyQt6.QtWidgets import *
-from commonroad.scenario.scenario import Tag, TimeOfDay, Weather, Underground
+from commonroad.scenario.scenario import Tag, TimeOfDay, Underground, Weather
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QDoubleValidator, QFont, QIntValidator
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSpinBox,
+    QWidget,
+)
 
 from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox
 
 
 class ScenarioSavingDialogUI(QWidget):
-
     def __init__(self):
         super().__init__()
 

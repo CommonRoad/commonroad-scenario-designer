@@ -1,13 +1,16 @@
 import dataclasses
 import inspect
-from dataclasses import dataclass, field
+import os
 import pathlib
-from typing import Dict, Union, Any, List, Optional
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Union
+
 from omegaconf import OmegaConf
 
 from crdesigner.verification_repairing.verification.formula_ids import FormulaID
-import os
-from crdesigner.verification_repairing.verification.hol.formula_manager import FormulaManager
+from crdesigner.verification_repairing.verification.hol.formula_manager import (
+    FormulaManager,
+)
 
 
 def _dict_to_params(dict_params: Dict, cls: Any) -> Any:
@@ -72,7 +75,7 @@ class BaseParam:
             raise KeyError(f"{key} is not a parameter of {self.__class__.__name__}") from e
 
     @classmethod
-    def load(cls, file_path: Union[pathlib.Path, str], validate_types: bool = True) -> 'BaseParam':
+    def load(cls, file_path: Union[pathlib.Path, str], validate_types: bool = True) -> "BaseParam":
         """
         Loads config file and creates parameter class.
 
@@ -95,8 +98,9 @@ class BaseParam:
         :param file_path: Path where yaml file should be stored.
         """
         # Avoid saving private attributes
-        dict_cfg = dataclasses.asdict(self, dict_factory=lambda items: {key: val for key, val in items if
-                                                                        not key.startswith("_")})
+        dict_cfg = dataclasses.asdict(
+            self, dict_factory=lambda items: {key: val for key, val in items if not key.startswith("_")}
+        )
         OmegaConf.save(OmegaConf.create(dict_cfg), file_path, resolve=True)
 
 
@@ -115,8 +119,9 @@ class VerificationParams:
     potential_border_thresh: float = 1e-3
     buffer_size: float = 10.0
 
-    assert num_threads > 0, 'At least one process is required!'
-    assert max_iterations >= 0, 'Number of iteration must be positive!'
+    assert num_threads > 0, "At least one process is required!"
+    assert max_iterations >= 0, "Number of iteration must be positive!"
+
 
 @dataclass
 class PartitioningParams(BaseParam):
@@ -148,10 +153,12 @@ class EvaluationParams(BaseParam):
     # Boolean indicates whether the map should be partitioned before evaluation.
     partitioned: bool = False
 
-    assert invalid_states_draw_dir is None or os.path.exists(invalid_states_draw_dir), \
-        'The path to the drawing directory is not existent!'
-    assert partition_draw_dir is None or (os.path.exists(partition_draw_dir) and partitioned), \
-        'The path to the drawing directory is not existent or partitioning mode is not selected!'
+    assert invalid_states_draw_dir is None or os.path.exists(
+        invalid_states_draw_dir
+    ), "The path to the drawing directory is not existent!"
+    assert partition_draw_dir is None or (
+        os.path.exists(partition_draw_dir) and partitioned
+    ), "The path to the drawing directory is not existent or partitioning mode is not selected!"
 
 
 @dataclass

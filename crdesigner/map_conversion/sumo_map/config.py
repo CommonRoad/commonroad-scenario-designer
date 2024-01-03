@@ -10,10 +10,10 @@ from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
 from sumocr.sumo_config.default import DefaultConfig
 
-EGO_ID_START = 'egoVehicle'
+EGO_ID_START = "egoVehicle"
 
 # CommonRoad ID prefixes
-ID_DICT = {'obstacleVehicle': 3, 'egoVehicle': 4}
+ID_DICT = {"obstacleVehicle": 3, "egoVehicle": 4}
 
 
 class SumoConfig(DefaultConfig):
@@ -43,7 +43,7 @@ class SumoConfig(DefaultConfig):
         return obj
 
     # logging level for logging module
-    logging_level = 'INFO'  # select DEBUG, INFO, WARNING, ERROR, CRITICAL
+    logging_level = "INFO"  # select DEBUG, INFO, WARNING, ERROR, CRITICAL
 
     # conversion
     country_id: SupportedTrafficSignCountry = SupportedTrafficSignCountry.ZAMUNDA
@@ -82,7 +82,7 @@ class SumoConfig(DefaultConfig):
     departure_time_ego = 3
 
     ##
-    ## ego vehicle sync parameters
+    # ego vehicle sync parameters
     ##
     # Time window to detect the lanelet change in seconds
     lanelet_check_time_window = int(2 / dt)
@@ -96,7 +96,7 @@ class SumoConfig(DefaultConfig):
     lane_change_tol = 0.00
 
     ##
-    ## TRAFFIC GENERATION
+    # TRAFFIC GENERATION
     ##
     # probability that vehicles will start at the fringe of the network (edges without
     # predecessor), and end at the fringe of the network (edges without successor).
@@ -123,7 +123,7 @@ class SumoConfig(DefaultConfig):
         ObstacleType.TRUCK: 0.8,
         ObstacleType.BUS: 0.3,
         ObstacleType.BICYCLE: 0.2,
-        ObstacleType.PEDESTRIAN: 0
+        ObstacleType.PEDESTRIAN: 0,
     }
 
     # default vehicle attributes to determine edge restrictions
@@ -131,30 +131,30 @@ class SumoConfig(DefaultConfig):
     # vehicle attributes
     veh_params = {
         # maximum length
-        'length': {
+        "length": {
             ObstacleType.CAR: 5.0,
             ObstacleType.TRUCK: 7.5,
             ObstacleType.BUS: 12.4,
-            ObstacleType.BICYCLE: 2.,
-            ObstacleType.PEDESTRIAN: 0.415
+            ObstacleType.BICYCLE: 2.0,
+            ObstacleType.PEDESTRIAN: 0.415,
         },
         # maximum width
-        'width': {
+        "width": {
             ObstacleType.CAR: 2.0,
             ObstacleType.TRUCK: 2.6,
             ObstacleType.BUS: 2.7,
             ObstacleType.BICYCLE: 0.68,
-            ObstacleType.PEDESTRIAN: 0.678
+            ObstacleType.PEDESTRIAN: 0.678,
         },
-        'minGap': {
+        "minGap": {
             ObstacleType.CAR: 2.5,
             ObstacleType.TRUCK: 2.5,
             ObstacleType.BUS: 2.5,
             # default 0.5
-            ObstacleType.BICYCLE: 1.,
-            ObstacleType.PEDESTRIAN: 0.25
+            ObstacleType.BICYCLE: 1.0,
+            ObstacleType.PEDESTRIAN: 0.25,
         },
-        'accel': {
+        "accel": {
             # default 2.9 m/s²
             ObstacleType.CAR: Interval(1.8, 2.9),
             # default 1.3
@@ -166,7 +166,7 @@ class SumoConfig(DefaultConfig):
             # default 1.5
             ObstacleType.PEDESTRIAN: Interval(1.3, 1.7),
         },
-        'decel': {
+        "decel": {
             # default 7.5 m/s²
             ObstacleType.CAR: Interval(4, 6.5),
             # default 4
@@ -178,7 +178,7 @@ class SumoConfig(DefaultConfig):
             # default 2
             ObstacleType.PEDESTRIAN: Interval(1.5, 2.5),
         },
-        'maxSpeed': {
+        "maxSpeed": {
             # default 180/3.6 m/s
             ObstacleType.CAR: 180 / 3.6,
             # default 130/3.6
@@ -189,7 +189,7 @@ class SumoConfig(DefaultConfig):
             ObstacleType.BICYCLE: 25 / 3.6,
             # default 5.4/3.6
             ObstacleType.PEDESTRIAN: 5.4 / 3.6,
-        }
+        },
     }
 
     # vehicle behavior
@@ -207,15 +207,15 @@ class SumoConfig(DefaultConfig):
     'lcMaxSpeedLatStanding': max. lateral speed when vehicle is standing (avoids lateral sliding in standstill)
     """
     driving_params = {
-        'lcStrategic': Interval(10, 100),
-        'lcSpeedGain': Interval(3, 20),
-        'lcCooperative': Interval(1, 3),
-        'sigma': Interval(0.5, 0.65),
-        'speedDev': Interval(0.1, 0.2),
-        'speedFactor': Interval(0.9, 1.1),
-        'lcImpatience': Interval(0, 0.5),
-        'impatience': Interval(0, 0.5),
-        'lcMaxSpeedLatStanding': 0,
-        'lcSigma': Interval(0.1, 0.2),
-        'lcKeepRight': Interval(0.8, 0.9)
+        "lcStrategic": Interval(10, 100),
+        "lcSpeedGain": Interval(3, 20),
+        "lcCooperative": Interval(1, 3),
+        "sigma": Interval(0.5, 0.65),
+        "speedDev": Interval(0.1, 0.2),
+        "speedFactor": Interval(0.9, 1.1),
+        "lcImpatience": Interval(0, 0.5),
+        "impatience": Interval(0, 0.5),
+        "lcMaxSpeedLatStanding": 0,
+        "lcSigma": Interval(0.1, 0.2),
+        "lcKeepRight": Interval(0.8, 0.9),
     }

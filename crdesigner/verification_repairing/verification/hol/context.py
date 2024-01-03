@@ -1,4 +1,4 @@
-from typing import Dict, Set, Any, Callable
+from typing import Any, Callable, Dict, Set
 
 
 class Context:
@@ -6,9 +6,12 @@ class Context:
     Class representing a model.
     """
 
-    def __init__(self, domain_vals: Dict[str, Set[Any]],
-                 predicate_funcs: Dict[str, Callable],  # [[Any, ...], bool]],
-                 function_funcs: Dict[str, Callable]):  # [[Any, ...], Any]]):
+    def __init__(
+        self,
+        domain_vals: Dict[str, Set[Any]],
+        predicate_funcs: Dict[str, Callable],  # [[Any, ...], bool]],
+        function_funcs: Dict[str, Callable],
+    ):  # [[Any, ...], Any]]):
         """
         Constructor.
 

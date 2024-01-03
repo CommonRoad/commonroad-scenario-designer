@@ -1,9 +1,17 @@
 from typing import Any, Tuple, Union
 
-from crdesigner.verification_repairing.verification.hol.expression_tree.domain.domain import Domain
-from crdesigner.verification_repairing.verification.hol.expression_tree.domain.dynamic import DynamicDomain
-from crdesigner.verification_repairing.verification.hol.expression_tree.domain.fixed import FixedDomain
-from crdesigner.verification_repairing.verification.hol.expression_tree.term.variable import Variable
+from crdesigner.verification_repairing.verification.hol.expression_tree.domain.domain import (
+    Domain,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.domain.dynamic import (
+    DynamicDomain,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.domain.fixed import (
+    FixedDomain,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.term.variable import (
+    Variable,
+)
 
 
 class VarDomainIterator:
@@ -12,7 +20,7 @@ class VarDomainIterator:
     the fixed or dynamic domains.
     """
 
-    def __init__(self, var: Variable, domain: Domain, next_iter: 'VarDomainIterator' = None):
+    def __init__(self, var: Variable, domain: Domain, next_iter: "VarDomainIterator" = None):
         """
         Constructor.
 
@@ -46,12 +54,12 @@ class VarDomainIterator:
         self._domain = domain
 
     @property
-    def next_iter(self) -> 'VarDomainIterator':
+    def next_iter(self) -> "VarDomainIterator":
         """Next domain iterator."""
         return self._next_iter
 
     @next_iter.setter
-    def next_iter(self, next_iter: 'VarDomainIterator'):
+    def next_iter(self, next_iter: "VarDomainIterator"):
         self._next_iter = next_iter
 
     @property

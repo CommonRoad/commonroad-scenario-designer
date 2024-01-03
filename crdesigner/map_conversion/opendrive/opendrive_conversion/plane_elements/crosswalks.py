@@ -1,11 +1,13 @@
-import numpy as np
 from typing import List
+
+import numpy as np
+
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
 
 
 def get_crosswalks(road) -> List[ConversionLanelet]:
-    """ identify and convert crosswalks
+    """identify and convert crosswalks
 
     :param road: The road object from which to extract signals.
     :type road: :class:`Road`
@@ -16,14 +18,16 @@ def get_crosswalks(road) -> List[ConversionLanelet]:
     for crosswalk in [obj for obj in road.objects if obj.type == "crosswalk"]:
         pos, tan, _, _ = road.planView.calc(crosswalk.s, compute_curvature=False)
         position = np.array(
-                [pos[0] + crosswalk.t * np.cos(tan + np.pi / 2), pos[1] + crosswalk.t * np.sin(tan + np.pi / 2)])
+            [pos[0] + crosswalk.t * np.cos(tan + np.pi / 2), pos[1] + crosswalk.t * np.sin(tan + np.pi / 2)]
+        )
         corners = np.empty((0, 2))
         # origin of local u/v coordinate system that hdg rotates about
         o = np.atleast_2d(position)
         # rotation matrix
         rotation_angle = tan + crosswalk.hdg
-        rotation_matrix = np.array([[np.cos(rotation_angle), -np.sin(rotation_angle)],
-                                    [np.sin(rotation_angle), np.cos(rotation_angle)]])
+        rotation_matrix = np.array(
+            [[np.cos(rotation_angle), -np.sin(rotation_angle)], [np.sin(rotation_angle), np.cos(rotation_angle)]]
+        )
 
         for outline in crosswalk.outline:
             p = np.atleast_2d([position[0] + outline.u, position[1] + outline.v])
@@ -38,7 +42,8 @@ def get_crosswalks(road) -> List[ConversionLanelet]:
 
         center_vertices = (left_vertices + right_vertices) / 2
         # create ConversionLanelet
-        lanelet = ConversionLanelet(None, left_vertices, center_vertices, right_vertices,
-                                    generate_unique_id(), lanelet_type='crosswalk')
+        lanelet = ConversionLanelet(
+            None, left_vertices, center_vertices, right_vertices, generate_unique_id(), lanelet_type="crosswalk"
+        )
         crosswalks.append(lanelet)
     return crosswalks

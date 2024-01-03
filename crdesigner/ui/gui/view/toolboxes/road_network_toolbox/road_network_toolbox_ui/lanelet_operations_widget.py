@@ -1,9 +1,23 @@
-from PyQt6.QtCore import *
-from PyQt6.QtGui import *
-from PyQt6.QtWidgets import *
-import math
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QDoubleValidator
+from PyQt6.QtWidgets import (
+    QButtonGroup,
+    QCheckBox,
+    QComboBox,
+    QFormLayout,
+    QFrame,
+    QGridLayout,
+    QGroupBox,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QRadioButton,
+    QSpinBox,
+    QVBoxLayout,
+)
 
-class LaneletOperationsWidget():
+
+class LaneletOperationsWidget:
     """
     Inherits the lanelet operations widget setup
     """
@@ -61,15 +75,17 @@ class LaneletOperationsWidget():
         lanelet_operations_selection_groupbox = QGroupBox()
         lanelet_operations_selection_groupbox.setLayout(lanelet_operations_selection_groupbox_layout)
         lanelet_operations_selection_groupbox_layout.addRow("[1] Selected lanelet", self.toolbox.selected_lanelet_one)
-        lanelet_operations_selection_groupbox_layout.addRow("[2] Previously selected",
-                                                            self.toolbox.selected_lanelet_two)
+        lanelet_operations_selection_groupbox_layout.addRow(
+            "[2] Previously selected", self.toolbox.selected_lanelet_two
+        )
         lanelet_operations_layout.addRow(lanelet_operations_selection_groupbox)
 
         lanelet_operations_adjacency_groupbox_layout = QFormLayout()
         lanelet_operations_adjacency_groupbox = QGroupBox()
         lanelet_operations_adjacency_groupbox.setLayout(lanelet_operations_adjacency_groupbox_layout)
-        lanelet_operations_adjacency_groupbox_layout.addRow(self.toolbox.create_adjacent_left_selection,
-                                                            self.toolbox.create_adjacent_right_selection)
+        lanelet_operations_adjacency_groupbox_layout.addRow(
+            self.toolbox.create_adjacent_left_selection, self.toolbox.create_adjacent_right_selection
+        )
         lanelet_operations_adjacency_groupbox_layout.addRow(self.toolbox.create_adjacent_same_direction_selection)
         lanelet_operations_adjacency_groupbox_layout.addRow(self.toolbox.button_create_adjacent)
         lanelet_operations_layout.addRow(lanelet_operations_adjacency_groupbox)
