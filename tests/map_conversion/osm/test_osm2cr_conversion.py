@@ -30,12 +30,10 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
 
         converted_path = os.path.join(self.out_path, osm_file_name + "_converted_scenario.xml")
 
-        # create and save converter scenario
-        graph_scenario = converter.GraphScenario(path)
-        graph_scenario.save_as_cr(converted_path)
-        cr_scenario, cr_planning_problem = CRDesignerFileReader(converted_path).open()
+        osm_graph = converter.GraphScenario(path).graph
+        cr_scenario = convert_to_scenario(osm_graph)
 
-        fw = CommonRoadFileWriter(scenario=cr_scenario, planning_problem_set=PlanningProblemSet())
+        fw = CRDesignerFileWriter(scenario=cr_scenario, planning_problem_set=PlanningProblemSet())
         fw.write_to_file(
             filename=self.out_path + "/" + osm_file_name + "_converted_scenario.xml",
             overwrite_existing_file=OverwriteExistingFile.ALWAYS,
