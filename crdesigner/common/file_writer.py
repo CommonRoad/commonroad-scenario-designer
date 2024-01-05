@@ -1,4 +1,3 @@
-import copy
 from typing import Set, Union
 
 from commonroad.common.file_writer import CommonRoadFileWriter

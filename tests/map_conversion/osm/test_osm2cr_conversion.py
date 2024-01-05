@@ -8,7 +8,6 @@ from commonroad.scenario.scenario import Scenario
 from lxml import etree
 
 import crdesigner.map_conversion.osm2cr.converter_modules.converter as converter
-from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import (
     convert_to_scenario,

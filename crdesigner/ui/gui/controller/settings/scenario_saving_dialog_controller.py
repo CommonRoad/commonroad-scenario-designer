@@ -14,7 +14,6 @@ from commonroad.scenario.scenario import (
     Underground,
     Weather,
 )
-from PyQt6.QtWidgets import *
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
 from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
