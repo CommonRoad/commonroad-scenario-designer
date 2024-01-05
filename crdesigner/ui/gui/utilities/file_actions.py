@@ -1,6 +1,7 @@
 import logging
 import os
 
+from commonroad.common.util import FileFormat
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario
 from PyQt6.QtGui import QIcon
