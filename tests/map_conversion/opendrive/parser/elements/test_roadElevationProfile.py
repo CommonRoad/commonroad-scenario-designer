@@ -1,5 +1,9 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadElevationProfile import *
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadElevationProfile import (
+    ElevationProfile,
+    ElevationRecord,
+)
 
 
 class TestRoadElevationProfile(unittest.TestCase):
@@ -30,5 +34,5 @@ class TestRoadElevationProfile(unittest.TestCase):
         self.assertTrue(elevation2 in elevation_profile.elevations)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

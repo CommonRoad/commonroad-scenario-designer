@@ -1,23 +1,28 @@
-from typing import Callable, Optional
-
-from PyQt6.QtCore import QObject, pyqtSignal
 import copy
+from typing import Callable, List, Optional, Set, Union
 
-from commonroad.scenario.intersection import Intersection
-from commonroad.scenario.scenario import Scenario, ScenarioID
-from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
+import numpy as np
 from commonroad.common.util import Interval
-from commonroad.scenario.traffic_sign import *
-from commonroad.scenario.obstacle import DynamicObstacle, Obstacle, StaticObstacle, EnvironmentObstacle, PhantomObstacle
+from commonroad.geometry.shape import Rectangle, Shape
+from commonroad.scenario.intersection import Intersection
+from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
+from commonroad.scenario.obstacle import (
+    DynamicObstacle,
+    EnvironmentObstacle,
+    Obstacle,
+    PhantomObstacle,
+    StaticObstacle,
+)
+from commonroad.scenario.scenario import Scenario, ScenarioID
 from commonroad.scenario.traffic_light import TrafficLight
-from commonroad.geometry.shape import Shape, Rectangle
+from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficSign
+from PyQt6.QtCore import QObject, pyqtSignal
 
-from crdesigner.config.logging import logger
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
 
 class ScenarioModel(QObject):
-
     scenario_changed = pyqtSignal()
 
     def __init__(self):
@@ -55,13 +60,13 @@ class ScenarioModel(QObject):
             new_scenario = self._current_scenario()
             # shorten the scenario list to current index in case undo was used
             self.__current_scenario_index += 1
-            self.__scenarios = self.__scenarios[:self.__current_scenario_index]
+            self.__scenarios = self.__scenarios[: self.__current_scenario_index]
 
             self.__scenarios.append(copy.deepcopy(new_scenario))
             self.__updated_scenario = True
 
     def _current_scenario(self) -> Optional[Scenario]:
-        """ Private function to make the calls in this class better readable"""
+        """Private function to make the calls in this class better readable"""
         if self.__current_scenario_index == -1:
             return None
         else:
@@ -190,14 +195,24 @@ class ScenarioModel(QObject):
         @param new_lanelet: new lanelet
         """
         old_lanelet_id = old_lanelet.lanelet_id
-        successors = [la.lanelet_id for la in self._current_scenario().lanelet_network.lanelets if
-                      old_lanelet_id in la.successor]
-        predecessors = [la.lanelet_id for la in self._current_scenario().lanelet_network.lanelets if
-                        old_lanelet_id in la.predecessor]
-        adjacent_left = [(la.lanelet_id, la.adj_left_same_direction) for la in
-                         self._current_scenario().lanelet_network.lanelets if old_lanelet_id == la.adj_left]
-        adjacent_right = [(la.lanelet_id, la.adj_right_same_direction) for la in
-                          self._current_scenario().lanelet_network.lanelets if old_lanelet_id == la.adj_right]
+        successors = [
+            la.lanelet_id for la in self._current_scenario().lanelet_network.lanelets if old_lanelet_id in la.successor
+        ]
+        predecessors = [
+            la.lanelet_id
+            for la in self._current_scenario().lanelet_network.lanelets
+            if old_lanelet_id in la.predecessor
+        ]
+        adjacent_left = [
+            (la.lanelet_id, la.adj_left_same_direction)
+            for la in self._current_scenario().lanelet_network.lanelets
+            if old_lanelet_id == la.adj_left
+        ]
+        adjacent_right = [
+            (la.lanelet_id, la.adj_right_same_direction)
+            for la in self._current_scenario().lanelet_network.lanelets
+            if old_lanelet_id == la.adj_right
+        ]
 
         self._update_scenario()
         self._current_scenario().remove_lanelet(old_lanelet)
@@ -212,8 +227,9 @@ class ScenarioModel(QObject):
             self._current_scenario().lanelet_network.find_lanelet_by_id(la_info[0]).adj_left_same_direction = la_info[1]
         for la_info in adjacent_right:
             self._current_scenario().lanelet_network.find_lanelet_by_id(la_info[0]).adj_right = old_lanelet_id
-            self._current_scenario().lanelet_network.find_lanelet_by_id(
-                    la_info[0]).adj_right_same_direction = la_info[1]
+            self._current_scenario().lanelet_network.find_lanelet_by_id(la_info[0]).adj_right_same_direction = la_info[
+                1
+            ]
 
         self.notify_all()
 
@@ -234,8 +250,10 @@ class ScenarioModel(QObject):
                 self._current_scenario().remove_traffic_sign(self.find_traffic_sign_by_id(traffic_sign_id))
 
         for traffic_light_id in traffic_lights:
-            if len(self._current_scenario().lanelet_network
-                           .get_traffic_lights_referenced_lanelets(traffic_light_id)) == 1:
+            if (
+                len(self._current_scenario().lanelet_network.get_traffic_lights_referenced_lanelets(traffic_light_id))
+                == 1
+            ):
                 self._current_scenario().remove_traffic_light(self.find_traffic_light_by_id(traffic_light_id))
 
         MapCreator.remove_lanelet(lanelet_id, self._current_scenario().lanelet_network)
@@ -425,8 +443,9 @@ class ScenarioModel(QObject):
         self.notify_all()
 
     @logger.log
-    def create_three_way_intersection(self, width: float, diameter: int, incoming_length: int,
-                                      add_traffic_signs: bool, add_traffic_lights: bool):
+    def create_three_way_intersection(
+        self, width: float, diameter: int, incoming_length: int, add_traffic_signs: bool, add_traffic_lights: bool
+    ):
         """
         Creates a three-way intersection ond adds it to the scenario.
 
@@ -438,10 +457,17 @@ class ScenarioModel(QObject):
         """
         self._update_scenario()
         country_signs = globals()[
-            "TrafficSignID" + SupportedTrafficSignCountry(self.get_country_id()).name.capitalize()]
+            "TrafficSignID" + SupportedTrafficSignCountry(self.get_country_id()).name.capitalize()
+        ]
         intersection, new_traffic_signs, new_traffic_lights, new_lanelets = MapCreator.create_three_way_intersection(
-                width, diameter, incoming_length, self._current_scenario(), add_traffic_signs, add_traffic_lights,
-                country_signs)
+            width,
+            diameter,
+            incoming_length,
+            self._current_scenario(),
+            add_traffic_signs,
+            add_traffic_lights,
+            country_signs,
+        )
         self._current_scenario().add_objects(intersection)
         self._current_scenario().add_objects(new_lanelets)
         self._current_scenario().add_objects(new_traffic_signs)
@@ -449,8 +475,9 @@ class ScenarioModel(QObject):
         self.notify_all()
 
     @logger.log
-    def create_four_way_intersection(self, width: float, diameter: int, incoming_length: int,
-                                     add_traffic_signs: bool, add_traffic_lights: bool):
+    def create_four_way_intersection(
+        self, width: float, diameter: int, incoming_length: int, add_traffic_signs: bool, add_traffic_lights: bool
+    ):
         """
         Creates a four-way intersection ond adds it to the scenario.
 
@@ -462,10 +489,17 @@ class ScenarioModel(QObject):
         """
         self._update_scenario()
         country_signs = globals()[
-            "TrafficSignID" + SupportedTrafficSignCountry(self.get_country_id()).name.capitalize()]
+            "TrafficSignID" + SupportedTrafficSignCountry(self.get_country_id()).name.capitalize()
+        ]
         intersection, new_traffic_signs, new_traffic_lights, new_lanelets = MapCreator.create_four_way_intersection(
-                width, diameter, incoming_length, self._current_scenario(), add_traffic_signs, add_traffic_lights,
-                country_signs)
+            width,
+            diameter,
+            incoming_length,
+            self._current_scenario(),
+            add_traffic_signs,
+            add_traffic_lights,
+            country_signs,
+        )
         self._current_scenario().add_objects(intersection)
         self._current_scenario().add_objects(new_lanelets)
         self._current_scenario().add_objects(new_traffic_signs)
@@ -520,8 +554,9 @@ class ScenarioModel(QObject):
         lanelet_predecessor = self.find_lanelet_by_id(predecessor_id)
         lanelet_successor = self.find_lanelet_by_id(successor_id)
 
-        MapCreator.fit_intersection_to_predecessor(lanelet_predecessor, lanelet_successor, intersection,
-                                                   self._current_scenario().lanelet_network)
+        MapCreator.fit_intersection_to_predecessor(
+            lanelet_predecessor, lanelet_successor, intersection, self._current_scenario().lanelet_network
+        )
         self.notify_all()
 
     @logger.log
@@ -649,7 +684,9 @@ class ScenarioModel(QObject):
         """
         return self._current_scenario().scenario_id.country_id
 
-    def get_obstacles(self) -> List[Union[Obstacle, StaticObstacle, DynamicObstacle, EnvironmentObstacle, PhantomObstacle]]:
+    def get_obstacles(
+        self,
+    ) -> List[Union[Obstacle, StaticObstacle, DynamicObstacle, EnvironmentObstacle, PhantomObstacle]]:
         """
         @returns: Gives back all obstacles of the scenario
         """
@@ -662,9 +699,13 @@ class ScenarioModel(QObject):
         @param plot_limits: Limits of which the obstacles should be searched
         @returns: List of obstacles found
         """
-        return self._current_scenario().obstacles_by_position_intervals(
-                [Interval(plot_limits[0], plot_limits[1]),
-                 Interval(plot_limits[2], plot_limits[3])]) if plot_limits else self._current_scenario().obstacles
+        return (
+            self._current_scenario().obstacles_by_position_intervals(
+                [Interval(plot_limits[0], plot_limits[1]), Interval(plot_limits[2], plot_limits[3])]
+            )
+            if plot_limits
+            else self._current_scenario().obstacles
+        )
 
     @logger.log
     def replace_lanelet_network(self, lanelet_network: LaneletNetwork):
@@ -702,7 +743,8 @@ class ScenarioModel(QObject):
         """
         self._update_scenario()
         new_lanelet_network = self.get_lanelet_network().create_from_lanelet_network(
-                self.get_lanelet_network(), shape_input=rectangle)
+            self.get_lanelet_network(), shape_input=rectangle
+        )
         obstacles = self.get_obstacles()
         for obs in obstacles:
             if isinstance(obs, StaticObstacle) and not rectangle.contains_point(obs.initial_state.position):

@@ -1,11 +1,34 @@
 import unittest
+
 import numpy as np
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import *
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadtype import *
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import *
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadElevationProfile import *
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLateralProfile import *
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import *
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import (
+    Junction,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadElevationProfile import (
+    ElevationRecord,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+    LaneOffset,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLateralProfile import (
+    Superelevation,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import (
+    Predecessor,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import (
+    Object,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import (
+    Signal,
+    SignalReference,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadtype import (
+    RoadType,
+    Speed,
+)
 
 
 class TestRoad(unittest.TestCase):
@@ -13,7 +36,6 @@ class TestRoad(unittest.TestCase):
         road_id = "101"
         name = "test"
         junction = Junction()
-        length = "1.908739611160e+03"
         speed1 = Speed(max_speed="50", unit="km/h")
         type1 = RoadType(s_pos="1.3", use_type="motorway", speed=speed1)
         speed2 = Speed(max_speed="30", unit="km/h")
@@ -72,5 +94,5 @@ class TestRoad(unittest.TestCase):
             road.addSignalReference(3)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

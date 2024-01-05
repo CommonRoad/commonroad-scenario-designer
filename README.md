@@ -31,16 +31,6 @@ Below we present two ways of installing the CommonRoad Scenario Designer:
 - Only using the CommonRoad Scenario Designer, e.g.,the GUI or integrating the scenario designer APIs into your code
 - Developing code for the CommonRoad Scenario Designer
 
-If you want to use the SUMO conversion or to generate traffic using SUMO, please install 
-[SUMO](https://sumo.dlr.de/docs/index.html):
-```bash
-sudo apt-get update
-sudo apt-get install sumo sumo-tools sumo-doc
-echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
-echo 'export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"' >> ~/.bashrc
-```
-If you use zsh, replace `.bashrc` with `.zshrc`.
-
 ### Using the CommonRoad Scenario Designer
 The recommended way of installation if you only want to use the scenario designer (i.e., you do not want to work with the code directly) is to use the PyPI package:
 ```bash

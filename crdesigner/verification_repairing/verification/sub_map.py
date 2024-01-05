@@ -1,7 +1,6 @@
 from copy import deepcopy
 
 from commonroad.scenario.lanelet import LaneletNetwork
-
 from shapely import Point
 from shapely.geometry.base import BaseGeometry
 from shapely.validation import make_valid
@@ -12,7 +11,7 @@ class SubMap:
     Class representing a sub map.
     """
 
-    def __init__(self, network: LaneletNetwork, buffer_size: float = 100.):
+    def __init__(self, network: LaneletNetwork, buffer_size: float = 100.0):
         """
         Constructor.
 
@@ -175,7 +174,8 @@ class SubMap:
 
         self._lanelet_ids = self._lanelet_ids.union(traffic_sign.first_occurrence)
         self._lanelet_ids = self._lanelet_ids.union(
-                set(la.lanelet_id for la in self._network.lanelets if traffic_sign_id in la.traffic_signs))
+            set(la.lanelet_id for la in self._network.lanelets if traffic_sign_id in la.traffic_signs)
+        )
 
     def _extract_refs_from_traffic_light(self, traffic_light_id: int):
         """
@@ -186,7 +186,8 @@ class SubMap:
         """
         self._traffic_light_ids.add(traffic_light_id)
         self._lanelet_ids = self._lanelet_ids.union(
-                set(la.lanelet_id for la in self._network.lanelets if traffic_light_id in la.traffic_lights))
+            set(la.lanelet_id for la in self._network.lanelets if traffic_light_id in la.traffic_lights)
+        )
 
     def _extract_refs_from_intersection(self, intersection_id: int):
         """

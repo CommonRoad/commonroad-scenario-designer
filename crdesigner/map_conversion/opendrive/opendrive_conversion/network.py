@@ -1,29 +1,101 @@
 import copy
-import numpy as np
-import iso3166
 from collections import deque
-from typing import Union, List, Optional
-from pyproj import CRS, Transformer
-from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID
-from commonroad.scenario.lanelet import LaneletNetwork, Lanelet, StopLine, LineMarking
-from commonroad.scenario.lanelet import LaneletType
-from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany, \
-    TrafficSignIDZamunda, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, \
-    TrafficSignIDRussia
+from typing import List, Optional, Union
 
-from crdesigner.config.general_config import general_config, GeneralConfig
-from crdesigner.config.opendrive_config import open_drive_config, OpenDriveConfig
-from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.crosswalks import get_crosswalks
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive
-from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id
-from crdesigner.map_conversion.common.conversion_lanelet_network import ConversionLaneletNetwork
+import iso3166
+import numpy as np
+from commonroad.scenario.lanelet import (
+    Lanelet,
+    LaneletNetwork,
+    LaneletType,
+    LineMarking,
+    StopLine,
+)
+from commonroad.scenario.scenario import (
+    GeoTransformation,
+    Location,
+    Scenario,
+    ScenarioID,
+)
+from commonroad.scenario.traffic_sign import (
+    TrafficSign,
+    TrafficSignElement,
+    TrafficSignIDChina,
+    TrafficSignIDGermany,
+    TrafficSignIDRussia,
+    TrafficSignIDSpain,
+    TrafficSignIDUsa,
+    TrafficSignIDZamunda,
+)
+from pyproj import CRS, Transformer
+
+from crdesigner.common.config.general_config import GeneralConfig, general_config
+from crdesigner.common.config.opendrive_config import OpenDriveConfig, open_drive_config
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
-from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import OpenDriveConverter
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import get_traffic_signals
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.geo_reference import get_geo_reference
+from crdesigner.map_conversion.common.conversion_lanelet_network import (
+    ConversionLaneletNetwork,
+)
 from crdesigner.map_conversion.common.utils import generate_unique_id
+from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
+from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import (
+    OpenDriveConverter,
+)
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.crosswalks import (
+    get_crosswalks,
+)
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.geo_reference import (
+    get_geo_reference,
+)
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import (
+    get_traffic_signals,
+)
+from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import (
+    encode_road_section_lane_width_id,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import (
+    OpenDrive,
+)
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
+
+
+def update_line_markings(lanelet_network: ConversionLaneletNetwork) -> ConversionLaneletNetwork:
+    """
+    Updates line markings of lanelets vertices in the conversion lanelet network,
+    as Opendrive format only supports line markings for the outer vertices of the lanelet.
+    If the two lanelets are adjacent, corresponding line marking of the shared vertices should be the same.
+
+    :param lanelet_network: ConversionLaneletNetwork that should be updated.
+    :return: Updated ConversionLaneletNetwork.
+    """
+    for la in lanelet_network.lanelets:
+        # left vertices line marking
+        if la.line_marking_left_vertices is LineMarking.UNKNOWN:
+            # check if there exists an adjacent left lanelet
+            if la.adj_left is not None:
+                # if the adjacent left lanelet is of the same direction, copy the line marking of the right vertices
+                if la.adj_left_same_direction is True:
+                    la.line_marking_left_vertices = lanelet_network.find_lanelet_by_id(
+                        la.adj_left
+                    ).line_marking_right_vertices
+                else:
+                    la.line_marking_left_vertices = lanelet_network.find_lanelet_by_id(
+                        la.adj_left
+                    ).line_marking_left_vertices
+        # right vertices line marking
+        if la.line_marking_right_vertices is LineMarking.UNKNOWN:
+            # check if there exists an adjacent right lanelet
+            if la.adj_right is not None:
+                # if the adjacent right lanelet is of the same direction, copy the line marking of the left
+                if la.adj_right_same_direction is True:
+                    la.line_marking_right_vertices = lanelet_network.find_lanelet_by_id(
+                        la.adj_right
+                    ).line_marking_left_vertices
+                else:
+                    la.line_marking_right_vertices = lanelet_network.find_lanelet_by_id(
+                        la.adj_right
+                    ).line_marking_right_vertices
+
+    return lanelet_network
 
 
 def convert_to_base_lanelet_network(lanelet_network: ConversionLaneletNetwork) -> LaneletNetwork:
@@ -40,12 +112,28 @@ def convert_to_base_lanelet_network(lanelet_network: ConversionLaneletNetwork) -
     for light in lanelet_network.traffic_lights:
         network.add_traffic_light(light, set())
     for la in lanelet_network.lanelets:
-        network.add_lanelet(Lanelet(la.left_vertices, la.center_vertices, la.right_vertices, la.lanelet_id,
-                                    la.predecessor, la.successor, la.adj_left, la.adj_left_same_direction,
-                                    la.adj_right, la.adj_right_same_direction,
-                                    la.line_marking_left_vertices, la.line_marking_right_vertices, la.stop_line,
-                                    la.lanelet_type, la.user_one_way, la.user_bidirectional, la.traffic_signs,
-                                    la.traffic_lights))
+        network.add_lanelet(
+            Lanelet(
+                la.left_vertices,
+                la.center_vertices,
+                la.right_vertices,
+                la.lanelet_id,
+                la.predecessor,
+                la.successor,
+                la.adj_left,
+                la.adj_left_same_direction,
+                la.adj_right,
+                la.adj_right_same_direction,
+                la.line_marking_left_vertices,
+                la.line_marking_right_vertices,
+                la.stop_line,
+                la.lanelet_type,
+                la.user_one_way,
+                la.user_bidirectional,
+                la.traffic_signs,
+                la.traffic_lights,
+            )
+        )
     return network
 
 
@@ -134,8 +222,7 @@ class Network:
             for road_object in road.objects:
                 if road_object.name == "StopLine":
                     position, tangent, _, _ = road.planView.calc(road_object.s, compute_curvature=False)
-                    position = np.array([position[0],
-                                         position[1]])
+                    position = np.array([position[0], position[1]])
 
                     position_1 = position
                     angle = road_object.hdg + tangent
@@ -145,18 +232,25 @@ class Network:
                     # check orientation of stop line
                     if road_object.orientation == "+":
                         position_2 = np.array(
-                                [position[0] + road_object.validLength * np.cos(angle),
-                                 position[1] - road_object.validLength * np.sin(angle)])
+                            [
+                                position[0] + road_object.validLength * np.cos(angle),
+                                position[1] - road_object.validLength * np.sin(angle),
+                            ]
+                        )
                     else:
                         position_2 = np.array(
-                                [position[0] + road_object.validLength * np.cos(angle),
-                                 position[1] + road_object.validLength * np.sin(angle)])
+                            [
+                                position[0] + road_object.validLength * np.cos(angle),
+                                position[1] + road_object.validLength * np.sin(angle),
+                            ]
+                        )
 
                     stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
                     self._stop_lines.append(stop_line)
 
-    def export_lanelet_network(self, transformer: Transformer, filter_types: Optional[List[str]] = None) \
-            -> LaneletNetwork:
+    def export_lanelet_network(
+        self, transformer: Transformer, filter_types: Optional[List[str]] = None
+    ) -> LaneletNetwork:
         """Export network as lanelet network.
 
         :param transformer: Coordinate projection transformer.
@@ -215,22 +309,28 @@ class Network:
 
         # create virtual traffic signs for individual lane speed limits
         drivable_lanelets = [
-            lanelet.lanelet_id for lanelet in lanelet_network.lanelets if lanelet.lanelet_type not in [
-                {LaneletType.BICYCLE_LANE}, {LaneletType.SIDEWALK}, {LaneletType.BORDER}
-            ]
+            lanelet.lanelet_id
+            for lanelet in lanelet_network.lanelets
+            if lanelet.lanelet_type not in [{LaneletType.BICYCLE_LANE}, {LaneletType.SIDEWALK}, {LaneletType.BORDER}]
         ]
 
         # for all lanelets with no predecessor and no traffic sign, add a virtual sign to the lanelet
-        lanelet_with_no_pred = [lanelet for lanelet in drivable_lanelets if
-                                lanelet_network.find_lanelet_by_id(lanelet).predecessor == []
-                                and lanelet_network.find_lanelet_by_id(lanelet).speed is not None]
+        lanelet_with_no_pred = [
+            lanelet
+            for lanelet in drivable_lanelets
+            if lanelet_network.find_lanelet_by_id(lanelet).predecessor == []
+            and lanelet_network.find_lanelet_by_id(lanelet).speed is not None
+        ]
         for lanelet in lanelet_with_no_pred:
             already_has_sign = False
             ids = lanelet_network.find_lanelet_by_id(lanelet).traffic_signs
             for sign_id in ids:
                 sign = lanelet_network.find_traffic_sign_by_id(sign_id)
-                elems = [sign.traffic_sign_elements for elem in sign.traffic_sign_elements if
-                         elem.traffic_sign_element_id.name == 'MAX_SPEED']
+                elems = [
+                    sign.traffic_sign_elements
+                    for elem in sign.traffic_sign_elements
+                    if elem.traffic_sign_element_id.name == "MAX_SPEED"
+                ]
 
                 if any(elems):
                     already_has_sign = True
@@ -240,6 +340,7 @@ class Network:
 
         self.find_lane_speed_changes(drivable_lanelets, lanelet_network)
         self.reference_traffic_signs_with_equal_speed(drivable_lanelets, lanelet_network)
+        lanelet_network = update_line_markings(lanelet_network)
         return convert_to_base_lanelet_network(lanelet_network)
 
     def relate_crosswalks_to_intersection(self, lanelet_network: ConversionLaneletNetwork):
@@ -247,6 +348,7 @@ class Network:
         Find for each crossing the intersection it belongs to
         :param lanelet_network: ConversionLaneletNetwork
         """
+
         def generate_line(vertices: np.ndarray) -> (float, float):
             """
             generate a line from start to end of vertex
@@ -254,7 +356,7 @@ class Network:
             :return: slope m, intersect c
             """
             m = (vertices[0][1] - vertices[-1][1]) / (vertices[0][0] - vertices[-1][0])
-            c = vertices[0][1] - m*vertices[0][0]
+            c = vertices[0][1] - m * vertices[0][0]
             return m, c
 
         def find_intersect_point() -> Union[int, None]:
@@ -292,8 +394,9 @@ class Network:
         for lane in lanelets:
             visited.append(lane)
             lane = lanelet_network.find_lanelet_by_id(lane)
-            speeds = [lanelet_network.find_lanelet_by_id(pred).speed for pred in lane.predecessor
-                      if lane.speed is not None]
+            speeds = [
+                lanelet_network.find_lanelet_by_id(pred).speed for pred in lane.predecessor if lane.speed is not None
+            ]
             if not speeds == [] and speeds.count(speeds[0]) == len(speeds):
                 # lane speeds are all the same, find first sign with equal speed
                 predecessors = deque(lane.predecessor)
@@ -311,22 +414,30 @@ class Network:
                         # If we haven't already visited the predecessor, then extend the list of predecessors but only
                         # by new unique predecessors.
                         if pred not in visited:
-                            predecessors.extend([p for p in lanelet_network.find_lanelet_by_id(pred).predecessor
-                                                 if p not in predecessors])
+                            predecessors.extend(
+                                [
+                                    p
+                                    for p in lanelet_network.find_lanelet_by_id(pred).predecessor
+                                    if p not in predecessors
+                                ]
+                            )
 
                         # check if the predecessor has a traffic sign with equal speed as the lane
-                        sign = self.get_traffic_sign_with_equal_speed(lanelet_network.find_lanelet_by_id(pred),
-                                                                      lanelet_network, speeds[0])
+                        sign = self.get_traffic_sign_with_equal_speed(
+                            lanelet_network.find_lanelet_by_id(pred), lanelet_network, speeds[0]
+                        )
                         if sign is not None:
                             traffic_sign_found = True
                             # update all traversed predecessors with a reference to this signal, do not add reference
                             # if lane already has a sign
                             for update_lane_id in update_with_reference:
                                 update_lane = lanelet_network.find_lanelet_by_id(update_lane_id)
-                                if sign.traffic_sign_id not in update_lane.traffic_signs and \
-                                        self.get_traffic_sign_with_equal_speed(
-                                                update_lane, lanelet_network, speeds[0] is None
-                                        ):
+                                if (
+                                    sign.traffic_sign_id not in update_lane.traffic_signs
+                                    and self.get_traffic_sign_with_equal_speed(
+                                        update_lane, lanelet_network, speeds[0] is None
+                                    )
+                                ):
                                     update_lane_id.add_traffic_sign_to_lanelet(sign.traffic_sign_id)
                             break
                     break
@@ -351,11 +462,11 @@ class Network:
                 # Only extend lanelets by unique predecessors, if we have not already visisted them
                 if pred not in visited:
                     lanelets.extend(
-                            [p for p in lanelet_network.find_lanelet_by_id(pred).predecessor if p not in lanelets]
+                        [p for p in lanelet_network.find_lanelet_by_id(pred).predecessor if p not in lanelets]
                     )
 
     def get_traffic_sign_with_equal_speed(
-            self, lanelet: ConversionLanelet, lanelet_network: ConversionLaneletNetwork, speed: float
+        self, lanelet: ConversionLanelet, lanelet_network: ConversionLaneletNetwork, speed: float
     ) -> Optional[TrafficSign]:
         """Checks if the supplied lanelet has a traffic sign with a speed limit equal to the value given by the
         argument speed. If a sign was found, it is returned.
@@ -368,10 +479,18 @@ class Network:
         for id in lanelet.traffic_signs:
             sign = lanelet_network.find_traffic_sign_by_id(id)
             for elem in sign.traffic_sign_elements:
-                if elem.traffic_sign_element_id in [TrafficSignIDZamunda.MAX_SPEED, TrafficSignIDGermany.MAX_SPEED,
-                                                    TrafficSignIDUsa.MAX_SPEED, TrafficSignIDChina.MAX_SPEED,
-                                                    TrafficSignIDSpain.MAX_SPEED, TrafficSignIDRussia.MAX_SPEED] \
-                        and float(elem.additional_values[0]) == speed:
+                if (
+                    elem.traffic_sign_element_id
+                    in [
+                        TrafficSignIDZamunda.MAX_SPEED,
+                        TrafficSignIDGermany.MAX_SPEED,
+                        TrafficSignIDUsa.MAX_SPEED,
+                        TrafficSignIDChina.MAX_SPEED,
+                        TrafficSignIDSpain.MAX_SPEED,
+                        TrafficSignIDRussia.MAX_SPEED,
+                    ]
+                    and float(elem.additional_values[0]) == speed
+                ):
                     return sign
         return None
 
@@ -381,22 +500,25 @@ class Network:
         :param lanelet: Lanelet to add virtual traffic signal to.
         :param network: The lanelet network to which the lanelet belongs to.
         """
-        traffic_sign_enum = utils.get_traffic_sign_enum_from_country(
-                utils.get_signal_country(self._country_ID)
-        )
+        traffic_sign_enum = utils.get_traffic_sign_enum_from_country(utils.get_signal_country(self._country_ID))
         element_id = traffic_sign_enum.MAX_SPEED
         additional_values = [str(float(lanelet.speed))]
-        traffic_sign_element = TrafficSignElement(traffic_sign_element_id=element_id,
-                                                  additional_values=additional_values)
-        traffic_sign = TrafficSign(traffic_sign_id=generate_unique_id(),
-                                   traffic_sign_elements=list([traffic_sign_element]),
-                                   first_occurrence={lanelet.lanelet_id}, position=lanelet.center_vertices[0],
-                                   virtual=True)
+        traffic_sign_element = TrafficSignElement(
+            traffic_sign_element_id=element_id, additional_values=additional_values
+        )
+        traffic_sign = TrafficSign(
+            traffic_sign_id=generate_unique_id(),
+            traffic_sign_elements=list([traffic_sign_element]),
+            first_occurrence={lanelet.lanelet_id},
+            position=lanelet.center_vertices[0],
+            virtual=True,
+        )
         network.add_traffic_signs_to_network([traffic_sign])
         lanelet.add_traffic_sign_to_lanelet(traffic_sign.traffic_sign_id)
 
-    def export_commonroad_scenario(self, g_config: GeneralConfig = general_config,
-                                   od_config: OpenDriveConfig = open_drive_config):
+    def export_commonroad_scenario(
+        self, g_config: GeneralConfig = general_config, od_config: OpenDriveConfig = open_drive_config
+    ):
         """Export a full CommonRoad scenario
 
         :param g_config: General config parameters.
@@ -413,21 +535,19 @@ class Network:
             crs_to = CRS(self._config.proj_string_odr)
             transformer = Transformer.from_proj(crs_from, crs_to)
 
-        location = Location(geo_transformation=GeoTransformation(geo_reference=self._config.proj_string_odr),
-                            **location_kwargs)
-
-        scenario_id = ScenarioID(
-                country_id=g_config.country_id if self._country_ID == "ZAM" else self._country_ID,
-                map_name=g_config.map_name,
-                map_id=g_config.map_id)
-
-        scenario = Scenario(
-            dt=g_config.time_step_size, scenario_id=scenario_id,
-            location=location
+        location = Location(
+            geo_transformation=GeoTransformation(geo_reference=self._config.proj_string_odr), **location_kwargs
         )
 
-        scenario.add_objects(self.export_lanelet_network(transformer=transformer,
-                                                         filter_types=od_config.filter_types))
+        scenario_id = ScenarioID(
+            country_id=g_config.country_id if self._country_ID == "ZAM" else self._country_ID,
+            map_name=g_config.map_name,
+            map_id=g_config.map_id,
+        )
+
+        scenario = Scenario(dt=g_config.time_step_size, scenario_id=scenario_id, location=location)
+
+        scenario.add_objects(self.export_lanelet_network(transformer=transformer, filter_types=od_config.filter_types))
 
         return scenario
 
@@ -468,9 +588,7 @@ class LinkIndex:
         for road in opendrive.roads:
             for lane_section in road.lanes.lane_sections:
                 for lane in lane_section.allLanes:
-                    parametric_lane_id = encode_road_section_lane_width_id(
-                        road.id, lane_section.idx, lane.id, -1
-                    )
+                    parametric_lane_id = encode_road_section_lane_width_id(road.id, lane_section.idx, lane.id, -1)
 
                     # Not the last lane section? > Next lane section in same road
                     if lane_section.idx < road.lanes.getLastLaneSectionIdx():
@@ -482,15 +600,10 @@ class LinkIndex:
 
                     # Last lane section! > Next road in first lane section
                     # Try to get next road
-                    elif (
-                        road.link.successor is not None
-                        and road.link.successor.elementType != "junction"
-                    ):
-
+                    elif road.link.successor is not None and road.link.successor.elementType != "junction":
                         next_road = opendrive.getRoad(road.link.successor.element_id)
 
                         if next_road is not None:
-
                             if road.link.successor.contactPoint == "start":
                                 successor_id = encode_road_section_lane_width_id(
                                     next_road.id, 0, lane.link.successorId, -1
@@ -515,15 +628,10 @@ class LinkIndex:
 
                     # First lane section! > Previous road
                     # Try to get previous road
-                    elif (
-                        road.link.predecessor is not None
-                        and road.link.predecessor.elementType != "junction"
-                    ):
-
+                    elif road.link.predecessor is not None and road.link.predecessor.elementType != "junction":
                         prevRoad = opendrive.getRoad(road.link.predecessor.element_id)
 
                         if prevRoad is not None:
-
                             if road.link.predecessor.contactPoint == "start":
                                 predecessor_id = encode_road_section_lane_width_id(
                                     prevRoad.id, 0, lane.link.predecessorId, -1
@@ -536,9 +644,7 @@ class LinkIndex:
                                     lane.link.predecessorId,
                                     -1,
                                 )
-                            self.add_link(
-                                predecessor_id, parametric_lane_id, lane.id >= 0
-                            )
+                            self.add_link(predecessor_id, parametric_lane_id, lane.id >= 0)
 
     def add_intersection_link(self, parametric_lane_id: str, successor: str, reverse: bool = False):
         """
@@ -598,12 +704,9 @@ class LinkIndex:
 
                 for lane_link in connection.laneLinks:
                     if contact_point == "start":
-
                         # decide which lane section to use (first or last)
                         if lane_link.fromId < 0:
-                            lane_section_idx = (
-                                incoming_road.lanes.getLastLaneSectionIdx()
-                            )
+                            lane_section_idx = incoming_road.lanes.getLastLaneSectionIdx()
                         else:
                             lane_section_idx = 0
                         incoming_road_id = encode_road_section_lane_width_id(
@@ -612,29 +715,19 @@ class LinkIndex:
                         connecting_road_id = encode_road_section_lane_width_id(
                             connecting_road.id, 0, lane_link.toId, -1
                         )
-                        self.add_link(
-                            incoming_road_id, connecting_road_id, lane_link.toId > 0
-                        )
-                        self.add_intersection_link(
-                            incoming_road_id, connecting_road_id, lane_link.toId > 0
-                        )
+                        self.add_link(incoming_road_id, connecting_road_id, lane_link.toId > 0)
+                        self.add_intersection_link(incoming_road_id, connecting_road_id, lane_link.toId > 0)
 
                     else:
-                        incoming_road_id = encode_road_section_lane_width_id(
-                            incoming_road.id, 0, lane_link.fromId, -1
-                        )
+                        incoming_road_id = encode_road_section_lane_width_id(incoming_road.id, 0, lane_link.fromId, -1)
                         connecting_road_id = encode_road_section_lane_width_id(
                             connecting_road.id,
                             connecting_road.lanes.getLastLaneSectionIdx(),
                             lane_link.toId,
                             -1,
                         )
-                        self.add_link(
-                            incoming_road_id, connecting_road_id, lane_link.toId < 0
-                        )
-                        self.add_intersection_link(
-                            incoming_road_id, connecting_road_id, lane_link.toId < 0
-                        )
+                        self.add_link(incoming_road_id, connecting_road_id, lane_link.toId < 0)
+                        self.add_intersection_link(incoming_road_id, connecting_road_id, lane_link.toId < 0)
             # Extracting opendrive junction links to formulate CommonRoad intersections
             self._intersections.append(self._intersection_dict)
             # dictionary reinitialized to get junction information for next junction without appending values

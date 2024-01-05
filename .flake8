@@ -1,0 +1,4 @@
+[flake8]
+extend-ignore = E501, E203
+extend-exclude = crdesigner/verification_repairing/verification/hol/parser/gen
+max-line-length = 120

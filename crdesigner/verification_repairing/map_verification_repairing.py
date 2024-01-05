@@ -1,29 +1,37 @@
 import copy
+import logging
 import time
 from copy import deepcopy
 from os.path import join
 from pathlib import Path
-from typing import List, Tuple, Optional
-import logging
+from typing import List, Optional, Tuple
 
-from commonroad.common.file_reader import FileFormat
-from commonroad.common.file_writer import OverwriteExistingFile, CommonRoadFileWriter
+from commonroad.common.file_reader import CommonRoadFileReader, FileFormat
+from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad.scenario.scenario import ScenarioID, Scenario
+from commonroad.scenario.scenario import Scenario, ScenarioID
 from commonroad.common.file_reader import CommonRoadFileReader
 
-from crdesigner.verification_repairing.verification.verification_result import VerificationResult, \
-    initial_map_verification, update_map_verification
-from crdesigner.verification_repairing.verification.formula_ids import extract_formula_ids, FormulaID, GeneralFormulaID
-from crdesigner.verification_repairing.verification.groups_handler import GroupsHandler
 from crdesigner.verification_repairing.config import MapVerParams
 from crdesigner.verification_repairing.repairing.map_repairer import MapRepairer
+from crdesigner.verification_repairing.verification.formula_ids import (
+    FormulaID,
+    GeneralFormulaID,
+    extract_formula_ids,
+)
+from crdesigner.verification_repairing.verification.groups_handler import GroupsHandler
 from crdesigner.verification_repairing.verification.map_verifier import MapVerifier
 from crdesigner.verification_repairing.verification.sub_map import SubMap
+from crdesigner.verification_repairing.verification.verification_result import (
+    VerificationResult,
+    initial_map_verification,
+    update_map_verification,
+)
 
 
-def collect_scenario_paths(scenario_dir: Path, subdir: bool = True, file_format: Optional[FileFormat] = None) \
-        -> List[Path]:
+def collect_scenario_paths(
+    scenario_dir: Path, subdir: bool = True, file_format: Optional[FileFormat] = None
+) -> List[Path]:
     """
     Collects scenarios from a directory and subdirectory and returns only paths to selected maps.
 
@@ -63,8 +71,9 @@ def verify_and_repair_scenario(scenario: Scenario, config: MapVerParams = MapVer
     return new_scenario, len(result.map_verifications[0].map_verification_result.invalid_states) == 0
 
 
-def verify_and_repair_map(network: LaneletNetwork, config: MapVerParams = MapVerParams(),
-                          scenario_id: ScenarioID = ScenarioID()) -> Tuple[LaneletNetwork, VerificationResult]:
+def verify_and_repair_map(
+    network: LaneletNetwork, config: MapVerParams = MapVerParams(), scenario_id: ScenarioID = ScenarioID()
+) -> Tuple[LaneletNetwork, VerificationResult]:
     """
     Verifies and repairs a CommonRoad map. In the verification process the desired formulas are checked to be
     satisfiable. If a formula cannot be satisfied, an invalid state is inferred. These formulas can be executed
@@ -90,7 +99,7 @@ def verify_and_repair_map(network: LaneletNetwork, config: MapVerParams = MapVer
     :param scenario_id: ScenarioID used for complete map name.
     :return: Verified as well as repaired scenario and verification result.
     """
-    assert network is not None, 'LaneletNetwork is not provided!'
+    assert network is not None, "LaneletNetwork is not provided!"
 
     config = deepcopy(config)
     if not config.evaluation.overwrite_scenario:
@@ -99,12 +108,12 @@ def verify_and_repair_map(network: LaneletNetwork, config: MapVerParams = MapVer
     if config.verification.formulas is None or config.verification.formulas == []:
         config.verification.formulas = extract_formula_ids()
 
-    complete_map_name = str(scenario_id.country_id)+'_'+str(scenario_id.map_name)+'-'+str(scenario_id.map_id)
+    complete_map_name = str(scenario_id.country_id) + "_" + str(scenario_id.map_name) + "-" + str(scenario_id.map_id)
     verification_result = VerificationResult()
     map_verification = initial_map_verification(verification_result, str(complete_map_name), config)
 
     verification_time, repairing_time = 0.0, 0.0
-    logging.info(f'Validating map {complete_map_name} with hol solver')
+    logging.info(f"Validating map {complete_map_name} with hol solver")
 
     groups_handler = GroupsHandler()
 
@@ -142,8 +151,10 @@ def verify_and_repair_map(network: LaneletNetwork, config: MapVerParams = MapVer
                 errors = {(formula_id, location)}
                 while errors and iter_i < config.verification.max_iterations:
                     if iter_i > 0:
-                        logging.error(f"Repairing was not successful at first attempt with map {complete_map_name} "
-                                      f"using specification {f_id} and error {loc}.")
+                        logging.error(
+                            f"Repairing was not successful at first attempt with map {complete_map_name} "
+                            f"using specification {f_id} and error {loc}."
+                        )
                     f_id, loc = errors.pop()
                     element_id = loc[0]
 
@@ -169,8 +180,10 @@ def verify_and_repair_map(network: LaneletNetwork, config: MapVerParams = MapVer
                     iter_i += 1
                 else:
                     if errors and iter_i >= config.verification.max_iterations:
-                        raise RuntimeError(f"Repairing was not successful with map {complete_map_name} with "
-                                           f"specification {f_id} and error {loc}.")
+                        raise RuntimeError(
+                            f"Repairing was not successful with map {complete_map_name} with "
+                            f"specification {f_id} and error {loc}."
+                        )
 
                 final_errors = final_errors.union(errors)
 
@@ -185,13 +198,14 @@ def verify_and_repair_map(network: LaneletNetwork, config: MapVerParams = MapVer
 
     update_map_verification(map_verification, verification_time, repairing_time, initial_invalid_states)
 
-    logging.info(f'Validating map {complete_map_name} finished with hol solver')
+    logging.info(f"Validating map {complete_map_name} finished with hol solver")
 
     return network, verification_result
 
 
-def verify_and_repair_maps(scenarios: List[Scenario], config: MapVerParams) \
-        -> Tuple[List[LaneletNetwork], VerificationResult]:
+def verify_and_repair_maps(
+    scenarios: List[Scenario], config: MapVerParams
+) -> Tuple[List[LaneletNetwork], VerificationResult]:
     """
     List of scenarios are verified and repaired successively.
 
@@ -201,22 +215,24 @@ def verify_and_repair_maps(scenarios: List[Scenario], config: MapVerParams) \
     :param config: Configuration parameters.
     :return: List of verified as well as repaired scenarios and verification result.
     """
-    assert scenarios is not None and len(scenarios) > 0, 'Scenarios are not provided!'
+    assert scenarios is not None and len(scenarios) > 0, "Scenarios are not provided!"
 
     verification_result = VerificationResult()
 
     repaired_networks = []
     for scenario in scenarios:
-        repaired_network, scenario_verification_result = \
-            verify_and_repair_map(scenario.lanelet_network, config, scenario.scenario_id)
+        repaired_network, scenario_verification_result = verify_and_repair_map(
+            scenario.lanelet_network, config, scenario.scenario_id
+        )
         repaired_networks.append(repaired_network)
         verification_result.map_verifications += scenario_verification_result.map_verifications
 
     return repaired_networks, verification_result
 
 
-def verify_and_repair_dir_maps(scenarios_dir_path: Path, config: MapVerParams = MapVerParams()) \
-        -> Tuple[List[LaneletNetwork], VerificationResult]:
+def verify_and_repair_dir_maps(
+    scenarios_dir_path: Path, config: MapVerParams = MapVerParams()
+) -> Tuple[List[LaneletNetwork], VerificationResult]:
     """
     List of scenarios in directory and included subdirectories are verified and repaired successively.
     The loaded scenarios can be overwritten or a new scenario can be stored with file ending '-repaired.xml'.
@@ -227,21 +243,22 @@ def verify_and_repair_dir_maps(scenarios_dir_path: Path, config: MapVerParams = 
     :param config: Configuration parameters.
     :return: List of verified as well as repaired scenarios and verification result.
     """
-    assert Path.exists(scenarios_dir_path), 'The path to configuration file is not existent!'
+    assert Path.exists(scenarios_dir_path), "The path to configuration file is not existent!"
 
     file_paths = collect_scenario_paths(scenarios_dir_path)
     scenarios_pp = [CommonRoadFileReader(join(scenarios_dir_path, name)).open() for name in file_paths]
 
-    repaired_networks, verification_result = \
-        verify_and_repair_maps(list(zip(*scenarios_pp))[0], config)
+    repaired_networks, verification_result = verify_and_repair_maps(list(zip(*scenarios_pp))[0], config)
 
     for repaired_network, file_path in zip(repaired_networks, file_paths):
         for scenario, pp in scenarios_pp:
-            if (repaired_network.information == scenario.lanelet_network.information and
-                    scenario.lanelet_network != repaired_network):
+            if (
+                repaired_network.information == scenario.lanelet_network.information
+                and scenario.lanelet_network != repaired_network
+            ):
                 writer = CommonRoadFileWriter(scenario=scenario, planning_problem_set=pp)
                 if not config.evaluation.overwrite_scenario:
-                    file_path = str(file_path).replace('.xml', '') + '-repaired.xml'
+                    file_path = str(file_path).replace(".xml", "") + "-repaired.xml"
                 writer.write_to_file(file_path, OverwriteExistingFile.ALWAYS)
                 break
 

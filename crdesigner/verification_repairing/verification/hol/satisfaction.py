@@ -4,20 +4,28 @@ from typing import List
 
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.lanelet import Lanelet
-from commonroad.scenario.traffic_sign import TrafficSign
 from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.scenario.traffic_sign import TrafficSign
 
 from crdesigner.verification_repairing.config import VerificationParams
-from crdesigner.verification_repairing.verification.formula_ids import FormulaID, extract_formula_id, extract_formula_ids
+from crdesigner.verification_repairing.verification.formula_ids import (
+    FormulaID,
+    extract_formula_id,
+    extract_formula_ids,
+)
+from crdesigner.verification_repairing.verification.hol.context import Context
 from crdesigner.verification_repairing.verification.hol.formula import Formula
 from crdesigner.verification_repairing.verification.hol.mapping import HOLMapping
-from crdesigner.verification_repairing.verification.hol.context import Context
-from crdesigner.verification_repairing.verification.hol.var_domain_iterator import VarDomainIterator
-from crdesigner.verification_repairing.verification.satisfaction import VerificationChecker, InvalidStates
+from crdesigner.verification_repairing.verification.hol.var_domain_iterator import (
+    VarDomainIterator,
+)
+from crdesigner.verification_repairing.verification.satisfaction import (
+    InvalidStates,
+    VerificationChecker,
+)
 
 
 class HOLVerificationChecker(VerificationChecker):
-
     def __init__(self, mapping: HOLMapping, formula_ids: List[FormulaID] = None):
         """
         Constructor of HOLValidityChecker.
@@ -49,7 +57,7 @@ class HOLVerificationChecker(VerificationChecker):
         for formula in config.formula_manager.formulas:
             for formula_id in formula_ids:
                 if formula_id.value == formula.formula_id:
-                    logging.info(f'HOL::check_validity: {formula_id}')
+                    logging.info(f"HOL::check_validity: {formula_id}")
                     self._solve_formula(formula, model)
 
         manager_results.append(self._invalid_states)
@@ -94,7 +102,7 @@ class HOLVerificationChecker(VerificationChecker):
                     elif isinstance(element, Intersection):
                         location.append(element.intersection_id)
                     else:
-                        warnings.warn('Unsuccessful extraction of ID of element!')
+                        warnings.warn("Unsuccessful extraction of ID of element!")
                 location = tuple(location)
 
                 formula_id = extract_formula_id(formula.formula_id)

@@ -1,22 +1,25 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import *
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import (
+    Object,
+)
 
 
 class TestRoadObject(unittest.TestCase):
     def test_object(self):
-        r_type = 'barrier'
-        name = 'random'
-        width = '2.3'
-        height = '1.3'
-        z_offset = '2'
-        r_id = '1'
-        s = '4'
-        t = '2'
-        valid_l = '0.0'
-        orientation = '+'
-        hdg = '1.2'
-        pitch = '3.2'
-        roll = '0.2'
+        r_type = "barrier"
+        name = "random"
+        width = "2.3"
+        height = "1.3"
+        z_offset = "2"
+        r_id = "1"
+        s = "4"
+        t = "2"
+        valid_l = "0.0"
+        orientation = "+"
+        hdg = "1.2"
+        pitch = "3.2"
+        roll = "0.2"
         r_object = Object()
         r_object.type = r_type
         r_object.name = name
@@ -54,5 +57,5 @@ class TestRoadObject(unittest.TestCase):
             r_object.orientation = None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

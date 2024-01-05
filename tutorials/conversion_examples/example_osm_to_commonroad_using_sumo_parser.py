@@ -5,8 +5,13 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 
 from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
-from crdesigner.map_conversion.map_conversion_interface import osm_to_commonroad_using_sumo
-scenario = osm_to_commonroad_using_sumo(str(Path.cwd().parent.parent/"tests/map_conversion/test_maps/osm/ped_crossing.osm"))
+from crdesigner.map_conversion.map_conversion_interface import (
+    osm_to_commonroad_using_sumo,
+)
+
+scenario = osm_to_commonroad_using_sumo(
+    str(Path.cwd().parent.parent / "tests/map_conversion/test_maps/osm/ped_crossing.osm")
+)
 
 writer = CRDesignerFileWriter(
     scenario=scenario,
@@ -18,9 +23,9 @@ writer = CRDesignerFileWriter(
 )
 
 # create a folder for the example file if it does not exist
-if os.path.exists(Path.cwd()/"example_files") is False:
-    os.mkdir(Path.cwd()/"example_files")
-if os.path.exists(Path.cwd()/"example_files/osm") is False:
-    os.mkdir(Path.cwd()/"example_files/osm")
+if os.path.exists(Path.cwd() / "example_files") is False:
+    os.mkdir(Path.cwd() / "example_files")
+if os.path.exists(Path.cwd() / "example_files/osm") is False:
+    os.mkdir(Path.cwd() / "example_files/osm")
 
-writer.write_to_file(str(Path.cwd()/"example_files/osm/test_ped_crossing.xml"), OverwriteExistingFile.ALWAYS)
+writer.write_to_file(str(Path.cwd() / "example_files/osm/test_ped_crossing.xml"), OverwriteExistingFile.ALWAYS)

@@ -1,7 +1,17 @@
-from PyQt6.QtCore import *
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QDoubleValidator
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QGroupBox, QFormLayout, QButtonGroup, QRadioButton, QPushButton, \
-    QGridLayout, QLineEdit, QSpinBox
+from PyQt6.QtWidgets import (
+    QButtonGroup,
+    QFormLayout,
+    QFrame,
+    QGridLayout,
+    QGroupBox,
+    QLineEdit,
+    QPushButton,
+    QRadioButton,
+    QSpinBox,
+    QVBoxLayout,
+)
 
 from crdesigner.ui.gui.utilities.toolbox_ui import Toolbox
 from crdesigner.ui.gui.utilities.waitingspinnerwidget import QtWaitingSpinner
@@ -104,7 +114,8 @@ class MapConversionToolboxUI(Toolbox):
         self.button_start_osm_conversion = QPushButton("Convert OSM to CommonRoad")
         self.button_start_osm_conversion_with_sumo_parser = QPushButton("Convert OSM to CommonRoad using Sumo Parser")
         self.button_start_osm_conversion_with_sumo_parser.setToolTip(
-            'The conversion follows the route : \nOsm -> OpenDrive -> CR\nUseful for densed crossing')
+            "The conversion follows the route : \nOsm -> OpenDrive -> CR\nUseful for densed crossing"
+        )
 
         self.connecting_radio_button_group_osm = QButtonGroup()
         self.load_local_file = QRadioButton("Load local file")
@@ -135,7 +146,7 @@ class MapConversionToolboxUI(Toolbox):
             self.osm_conversion_coordinate_longitude = QLineEdit()
             self.osm_conversion_coordinate_longitude.setValidator(QDoubleValidator())
             self.osm_conversion_coordinate_longitude.setAlignment(Qt.AlignmentFlag.AlignRight)
-            self.osm_conversion_coordinate_longitude.setText("11.668124")
+            self.osm_conversion_coordinate_longitude.setText("11.658142")
             self.osm_download_map_range = QSpinBox()
             self.osm_download_map_range.setMinimum(0)
             self.osm_download_map_range.setMaximum(10000)

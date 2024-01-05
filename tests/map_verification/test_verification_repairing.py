@@ -1,19 +1,22 @@
+import os
+import unittest
 from pathlib import Path
 from typing import List
-import unittest
-import os
 
 from crdesigner.common.file_reader import CRDesignerFileReader
+from crdesigner.verification_repairing.config import MapVerParams, VerificationParams
+from crdesigner.verification_repairing.map_verification_repairing import (
+    collect_scenario_paths,
+    verify_and_repair_scenario,
+)
 from crdesigner.verification_repairing.verification.formula_ids import FormulaID
 from crdesigner.verification_repairing.verification.hol.mapping import HOLMapping
-from crdesigner.verification_repairing.verification.hol.satisfaction import HOLVerificationChecker
-from crdesigner.verification_repairing.config import VerificationParams, MapVerParams
-from crdesigner.verification_repairing.map_verification_repairing import (verify_and_repair_scenario,
-                                                                          collect_scenario_paths)
+from crdesigner.verification_repairing.verification.hol.satisfaction import (
+    HOLVerificationChecker,
+)
 
 
 class TestAll(unittest.TestCase):
-
     def verify(self, formula_ids: List[FormulaID]):
         for sc_name in self.network_names:
             sc, _ = CRDesignerFileReader(str(self.network_path) + "/test_maps/" + sc_name + ".xml").open()
@@ -41,8 +44,8 @@ class TestAll(unittest.TestCase):
             "paper_test_maps/DEU_Guetersloh-20_1_T-1",
             "paper_test_maps/DEU_Reutlingen-1_1_T-1",
             "DEU_AachenBendplatz-1",
-            "DEU_TrafficLightTest-1"  # traffic light cycle has no ID-> unique ID check fails if cycle in overall set
-                              ]
+            "DEU_TrafficLightTest-1",  # traffic light cycle has no ID-> unique ID check fails if cycle in overall set
+        ]
         self.network_path = Path(__file__).parent
         self.base_formula_ids = []
 
@@ -51,10 +54,20 @@ class TestAll(unittest.TestCase):
         self.verify(formula_ids)
 
     def test_path_collection(self):
-        self.assertEqual(8, len(collect_scenario_paths(Path(
-                f"{os.path.dirname(os.path.realpath(__file__))}/../map_verification/test_maps"),
-                subdir=False)))
+        self.assertEqual(
+            8,
+            len(
+                collect_scenario_paths(
+                    Path(f"{os.path.dirname(os.path.realpath(__file__))}/../map_verification/test_maps"), subdir=False
+                )
+            ),
+        )
 
-        self.assertEqual(11, len(collect_scenario_paths(
-                Path(f"{os.path.dirname(os.path.realpath(__file__))}/../map_verification/test_maps"),
-                subdir=True)))
+        self.assertEqual(
+            11,
+            len(
+                collect_scenario_paths(
+                    Path(f"{os.path.dirname(os.path.realpath(__file__))}/../map_verification/test_maps"), subdir=True
+                )
+            ),
+        )
