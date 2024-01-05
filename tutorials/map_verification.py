@@ -1,6 +1,6 @@
 import os
-from crdesigner.common.file_reader import CRDesignerFileReader
 
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.verification_repairing.map_verification_repairing import (
     verify_and_repair_dir_maps,
     verify_and_repair_map,

@@ -2,10 +2,10 @@ import os
 import unittest
 from pathlib import Path
 
-from crdesigner.common.file_reader import CRDesignerFileReader
 from lxml import etree  # type: ignore
 
 from crdesigner.common.config.lanelet2_config import lanelet2_config
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
 from tests.map_conversion.utils import elements_equal

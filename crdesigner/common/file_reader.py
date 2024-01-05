@@ -2,14 +2,16 @@ import copy
 from typing import Optional, Tuple
 
 from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.common.util import Path_T, FileFormat
+from commonroad.common.util import FileFormat, Path_T
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario
-from pyproj import Transformer, CRS
+from pyproj import CRS, Transformer
 
-from crdesigner.verification_repairing.map_verification_repairing import (verify_and_repair_scenario,
-                                                                          verify_and_repair_map)
+from crdesigner.verification_repairing.map_verification_repairing import (
+    verify_and_repair_map,
+    verify_and_repair_scenario,
+)
 
 
 def project_complete_scenario(scenario: Scenario, proj_string_from: str, proj_string_to: str) -> Scenario:
@@ -52,7 +54,6 @@ def project_complete_scenario(scenario: Scenario, proj_string_from: str, proj_st
 
 
 class CRDesignerFileReader(CommonRoadFileReader):
-
     def __init__(self, filename: Path_T, file_format: Optional[FileFormat] = None):
         """
         Initializes the CR Designer FileReader for CommonRoad files.
@@ -65,8 +66,9 @@ class CRDesignerFileReader(CommonRoadFileReader):
         """
         super().__init__(filename, file_format)
 
-    def open(self, verify_repair_scenario: bool = False, target_projection: str = None,
-             lanelet_assignment: bool = False) -> Tuple[Scenario, PlanningProblemSet]:
+    def open(
+        self, verify_repair_scenario: bool = False, target_projection: str = None, lanelet_assignment: bool = False
+    ) -> Tuple[Scenario, PlanningProblemSet]:
         """
         Opens and loads CommonRoad scenario and planning problem set from file.
         If the boolean is set to True, the function verifies and repairs the scenario.

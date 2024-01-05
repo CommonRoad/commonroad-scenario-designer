@@ -5,8 +5,8 @@ import numpy as np
 from commonroad.visualization.mp_renderer import MPRenderer
 from lxml import etree
 
-from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.common.file_reader import CRDesignerFileReader
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.map_conversion.map_conversion_interface import commonroad_to_sumo
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 

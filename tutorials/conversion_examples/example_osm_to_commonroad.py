@@ -1,11 +1,10 @@
 import os
 from pathlib import Path
 
-from crdesigner.map_conversion.map_conversion_interface import osm_to_commonroad
-from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
-from commonroad.scenario.scenario import Tag
 from commonroad.planning.planning_problem import PlanningProblemSet
+from commonroad.scenario.scenario import Tag
 
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.map_conversion.map_conversion_interface import osm_to_commonroad
 
 # load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario

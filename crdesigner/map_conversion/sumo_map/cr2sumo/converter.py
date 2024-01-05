@@ -64,9 +64,8 @@ from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from commonroad.scenario.trajectory import State
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
-from crdesigner.map_conversion.sumo_map.config import SumoConfig
-
 from crdesigner.common.file_reader import CRDesignerFileReader
+from crdesigner.map_conversion.sumo_map.config import SumoConfig
 from crdesigner.map_conversion.sumo_map.errors import ScenarioException
 from crdesigner.map_conversion.sumo_map.sumolib_net import (
     TLS,

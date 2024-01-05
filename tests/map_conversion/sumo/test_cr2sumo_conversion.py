@@ -9,13 +9,11 @@ from typing import List
 import numpy as np
 import pytest
 from commonroad.scenario.obstacle import ObstacleType
-from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
-from crdesigner.common.file_reader import CRDesignerFileReader
-from crdesigner.map_conversion.sumo_map.config import SumoConfig
-from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
 from parameterized import parameterized
 from sumocr.interface.sumo_simulation import SumoSimulation
 
+from crdesigner.common.file_reader import CRDesignerFileReader
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.map_conversion.sumo_map.config import SumoConfig
 from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
 

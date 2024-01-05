@@ -5,16 +5,26 @@ from commonroad.common.file_writer import CommonRoadFileWriter
 from commonroad.common.util import FileFormat
 from commonroad.common.writer.file_writer_interface import OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import Scenario, Tag, Location
+from commonroad.scenario.scenario import Location, Scenario, Tag
 
-from crdesigner.verification_repairing.map_verification_repairing import verify_and_repair_scenario
+from crdesigner.verification_repairing.map_verification_repairing import (
+    verify_and_repair_scenario,
+)
 
 
 class CRDesignerFileWriter(CommonRoadFileWriter):
-
-    def __init__(self, scenario: Scenario, planning_problem_set: PlanningProblemSet, author: str = None,
-                 affiliation: str = None, source: str = None, tags: Set[Tag] = None, location: Location = None,
-                 decimal_precision: int = 4, file_format: FileFormat = FileFormat.XML):
+    def __init__(
+        self,
+        scenario: Scenario,
+        planning_problem_set: PlanningProblemSet,
+        author: str = None,
+        affiliation: str = None,
+        source: str = None,
+        tags: Set[Tag] = None,
+        location: Location = None,
+        decimal_precision: int = 4,
+        file_format: FileFormat = FileFormat.XML,
+    ):
         """
         Initializes the CR Designer FileWriter for CommonRoad files.
         Standard commonroad-io FileWriter is used, with an addition that the writer optionally verifies and repairs
@@ -30,12 +40,17 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
         :param file_format: Format of file
         :return:
         """
-        super().__init__(scenario, planning_problem_set, author, affiliation, source, tags, location,
-                         decimal_precision, file_format)
+        super().__init__(
+            scenario, planning_problem_set, author, affiliation, source, tags, location, decimal_precision, file_format
+        )
 
-    def write_to_file(self, filename: Union[str, None] = None,
-                      overwrite_existing_file: OverwriteExistingFile = OverwriteExistingFile.ASK_USER_INPUT,
-                      check_validity: bool = False, verify_repair_scenario=False):
+    def write_to_file(
+        self,
+        filename: Union[str, None] = None,
+        overwrite_existing_file: OverwriteExistingFile = OverwriteExistingFile.ASK_USER_INPUT,
+        check_validity: bool = False,
+        verify_repair_scenario=False,
+    ):
         """
         Writes CommonRoad scenario and planning problems to file.
         If the boolean is set to True, the function verifies and repairs the scenario.
@@ -51,9 +66,12 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
 
         super().write_to_file(filename, overwrite_existing_file, check_validity)
 
-    def write_scenario_to_file(self, filename: Union[str, None] = None,
-                               overwrite_existing_file: OverwriteExistingFile = OverwriteExistingFile.ASK_USER_INPUT,
-                               verify_repair_scenario: bool = False):
+    def write_scenario_to_file(
+        self,
+        filename: Union[str, None] = None,
+        overwrite_existing_file: OverwriteExistingFile = OverwriteExistingFile.ASK_USER_INPUT,
+        verify_repair_scenario: bool = False,
+    ):
         """
         Writes CommonRoad scenario to file.
         If the boolean is set to True, the function verifies and repairs the scenario.
@@ -68,8 +86,9 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
 
         super().write_scenario_to_file(filename, overwrite_existing_file)
 
-    def check_validity_of_commonroad_file(self, commonroad_str: Union[str, bytes],
-                                          file_format: FileFormat = FileFormat.XML) -> bool:
+    def check_validity_of_commonroad_file(
+        self, commonroad_str: Union[str, bytes], file_format: FileFormat = FileFormat.XML
+    ) -> bool:
         """
         Checks validity of CommonRoad scenario and planning problem stored in XML or protobuf format.
 

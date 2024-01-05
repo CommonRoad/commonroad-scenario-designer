@@ -14,12 +14,12 @@ from commonroad.scenario.scenario import (
     Underground,
     Weather,
 )
-from PyQt6.QtWidgets import QFileDialog, QMessageBox
 from PyQt6.QtWidgets import *
+from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.common.logging import logger
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
-from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.settings.scenario_saving_dialog_ui import (

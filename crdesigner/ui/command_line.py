@@ -1,17 +1,16 @@
 import inspect
 from pathlib import Path
 from typing import List, Optional
-import typer
-import inspect
 
+import typer
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Scenario, Tag
 from typing_extensions import Annotated
 
-from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
-from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.common.config.general_config import general_config
 from crdesigner.common.config.lanelet2_config import lanelet2_config
+from crdesigner.common.file_reader import CRDesignerFileReader
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.map_conversion.map_conversion_interface import (
     commonroad_to_lanelet,
     commonroad_to_sumo,

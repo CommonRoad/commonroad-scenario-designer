@@ -1,11 +1,9 @@
 import os
 
-from crdesigner.map_conversion.map_conversion_interface import sumo_to_commonroad
-from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
-
-from commonroad.scenario.scenario import Tag
 from commonroad.planning.planning_problem import PlanningProblemSet
+from commonroad.scenario.scenario import Tag
 
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.map_conversion.map_conversion_interface import sumo_to_commonroad
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 

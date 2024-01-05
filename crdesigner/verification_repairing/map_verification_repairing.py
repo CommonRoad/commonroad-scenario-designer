@@ -10,7 +10,6 @@ from commonroad.common.file_reader import CommonRoadFileReader, FileFormat
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario, ScenarioID
-from commonroad.common.file_reader import CommonRoadFileReader
 
 from crdesigner.verification_repairing.config import MapVerParams
 from crdesigner.verification_repairing.repairing.map_repairer import MapRepairer
