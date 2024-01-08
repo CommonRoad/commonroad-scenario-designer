@@ -71,8 +71,9 @@ class RoadNetworkToolboxUI(Toolbox):
                         'background-color: ' + self.mwindow.mwindow_ui.colorscheme().second_background + '; color: ' +
                         self.mwindow.mwindow_ui.colorscheme().color)
 
-        if self.place_at_position.isChecked() or self.connect_to_previous_selection.isChecked() or \
-                self.connect_to_predecessors_selection.isChecked() or self.connect_to_successors_selection.isChecked():
+        if (self.place_at_position.isChecked() or self.connect_to_previous_selection.isChecked() or
+                self.connect_to_predecessors_selection.isChecked() or self.connect_to_successors_selection.isChecked()
+                or self.connect_to_selected_selection.isChecked()):
             if not self.place_at_position.isChecked():
                 self.lanelet_width.setStyleSheet(
                         'background-color: ' + self.mwindow.mwindow_ui.colorscheme().second_background + '; color: ' +

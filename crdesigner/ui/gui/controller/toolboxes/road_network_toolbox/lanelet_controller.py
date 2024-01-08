@@ -93,9 +93,8 @@ class AddLaneletController:
             self.road_network_controller.text_browser.append("Please select an adding option.")
             return
 
-        if not self.road_network_toolbox_ui.connect_to_selected_selection.isChecked():
-            predecessors = [int(pre) for pre in self.road_network_toolbox_ui.predecessors.get_checked_items()]
-            successors = [int(suc) for suc in self.road_network_toolbox_ui.successors.get_checked_items()]
+        predecessors = [int(pre) for pre in self.road_network_toolbox_ui.predecessors.get_checked_items()]
+        successors = [int(suc) for suc in self.road_network_toolbox_ui.successors.get_checked_items()]
 
         place_at_position = self.road_network_toolbox_ui.place_at_position.isChecked()
         connect_to_last_selection = self.road_network_toolbox_ui.connect_to_previous_selection.isChecked()
@@ -121,10 +120,9 @@ class AddLaneletController:
         lanelet_start_pos_y = self.get_y_position_lanelet_start(False)
 
         lanelet_width = self.road_network_controller.get_float(self.road_network_toolbox_ui.lanelet_width)
-        line_marking_left = LineMarking('dashed')
-        line_marking_right = LineMarking('dashed')
-        # line_marking_left = LineMarking(self.road_network_toolbox_ui.line_marking_left.currentText())
-        # line_marking_right = LineMarking(self.road_network_toolbox_ui.line_marking_right.currentText())
+        """
+        line_marking_left = LineMarking(self.road_network_toolbox_ui.line_marking_left.currentText())
+        line_marking_right = LineMarking(self.road_network_toolbox_ui.line_marking_right.currentText())
         num_vertices = int(self.road_network_toolbox_ui.number_vertices.text())
         adjacent_left = int(
                 self.road_network_toolbox_ui.adjacent_left.currentText()) if \
@@ -146,6 +144,26 @@ class AddLaneletController:
                          self.road_network_toolbox_ui.lanelet_referenced_traffic_sign_ids.get_checked_items()}
         traffic_lights = {int(light) for light in
                           self.road_network_toolbox_ui.lanelet_referenced_traffic_light_ids.get_checked_items()}
+        """
+        (user_one_way, user_bidirectional, adjacent_left_same_direction, adjacent_right_same_direction, lanelet_type,
+         adjacent_left, adjacent_right, num_vertices, traffic_signs, traffic_lights) = (set(), set(), True, True, set(),
+                                                                                        None, None, 20, set(), set())
+        line_marking_left = LineMarking('dashed')
+        line_marking_right = LineMarking('dashed')
+        print(user_one_way)
+        print(user_bidirectional)
+        print(adjacent_left_same_direction)
+        print(adjacent_right_same_direction)
+        print(lanelet_type)
+        print(adjacent_left)
+        print(adjacent_right)
+        print(num_vertices)
+        print(traffic_lights)
+        print(traffic_signs)
+        print(line_marking_left)
+        print(line_marking_right)
+        print(lanelet_width)
+
         if self.road_network_toolbox_ui.stop_line_check_box.isChecked():
             if self.road_network_toolbox_ui.stop_line_beginning.isChecked():
                 stop_line_at_end = False
@@ -213,7 +231,7 @@ class AddLaneletController:
                 lanelet.translate_rotate(np.array([selected_lanelet.center_vertices[-1][0],
                                                    selected_lanelet.center_vertices[-1][1]]), 0)
                 MapCreator.fit_to_predecessor(selected_lanelet, lanelet)
-            elif as_successor:
+            elif as_predecessor:
                 x_start = selected_lanelet.center_vertices[0][0] - lanelet_length
                 y_start = selected_lanelet.center_vertices[0][1]
 
