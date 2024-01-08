@@ -1,25 +1,33 @@
 from crdesigner.ui.gui.utilities.toolbox_ui import Toolbox
-from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.add_lanelet_widget import \
-    AddLaneletWidget
-from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.aerial_image_widget import \
-    AerialImageWidget
-from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.intersection_widget import \
-    IntersectionsWidget
-from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.lanelet_attributes_widget import \
-    LaneletAttributesWidget
-from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.lanelet_operations_widget import \
-    LaneletOperationsWidget
-from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.traffic_light_widget import \
-    TrafficLightWidget
-from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.traffic_sign_widget import \
-    TrafficSignWidget
+from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.add_lanelet_widget import (
+    AddLaneletWidget,
+)
+from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.aerial_image_widget import (
+    AerialImageWidget,
+)
+from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.intersection_widget import (
+    IntersectionsWidget,
+)
+from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.lanelet_attributes_widget import (
+    LaneletAttributesWidget,
+)
+from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.lanelet_operations_widget import (
+    LaneletOperationsWidget,
+)
+from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.traffic_light_widget import (
+    TrafficLightWidget,
+)
+from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.traffic_sign_widget import (
+    TrafficSignWidget,
+)
 
 
 class RoadNetworkToolboxUI(Toolbox):
     """a dialog to which collapsible sections can be added;
-        reimplement define_sections() to define sections and
-        add them as (title, widget) tuples to self.sections
-            """
+    reimplement define_sections() to define sections and
+    add them as (title, widget) tuples to self.sections
+    """
+
     def __init__(self, mwindow):
         self.add_lanelet_widget = AddLaneletWidget(self)
         self.lanelet_attributes_widget = LaneletAttributesWidget(self)
@@ -34,11 +42,10 @@ class RoadNetworkToolboxUI(Toolbox):
         self.lanelet_width = None
         super().__init__(mwindow)
 
-
     def define_sections(self):
         """reimplement this to define all your sections
-                and add them as (title, widget) tuples to self.sections
-                """
+        and add them as (title, widget) tuples to self.sections
+        """
         self.sections.append(self.add_lanelet_widget.create_add_lanelet_widget())
         self.sections.append(self.lanelet_attributes_widget.create_lanelet_attributes_widget())
         self.sections.append(self.lanelet_operations_widget.create_lanelet_operations_widget())
@@ -55,30 +62,48 @@ class RoadNetworkToolboxUI(Toolbox):
         if self.place_at_position.isChecked():
             if self.curved_check_button.isChecked():
                 self.select_end_position.setStyleSheet(
-                        'background-color: ' + self.mwindow.mwindow_ui.colorscheme().second_background + '; color: ' +
-                        self.mwindow.mwindow_ui.colorscheme().disabled)
+                    "background-color: "
+                    + self.mwindow.mwindow_ui.colorscheme().second_background
+                    + "; color: "
+                    + self.mwindow.mwindow_ui.colorscheme().disabled
+                )
             else:
                 self.select_end_position.setStyleSheet(
-                        'background-color: ' + self.mwindow.mwindow_ui.colorscheme().second_background + '; color: ' +
-                        self.mwindow.mwindow_ui.colorscheme().color)
+                    "background-color: "
+                    + self.mwindow.mwindow_ui.colorscheme().second_background
+                    + "; color: "
+                    + self.mwindow.mwindow_ui.colorscheme().color
+                )
 
             if self.select_end_position.isChecked():
                 self.curved_check_button.button.setStyleSheet(
-                        'background-color: ' + self.mwindow.mwindow_ui.colorscheme().second_background + '; color: ' +
-                        self.mwindow.mwindow_ui.colorscheme().disabled)
+                    "background-color: "
+                    + self.mwindow.mwindow_ui.colorscheme().second_background
+                    + "; color: "
+                    + self.mwindow.mwindow_ui.colorscheme().disabled
+                )
             else:
                 self.curved_check_button.button.setStyleSheet(
-                        'background-color: ' + self.mwindow.mwindow_ui.colorscheme().second_background + '; color: ' +
-                        self.mwindow.mwindow_ui.colorscheme().color)
+                    "background-color: "
+                    + self.mwindow.mwindow_ui.colorscheme().second_background
+                    + "; color: "
+                    + self.mwindow.mwindow_ui.colorscheme().color
+                )
 
         if (self.place_at_position.isChecked() or self.connect_to_previous_selection.isChecked() or
                 self.connect_to_predecessors_selection.isChecked() or self.connect_to_successors_selection.isChecked()
                 or self.connect_to_selected_selection.isChecked()):
             if not self.place_at_position.isChecked():
                 self.lanelet_width.setStyleSheet(
-                        'background-color: ' + self.mwindow.mwindow_ui.colorscheme().second_background + '; color: ' +
-                        self.mwindow.mwindow_ui.colorscheme().disabled)
+                    "background-color: "
+                    + self.mwindow.mwindow_ui.colorscheme().second_background
+                    + "; color: "
+                    + self.mwindow.mwindow_ui.colorscheme().disabled
+                )
             else:
                 self.lanelet_width.setStyleSheet(
-                        'background-color: ' + self.mwindow.mwindow_ui.colorscheme().second_background + '; color: ' +
-                        self.mwindow.mwindow_ui.colorscheme().color)
+                    "background-color: "
+                    + self.mwindow.mwindow_ui.colorscheme().second_background
+                    + "; color: "
+                    + self.mwindow.mwindow_ui.colorscheme().color
+                )

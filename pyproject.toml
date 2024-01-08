@@ -44,6 +44,7 @@ scipy = [
 lxml = "^4.9.2"
 pyproj = "^3.4.1"
 utm = "^0.7.0"
+mgrs = ">=1.4.5"
 shapely = ">=2.0.1"
 ordered-set = "^4.1.0"
 # sumocr = "^2023.4"  TODO activate sumo test case again and activate odr validation in osm2cr conversion via sumo
@@ -65,6 +66,16 @@ kdtree = "^0.16"
 pandas = "2.0.2"
 requests = "^2.31.0 "
 
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.12.0"
+isort = "^5.13.1"
+flake8 = [
+    { version = "^5.0.4", python = ">=3.8,<3.8.1" },
+    { version = "^6.1.0", python = ">=3.8.1" }
+]
 
 [tool.poetry.group.docs]
 optional = true
@@ -94,6 +105,14 @@ jupyter = "^1.0.0"
 # remove until to pass ci
 # [tool.poetry.scripts]
 # crdesigner = 'crdesigner.command_line:cli'
+
+[tool.black]
+extend-exclude = "(gen/)"
+line-length = 120
+
+[tool.isort]
+profile = "black"
+extend_skip = ["gen"]
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,22 +1,32 @@
 import math
 from typing import Tuple
 
-from PyQt6 import QtCore
-from PyQt6.QtCore import *
-from PyQt6.QtGui import *
-from PyQt6.QtWidgets import *
+from commonroad.common.common_scenario import TimeOfDay, Underground, Weather
+from commonroad.scenario.scenario import Tag
 from commonroad.scenario.state import InitialState
-
-from crdesigner.ui.gui.utilities.toolbox_ui import (
-    Toolbox,
-    CheckableComboBox,
-    QTableWidget
+from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
+from pyparsing import Literal
+from PyQt6 import QtCore
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QDoubleValidator, QFont, QIcon, QIntValidator
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QFormLayout,
+    QFrame,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSpinBox,
+    QTableWidget,
+    QVBoxLayout,
+    QWidget,
 )
 
-from pyparsing import Literal
-from commonroad.common.common_scenario import TimeOfDay, Weather, Underground
-from commonroad.scenario.scenario import Tag
-from commonroad.scenario.traffic_sign import *
+from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox, Toolbox
 
 
 class ScenarioToolboxUI(Toolbox):
@@ -64,13 +74,9 @@ class ScenarioToolboxUI(Toolbox):
         self.planning_problem_list_label = QLabel("Planning Problems:")
         self.planning_problems_list_table = QTableWidget()
         self.planning_problems_list_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.planning_problems_list_table_row_count = (
-            self.planning_problems_list_table.rowCount()
-        )
+        self.planning_problems_list_table_row_count = self.planning_problems_list_table.rowCount()
         self.planning_problems_list_table.setColumnCount(1)
-        self.planning_problems_list_table.setHorizontalHeaderLabels(
-            ["Planning Problem ID"]
-        )
+        self.planning_problems_list_table.setHorizontalHeaderLabels(["Planning Problem ID"])
         self.planning_problems_list_table.verticalHeader().hide()
         self.planning_problems_list_table.resizeColumnsToContents()
         self.planning_problems_list_table.setColumnWidth(0, 400)
@@ -241,9 +247,7 @@ class ScenarioToolboxUI(Toolbox):
         """
         layout_initial_state_information_groupbox = QFormLayout()
         initial_state_information_groupbox = QGroupBox()
-        initial_state_information_groupbox.setLayout(
-            layout_initial_state_information_groupbox
-        )
+        initial_state_information_groupbox.setLayout(layout_initial_state_information_groupbox)
 
         label_general = QLabel("Initial State Attributes")
         label_general.setFont(QFont("Arial", 11, QFont.Weight.Bold))
@@ -307,7 +311,6 @@ class ScenarioToolboxUI(Toolbox):
         self.initial_yawRate.setFixedWidth(150)
         self.initial_yawRate.setAlignment(Qt.AlignmentFlag.AlignRight)
 
-
         yaw_rate_information = QGridLayout()
         yaw_rate_information.addWidget(QLabel("Yaw Rate [deg]:"), 1, 0)
         yaw_rate_information.addWidget(self.initial_yawRate, 1, 2)
@@ -362,9 +365,7 @@ class ScenarioToolboxUI(Toolbox):
         self.button_update_initial_state = QPushButton("Update")
         layout_initial_state_selection_buttons.addRow(self.button_update_initial_state)
 
-        layout_initial_state_information.addLayout(
-            layout_initial_state_selection_buttons
-        )
+        layout_initial_state_information.addLayout(layout_initial_state_selection_buttons)
 
         return widget_initial_state
 
@@ -385,9 +386,7 @@ class ScenarioToolboxUI(Toolbox):
         """
         self.layout_goal_state_information_groupbox = QFormLayout()
         goal_state_information_groupbox = QGroupBox()
-        goal_state_information_groupbox.setLayout(
-            self.layout_goal_state_information_groupbox
-        )
+        goal_state_information_groupbox.setLayout(self.layout_goal_state_information_groupbox)
         goal_state_information_groupbox.setFixedHeight(900)
         goal_state_information_groupbox.setAlignment(Qt.AlignmentFlag.AlignTop)
 
@@ -399,43 +398,29 @@ class ScenarioToolboxUI(Toolbox):
         self.goal_states_list_label = QLabel("Goal States:")
         self.goal_states_list_table = QTableWidget()
         self.goal_states_list_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.goal_states_list_list_table_row_count = (
-            self.goal_states_list_table.rowCount()
-        )
+        self.goal_states_list_list_table_row_count = self.goal_states_list_table.rowCount()
         self.goal_states_list_table.setColumnCount(4)
-        self.goal_states_list_table.setHorizontalHeaderLabels(
-            ["Time", "Position", "Orientation", "Velocity"]
-        )
+        self.goal_states_list_table.setHorizontalHeaderLabels(["Time", "Position", "Orientation", "Velocity"])
         self.goal_states_list_table.setColumnWidth(0, 80)
         self.goal_states_list_table.setColumnWidth(1, 80)
         self.goal_states_list_table.setColumnWidth(2, 80)
         self.goal_states_list_table.setColumnWidth(3, 80)
 
-        self.layout_goal_state_information_groupbox.insertRow(
-            1, self.goal_states_list_label
-        )
-        self.layout_goal_state_information_groupbox.insertRow(
-            2, self.goal_states_list_table
-        )
+        self.layout_goal_state_information_groupbox.insertRow(1, self.goal_states_list_label)
+        self.layout_goal_state_information_groupbox.insertRow(2, self.goal_states_list_table)
 
         """
         Buttons
         """
 
         self.button_add_goal_state = QPushButton("Add")
-        self.layout_goal_state_information_groupbox.insertRow(
-            3, self.button_add_goal_state
-        )
+        self.layout_goal_state_information_groupbox.insertRow(3, self.button_add_goal_state)
 
         self.button_remove_goal_state = QPushButton("Remove")
-        self.layout_goal_state_information_groupbox.insertRow(
-            4, self.button_remove_goal_state
-        )
+        self.layout_goal_state_information_groupbox.insertRow(4, self.button_remove_goal_state)
 
         self.button_update_goal_state = QPushButton("Update")
-        self.layout_goal_state_information_groupbox.insertRow(
-            5, self.button_update_goal_state
-        )
+        self.layout_goal_state_information_groupbox.insertRow(5, self.button_update_goal_state)
 
         """Start & End Time"""
         self.goal_time_start = QLineEdit()
@@ -517,9 +502,7 @@ class ScenarioToolboxUI(Toolbox):
         orientation_information.addWidget(QLabel("-"), 1, 3, alignment=Qt.AlignmentFlag.AlignCenter)
         orientation_information.addWidget(self.goal_orientation_end, 1, 4)
 
-        self.layout_goal_state_information_groupbox.insertRow(
-            8, orientation_information
-        )
+        self.layout_goal_state_information_groupbox.insertRow(8, orientation_information)
 
         """Position"""
         self.layout_goal_state_information_groupbox.insertRow(9, QLabel("Position:"))
@@ -544,9 +527,7 @@ class ScenarioToolboxUI(Toolbox):
 
         self.goal_states_shape_list_table = QTableWidget()
         self.goal_states_shape_list_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.goal_states_shape_list_table_row_count = (
-            self.goal_states_shape_list_table.rowCount()
-        )
+        self.goal_states_shape_list_table_row_count = self.goal_states_shape_list_table.rowCount()
         self.goal_states_shape_list_table.setColumnCount(2)
         self.goal_states_shape_list_table.setHorizontalHeaderLabels(["Shape", "Center"])
         self.goal_states_shape_list_table.setColumnWidth(0, 160)
@@ -567,20 +548,14 @@ class ScenarioToolboxUI(Toolbox):
         self.goal_states_shape_layout.addRow(self.button_goal_state_position_add_shape)
         self.goal_states_shape_layout.addRow(self.button_goal_state_position_remove_shape)
         self.goal_states_shape_layout.addRow(self.button_goal_state_position_update_shape)
-        self.goal_states_shape_layout.insertRow(
-            11, QLabel("Shape:"), self.goal_states_shape_selector
-        )
+        self.goal_states_shape_layout.insertRow(11, QLabel("Shape:"), self.goal_states_shape_selector)
 
-        self.layout_goal_state_information_groupbox.insertRow(
-            12, self.goal_states_shape_widget
-        )
+        self.layout_goal_state_information_groupbox.insertRow(12, self.goal_states_shape_widget)
 
     def remove_goal_state_shape_fields(self) -> None:
         """removes the shape_fields"""
         try:
-            self.layout_goal_state_information_groupbox.removeRow(
-                self.goal_states_shape_widget
-            )
+            self.layout_goal_state_information_groupbox.removeRow(self.goal_states_shape_widget)
         except Exception:
             pass
 
@@ -635,9 +610,7 @@ class ScenarioToolboxUI(Toolbox):
 
         self.goal_states_lanelet_list_table = QTableWidget()
         self.goal_states_lanelet_list_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.goal_states_lanelet_list_table_row_count = (
-            self.goal_states_lanelet_list_table.rowCount()
-        )
+        self.goal_states_lanelet_list_table_row_count = self.goal_states_lanelet_list_table.rowCount()
         self.goal_states_lanelet_list_table.setColumnCount(1)
         self.goal_states_lanelet_list_table.setHorizontalHeaderLabels(["Lanelet"])
         self.goal_states_lanelet_list_table.setColumnWidth(0, 350)
@@ -653,33 +626,21 @@ class ScenarioToolboxUI(Toolbox):
         self.button_goal_state_position_add_lanelet.setFixedWidth(80)
 
         self.goal_states_lanelet_layout.addRow(self.goal_states_lanelet_list_table)
-        self.goal_states_lanelet_layout.addRow(
-            self.button_goal_state_position_remove_lanelet
-        )
+        self.goal_states_lanelet_layout.addRow(self.button_goal_state_position_remove_lanelet)
 
         layout_goal_states_lanelet_layout_add = QGridLayout()
-        layout_goal_states_lanelet_layout_add.addWidget(
-            self.goal_state_position_lanelet_update, 1, 1
-        )
-        layout_goal_states_lanelet_layout_add.addWidget(
-            self.button_goal_state_position_add_lanelet, 1, 2
-        )
+        layout_goal_states_lanelet_layout_add.addWidget(self.goal_state_position_lanelet_update, 1, 1)
+        layout_goal_states_lanelet_layout_add.addWidget(self.button_goal_state_position_add_lanelet, 1, 2)
         goal_states_lanelet_add_widget = QWidget()
         goal_states_lanelet_add_widget.setLayout(layout_goal_states_lanelet_layout_add)
         self.goal_states_lanelet_layout.addRow(goal_states_lanelet_add_widget)
 
-        self.layout_goal_state_information_groupbox.insertRow(
-            11, self.goal_states_lanelet_widget
-        )
-
-
+        self.layout_goal_state_information_groupbox.insertRow(11, self.goal_states_lanelet_widget)
 
     def remove_goal_state_lanelet_fields(self) -> None:
         """Removes the Lanelet fields"""
         try:
-            self.layout_goal_state_information_groupbox.removeRow(
-                self.goal_states_lanelet_widget
-            )
+            self.layout_goal_state_information_groupbox.removeRow(self.goal_states_lanelet_widget)
         except Exception:
             pass
 
@@ -824,9 +785,7 @@ class ScenarioToolboxUI(Toolbox):
         """Removes the Polygon Shape fields"""
         try:
             for i in range(self.amount_vertices):
-                self.layout_goal_state_information_groupbox.removeRow(
-                    self.polygon_row[i]
-                )
+                self.layout_goal_state_information_groupbox.removeRow(self.polygon_row[i])
 
             self.layout_goal_state_information_groupbox.removeRow(self.add_vertice_btn)
         except Exception:
@@ -882,9 +841,7 @@ class ScenarioToolboxUI(Toolbox):
         self.remove_vertice_btn[i].clicked.connect(lambda: self.remove_vertice())
         self.polygon_row[i].addWidget(self.remove_vertice_btn[i])
 
-        self.layout_goal_state_information_groupbox.insertRow(
-            i + 13, self.polygon_row[i]
-        )
+        self.layout_goal_state_information_groupbox.insertRow(i + 13, self.polygon_row[i])
         self.amount_vertices = self.amount_vertices + 1
 
     def remove_vertice(self, i: int = -1) -> None:

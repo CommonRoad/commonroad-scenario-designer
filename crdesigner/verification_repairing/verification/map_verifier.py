@@ -8,19 +8,34 @@ from typing import List, Tuple
 from commonroad.scenario.lanelet import LaneletNetwork
 
 from crdesigner.verification_repairing.config import MapVerParams
-from crdesigner.verification_repairing.partitioning.map_partition import LaneletPartitioning, TrafficSignPartitioning, \
-    TrafficLightPartitioning, LaneletBlock, TrafficSignBlock, TrafficLightBlock, IntersectionBlock, Partition, \
-    pymetis_imported
+from crdesigner.verification_repairing.partitioning.map_partition import (
+    IntersectionBlock,
+    LaneletBlock,
+    LaneletPartitioning,
+    Partition,
+    TrafficLightBlock,
+    TrafficLightPartitioning,
+    TrafficSignBlock,
+    TrafficSignPartitioning,
+    pymetis_imported,
+)
+from crdesigner.verification_repairing.verification.formula_ids import (
+    FormulaID,
+    FormulaTypes,
+    LaneletFormulaID,
+    TrafficLightFormulaID,
+    TrafficSignFormulaID,
+    extract_formula_ids_by_type,
+    filter_formula_ids_by_type,
+)
 from crdesigner.verification_repairing.verification.hol.mapping import HOLMapping
-from crdesigner.verification_repairing.verification.hol.satisfaction import HOLVerificationChecker
-
+from crdesigner.verification_repairing.verification.hol.satisfaction import (
+    HOLVerificationChecker,
+)
 from crdesigner.verification_repairing.verification.satisfaction import InvalidStates
-from crdesigner.verification_repairing.verification.formula_ids import LaneletFormulaID, TrafficSignFormulaID, \
-    TrafficLightFormulaID, FormulaID, extract_formula_ids_by_type, FormulaTypes, filter_formula_ids_by_type
 
 
 class MapVerifier:
-
     def __init__(self, network: LaneletNetwork, config: MapVerParams):
         """
         Constructor.
@@ -58,8 +73,11 @@ class MapVerifier:
         mapping.map_verification_paras()
         mapping.map_lanelet_network()
 
-        formula_ids = [formula for formula in self._config.verification.formulas
-                       if formula not in self._config.verification.excluded_formulas]
+        formula_ids = [
+            formula
+            for formula in self._config.verification.formulas
+            if formula not in self._config.verification.excluded_formulas
+        ]
         valid_checker = self._create_verifier(mapping, formula_ids)
 
         results = []
@@ -83,8 +101,9 @@ class MapVerifier:
                 formula_ids = extract_formula_ids_by_type(formula_type)
             else:
                 formula_ids = filter_formula_ids_by_type(self._config.verification.formulas, formula_type)
-            formula_ids = \
-                [formula for formula in formula_ids if formula not in self._config.verification.excluded_formulas]
+            formula_ids = [
+                formula for formula in formula_ids if formula not in self._config.verification.excluded_formulas
+            ]
 
             if not formula_ids:
                 continue
@@ -133,8 +152,9 @@ class MapVerifier:
 
         return invalid_states
 
-    def _reduce_network(self, block: Tuple[LaneletBlock, TrafficSignBlock, TrafficLightBlock, IntersectionBlock]) \
-            -> LaneletNetwork:
+    def _reduce_network(
+        self, block: Tuple[LaneletBlock, TrafficSignBlock, TrafficLightBlock, IntersectionBlock]
+    ) -> LaneletNetwork:
         """
         Reduces network to a smaller network which includes all lanelets, traffic signs, traffic lights, and
         intersections contained by the block of partition.
@@ -217,8 +237,9 @@ class MapVerifier:
         return verifier
 
     @staticmethod
-    def _create_partitioning(formula_type: enum.EnumMeta, network: LaneletNetwork, config: MapVerParams) \
-            -> Tuple[Partition, str]:
+    def _create_partitioning(
+        formula_type: enum.EnumMeta, network: LaneletNetwork, config: MapVerParams
+    ) -> Tuple[Partition, str]:
         """
         Creates a partition of the network.
 
@@ -229,14 +250,17 @@ class MapVerifier:
         """
 
         if formula_type == LaneletFormulaID:
-            partition = LaneletPartitioning(network) \
-                .normal_partition(ref_size=config.partitioning.lanelet_chunk_size, buffered=True)
+            partition = LaneletPartitioning(network).normal_partition(
+                ref_size=config.partitioning.lanelet_chunk_size, buffered=True
+            )
         elif formula_type == TrafficSignFormulaID:
-            partition = TrafficSignPartitioning(network) \
-                .signs_chunks_partition(size=config.partitioning.traffic_sign_chunk_size)
+            partition = TrafficSignPartitioning(network).signs_chunks_partition(
+                size=config.partitioning.traffic_sign_chunk_size
+            )
         elif formula_type == TrafficLightFormulaID:
-            partition = TrafficLightPartitioning(network) \
-                .lights_chunks_partition(size=config.partitioning.traffic_light_chunk_size)
+            partition = TrafficLightPartitioning(network).lights_chunks_partition(
+                size=config.partitioning.traffic_light_chunk_size
+            )
         else:
             partition = []  # TODO: Implement
 

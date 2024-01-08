@@ -1,15 +1,27 @@
 import itertools
 import warnings
 from abc import ABC
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-from crdesigner.verification_repairing.verification.hol.expression_tree.domain.domain import Domain
-from crdesigner.verification_repairing.verification.hol.expression_tree.domain.dynamic import DynamicDomain
-from crdesigner.verification_repairing.verification.hol.expression_tree.domain.fixed import FixedDomain
-from crdesigner.verification_repairing.verification.hol.expression_tree.expression import Expression
-from crdesigner.verification_repairing.verification.hol.expression_tree.term.variable import Variable
-from crdesigner.verification_repairing.verification.hol.expression_tree.unary.unary import Unary
 from crdesigner.verification_repairing.verification.hol.context import Context
+from crdesigner.verification_repairing.verification.hol.expression_tree.domain.domain import (
+    Domain,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.domain.dynamic import (
+    DynamicDomain,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.domain.fixed import (
+    FixedDomain,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.expression import (
+    Expression,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.term.variable import (
+    Variable,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.unary.unary import (
+    Unary,
+)
 
 
 class FirstOrder(Unary, ABC):
@@ -55,9 +67,9 @@ class FirstOrder(Unary, ABC):
 
         :return: String.
         """
-        string = self._symbol + ' '
+        string = self._symbol + " "
         for i, (var, domain) in enumerate(zip(self._vars, self._domains)):
-            string += var.name + ' in ' + domain.to_string() + ('. ' if i == len(self._vars) - 1 else ', ')
+            string += var.name + " in " + domain.to_string() + (". " if i == len(self._vars) - 1 else ", ")
         string += self._expr.to_string()
         return string
 
@@ -73,14 +85,15 @@ class FirstOrder(Unary, ABC):
                 if domain.domain_id in model.domain_vals.keys():
                     domain.values = model.domain_vals[domain.domain_id]
                 else:
-                    warnings.warn('Unsuccessful initialization of values of fixed domain {}'.format(domain.domain_id))
+                    warnings.warn("Unsuccessful initialization of values of fixed domain {}".format(domain.domain_id))
             elif isinstance(domain, DynamicDomain):
                 if domain.func.name in model.function_funcs.keys():
                     domain.func.func = model.function_funcs[domain.func.name]
                     domain.initialize(model)
                 else:
-                    warnings \
-                        .warn('Unsuccessful initialization of function of dynamic domain {}'.format(domain.func.name))
+                    warnings.warn(
+                        "Unsuccessful initialization of function of dynamic domain {}".format(domain.func.name)
+                    )
 
         super().initialize(model)
 

@@ -1,29 +1,48 @@
-from typing import Dict, List, Any
 import enum
-from crdesigner.verification_repairing.verification.hol.expression_tree.domain.domain import Domain
-from crdesigner.verification_repairing.verification.hol.expression_tree.domain.dynamic import DynamicDomain
-from crdesigner.verification_repairing.verification.hol.expression_tree.domain.fixed import FixedDomain
-from crdesigner.verification_repairing.verification.hol.expression_tree.expression import Expression
-from crdesigner.verification_repairing.verification.hol.expression_tree.symbols import Symbol
-from crdesigner.verification_repairing.verification.hol.expression_tree.term.variable import Variable
-from crdesigner.verification_repairing.verification.hol.expression_tree.unary.bool.not_ import Not
+from typing import Any, Dict, List
+
 from crdesigner.verification_repairing.verification.hol.context import Context
-from crdesigner.verification_repairing.verification.hol.functions.predicates import builtin_predicates
-from crdesigner.verification_repairing.verification.hol.functions.term_functions import builtin_functions
+from crdesigner.verification_repairing.verification.hol.expression_tree.domain.domain import (
+    Domain,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.domain.dynamic import (
+    DynamicDomain,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.domain.fixed import (
+    FixedDomain,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.expression import (
+    Expression,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.symbols import (
+    Symbol,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.term.variable import (
+    Variable,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.unary.bool.not_ import (
+    Not,
+)
+from crdesigner.verification_repairing.verification.hol.functions.predicates import (
+    builtin_predicates,
+)
+from crdesigner.verification_repairing.verification.hol.functions.term_functions import (
+    builtin_functions,
+)
 
 
 class DomainName(enum.Enum):
-    LANELETS = 'L'
-    TRAFFIC_SIGNS = 'TS'
-    TRAFFIC_LIGHTS = 'TL'
-    INTERSECTIONS = 'I'
-    INCOMING_GROUPS = 'IG'
-    TRAFFIC_LIGHT_CYCLE_ELEMENTS = 'CE'
-    OUTGOING_GROUPS = 'OG'
-    POLYLINES = 'P'
-    STOP_LINES = 'SL'
-    AREAS = 'AR'
-    ALL_ELEMENTS = 'M'
+    LANELETS = "L"
+    TRAFFIC_SIGNS = "TS"
+    TRAFFIC_LIGHTS = "TL"
+    INTERSECTIONS = "I"
+    INCOMING_GROUPS = "IG"
+    TRAFFIC_LIGHT_CYCLE_ELEMENTS = "CE"
+    OUTGOING_GROUPS = "OG"
+    POLYLINES = "P"
+    STOP_LINES = "SL"
+    AREAS = "AR"
+    ALL_ELEMENTS = "M"
 
 
 class Formula:
@@ -89,7 +108,7 @@ class Formula:
         # built-in predicates
         for func_name in dir(builtin_predicates):
             predicate_func = getattr(builtin_predicates, func_name)
-            if callable(predicate_func) and not func_name.startswith('__'):
+            if callable(predicate_func) and not func_name.startswith("__"):
                 for symbol in Symbol:
                     if func_name == symbol.name.lower():
                         func_name = symbol.value
@@ -98,7 +117,7 @@ class Formula:
         # built-in functions
         for func_name in dir(builtin_functions):
             function_func = getattr(builtin_functions, func_name)
-            if callable(function_func) and not func_name.startswith('__'):
+            if callable(function_func) and not func_name.startswith("__"):
                 model.add_function_func(func_name, function_func)
 
         # initializes domains of free variables
@@ -121,8 +140,8 @@ class Formula:
         string = self._expr.to_string()
         for i, (var, domain) in enumerate(zip(self._free_vars, self._free_var_domains)):
             if i == 0:
-                string += ' || '
-            string += var.name + ' in ' + domain.to_string() + (', ' if i < len(self._free_vars) - 1 else '')
+                string += " || "
+            string += var.name + " in " + domain.to_string() + (", " if i < len(self._free_vars) - 1 else "")
 
         return string
 

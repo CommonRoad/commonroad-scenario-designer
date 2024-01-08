@@ -5,7 +5,10 @@ from typing import Tuple, Union
 
 import numpy as np
 import scipy.optimize
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.eulerspiral import EulerSpiral
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.eulerspiral import (
+    EulerSpiral,
+)
 
 
 class CurvatureRes(IntEnum):
@@ -63,7 +66,7 @@ class Geometry(abc.ABC):
         :param compute_curvature: computes curvature, otherwise returns None
         :return: None
         """
-        return
+        pass
 
 
 class Line(Geometry):
@@ -82,9 +85,7 @@ class Line(Geometry):
         :param compute_curvature: decides whether curvature should be calculated
         :return: x and y position, orientation and curvature in the form ([x, y], orientation, curvature=0)
         """
-        pos = self.start_position + np.array(
-            [s_pos * np.cos(self.heading), s_pos * np.sin(self.heading)]
-        )
+        pos = self.start_position + np.array([s_pos * np.cos(self.heading), s_pos * np.sin(self.heading)])
         tangent = self.heading
 
         return pos, tangent, CurvatureRes.CONST_ZERO
@@ -158,12 +159,11 @@ class Spiral(Geometry):
         self._curv_end = curv_end
 
         super().__init__(start_position=start_position, heading=heading, length=length)
-        self._spiral = EulerSpiral.create_from_length_and_curvature(
-            self.length, self._curv_start, self._curv_end
-        )
+        self._spiral = EulerSpiral.create_from_length_and_curvature(self.length, self._curv_start, self._curv_end)
 
-    def calc_position(self, s_pos:float, compute_curvature: bool = True) \
-            -> Tuple[np.ndarray, float, Tuple[float, float]]:
+    def calc_position(
+        self, s_pos: float, compute_curvature: bool = True
+    ) -> Tuple[np.ndarray, float, Tuple[float, float]]:
         """
         Calculates x and y coordinates at position s along the line and returns additionally the orientation and
         curvature. It overrides the abstract method of the superclass Geometry. Is just calls a function from
@@ -174,11 +174,7 @@ class Spiral(Geometry):
         :return: x and y position, orientation and curvature in the form ([x, y], orientation, curvature=0)
         """
         (x, y, t, curvature) = self._spiral.calc(
-            s_pos,
-            self.start_position[0],
-            self.start_position[1],
-            self._curv_start,
-            self.heading
+            s_pos, self.start_position[0], self.start_position[1], self._curv_start, self.heading
         )
         return np.array([x, y]), t, curvature
 
@@ -193,8 +189,9 @@ class Poly3(Geometry):
     :ivar d2_coeffs: list of coefficients of second derivative in the form [c'', d'']
     """
 
-    def __init__(self, start_position: np.ndarray, heading: float, length: float, a: float, b: float, c: float,
-                 d: float):
+    def __init__(
+        self, start_position: np.ndarray, heading: float, length: float, a: float, b: float, c: float, d: float
+    ):
         """
         Constructor of Cubic polynom of the form y(x) = a + b*x + c*x^2 + d*x^3
 
@@ -218,8 +215,9 @@ class Poly3(Geometry):
 
         # raise NotImplementedError()
 
-    def calc_position(self, s_pos: float, compute_curvature: bool = True) \
-            -> Tuple[np.ndarray, float, Union[Tuple[float, float], None]]:
+    def calc_position(
+        self, s_pos: float, compute_curvature: bool = True
+    ) -> Tuple[np.ndarray, float, Union[Tuple[float, float], None]]:
         """
         Calculates x and y coordinates at position s along the line and returns additionally the orientation and
         curvature. It overrides the abstract method of the superclass Geometry. The coordinate frame of the
@@ -268,8 +266,19 @@ class ParamPoly3(Geometry):
     """
 
     def __init__(
-        self, start_position: np.ndarray, heading: float, length: float, aU: float, bU: float, cU: float, dU: float,
-            aV: float, bV: float, cV: float, dV: float, pRange: float
+        self,
+        start_position: np.ndarray,
+        heading: float,
+        length: float,
+        aU: float,
+        bU: float,
+        cU: float,
+        dU: float,
+        aV: float,
+        bV: float,
+        cV: float,
+        dV: float,
+        pRange: float,
     ):
         """
         Constructor of Parametric Cubic curve
@@ -326,8 +335,9 @@ class ParamPoly3(Geometry):
         :param pos: position on the parametric cubic curve
         :return: max curvature
         """
-        if abs(np.polynomial.polynomial.polyval(pos, self.d2_coeffs_u)) > \
-           abs(np.polynomial.polynomial.polyval(pos, self.d2_coeffs_v)):
+        if abs(np.polynomial.polynomial.polyval(pos, self.d2_coeffs_u)) > abs(
+            np.polynomial.polynomial.polyval(pos, self.d2_coeffs_v)
+        ):
             if np.polynomial.polynomial.polyval(pos, self.d2_coeffs_u) > 0:
                 return np.polynomial.polynomial.polyval(pos, self.d2_coeffs_u), self.curvature_derivative_max
             else:
@@ -339,8 +349,9 @@ class ParamPoly3(Geometry):
             else:
                 return np.polynomial.polynomial.polyval(pos, self.d2_coeffs_v), self.curvature_derivative_min
 
-    def calc_position(self, s_pos: float, compute_curvature: bool = True) \
-            -> Tuple[np.ndarray, float, Union[None, Tuple[float, float]]]:
+    def calc_position(
+        self, s_pos: float, compute_curvature: bool = True
+    ) -> Tuple[np.ndarray, float, Union[None, Tuple[float, float]]]:
         """
         Calculates x and y coordinates at position s along the line and returns additionally the orientation and
         curvature. It overrides the abstract method of the superclass Geometry.
@@ -418,7 +429,7 @@ def calc_delta_s(curvature: Union[None, float, Tuple[float, float]], error_toler
     :param error_tolerance: max. error
     :return: delta s
     """
-    if type(curvature) == tuple:
+    if isinstance(curvature, tuple):
         curvature, curv_derivative = curvature
         if curvature < 0:
             curv_derivative = -curv_derivative
@@ -432,6 +443,7 @@ def calc_delta_s(curvature: Union[None, float, Tuple[float, float]], error_toler
     else:
         curvature = abs(curvature)
         if curv_derivative is not None and abs(curv_derivative) > 2.0:
+
             def f(ds):
                 return (math.pow(ds, 2) * curvature + math.pow(ds, 3) * curv_derivative) / 8 - error_tolerance
 

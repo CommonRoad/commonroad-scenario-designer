@@ -1,9 +1,14 @@
 import warnings
-from typing import List, Dict, Set, Any
+from typing import Any, Dict, List, Set
 
-from crdesigner.verification_repairing.verification.hol.formula_collection import TrafficSignFormulas, TrafficLightFormulas, \
-    IntersectionFormulas, LaneletFormulas, GeneralFormulas
 from crdesigner.verification_repairing.verification.hol.formula import Formula
+from crdesigner.verification_repairing.verification.hol.formula_collection import (
+    GeneralFormulas,
+    IntersectionFormulas,
+    LaneletFormulas,
+    TrafficLightFormulas,
+    TrafficSignFormulas,
+)
 from crdesigner.verification_repairing.verification.hol.parser.parser import Parser
 
 
@@ -45,7 +50,7 @@ class FormulaManager:
         """
         for f in self._formulas:
             if f.formula_id == formula.formula_id:
-                warnings.warn('Formula with ID {} is already stored!'.format(formula.formula_id))
+                warnings.warn("Formula with ID {} is already stored!".format(formula.formula_id))
                 return
         self._formulas.append(formula)
 
@@ -57,13 +62,18 @@ class FormulaManager:
         :param values: Values.
         """
         if domain_id in self._domains.keys():
-            warnings.warn('Domain with ID {} is already stored!'.format(domain_id))
+            warnings.warn("Domain with ID {} is already stored!".format(domain_id))
             return
         self._domains[domain_id] = values
 
     def _collect_formulas(self):
-        for collection in [TrafficLightFormulas, TrafficSignFormulas, IntersectionFormulas, LaneletFormulas,
-                           GeneralFormulas]:
+        for collection in [
+            TrafficLightFormulas,
+            TrafficSignFormulas,
+            IntersectionFormulas,
+            LaneletFormulas,
+            GeneralFormulas,
+        ]:
             for formula_id, formula in collection.formulas.items():
                 for subformula_id, subformula in collection.subformulas.items():
                     formula = formula.replace(subformula_id, subformula)

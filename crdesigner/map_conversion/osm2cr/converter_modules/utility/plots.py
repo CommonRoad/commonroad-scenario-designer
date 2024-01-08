@@ -2,13 +2,22 @@
 This module provides many functions to plot a scenario.
 It is not used in the conversion process.
 """
-import matplotlib.pyplot as plt
 import matplotlib.axes as axis
+import matplotlib.pyplot as plt
 import numpy as np
-from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
+
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph import (
+    Graph,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_edge import (
+    GraphEdge,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph_lane import (
+    Lane,
+)
 
 
-def draw_laneborders(lane: rg.Lane, ax: axis):
+def draw_laneborders(lane: Lane, ax: axis):
     """
     draws a single lane in a plot
 
@@ -33,7 +42,7 @@ def draw_laneborders(lane: rg.Lane, ax: axis):
     return
 
 
-def draw_edge_orientation(edge: rg.GraphEdge, ax: axis):
+def draw_edge_orientation(edge: GraphEdge, ax: axis):
     """
     draws a single edge direction in a plot
 
@@ -45,17 +54,24 @@ def draw_edge_orientation(edge: rg.GraphEdge, ax: axis):
 
     # draw an arrow from start to end of edge
     ax.scatter(edge.node1.x, edge.node1.y, color="blue")
-    ax.arrow(x=edge.node1.x,  y=edge.node1.y,  dx=edge.node2.x - edge.node1.x,  dy=edge.node2.y - edge.node1.y,
-             color="red",  width=1, head_width=6)
+    ax.arrow(
+        x=edge.node1.x,
+        y=edge.node1.y,
+        dx=edge.node2.x - edge.node1.x,
+        dy=edge.node2.y - edge.node1.y,
+        color="red",
+        width=1,
+        head_width=6,
+    )
     # print compass degrees
     ax.text(
-        x=(edge.node1.x + edge.node2.x)/2,
-        y=(edge.node1.y + edge.node2.y)/2,
-        s='{}'.format(int(edge.get_compass_degrees()))
-        )
+        x=(edge.node1.x + edge.node2.x) / 2,
+        y=(edge.node1.y + edge.node2.y) / 2,
+        s="{}".format(int(edge.get_compass_degrees())),
+    )
 
 
-def draw_lanelet_direction(lane: rg.Lane, ax: axis):
+def draw_lanelet_direction(lane: Lane, ax: axis):
     """
     draws a single lane direction in a plot. Green if lane forward
 
@@ -71,10 +87,11 @@ def draw_lanelet_direction(lane: rg.Lane, ax: axis):
         dy=lane.right_bound[-1][1] - lane.right_bound[0][1],
         color="green" if lane.forward else "pink",
         width=1,
-        head_width=2)
+        head_width=2,
+    )
 
 
-def draw_graph(graph: rg.Graph, ax: axis, links: bool = True):
+def draw_graph(graph: Graph, ax: axis, links: bool = True):
     """
     draws lanelets of a graph in a plot
 
@@ -107,7 +124,7 @@ def draw_graph(graph: rg.Graph, ax: axis, links: bool = True):
     return
 
 
-def draw_nodes(graph: rg.Graph, ax: axis):
+def draw_nodes(graph: Graph, ax: axis):
     """
     scatters the nodes of a graph on the plot
 
@@ -124,7 +141,7 @@ def draw_nodes(graph: rg.Graph, ax: axis):
     return
 
 
-def draw_simple_edges(graph: rg.Graph, ax: axis):
+def draw_simple_edges(graph: Graph, ax: axis):
     """
     draws the edges of a graph simplified by a straight line between its start and end
 
@@ -138,7 +155,7 @@ def draw_simple_edges(graph: rg.Graph, ax: axis):
     return
 
 
-def draw_edges(graph: rg.Graph, ax: axis):
+def draw_edges(graph: Graph, ax: axis):
     """
     draws the edges of a graph according to their original way points
 
@@ -156,7 +173,7 @@ def draw_edges(graph: rg.Graph, ax: axis):
     return
 
 
-def draw_interpolated_edges(graph: rg.Graph, ax: axis):
+def draw_interpolated_edges(graph: Graph, ax: axis):
     """
     draws the interpolated courses of the edges of a graph
 
@@ -174,7 +191,7 @@ def draw_interpolated_edges(graph: rg.Graph, ax: axis):
     return
 
 
-def draw_lane(lane: rg.Lane, ax: axis):
+def draw_lane(lane: Lane, ax: axis):
     """
     draws a lane
 
@@ -191,7 +208,7 @@ def draw_lane(lane: rg.Lane, ax: axis):
     return
 
 
-def draw_lanes(graph: rg.Graph, ax: axis, links: bool = True):
+def draw_lanes(graph: Graph, ax: axis, links: bool = True):
     """
     draws all lanes of a graph
 
@@ -209,7 +226,7 @@ def draw_lanes(graph: rg.Graph, ax: axis, links: bool = True):
     return
 
 
-def draw_edge_links(graph: rg.Graph, ax: axis):
+def draw_edge_links(graph: Graph, ax: axis):
     """
     draws all links between edges of a graph with arrows
 
@@ -224,7 +241,7 @@ def draw_edge_links(graph: rg.Graph, ax: axis):
             to_point = edge.forward_successor.interpolated_waypoints[0]
             dx = to_point[0] - from_point[0]
             dy = to_point[1] - from_point[1]
-            length = np.sqrt(dx ** 2 + dy ** 2)
+            length = np.sqrt(dx**2 + dy**2)
             ax.arrow(
                 from_point[0],
                 from_point[1],
@@ -239,7 +256,7 @@ def draw_edge_links(graph: rg.Graph, ax: axis):
             to_point = edge.backward_successor.interpolated_waypoints[-1]
             dx = to_point[0] - from_point[0]
             dy = to_point[1] - from_point[1]
-            length = np.sqrt(dx ** 2 + dy ** 2)
+            length = np.sqrt(dx**2 + dy**2)
             ax.arrow(
                 from_point[0],
                 from_point[1],
@@ -252,7 +269,7 @@ def draw_edge_links(graph: rg.Graph, ax: axis):
     return
 
 
-def draw_lane_links(graph: rg.Graph, ax: axis):
+def draw_lane_links(graph: Graph, ax: axis):
     """
     draws all links between lanes of a graph with arrows
 
@@ -268,7 +285,7 @@ def draw_lane_links(graph: rg.Graph, ax: axis):
                 first_point = successor.waypoints[0]
                 dx = first_point[0] - last_point[0]
                 dy = first_point[1] - last_point[1]
-                length = np.sqrt(dx ** 2 + dy ** 2)
+                length = np.sqrt(dx**2 + dy**2)
                 ax.arrow(
                     last_point[0],
                     last_point[1],
@@ -281,7 +298,7 @@ def draw_lane_links(graph: rg.Graph, ax: axis):
     return
 
 
-def draw_points_of_lane(lane: rg.Lane, ax: axis):
+def draw_points_of_lane(lane: Lane, ax: axis):
     waypoints_x, waypoints_y = [], []
     for waypoint in lane.waypoints + lane.left_bound + lane.right_bound:
         waypoints_x.append(waypoint[0])
@@ -289,7 +306,7 @@ def draw_points_of_lane(lane: rg.Lane, ax: axis):
     ax.scatter(waypoints_x, waypoints_y)
 
 
-def draw_all_points(graph: rg.Graph, ax: axis):
+def draw_all_points(graph: Graph, ax: axis):
     """
     draws all points of all lanelets in the scenario
 

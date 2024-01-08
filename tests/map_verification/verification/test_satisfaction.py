@@ -1,20 +1,33 @@
 import unittest
-
-import numpy as np
 import warnings
 
-from commonroad.common.common_lanelet import LaneletType
-from commonroad.scenario.lanelet import Lanelet, StopLine, LineMarking, LaneletNetwork
+import numpy as np
+from commonroad.scenario.lanelet import Lanelet, LaneletNetwork, LineMarking, StopLine
 from commonroad.scenario.scenario import ScenarioID
-from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany
-from commonroad.scenario.traffic_light import TrafficLight, TrafficLightState, TrafficLightCycleElement, \
-    TrafficLightCycle
+from commonroad.scenario.traffic_light import (
+    TrafficLight,
+    TrafficLightCycle,
+    TrafficLightCycleElement,
+    TrafficLightState,
+)
+from commonroad.scenario.traffic_sign import (
+    TrafficSign,
+    TrafficSignElement,
+    TrafficSignIDGermany,
+)
 
-from crdesigner.verification_repairing.verification.formula_ids import FormulaID, LaneletFormulaID, \
-    TrafficSignFormulaID, TrafficLightFormulaID, GeneralFormulaID
-from crdesigner.verification_repairing.verification.hol.mapping import HOLMapping
-from crdesigner.verification_repairing.verification.hol.satisfaction import HOLVerificationChecker
 from crdesigner.verification_repairing.config import VerificationParams
+from crdesigner.verification_repairing.verification.formula_ids import (
+    FormulaID,
+    GeneralFormulaID,
+    LaneletFormulaID,
+    TrafficLightFormulaID,
+    TrafficSignFormulaID,
+)
+from crdesigner.verification_repairing.verification.hol.mapping import HOLMapping
+from crdesigner.verification_repairing.verification.hol.satisfaction import (
+    HOLVerificationChecker,
+)
 
 warnings.filterwarnings("ignore")
 
@@ -51,23 +64,33 @@ class TestGeneralFormulaPool(TestFormulaPool):
     """
     The class tests the verification of lanelet elements.
     """
+
     def setUp(self) -> None:
-        self.lanelet_1 = Lanelet(np.array([[0., 1.], [1., 1.]]), np.array([[0., 0.5], [1., 0.5]]),
-                                 np.array([[0., 0.], [1., 0.]]), 1, traffic_signs={3}, traffic_lights={4})
-        self.lanelet_2 = Lanelet(np.array([[1., 1.], [1.5, 1.], [2., 1.]]),
-                                 np.array([[1., 0.5], [1.5, 0.5], [2., 0.5]]),
-                                 np.array([[1., 0.], [1.5, 0.], [2., 0.]]), 2)
+        self.lanelet_1 = Lanelet(
+            np.array([[0.0, 1.0], [1.0, 1.0]]),
+            np.array([[0.0, 0.5], [1.0, 0.5]]),
+            np.array([[0.0, 0.0], [1.0, 0.0]]),
+            1,
+            traffic_signs={3},
+            traffic_lights={4},
+        )
+        self.lanelet_2 = Lanelet(
+            np.array([[1.0, 1.0], [1.5, 1.0], [2.0, 1.0]]),
+            np.array([[1.0, 0.5], [1.5, 0.5], [2.0, 0.5]]),
+            np.array([[1.0, 0.0], [1.5, 0.0], [2.0, 0.0]]),
+            2,
+        )
 
         self.network = LaneletNetwork()
         self.scenario_id = ScenarioID()
         self.network.add_lanelet(self.lanelet_1)
         self.network.add_lanelet(self.lanelet_2)
 
-        traffic_sign_element = TrafficSignElement(TrafficSignIDGermany.MAX_SPEED, ['120'])
-        self.traffic_sign = TrafficSign(3, [traffic_sign_element], {1}, np.array([0., 0.]))
+        traffic_sign_element = TrafficSignElement(TrafficSignIDGermany.MAX_SPEED, ["120"])
+        self.traffic_sign = TrafficSign(3, [traffic_sign_element], {1}, np.array([0.0, 0.0]))
         self.network.add_traffic_sign(self.traffic_sign, {1})
 
-        self.traffic_light = TrafficLight(4, np.array([00., 0.0]))
+        self.traffic_light = TrafficLight(4, np.array([00.0, 0.0]))
         self.network.add_traffic_light(self.traffic_light, {1})
 
     def test_unique_id(self):
@@ -87,12 +110,18 @@ class TestLaneletFormulaPool(TestFormulaPool):
     """
 
     def setUp(self) -> None:
-        self.lanelet_1 = Lanelet(np.array([[0., 1.], [0.5, 1.], [1., 1.]]),
-                                 np.array([[0., 0.5], [0.5, 0.5], [1., 0.5]]),
-                                 np.array([[0., 0.], [0.5, 0.], [1., 0.]]), 1)
-        self.lanelet_2 = Lanelet(np.array([[1., 1.], [1.5, 1.], [2., 1.]]),
-                                 np.array([[1., 0.5], [1.5, 0.5], [2., 0.5]]),
-                                 np.array([[1., 0.], [1.5, 0.], [2., 0.]]), 2)
+        self.lanelet_1 = Lanelet(
+            np.array([[0.0, 1.0], [0.5, 1.0], [1.0, 1.0]]),
+            np.array([[0.0, 0.5], [0.5, 0.5], [1.0, 0.5]]),
+            np.array([[0.0, 0.0], [0.5, 0.0], [1.0, 0.0]]),
+            1,
+        )
+        self.lanelet_2 = Lanelet(
+            np.array([[1.0, 1.0], [1.5, 1.0], [2.0, 1.0]]),
+            np.array([[1.0, 0.5], [1.5, 0.5], [2.0, 0.5]]),
+            np.array([[1.0, 0.0], [1.5, 0.0], [2.0, 0.0]]),
+            2,
+        )
 
         self.network = LaneletNetwork()
         self.network.add_lanelet(self.lanelet_1)
@@ -103,7 +132,7 @@ class TestLaneletFormulaPool(TestFormulaPool):
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_1.left_vertices = np.array([[0., 1.], [1., 1.]])
+        self.lanelet_1.left_vertices = np.array([[0.0, 1.0], [1.0, 1.0]])
 
         self.check_sat(formula_id, self.network, expected=True)
 
@@ -128,7 +157,7 @@ class TestLaneletFormulaPool(TestFormulaPool):
 
         self.lanelet_1.adj_right = 2
 
-        self.check_sat(formula_id, self.network,  expected=False)
+        self.check_sat(formula_id, self.network, expected=False)
 
         self.lanelet_1.adj_right = 3
 
@@ -139,152 +168,152 @@ class TestLaneletFormulaPool(TestFormulaPool):
 
         self.lanelet_1.predecessor = [2]
 
-        self.check_sat(formula_id, self.network,  expected=False)
+        self.check_sat(formula_id, self.network, expected=False)
 
         self.lanelet_1.predecessor = [3]
 
-        self.check_sat(formula_id, self.network,  expected=True)
+        self.check_sat(formula_id, self.network, expected=True)
 
     def test_existence_successor(self):
         formula_id = LaneletFormulaID.EXISTENCE_SUCCESSOR
 
         self.lanelet_1.successor = [2]
 
-        self.check_sat(formula_id, self.network,  expected=False)
+        self.check_sat(formula_id, self.network, expected=False)
 
         self.lanelet_1.successor = [3]
 
-        self.check_sat(formula_id, self.network,  expected=True)
+        self.check_sat(formula_id, self.network, expected=True)
 
     def test_connections_predecessor(self):
         formula_id = LaneletFormulaID.CONNECTIONS_PREDECESSOR
 
-        self.lanelet_2.left_vertices = np.array([[-1., 1.], [0., 1.]])
-        self.lanelet_2.right_vertices = np.array([[-1., 0.], [0., 0.]])
+        self.lanelet_2.left_vertices = np.array([[-1.0, 1.0], [0.0, 1.0]])
+        self.lanelet_2.right_vertices = np.array([[-1.0, 0.0], [0.0, 0.0]])
         self.lanelet_1.predecessor = [2]
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_2.left_vertices = np.array([[-1., 1.], [0., 1.25]])
+        self.lanelet_2.left_vertices = np.array([[-1.0, 1.0], [0.0, 1.25]])
 
-        self.check_sat(formula_id, self.network,  expected=True)
+        self.check_sat(formula_id, self.network, expected=True)
 
     def test_connections_successor(self):
         formula_id = LaneletFormulaID.CONNECTIONS_SUCCESSOR
 
         self.lanelet_1.successor = [2]
 
-        self.check_sat(formula_id, self.network,  expected=False)
+        self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_2.left_vertices = np.array([[0., 1.], [1., 1.25]])
+        self.lanelet_2.left_vertices = np.array([[0.0, 1.0], [1.0, 1.25]])
 
-        self.check_sat(formula_id, self.network,  expected=True)
+        self.check_sat(formula_id, self.network, expected=True)
 
     def test_polylines_left_same_dir_parallel_adj(self):
         formula_id = LaneletFormulaID.POLYLINES_LEFT_SAME_DIR_PARALLEL_ADJ
 
-        self.lanelet_2.right_vertices = np.array([[0., 1.], [0.5, 1.], [1., 1.]])
+        self.lanelet_2.right_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [1.0, 1.0]])
         self.lanelet_1.adj_left = 2
         self.lanelet_1.adj_left_same_direction = True
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_2.right_vertices = np.array([[0., 1.], [0.5, 1.25], [1., 1.]])
+        self.lanelet_2.right_vertices = np.array([[0.0, 1.0], [0.5, 1.25], [1.0, 1.0]])
 
         self.check_sat(formula_id, self.network, expected=True)
 
     def test_polylines_left_opposite_dir_parallel_adj(self):
         formula_id = LaneletFormulaID.POLYLINES_LEFT_OPPOSITE_DIR_PARALLEL_ADJ
 
-        self.lanelet_2.left_vertices = np.array([[1., 1.], [0.5, 1.], [0., 1.]])
+        self.lanelet_2.left_vertices = np.array([[1.0, 1.0], [0.5, 1.0], [0.0, 1.0]])
         self.lanelet_1.adj_left = 2
         self.lanelet_1.adj_left_same_direction = False
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_2.left_vertices = np.array([[1., 1.], [0.5, 0.75], [0., 1.]])
+        self.lanelet_2.left_vertices = np.array([[1.0, 1.0], [0.5, 0.75], [0.0, 1.0]])
 
         self.check_sat(formula_id, self.network, expected=True)
 
     def test_polylines_right_same_dir_parallel_adj(self):
         formula_id = LaneletFormulaID.POLYLINES_RIGHT_SAME_DIR_PARALLEL_ADJ
 
-        self.lanelet_2.left_vertices = np.array([[0., 0.], [0.5, 0.], [1., 0.]])
+        self.lanelet_2.left_vertices = np.array([[0.0, 0.0], [0.5, 0.0], [1.0, 0.0]])
         self.lanelet_1.adj_right = 2
         self.lanelet_1.adj_right_same_direction = True
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_2.left_vertices = np.array([[0., 0.], [0.5, 0.9], [1., 0.]])
+        self.lanelet_2.left_vertices = np.array([[0.0, 0.0], [0.5, 0.9], [1.0, 0.0]])
 
         self.check_sat(formula_id, self.network, expected=True)
 
     def test_polylines_right_opposite_dir_parallel_adj(self):
         formula_id = LaneletFormulaID.POLYLINES_RIGHT_OPPOSITE_DIR_PARALLEL_ADJ
 
-        self.lanelet_2.right_vertices = np.array([[1., 0.], [0.5, 0.], [0., 0.]])
+        self.lanelet_2.right_vertices = np.array([[1.0, 0.0], [0.5, 0.0], [0.0, 0.0]])
         self.lanelet_1.adj_right = 2
         self.lanelet_1.adj_right_same_direction = False
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_2.right_vertices = np.array([[1., 0.], [0.5, 0.25], [0., 0.]])
+        self.lanelet_2.right_vertices = np.array([[1.0, 0.0], [0.5, 0.25], [0.0, 0.0]])
 
         self.check_sat(formula_id, self.network, expected=True)
 
     def test_connections_left_merging_adj(self):
         formula_id = LaneletFormulaID.CONNECTIONS_LEFT_MERGING
 
-        self.lanelet_2.left_vertices = np.array([[0., 2.], [0.5, 1.5], [1., 1.]])
-        self.lanelet_2.right_vertices = np.array([[0., 1.], [0.5, 0.5], [1., 0.]])
+        self.lanelet_2.left_vertices = np.array([[0.0, 2.0], [0.5, 1.5], [1.0, 1.0]])
+        self.lanelet_2.right_vertices = np.array([[0.0, 1.0], [0.5, 0.5], [1.0, 0.0]])
         self.lanelet_1.adj_left = 2
         self.lanelet_1.adj_left_same_direction = True
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_2.left_vertices = np.array([[0., 2.], [0.5, 1.5], [1., 1.25]])
+        self.lanelet_2.left_vertices = np.array([[0.0, 2.0], [0.5, 1.5], [1.0, 1.25]])
 
         self.check_sat(formula_id, self.network, expected=True)
 
     def test_connections_right_merging_adj(self):
         formula_id = LaneletFormulaID.CONNECTIONS_RIGHT_MERGING
 
-        self.lanelet_2.left_vertices = np.array([[0., 0.], [0.5, 0.5], [1., 1.]])
-        self.lanelet_2.right_vertices = np.array([[0., -1.], [0.5, 0.75], [1., 0.]])
+        self.lanelet_2.left_vertices = np.array([[0.0, 0.0], [0.5, 0.5], [1.0, 1.0]])
+        self.lanelet_2.right_vertices = np.array([[0.0, -1.0], [0.5, 0.75], [1.0, 0.0]])
         self.lanelet_1.adj_right = 2
         self.lanelet_1.adj_right_same_direction = True
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_2.right_vertices = np.array([[0., -1.], [0.5, 0.75], [1., -0.25]])
+        self.lanelet_2.right_vertices = np.array([[0.0, -1.0], [0.5, 0.75], [1.0, -0.25]])
 
-        self.check_sat(formula_id, self.network,  expected=True)
+        self.check_sat(formula_id, self.network, expected=True)
 
     def test_connections_left_forking_adj(self):
         formula_id = LaneletFormulaID.CONNECTIONS_LEFT_FORKING
 
-        self.lanelet_2.left_vertices = np.array([[0., 1.], [0.5, 1.5], [1., 2.]])
-        self.lanelet_2.right_vertices = np.array([[0., 0.], [0.5, 0.5], [1., 1.]])
+        self.lanelet_2.left_vertices = np.array([[0.0, 1.0], [0.5, 1.5], [1.0, 2.0]])
+        self.lanelet_2.right_vertices = np.array([[0.0, 0.0], [0.5, 0.5], [1.0, 1.0]])
         self.lanelet_1.adj_left = 2
         self.lanelet_1.adj_left_same_direction = True
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_2.left_vertices = np.array([[0., 1.25], [0.5, 1.5], [1., 2.]])
+        self.lanelet_2.left_vertices = np.array([[0.0, 1.25], [0.5, 1.5], [1.0, 2.0]])
 
         self.check_sat(formula_id, self.network, expected=True)
 
     def test_connections_right_forking_adj(self):
         formula_id = LaneletFormulaID.CONNECTIONS_RIGHT_FORKING
 
-        self.lanelet_2.left_vertices = np.array([[0., 1.], [0.5, 0.5], [1., 0.]])
-        self.lanelet_2.right_vertices = np.array([[0., 0.], [0.5, -0.5], [1., -1.]])
+        self.lanelet_2.left_vertices = np.array([[0.0, 1.0], [0.5, 0.5], [1.0, 0.0]])
+        self.lanelet_2.right_vertices = np.array([[0.0, 0.0], [0.5, -0.5], [1.0, -1.0]])
         self.lanelet_1.adj_right = 2
         self.lanelet_1.adj_right_same_direction = True
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_2.right_vertices = np.array([[0., -0.25], [0.5, -0.5], [1., -1.]])
+        self.lanelet_2.right_vertices = np.array([[0.0, -0.25], [0.5, -0.5], [1.0, -1.0]])
 
         self.check_sat(formula_id, self.network, expected=True)
 
@@ -302,8 +331,8 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_potential_predecessor(self):
         formula_id = LaneletFormulaID.POTENTIAL_PREDECESSOR
 
-        self.lanelet_2.left_vertices = np.array([[-1., 1.], [-0.5, 1.], [0., 1.]])
-        self.lanelet_2.right_vertices = np.array([[-1., 0.], [-0.5, 0.], [0., 0.]])
+        self.lanelet_2.left_vertices = np.array([[-1.0, 1.0], [-0.5, 1.0], [0.0, 1.0]])
+        self.lanelet_2.right_vertices = np.array([[-1.0, 0.0], [-0.5, 0.0], [0.0, 0.0]])
         self.lanelet_1.predecessor = [2]
 
         self.check_sat(formula_id, self.network, expected=False)
@@ -315,7 +344,7 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_potential_left_same_dir_parallel_adj(self):
         formula_id = LaneletFormulaID.POTENTIAL_LEFT_SAME_DIR_PARALLEL_ADJ
 
-        self.lanelet_2.right_vertices = np.array([[0., 1.], [0.5, 1.], [1., 1.]])
+        self.lanelet_2.right_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [1.0, 1.0]])
         self.lanelet_1.adj_left = 2
         self.lanelet_1.adj_left_same_direction = True
 
@@ -328,7 +357,7 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_potential_left_opposite_dir_parallel_adj(self):
         formula_id = LaneletFormulaID.POTENTIAL_LEFT_OPPOSITE_DIR_PARALLEL_ADJ
 
-        self.lanelet_2.left_vertices = np.array([[1., 1.], [0.5, 1.], [0., 1.]])
+        self.lanelet_2.left_vertices = np.array([[1.0, 1.0], [0.5, 1.0], [0.0, 1.0]])
         self.lanelet_1.adj_left = 2
         self.lanelet_1.adj_left_same_direction = False
         self.lanelet_2.adj_left = 1
@@ -343,7 +372,7 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_potential_right_same_dir_parallel_adj(self):
         formula_id = LaneletFormulaID.POTENTIAL_RIGHT_SAME_DIR_PARALLEL_ADJ
 
-        self.lanelet_2.left_vertices = np.array([[0., 0.], [0.5, 0.], [1., 0.]])
+        self.lanelet_2.left_vertices = np.array([[0.0, 0.0], [0.5, 0.0], [1.0, 0.0]])
         self.lanelet_1.adj_right = 2
         self.lanelet_1.adj_right_same_direction = True
 
@@ -356,7 +385,7 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_potential_right_opposite_dir_parallel_adj(self):
         formula_id = LaneletFormulaID.POTENTIAL_RIGHT_OPPOSITE_DIR_PARALLEL_ADJ
 
-        self.lanelet_2.right_vertices = np.array([[1., 0.], [0.5, 0.], [0., 0.]])
+        self.lanelet_2.right_vertices = np.array([[1.0, 0.0], [0.5, 0.0], [0.0, 0.0]])
         self.lanelet_1.adj_right = 2
         self.lanelet_1.adj_right_same_direction = False
         self.lanelet_2.adj_right = 1
@@ -371,8 +400,8 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_potential_left_merging_adj(self):
         formula_id = LaneletFormulaID.POTENTIAL_LEFT_MERGING_ADJ
 
-        self.lanelet_2.left_vertices = np.array([[0., 2.], [0.5, 1.5], [1., 1.]])
-        self.lanelet_2.right_vertices = np.array([[0., 1.], [0.5, 0.5], [1., 0.]])
+        self.lanelet_2.left_vertices = np.array([[0.0, 2.0], [0.5, 1.5], [1.0, 1.0]])
+        self.lanelet_2.right_vertices = np.array([[0.0, 1.0], [0.5, 0.5], [1.0, 0.0]])
         self.lanelet_1.adj_left = 2
         self.lanelet_1.adj_left_same_direction = True
 
@@ -385,8 +414,8 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_potential_right_merging_adj(self):
         formula_id = LaneletFormulaID.POTENTIAL_RIGHT_MERGING_ADJ
 
-        self.lanelet_2.left_vertices = np.array([[0., 0.], [0.5, 0.5], [1., 1.]])
-        self.lanelet_2.right_vertices = np.array([[0., -1.], [0.5, 0.75], [1., 0.]])
+        self.lanelet_2.left_vertices = np.array([[0.0, 0.0], [0.5, 0.5], [1.0, 1.0]])
+        self.lanelet_2.right_vertices = np.array([[0.0, -1.0], [0.5, 0.75], [1.0, 0.0]])
         self.lanelet_1.adj_right = 2
         self.lanelet_1.adj_right_same_direction = True
 
@@ -399,8 +428,8 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_potential_left_forking_adj(self):
         formula_id = LaneletFormulaID.POTENTIAL_LEFT_FORKING_ADJ
 
-        self.lanelet_2.left_vertices = np.array([[0., 1.], [0.5, 1.5], [1., 2.]])
-        self.lanelet_2.right_vertices = np.array([[0., 0.], [0.5, 0.5], [1., 1.]])
+        self.lanelet_2.left_vertices = np.array([[0.0, 1.0], [0.5, 1.5], [1.0, 2.0]])
+        self.lanelet_2.right_vertices = np.array([[0.0, 0.0], [0.5, 0.5], [1.0, 1.0]])
         self.lanelet_1.adj_left = 2
         self.lanelet_1.adj_left_same_direction = True
 
@@ -413,8 +442,8 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_potential_right_forking_adj(self):
         formula_id = LaneletFormulaID.POTENTIAL_RIGHT_FORKING_ADJ
 
-        self.lanelet_2.left_vertices = np.array([[0., 1.], [0.5, 0.5], [1., 0.]])
-        self.lanelet_2.right_vertices = np.array([[0., 0.], [0.5, -0.5], [1., -1.]])
+        self.lanelet_2.left_vertices = np.array([[0.0, 1.0], [0.5, 0.5], [1.0, 0.0]])
+        self.lanelet_2.right_vertices = np.array([[0.0, 0.0], [0.5, -0.5], [1.0, -1.0]])
         self.lanelet_1.adj_right = 2
         self.lanelet_1.adj_right_same_direction = True
 
@@ -439,8 +468,8 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_non_predecessor_as_successor(self):
         formula_id = LaneletFormulaID.NON_PREDECESSOR_AS_SUCCESSOR
 
-        self.lanelet_2.left_vertices = np.array([[-1., 1.], [0., 1.]])
-        self.lanelet_2.right_vertices = np.array([[-1., 0.], [0., 0.]])
+        self.lanelet_2.left_vertices = np.array([[-1.0, 1.0], [0.0, 1.0]])
+        self.lanelet_2.right_vertices = np.array([[-1.0, 0.0], [0.0, 0.0]])
         self.lanelet_1.predecessor = [2]
 
         self.check_sat(formula_id, self.network, expected=False)
@@ -455,7 +484,7 @@ class TestLaneletFormulaPool(TestFormulaPool):
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_1.left_vertices = np.array([[0., 1.], [0.5, 0.], [1., -1.]])
+        self.lanelet_1.left_vertices = np.array([[0.0, 1.0], [0.5, 0.0], [1.0, -1.0]])
 
         self.check_sat(formula_id, self.network, expected=True)
 
@@ -464,13 +493,15 @@ class TestLaneletFormulaPool(TestFormulaPool):
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_1.left_vertices = np.array([[0., 1.], [0.5, 1.], [0.5, 1.5], [0.25, 1.5], [0.25, 1.5], [0.5, 1.]])
+        self.lanelet_1.left_vertices = np.array(
+            [[0.0, 1.0], [0.5, 1.0], [0.5, 1.5], [0.25, 1.5], [0.25, 1.5], [0.5, 1.0]]
+        )
         self.check_sat(formula_id, self.network, expected=True)
 
-        self.lanelet_1.left_vertices = np.array([[0.0, 1.], [0.5, 1.], [0.25, 1.0], [0.75, 1.0]])
+        self.lanelet_1.left_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [0.25, 1.0], [0.75, 1.0]])
         self.check_sat(formula_id, self.network, expected=True)
 
-        self.lanelet_1.left_vertices = np.array([[0.0, 1.], [0.5, 1.], [0.5, 1.0], [0.75, 1.0]])
+        self.lanelet_1.left_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [0.5, 1.0], [0.75, 1.0]])
         self.check_sat(formula_id, self.network, expected=True)
 
     def test_right_self_intersection(self):
@@ -478,7 +509,9 @@ class TestLaneletFormulaPool(TestFormulaPool):
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_1.right_vertices = np.array([[0., 1.], [0.5, 1.], [0.5, 1.5], [0.25, 1.5], [0.25, 1.5], [0.5, 1.]])
+        self.lanelet_1.right_vertices = np.array(
+            [[0.0, 1.0], [0.5, 1.0], [0.5, 1.5], [0.25, 1.5], [0.25, 1.5], [0.5, 1.0]]
+        )
         self.check_sat(formula_id, self.network, expected=True)
 
         self.lanelet_1.right_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [0.25, 1.0], [0.75, 1.0]])
@@ -505,8 +538,13 @@ class TestLaneletFormulaPool(TestFormulaPool):
         self.check_sat(formula_id, self.network, expected=False)
 
         self.network.add_lanelet(
-            Lanelet(np.array([[2., 1.], [1., 1.]]), np.array([[2., 0.5], [1., 0.5]]), np.array([[2., 0.], [1., 0.]]),
-                    1111))
+            Lanelet(
+                np.array([[2.0, 1.0], [1.0, 1.0]]),
+                np.array([[2.0, 0.5], [1.0, 0.5]]),
+                np.array([[2.0, 0.0], [1.0, 0.0]]),
+                1111,
+            )
+        )
 
         self.check_sat(formula_id, self.network, expected=True)
 
@@ -515,15 +553,16 @@ class TestLaneletFormulaPool(TestFormulaPool):
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_1.right_vertices, self.lanelet_1.left_vertices = np.flip(self.lanelet_1.left_vertices), \
-            np.flip(self.lanelet_1.right_vertices)
+        self.lanelet_1.right_vertices, self.lanelet_1.left_vertices = np.flip(self.lanelet_1.left_vertices), np.flip(
+            self.lanelet_1.right_vertices
+        )
 
         self.check_sat(formula_id, self.network, expected=True)
 
     def test_existence_traffic_signs(self):
         formula_id = LaneletFormulaID.EXISTENCE_TRAFFIC_SIGNS
 
-        traffic_sign = TrafficSign(3, [], {1}, np.array([0., 0.]))
+        traffic_sign = TrafficSign(3, [], {1}, np.array([0.0, 0.0]))
         self.network.add_traffic_sign(traffic_sign, {1})
         self.lanelet_1.traffic_signs = {3}
 
@@ -536,7 +575,7 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_existence_traffic_lights(self):
         formula_id = LaneletFormulaID.EXISTENCE_TRAFFIC_LIGHTS
 
-        traffic_light = TrafficLight(3, np.array([0., 0.]))
+        traffic_light = TrafficLight(3, np.array([0.0, 0.0]))
         self.network.add_traffic_light(traffic_light, {1})
         self.lanelet_1.traffic_lights = {3}
 
@@ -579,9 +618,9 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_included_stop_line_traffic_signs(self):
         formula_id = LaneletFormulaID.INCLUDED_STOP_LINE_TRAFFIC_SIGNS
 
-        traffic_sign = TrafficSign(3, [], {1}, np.array([0., 0.]))
+        traffic_sign = TrafficSign(3, [], {1}, np.array([0.0, 0.0]))
         self.network.add_traffic_sign(traffic_sign, {1})
-        stop_line = StopLine(np.array([0., 0.]), np.array([1., 1.]), LineMarking.SOLID)
+        stop_line = StopLine(np.array([0.0, 0.0]), np.array([1.0, 1.0]), LineMarking.SOLID)
         self.lanelet_1.stop_line = stop_line
         self.lanelet_1.traffic_signs = {3}
         self.lanelet_1.stop_line.traffic_sign_ref = {3}
@@ -595,9 +634,9 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_included_stop_line_traffic_lights(self):
         formula_id = LaneletFormulaID.INCLUDED_STOP_LINE_TRAFFIC_LIGHTS
 
-        traffic_light = TrafficLight(3, np.array([0., 0.]))
+        traffic_light = TrafficLight(3, np.array([0.0, 0.0]))
         self.network.add_traffic_light(traffic_light, {1})
-        stop_line = StopLine(np.array([0., 0.]), np.array([1., 1.]), LineMarking.SOLID)
+        stop_line = StopLine(np.array([0.0, 0.0]), np.array([1.0, 1.0]), LineMarking.SOLID)
         self.lanelet_1.stop_line = stop_line
         self.lanelet_1.traffic_lights = {3}
         self.lanelet_1.stop_line.traffic_light_ref = {3}
@@ -611,12 +650,12 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_zero_or_two_points_stop_line(self):
         formula_id = LaneletFormulaID.ZERO_OR_TWO_POINTS_STOP_LINE
 
-        stop_line = StopLine(start=np.array([0., 0.]), end=np.array([1., 1.]), line_marking=LineMarking.SOLID)
+        stop_line = StopLine(start=np.array([0.0, 0.0]), end=np.array([1.0, 1.0]), line_marking=LineMarking.SOLID)
         self.lanelet_1.stop_line = stop_line
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        stop_line = StopLine(start=np.array([0., 0.]), end=None, line_marking=LineMarking.SOLID)
+        stop_line = StopLine(start=np.array([0.0, 0.0]), end=None, line_marking=LineMarking.SOLID)
         self.lanelet_1.stop_line = stop_line
 
         self.check_sat(formula_id, self.network, expected=True)
@@ -641,11 +680,15 @@ class TestTrafficSignFormulaPool(TestFormulaPool):
     """
 
     def setUp(self) -> None:
-        lanelet = Lanelet(np.array([[0., 1.], [1., 1.]]),
-                          np.array([[0., 0.5], [1., 0.5]]),
-                          np.array([[0., 0.], [1., 0.]]), 1, traffic_signs={2})
-        traffic_sign_element = TrafficSignElement(TrafficSignIDGermany.MAX_SPEED, ['120'])
-        self.traffic_sign = TrafficSign(2, [traffic_sign_element], {1}, np.array([0., 0.]))
+        lanelet = Lanelet(
+            np.array([[0.0, 1.0], [1.0, 1.0]]),
+            np.array([[0.0, 0.5], [1.0, 0.5]]),
+            np.array([[0.0, 0.0], [1.0, 0.0]]),
+            1,
+            traffic_signs={2},
+        )
+        traffic_sign_element = TrafficSignElement(TrafficSignIDGermany.MAX_SPEED, ["120"])
+        self.traffic_sign = TrafficSign(2, [traffic_sign_element], {1}, np.array([0.0, 0.0]))
 
         self.network = LaneletNetwork()
         self.network.add_lanelet(lanelet)
@@ -658,7 +701,7 @@ class TestTrafficSignFormulaPool(TestFormulaPool):
 
         self.traffic_sign.traffic_sign_elements = []
 
-        self.check_sat(formula_id, self.network,  expected=True)
+        self.check_sat(formula_id, self.network, expected=True)
 
     def test_referenced_traffic_sign(self):
         formula_id = TrafficSignFormulaID.REFERENCED_TRAFFIC_SIGN
@@ -706,16 +749,22 @@ class TestTrafficLightFormulaPool(TestFormulaPool):
     """
 
     def setUp(self) -> None:
-        lanelet = Lanelet(np.array([[0., 1.], [1., 1.]]),
-                          np.array([[0., 0.5], [1., 0.5]]),
-                          np.array([[0., 0.], [1., 0.]]), 1, traffic_lights={2})
+        lanelet = Lanelet(
+            np.array([[0.0, 1.0], [1.0, 1.0]]),
+            np.array([[0.0, 0.5], [1.0, 0.5]]),
+            np.array([[0.0, 0.0], [1.0, 0.0]]),
+            1,
+            traffic_lights={2},
+        )
         cycle_element_0 = TrafficLightCycleElement(TrafficLightState.RED, 10)
         cycle_element_1 = TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 5)
         cycle_element_2 = TrafficLightCycleElement(TrafficLightState.GREEN, 10)
         cycle_element_3 = TrafficLightCycleElement(TrafficLightState.YELLOW, 5)
-        self.traffic_light = \
-            TrafficLight(2, np.array([00., 0.0]),
-                         TrafficLightCycle([cycle_element_0, cycle_element_1, cycle_element_2, cycle_element_3]))
+        self.traffic_light = TrafficLight(
+            2,
+            np.array([00.0, 0.0]),
+            TrafficLightCycle([cycle_element_0, cycle_element_1, cycle_element_2, cycle_element_3]),
+        )
 
         self.network = LaneletNetwork()
         self.network.add_lanelet(lanelet)
@@ -830,5 +879,5 @@ class TestTrafficLightFormulaPool(TestFormulaPool):
 #         self.check_sat(formula_id, self.network, [Solver.HOL], expected=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
