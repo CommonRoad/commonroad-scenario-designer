@@ -1,8 +1,10 @@
-from typing import Optional, Callable
+from typing import Callable, Optional
 
-from PyQt5.QtCore import QObject, pyqtSignal
 from commonroad.planning.goal import GoalRegion
-from commonroad.planning.planning_problem import PlanningProblemSet, PlanningProblem
+from commonroad.planning.planning_problem import PlanningProblem, PlanningProblemSet
+from PyQt6.QtCore import QObject, pyqtSignal
+
+from crdesigner.common.logging import logger
 
 
 class PlanningProblemSetModel(QObject):
@@ -20,6 +22,7 @@ class PlanningProblemSetModel(QObject):
         self._planing_problem_set: Optional[PlanningProblemSet] = planing_problem_set
         self.selected_pp_id: Optional[int] = -1
 
+    @logger.log
     def set_planing_problem_set(self, planing_problem_set: PlanningProblemSet):
         """
         Sets the planning set of the model.
@@ -93,6 +96,7 @@ class PlanningProblemSetModel(QObject):
         """
         return self._planing_problem_set is None
 
+    @logger.log
     def add_planing_problem(self, planing_problem: PlanningProblem):
         """
         Adds a planning problem to the planning set.
@@ -115,6 +119,7 @@ class PlanningProblemSetModel(QObject):
         else:
             return False
 
+    @logger.log
     def remove_lanelet_from_goals(self, ppi: int, current_goal_state_id: int) -> None:
         """
         Removes a lanelet from the dict lanelets_of_goal_position

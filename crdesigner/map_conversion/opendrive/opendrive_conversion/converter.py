@@ -1,13 +1,28 @@
-from typing import Tuple, List
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLane, \
-    ParametricLaneBorderGroup
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import ParametricLaneGroup
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import Border
-from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id, \
-    encode_mark_lane_width_id
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import Lane
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import LaneSection, LaneWidth
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
+import copy
+from typing import List, Tuple
+
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import (
+    Border,
+)
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import (
+    ParametricLane,
+    ParametricLaneBorderGroup,
+)
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import (
+    ParametricLaneGroup,
+)
+from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import (
+    encode_mark_lane_width_id,
+    encode_road_section_lane_width_id,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+    Lane,
+    LaneSection,
+    LaneWidth,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import (
+    PlanView,
+)
 
 
 class OpenDriveConverter:
@@ -40,15 +55,11 @@ class OpenDriveConverter:
             for lane_offset in lane_offsets:
                 if lane_offset.start_pos in reference_border.width_coefficient_offsets:
                     # offset is already there, delete previous entries
-                    idx = reference_border.width_coefficient_offsets.index(
-                        lane_offset.start_pos
-                    )
+                    idx = reference_border.width_coefficient_offsets.index(lane_offset.start_pos)
                     del reference_border.width_coefficient_offsets[idx]
                     del reference_border.width_coefficients[idx]
                 reference_border.width_coefficient_offsets.append(lane_offset.start_pos)
-                reference_border.width_coefficients.append(
-                    lane_offset.polynomial_coefficients
-                )
+                reference_border.width_coefficients.append(lane_offset.polynomial_coefficients)
         else:
             reference_border.width_coefficient_offsets.append(0.0)
             reference_border.width_coefficients.append([0.0])
@@ -56,8 +67,9 @@ class OpenDriveConverter:
         return reference_border
 
     @staticmethod
-    def lane_section_to_parametric_lanes(lane_section: LaneSection, reference_border: Border) \
-            -> List[ParametricLaneGroup]:
+    def lane_section_to_parametric_lanes(
+        lane_section: LaneSection, reference_border: Border
+    ) -> List[ParametricLaneGroup]:
         """Convert a whole lane section into a list of ParametricLane objects.
 
         :param lane_section: LaneSection from which to create the list of ParametricLane Objects
@@ -68,12 +80,9 @@ class OpenDriveConverter:
         plane_groups = []
 
         for side in ["right", "left"]:
-
             # lanes loaded by opendriveparser are aleady sorted by id
             # coeff_factor decides if border is left or right of the reference line
-            lanes = (
-                lane_section.rightLanes if side == "right" else lane_section.leftLanes
-            )
+            lanes = lane_section.rightLanes if side == "right" else lane_section.leftLanes
             coeff_factor = -1.0 if side == "right" else 1.0
 
             # Most inner border gets added first
@@ -82,26 +91,47 @@ class OpenDriveConverter:
             # copy reference border, but set refOffset to start of lane_section
 
             for lane in lanes:
-
-                inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir = \
-                    OpenDriveConverter.determine_neighbours(lane)
+                (
+                    inner_neighbour_id,
+                    outer_neighbour_id,
+                    inner_neighbour_same_dir,
+                ) = OpenDriveConverter.determine_neighbours(lane)
 
                 # Create outer lane border
                 # outer_parametric_lane_border =
 
-                lane_borders.append(
-                    OpenDriveConverter._create_outer_lane_border(
-                        lane_borders, lane, coeff_factor
-                    )
-                )
+                lane_borders.append(OpenDriveConverter._create_outer_lane_border(lane_borders, lane, coeff_factor))
+
+                # check the center line to save the inner linemarkings of the lanes around the center line
+                inner_linemarking = None
+                # lanes around the center line have an id of 1 and -1.
+                if lane.id == 1 or lane.id == -1:
+                    for parent_lane_section in lane.parentRoad.lanes.lane_sections:
+                        # check for the center line
+                        if len(parent_lane_section.centerLanes) > 0:
+                            # check if the center lane has a road mark
+                            if len(parent_lane_section.centerLanes[0].road_mark) > 0:
+                                # assign the road mark to the inner linemarking
+                                inner_linemarking = copy.deepcopy(parent_lane_section.centerLanes[0].road_mark[0])
+                                # check if the road mark type is made up of 2 different markings,
+                                # assume right hand drive
+                                if parent_lane_section.centerLanes[0].road_mark[0].type == "solid broken":
+                                    if lane.id == 1:
+                                        inner_linemarking.type = "solid"
+                                    if lane.id == -1:
+                                        inner_linemarking.type = "broken"
+                                if parent_lane_section.centerLanes[0].road_mark[0].type == "broken solid":
+                                    if lane.id == 1:
+                                        inner_linemarking.type = "broken"
+                                    if lane.id == -1:
+                                        inner_linemarking.type = "solid"
 
                 plane_group = ParametricLaneGroup(
-                    id_=encode_road_section_lane_width_id(
-                        lane_section.parentRoad.id, lane_section.idx, lane.id, -1
-                    ),
+                    id_=encode_road_section_lane_width_id(lane_section.parentRoad.id, lane_section.idx, lane.id, -1),
                     inner_neighbour=inner_neighbour_id,
                     inner_neighbour_same_direction=inner_neighbour_same_dir,
                     outer_neighbour=outer_neighbour_id,
+                    inner_linemarking=inner_linemarking,
                 )
 
                 # Create new lane for each width segment
@@ -126,8 +156,9 @@ class OpenDriveConverter:
         return plane_groups
 
     @staticmethod
-    def create_parametric_lane(lane_borders: List[Border], width: LaneWidth, lane: Lane, side: str, mark_idx: int) \
-            -> ParametricLane:
+    def create_parametric_lane(
+        lane_borders: List[Border], width: LaneWidth, lane: Lane, side: str, mark_idx: int
+    ) -> ParametricLane:
         """Create a parametric lane for a certain width section.
 
         :param lane_borders: Array with already created lane borders.
@@ -162,7 +193,7 @@ class OpenDriveConverter:
             speed=lane.speed,
             line_marking=marking,
             side=side,
-            access=lane.access
+            access=lane.access,
         )
         return parametric_lane
 
@@ -195,9 +226,7 @@ class OpenDriveConverter:
 
         for width in lane.widths:
             border.width_coefficient_offsets.append(width.start_offset)
-            border.width_coefficients.append(
-                [x * coeff_factor for x in width.polynomial_coefficients]
-            )
+            border.width_coefficients.append([x * coeff_factor for x in width.polynomial_coefficients])
         return border
 
     @staticmethod
@@ -208,7 +237,6 @@ class OpenDriveConverter:
         :return: IDs of the inner and outer neighbor, and whether the inner neighbor has the same direction.
         """
         if abs(lane.id) > 1:
-
             if lane.id > 0:
                 inner_lane_id = lane.id - 1
                 outer_lane_id = lane.id + 1

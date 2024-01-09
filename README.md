@@ -15,30 +15,21 @@ This toolbox provides map converters for [OpenStreetMap](https://www.openstreetm
 Additionally, a graphical user interface (GUI) is included, which allows one to efficiently create and manipulate 
 CommonRoad maps and scenarios.
 
-|  Tool                               |                 Path                  |                                Functionality                                 |
-| :---------------------------------: |:-------------------------------------:|:----------------------------------------------------------------------------:|
-|OpenDRIVE => CR            | `crdesigner/map_converter/opendrive`  |                   Conversion from OpenDRIVE to CommonRoad.                   |
-|Lanelet/Lanelet2 <=> CR |  `crdesigner/map_converter/lanelet2`  | Conversion from Lanelet2 to CommonRoad <br /> and from CommonRoad to Lanelet |
-|OSM => CR                  |   `crdesigner/map_converter/osm2cr`   |                      Conversion from OSM to CommonRoad.                      |
-|SUMO <=> CR             |  `crdesigner/map_converter/sumo_map`  |              Conversion from SUMO to CommonRoad and vice versa.              |
-|CR Scenario Designer GUI             |     `crdesigner/input_output/gui`     |    Multi-functional GUI for map conversion and scenario creation/editing.    |
+|              Tool              |                    Path                     |                                Functionality                                 |
+|:------------------------------:|:-------------------------------------------:|:----------------------------------------------------------------------------:|
+|        OpenDRIVE => CR         |    `crdesigner/map_conversion/opendrive`    |                   Conversion from OpenDRIVE to CommonRoad.                   |
+|    Lanelet/Lanelet2 <=> CR     |    `crdesigner/map_conversion/lanelet2`     | Conversion from Lanelet2 to CommonRoad <br /> and from CommonRoad to Lanelet |
+|           OSM => CR            |     `crdesigner/map_conversion/osm2cr`      |                      Conversion from OSM to CommonRoad.                      |
+|          SUMO <=> CR           |    `crdesigner/map_conversion/sumo_map`     |              Conversion from SUMO to CommonRoad and vice versa.              |
+| Map Verification and Repairing |     `crdesigner/verification_repairing`     |                Verification and Repairing of CommonRoad maps.                |
+|    CR Scenario Designer GUI    |             `crdesigner/ui/gui`             |    Multi-functional GUI for map conversion and scenario creation/editing.    |
 
 ## Prerequisites and Installation
-We have tested the toolbox with Python 3.8, 3.9, 3.10, and 3.11.
+We have tested the toolbox with Python 3.8, 3.9, and 3.10.
 The toolbox should work under Linux, macOS, and Windows. 
 Below we present two ways of installing the CommonRoad Scenario Designer: 
 - Only using the CommonRoad Scenario Designer, e.g.,the GUI or integrating the scenario designer APIs into your code
 - Developing code for the CommonRoad Scenario Designer
-
-If you want to use the SUMO conversion or to generate traffic using SUMO, please install 
-[SUMO](https://sumo.dlr.de/docs/index.html):
-```bash
-sudo apt-get update
-sudo apt-get install sumo sumo-tools sumo-doc
-echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
-echo 'export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"' >> ~/.bashrc
-```
-If you use zsh, replace `.bashrc` with `.zshrc`.
 
 ### Using the CommonRoad Scenario Designer
 The recommended way of installation if you only want to use the scenario designer (i.e., you do not want to work with the code directly) is to use the PyPI package:
@@ -84,7 +75,7 @@ First you need to activate your python environment with the installed dependenci
 Afterward, you can start the _CommonRoad Scenario Designer_ and the GUI will open:
 
 ```bash
-$ python crdesigner/start_gui.py
+$ python crdesigner/ui/gui/start_gui.py
 ```
 
 #### Command Line
@@ -140,6 +131,15 @@ For many conversions we provide further APIs, e.g., for downloading a map from O
 #### GUI
 The GUI provides a toolbox with which contains functionality to load maps given in formats other the CommonRoad format   
 and to convert CommonRoad maps to other formats or the other formats to the CommonRoad format.
+
+#### Saving Video
+
+Provides the functionality to save the animation of the scenario as a mp4 file.
+
+For error: "MovieWriter ffmpeg unavailable; using Pillow instead." try to install ffmpeg. This should solve the problem.
+```bash
+sudo apt-install ffmpeg
+```
 
 #### Important information
 

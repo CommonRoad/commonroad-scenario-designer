@@ -1,8 +1,49 @@
 # Changelog
 
+## [0.8.1] - 2023-12-XX
+
+### Added
+- Test cases for GUI
+- Logging actions of users
+- Optional functionality to get geonamesID locally without API-call
+- Test Case for local geonamesID functionality
+- OpenDRIVE to CommonRoad conversion: considering line markings of inner shared lanelet boundaries
+- Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
+- Optional MGRS tag for nodes in CR to Lanelet2 conversion (comptaibility with Autoware)
+- Functionality to edit vertices of a lanelet in the canvas
+- Eclipse-SUMO Python package dependency for better integration of SUMO
+- cr2lanelet: Option of local coordinates for traffic lights
+- cr2lanelet: Static height for traffic lights (1.2m) until official height support in CommonRoad
+- cr2lanelet: Regulatory element to corresponding way relation for lanes (required by autoware)
+- Option to display the aerial image of the current position
+- By default, if no lbdv creditials are stored, the open source credentials are used
+
+### Changed
+- Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
+- osm2cr: virtual traffic sign have position assigned
+- PyQt6 instead of PyQt5 as GUI backend
+- Code formatting (flake8, black, isort)
+- cr2lanelet: traffic light subtype
+- cr2lanelet: traffic light includes only two nodes (in case of autoware)
+- osm2cr: use pyproj for projection
+
+### Fixed
+- Adding existing obstacles again
+- Selecting obstacles with set-based prediction
+- Bug when editing curved lanelets in the canvas
+- lanelet2cr wrong final vertices assignment 
+- Deleting unreferenced traffic signs/lights after deleting lanelet
+- Map verification/repairing: Checking unique ID of traffic light cycle element
+- Consider x-, y-translation for cr2lanelet conversion (and vice versa)
+- osm2cr projection
+
+### Removed
+- Unused osm2cr functions, e.g., for plotting graphs
+
 ## [0.8.0] - 2023-10-31
 
 ### Added
+- CommonRoad map verification and repairing
 - Cropping of a map in the GUI
 - Background saves with restore functionality
 - Scenario toolbox to specify planning problems
@@ -11,9 +52,7 @@
 - Support for visualizing scenarios with 3D coordinates on 2D plane
 - cr2lanelet line marking conversion
 - cr2lanelet bidirectional users conversion
-- Tool for CommonRoad map verification and repairing
 - Possibility to change look of the GUI into a more modern style
-
 
 ### Changed
 - GUI backend using MVC pattern
@@ -34,8 +73,8 @@
 - OpenDRIVE/Lanelet2 conversion intersection incoming lanelets as set instead of list/tuple
 - Relationship of predecessor/successor when creating adjacent lanelets
 - Obstacle information no longer crashes when selecting static obstacle or required state value is missing
-- Visualization of the obstacles colors works fixed
-- Resolved bug where the obstacles where not shown after time step 200
+- Visualization of obstacle colors
+- Obstacles are not shown after time step 200
 
 ## [0.7.2] - 2023-07-29
 

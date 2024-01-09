@@ -1,6 +1,6 @@
-
 from typing import List
-from PyQt5.QtWidgets import QFileDialog
+
+from PyQt6.QtWidgets import QFileDialog
 
 
 class Observable:
@@ -29,18 +29,17 @@ class Observable:
 
 
 def find_invalid_ref_of_traffic_lights(scenario) -> List[int]:
-    """ find references to traffic lights that do not exist """
+    """find references to traffic lights that do not exist"""
     invalid_refs = []
     for lanelet in scenario.lanelet_network.lanelets:
         for t_light_ref in set(lanelet.traffic_lights):
-            if not scenario.lanelet_network.find_traffic_light_by_id(
-                    t_light_ref):
+            if not scenario.lanelet_network.find_traffic_light_by_id(t_light_ref):
                 invalid_refs.append(t_light_ref)
     return invalid_refs
 
 
 def find_invalid_ref_of_traffic_signs(scenario) -> List[int]:
-    """ find references to traffic signs that do not exist """
+    """find references to traffic signs that do not exist"""
     invalid_refs = []
     for lanelet in scenario.lanelet_network.lanelets:
         for t_sign_ref in set(lanelet.traffic_signs):
@@ -50,7 +49,7 @@ def find_invalid_ref_of_traffic_signs(scenario) -> List[int]:
 
 
 def find_invalid_lanelet_polygons(scenario) -> List[int]:
-    """ find lanelets with invalid polygon """
+    """find lanelets with invalid polygon"""
     lanelet_ids = []
     for lanelet in scenario.lanelet_network.lanelets:
         polygon = lanelet.polygon.shapely_object
@@ -61,10 +60,9 @@ def find_invalid_lanelet_polygons(scenario) -> List[int]:
 
 def select_local_file(parent, file_type: str, file_ending: str) -> str:
     file_path, _ = QFileDialog.getOpenFileName(
-        parent,
+        None,
         "Select {} file to convert".format(file_type),
         "",
         "{} files *.{} (*.{})".format(file_type, file_ending, file_ending),
-        options=QFileDialog.Options(),
     )
     return file_path

@@ -1,8 +1,30 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import Signal
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import *
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import *
-from commonroad.scenario.traffic_sign import TrafficSignIDGermany
+
+import numpy as np
+from commonroad.common.common_lanelet import LineMarking, StopLine
+from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.scenario.traffic_sign import (
+    TrafficSign,
+    TrafficSignElement,
+    TrafficSignIDGermany,
+    TrafficSignIDZamunda,
+)
+
+from crdesigner.map_conversion.common.utils import generate_unique_id, get_default_cycle
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import (
+    calculate_stop_line_position,
+    extract_traffic_element_id,
+    get_traffic_signals,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+    Lane,
+    LaneSection,
+    LaneWidth,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import (
+    Signal,
+)
 
 
 class TestTrafficSignals(unittest.TestCase):
@@ -93,12 +115,20 @@ class TestTrafficSignals(unittest.TestCase):
         # true stop line
         line = StopLine(np.array([2.828427818, 4.242640225]), np.array([2.828427818, 4.242640225]), LineMarking.SOLID)
         # true traffic light
-        position = np.array([15 * np.cos(0.785398) + (2 * np.cos(0.785398 + np.pi / 2)),
-                             15 * np.sin(0.785398) + (2 * np.sin(0.785398 + np.pi / 2))])
+        position = np.array(
+            [
+                15 * np.cos(0.785398) + (2 * np.cos(0.785398 + np.pi / 2)),
+                15 * np.sin(0.785398) + (2 * np.sin(0.785398 + np.pi / 2)),
+            ]
+        )
         traffic_light = TrafficLight(1, position=position, traffic_light_cycle=get_default_cycle())
         # true traffic sign
-        position = np.array([20 * np.cos(0.785398) + (2 * np.cos(0.785398 + np.pi / 2)),
-                             20 * np.sin(0.785398) + (2 * np.sin(0.785398 + np.pi / 2))])
+        position = np.array(
+            [
+                20 * np.cos(0.785398) + (2 * np.cos(0.785398 + np.pi / 2)),
+                20 * np.sin(0.785398) + (2 * np.sin(0.785398 + np.pi / 2)),
+            ]
+        )
         element = TrafficSignElement(TrafficSignIDZamunda.WARNING_SLIPPERY_ROAD, [])
         # noinspection PyTypeChecker
         sign = TrafficSign(1, list([element]), None, position, virtual=False)
@@ -124,12 +154,14 @@ class TestTrafficSignals(unittest.TestCase):
         signal.s = 5
         signal.t = 2.5
         pos_calc, tangent, _, _ = road.planView.calc(signal.s, compute_curvature=False)
-        position = np.array([pos_calc[0] + signal.t * np.cos(tangent + np.pi / 2),
-                             pos_calc[1] + signal.t * np.sin(tangent + np.pi / 2)])
+        position = np.array(
+            [pos_calc[0] + signal.t * np.cos(tangent + np.pi / 2), pos_calc[1] + signal.t * np.sin(tangent + np.pi / 2)]
+        )
         position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal, position, tangent)
 
         true_pos_2 = np.array(
-                [position[0] - 0 * np.cos(tangent + np.pi / 2), position[1] - 0 * np.sin(tangent + np.pi) / 2])
+            [position[0] - 0 * np.cos(tangent + np.pi / 2), position[1] - 0 * np.sin(tangent + np.pi) / 2]
+        )
         true_pos_1 = position
         self.assertIsNone(np.testing.assert_almost_equal(true_pos_1, position_1))
         self.assertIsNone(np.testing.assert_almost_equal(true_pos_2, position_2))
@@ -163,19 +195,28 @@ class TestTrafficSignals(unittest.TestCase):
 
         # construct ground truth / expected value
         pos_at_s, tangent, _, _ = self.roadMultipleLaneSections.planView.calc(self.signals[0].s, False, False)
-        true_first_pos = np.array([pos_at_s[0] + self.signals[0].t * np.cos(tangent + np.pi / 2),
-                                   pos_at_s[1] + self.signals[0].t * np.sin(tangent + np.pi / 2)])
+        true_first_pos = np.array(
+            [
+                pos_at_s[0] + self.signals[0].t * np.cos(tangent + np.pi / 2),
+                pos_at_s[1] + self.signals[0].t * np.sin(tangent + np.pi / 2),
+            ]
+        )
         total_width = 5.0 + 0.09822 * self.signals[0].s ** 2 - 0.0051843 * self.signals[0].s ** 3 + 5.22
-        true_second_pos = np.array([true_first_pos[0] - total_width * np.cos(tangent + np.pi / 2),
-                                    true_first_pos[1] - total_width * np.sin(tangent + np.pi / 2)])
+        true_second_pos = np.array(
+            [
+                true_first_pos[0] - total_width * np.cos(tangent + np.pi / 2),
+                true_first_pos[1] - total_width * np.sin(tangent + np.pi / 2),
+            ]
+        )
 
         # get actual value
-        first_pos, second_pos = calculate_stop_line_position(self.roadMultipleLaneSections.lanes.lane_sections,
-                                                             self.signals[0], true_first_pos, tangent)
+        first_pos, second_pos = calculate_stop_line_position(
+            self.roadMultipleLaneSections.lanes.lane_sections, self.signals[0], true_first_pos, tangent
+        )
 
         np.testing.assert_almost_equal(true_first_pos, first_pos)
         np.testing.assert_almost_equal(true_second_pos, second_pos)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

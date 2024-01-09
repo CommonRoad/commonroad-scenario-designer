@@ -1,4 +1,3 @@
-
 class Object:
     """
     Describes items that influence a road by expanding, delimiting and supplementing its course.
@@ -20,6 +19,7 @@ class Object:
     :ivar _pitch: pitch angle relative to the x/y-plane
     :ivar _roll: roll angle relative to the x/y-plane
     """
+
     def __init__(self):
         self._type = None
         self._name = None
@@ -50,13 +50,54 @@ class Object:
 
     @type.setter
     def type(self, value):
-        road_types = ['barrier', 'bike', 'building', 'bus', 'car', 'crosswalk', 'ZebraCrossing', 'gantry', 'motorbike',
-                      'none', 'obstacle', 'parkingSpace', 'patch', 'pedestrian', 'pole', 'RoadSignPole', 'railing',
-                      'roadMark', 'roadmark', 'soundBarrier', 'streetLamp', 'Streetlamp', 'trafficIsland', 'trailer',
-                      'train', 'tram', 'tree', 'van', 'vegetation', 'wind', 'Guidepost']
-        customs = ['permanentDelineator', 'emergencyCallBox', 'tunnel', 'arrowStraight', 'arrowRight', 'arrowMergeLeft',
-                   'arrowLeft', 'arrowLeftRight', 'arrowStraightLeft', 'arrowMergeRight', 'island', 'guidepost',
-                   'roadpainting']
+        road_types = [
+            "barrier",
+            "bike",
+            "building",
+            "bus",
+            "car",
+            "crosswalk",
+            "ZebraCrossing",
+            "gantry",
+            "motorbike",
+            "none",
+            "obstacle",
+            "parkingSpace",
+            "patch",
+            "pedestrian",
+            "pole",
+            "RoadSignPole",
+            "railing",
+            "roadMark",
+            "roadmark",
+            "soundBarrier",
+            "streetLamp",
+            "Streetlamp",
+            "trafficIsland",
+            "trailer",
+            "train",
+            "tram",
+            "tree",
+            "van",
+            "vegetation",
+            "wind",
+            "Guidepost",
+        ]
+        customs = [
+            "permanentDelineator",
+            "emergencyCallBox",
+            "tunnel",
+            "arrowStraight",
+            "arrowRight",
+            "arrowMergeLeft",
+            "arrowLeft",
+            "arrowLeftRight",
+            "arrowStraightLeft",
+            "arrowMergeRight",
+            "island",
+            "guidepost",
+            "roadpainting",
+        ]
         if value == "-1":
             value = "none"
         if value not in road_types and value not in customs:
@@ -207,7 +248,7 @@ class Object:
 
     @orientation.setter
     def orientation(self, value):
-        if value not in ['+', '-', 'none']:
+        if value not in ["+", "-", "none"]:
             raise AttributeError("Value is not a valid orientation!")
         self._orientation = str(value)
 
@@ -268,9 +309,7 @@ class Object:
         self._outline = value
 
 
-
 class ObjectOutlineCorner:
-
     def __init__(self):
         self._height = None
         self._id = None

@@ -1,14 +1,20 @@
 """
 This module removes converting errors before exporting the scenario to XML
 """
-import numpy as np
-import networkx as nx
-from ordered_set import OrderedSet
 import logging
+from typing import Dict, Set
+
+import networkx as nx
+import numpy as np
+from commonroad.scenario.scenario import Lanelet, LaneletNetwork, Scenario
+from commonroad.scenario.traffic_sign import (
+    LEFT_HAND_TRAFFIC,
+    TRAFFIC_SIGN_VALIDITY_START,
+)
+from ordered_set import OrderedSet
 from scipy import interpolate
-from crdesigner.config.osm_config import osm_config as config
-from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork
-from commonroad.scenario.traffic_sign import LEFT_HAND_TRAFFIC
+
+from crdesigner.common.config.osm_config import osm_config as config
 
 
 def sanitize(scenario: Scenario) -> None:
@@ -30,8 +36,97 @@ def sanitize(scenario: Scenario) -> None:
     # merge_short_lanes(scenario)
     # interpolate waypoints to smoothen lanes
     smoothen_scenario(scenario)
+    # add positions to virtual traffic signs
+    add_traffic_sign_position(scenario)
     # convert to left hand driving scenario if necessary
     convert_to_lht(scenario)
+
+
+def _find_first_traffic_sign_occurrence(lanelet_network: LaneletNetwork) -> Dict[int, Set[int]]:
+    """
+    Evaluates all lanelets if a traffic sign occurs first within it
+
+    :param lanelet_network: CommonRoad lanelet network
+    :return: list of tuples with traffic sign ID and corresponding lanelet ID
+    """
+    occurrences = {}
+    for lanelet in lanelet_network.lanelets:
+        for traffic_sign in lanelet.traffic_signs:
+            # create set object if none exist
+            if occurrences.get(traffic_sign) is None:
+                occurrences[traffic_sign] = set()
+            # if there exists no predecessor, current lanelet is first occurrence
+            if len(lanelet.predecessor) == 0:
+                occurrences[traffic_sign].add(lanelet.lanelet_id)
+            # if no predecessor references the traffic sign, this is the first occurrence
+            elif all(
+                traffic_sign not in lanelet_network.find_lanelet_by_id(pre).traffic_signs for pre in lanelet.predecessor
+            ):
+                occurrences[traffic_sign].add(lanelet.lanelet_id)
+
+    return occurrences
+
+
+def add_traffic_sign_position(scenario: Scenario):
+    first_traffic_sign_occurrence = _find_first_traffic_sign_occurrence(scenario.lanelet_network)
+    for sign in scenario.lanelet_network.traffic_signs:
+        if sign.position is not None:
+            continue
+        for lanelet_id in first_traffic_sign_occurrence.get(sign.traffic_sign_id):
+            if scenario.scenario_id.country_id in LEFT_HAND_TRAFFIC:
+                if (
+                    scenario.lanelet_network.find_lanelet_by_id(lanelet_id).adj_left_same_direction is None
+                    or scenario.lanelet_network.find_lanelet_by_id(lanelet_id).adj_left_same_direction is False
+                ):
+                    if any(
+                        element.traffic_sign_element_id.name in TRAFFIC_SIGN_VALIDITY_START
+                        for element in sign.traffic_sign_elements
+                    ):
+                        sign.position = scenario.lanelet_network.find_lanelet_by_id(lanelet_id).left_vertices[0]
+                    else:
+                        sign.position = scenario.lanelet_network.find_lanelet_by_id(lanelet_id).left_vertices[-1]
+            else:
+                if (
+                    scenario.lanelet_network.find_lanelet_by_id(lanelet_id).adj_right_same_direction is None
+                    or scenario.lanelet_network.find_lanelet_by_id(lanelet_id).adj_right_same_direction is False
+                ):
+                    if any(
+                        element.traffic_sign_element_id.name in TRAFFIC_SIGN_VALIDITY_START
+                        for element in sign.traffic_sign_elements
+                    ):
+                        sign.position = scenario.lanelet_network.find_lanelet_by_id(lanelet_id).right_vertices[0]
+                    else:
+                        sign.position = scenario.lanelet_network.find_lanelet_by_id(lanelet_id).right_vertices[-1]
+        if sign.position is None:
+            current_lanelet = scenario.lanelet_network.find_lanelet_by_id(
+                list(first_traffic_sign_occurrence.get(sign.traffic_sign_id))[0]
+            )
+            if scenario.scenario_id.country_id.value in LEFT_HAND_TRAFFIC:
+                while (
+                    current_lanelet.adj_left_same_direction is not None
+                    and current_lanelet.adj_left_same_direction is not False
+                ):
+                    current_lanelet = scenario.lanelet_network.find_lanelet_by_id(current_lanelet.adj_left)
+                if any(
+                    element.traffic_sign_element_id.name in TRAFFIC_SIGN_VALIDITY_START
+                    for element in sign.traffic_sign_elements
+                ):
+                    sign.position = current_lanelet.left_vertices[0]
+                else:
+                    sign.position = current_lanelet.left_vertices[-1]
+            else:
+                while (
+                    current_lanelet.adj_right_same_direction is not None
+                    and current_lanelet.adj_right_same_direction is not False
+                ):
+                    current_lanelet = scenario.lanelet_network.find_lanelet_by_id(current_lanelet.adj_right)
+                if any(
+                    element.traffic_sign_element_id.name in TRAFFIC_SIGN_VALIDITY_START
+                    for element in sign.traffic_sign_elements
+                ):
+                    sign.position = current_lanelet.right_vertices[0]
+                else:
+                    sign.position = current_lanelet.right_vertices[-1]
 
 
 def remove_empty_traffic_signs(scenario: Scenario) -> None:
@@ -161,17 +256,27 @@ def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
             pre_lanelet = net.find_lanelet_by_id(pre)
             sucs_of_pre = list(filter(lambda s: s != l_id, pre_lanelet.successor))
             sucs_of_pre.extend(successors)
-            new_pre = create_lanelet(pre_lanelet, pre_lanelet.left_vertices, pre_lanelet.right_vertices,
-                                     pre_lanelet.center_vertices, predecessor=pre_lanelet.predecessor,
-                                     successor=sucs_of_pre)
+            new_pre = create_lanelet(
+                pre_lanelet,
+                pre_lanelet.left_vertices,
+                pre_lanelet.right_vertices,
+                pre_lanelet.center_vertices,
+                predecessor=pre_lanelet.predecessor,
+                successor=sucs_of_pre,
+            )
             lanelets.remove(pre_lanelet)
             lanelets.append(new_pre)
 
         # update scenario's road network
 
-        scenario.replace_lanelet_network(create_laneletnetwork(lanelets, scenario.lanelet_network.traffic_signs,
-                                                         scenario.lanelet_network.traffic_lights,
-                                                         scenario.lanelet_network.intersections))
+        scenario.replace_lanelet_network(
+            create_laneletnetwork(
+                lanelets,
+                scenario.lanelet_network.traffic_signs,
+                scenario.lanelet_network.traffic_lights,
+                scenario.lanelet_network.intersections,
+            )
+        )
 
 
 def merge_lanelets(lanelet1: Lanelet, lanelet2: Lanelet) -> Lanelet:
@@ -183,12 +288,13 @@ def merge_lanelets(lanelet1: Lanelet, lanelet2: Lanelet) -> Lanelet:
     :param lanelet2: The second lanelet
     :return: Merged lanelet (predecessor => successor)
     """
-    assert isinstance(lanelet1, Lanelet), '<Lanelet/merge_lanelets>: lanelet1 is not a valid lanelet object!'
-    assert isinstance(lanelet2, Lanelet), '<Lanelet/merge_lanelets>: lanelet1 is not a valid lanelet object!'
+    assert isinstance(lanelet1, Lanelet), "<Lanelet/merge_lanelets>: lanelet1 is not a valid lanelet object!"
+    assert isinstance(lanelet2, Lanelet), "<Lanelet/merge_lanelets>: lanelet1 is not a valid lanelet object!"
     # check connection via successor / predecessor
-    assert lanelet1.lanelet_id in lanelet2.successor or lanelet2.lanelet_id in lanelet1.successor,\
-        '<Lanelet/merge_lanelets>: cannot merge two not connected lanelets! successors of l1 = {}, ' \
-        'successors of l2 = {}'.format(lanelet1.successor, lanelet2.successor)
+    assert lanelet1.lanelet_id in lanelet2.successor or lanelet2.lanelet_id in lanelet1.successor, (
+        "<Lanelet/merge_lanelets>: cannot merge two not connected lanelets! successors of l1 = {}, "
+        "successors of l2 = {}".format(lanelet1.successor, lanelet2.successor)
+    )
 
     # check pred and successor
     if lanelet1.lanelet_id in lanelet2.successor:
@@ -220,8 +326,16 @@ def merge_lanelets(lanelet1: Lanelet, lanelet2: Lanelet) -> Lanelet:
     traffic_lights.update(lanelet1.traffic_lights)
     traffic_lights.update(lanelet2.traffic_lights)
 
-    return create_lanelet(suc, left_vertices, right_vertices, center_vertices, predecessor=predecessor,
-                          successor=successor, traffic_signs=traffic_signs, traffic_lights=traffic_lights)
+    return create_lanelet(
+        suc,
+        left_vertices,
+        right_vertices,
+        center_vertices,
+        predecessor=predecessor,
+        successor=successor,
+        traffic_signs=traffic_signs,
+        traffic_lights=traffic_lights,
+    )
 
 
 def smoothen_scenario(scenario: Scenario) -> None:
@@ -240,9 +354,14 @@ def smoothen_scenario(scenario: Scenario) -> None:
     lanelets = list(map(smoothen_lane, lanelets))
 
     # update scenario
-    scenario.replace_lanelet_network(create_laneletnetwork(lanelets, scenario.lanelet_network.traffic_signs,
-                                                           scenario.lanelet_network.traffic_lights,
-                                                           scenario.lanelet_network.intersections))
+    scenario.replace_lanelet_network(
+        create_laneletnetwork(
+            lanelets,
+            scenario.lanelet_network.traffic_signs,
+            scenario.lanelet_network.traffic_lights,
+            scenario.lanelet_network.intersections,
+        )
+    )
 
 
 def b_spline(ctr, max_nodes=10) -> np.array:
@@ -379,13 +498,19 @@ def rht_to_lht(scenario: Scenario) -> None:
             adjacent_right=la.adj_left,
             adjacent_left=la.adj_right,
             adjacent_right_same_direction=adj_l_same,
-            adjacent_left_same_direction=adj_r_same)
+            adjacent_left_same_direction=adj_r_same,
+        )
 
         lht_lanes.append(lht_l)
 
-    scenario.replace_lanelet_network(create_laneletnetwork(lht_lanes, scenario.lanelet_network.traffic_signs,
-                                                           scenario.lanelet_network.traffic_lights,
-                                                           scenario.lanelet_network.intersections))
+    scenario.replace_lanelet_network(
+        create_laneletnetwork(
+            lht_lanes,
+            scenario.lanelet_network.traffic_signs,
+            scenario.lanelet_network.traffic_lights,
+            scenario.lanelet_network.intersections,
+        )
+    )
 
 
 def remove_unconnected_lanes(scenario: Scenario):
@@ -438,10 +563,7 @@ def scenario_to_networkx_graph(scenario) -> nx.DiGraph:
 
     graph = nx.DiGraph(scenario=scenario)
     for la in lanelets:
-        position = (
-                np.mean([p[0] for p in la.center_vertices]),
-                np.mean([p[1] for p in la.center_vertices])
-            )
+        position = (np.mean([p[0] for p in la.center_vertices]), np.mean([p[1] for p in la.center_vertices]))
         graph.add_node(la.lanelet_id, pos=position, lanelet=la)
         edges = [(la.lanelet_id, s) for s in la.successor if s in lanelet_ids]
         if edges:
@@ -450,9 +572,20 @@ def scenario_to_networkx_graph(scenario) -> nx.DiGraph:
     return graph
 
 
-def create_lanelet(lanelet, left_vertices, right_vertices, center_vertices, predecessor=None, successor=None,
-                   adjacent_right=None, adjacent_left=None, adjacent_right_same_direction=None,
-                   adjacent_left_same_direction=None, traffic_signs=None, traffic_lights=None) -> Lanelet:
+def create_lanelet(
+    lanelet,
+    left_vertices,
+    right_vertices,
+    center_vertices,
+    predecessor=None,
+    successor=None,
+    adjacent_right=None,
+    adjacent_left=None,
+    adjacent_right_same_direction=None,
+    adjacent_left_same_direction=None,
+    traffic_signs=None,
+    traffic_lights=None,
+) -> Lanelet:
     """
     Create a new lanelet given an old one. Vertices, successors and predecessors can be modified
 
@@ -500,7 +633,7 @@ def create_lanelet(lanelet, left_vertices, right_vertices, center_vertices, pred
         user_one_way=lanelet.user_one_way,
         user_bidirectional=lanelet.user_bidirectional,
         traffic_signs=traffic_signs,
-        traffic_lights=traffic_lights
+        traffic_lights=traffic_lights,
     )
     return new_lanelet
 

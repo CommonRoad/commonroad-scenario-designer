@@ -1,13 +1,60 @@
-import warnings
-from typing import Tuple, Optional, List
-import math
-import numpy as np
 import copy
+import math
+import warnings
+from typing import List, Optional, Tuple
+
+import numpy as np
+from commonroad.scenario.lanelet import LineMarking
 from pyproj import Transformer
 
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLane
-from commonroad.scenario.lanelet import LineMarking
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import (
+    ParametricLane,
+)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+    RoadMark,
+)
+
+
+def convert_line_marking(plane_line_marking: RoadMark) -> LineMarking:
+    """
+    Function that converts the Opendrive road mark type to the corresponding CommonRoad lanelet linemarking type.
+    :param plane_line_marking: road mark of the parametric lane
+    :return: corresponding linemarking type
+    """
+    mark = LineMarking.UNKNOWN
+
+    if plane_line_marking.type == "solid":
+        if plane_line_marking.weight == "standard":
+            mark = LineMarking.SOLID
+        elif plane_line_marking.weight == "bold":
+            mark = LineMarking.BROAD_SOLID
+
+    elif plane_line_marking.type == "broken":
+        if plane_line_marking.weight == "standard":
+            mark = LineMarking.DASHED
+        elif plane_line_marking.weight == "bold":
+            mark = LineMarking.BROAD_DASHED
+
+    elif plane_line_marking.type == "solid solid":
+        mark = LineMarking.SOLID_SOLID
+
+    elif plane_line_marking.type == "broken broken":
+        mark = LineMarking.DASHED_DASHED
+
+    elif plane_line_marking.type == "curb":
+        mark = LineMarking.CURB
+
+    elif plane_line_marking.type == "none":
+        mark = LineMarking.NO_MARKING
+
+    elif plane_line_marking.type == "solid dashed":
+        mark = LineMarking.SOLID_DASHED
+
+    elif plane_line_marking.type == "dashed solid":
+        mark = LineMarking.DASHED_SOLID
+
+    return mark
 
 
 class ParametricLaneGroup:
@@ -22,6 +69,7 @@ class ParametricLaneGroup:
         inner_neighbour=None,
         inner_neighbour_same_direction=True,
         outer_neighbour=None,
+        inner_linemarking=None,
     ):
         """Initializes a ParametricLaneGroup object.
 
@@ -33,6 +81,8 @@ class ParametricLaneGroup:
         :type inner_neighbour: str
         :param outer_neighbour: ID of the outer neighbor of this group.
         :type outer_neighbour: str
+        :param inner_linemarking: inside road mark present in 2 central inner lanelets, closest to the center line
+        :type inner_linemarking: RoadMark
         """
         self._geo_lengths = [np.array([0.0])]
         self.parametric_lanes: List[ParametricLane] = []
@@ -44,6 +94,10 @@ class ParametricLaneGroup:
         self.traffic_signs = []
         self.stop_lines = []
         self.signal_references = []
+        if inner_linemarking is None:
+            inner_linemarking = RoadMark()
+            inner_linemarking.type = "unknown"
+        self.inner_linemarking = inner_linemarking
 
         if parametric_lanes is not None:
             if isinstance(parametric_lanes, list):
@@ -85,13 +139,9 @@ class ParametricLaneGroup:
         """
         if reverse:
             self._geo_lengths = np.insert(self._geo_lengths, 1, length)
-            self._geo_lengths[2:] = [
-                x + length for i, x in enumerate(self._geo_lengths) if i > 1
-            ]
+            self._geo_lengths[2:] = [x + length for i, x in enumerate(self._geo_lengths) if i > 1]
         else:
-            self._geo_lengths = np.append(
-                self._geo_lengths, length + self._geo_lengths[-1]
-            )
+            self._geo_lengths = np.append(self._geo_lengths, length + self._geo_lengths[-1])
 
     @property
     def type(self) -> str:
@@ -124,9 +174,7 @@ class ParametricLaneGroup:
 
         :return: True if every ParametricLane has width_coefficients equal to only zero
         """
-        return all(
-            [plane.has_zero_width_everywhere() for plane in self.parametric_lanes]
-        )
+        return all([plane.has_zero_width_everywhere() for plane in self.parametric_lanes])
 
     def to_lanelet(self, error_tolerance, min_delta_s, transformer: Transformer) -> ConversionLanelet:
         """Convert a ParametricLaneGroup to a Lanelet.
@@ -137,7 +185,6 @@ class ParametricLaneGroup:
         :return: Created Lanelet.
         """
         left_vertices, right_vertices = np.array([]), np.array([])
-        line_marking_left_vertices = LineMarking.UNKNOWN
         line_marking_right_vertices = LineMarking.UNKNOWN
 
         for parametric_lane in self.parametric_lanes:
@@ -161,58 +208,18 @@ class ParametricLaneGroup:
                 right_vertices = local_right_vertices
 
         for parametric_lane in self.parametric_lanes:
-            mark = LineMarking.UNKNOWN
             line_marking = parametric_lane.line_marking
-
             if line_marking is not None:
-
-                if parametric_lane.side == "left":
-
-                    if line_marking.type == "solid":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.SOLID
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_SOLID
-
-                    elif line_marking.type == "broken":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.DASHED
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_DASHED
-
-                    else:
-                        mark = LineMarking.UNKNOWN
-
-                    line_marking_left_vertices = mark
-
-                elif parametric_lane.side == "right":
-
-                    if line_marking.type == "solid":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.SOLID
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_SOLID
-
-                    elif line_marking.type == "broken":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.DASHED
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_DASHED
-
-                    else:
-                        mark = LineMarking.UNKNOWN
-
-                    line_marking_right_vertices = mark
+                # for the right-hand driving, outer lanelet is always on the right side
+                # assumed right-hand driving
+                line_marking_right_vertices = convert_line_marking(line_marking)
             else:
                 pass
 
-        center_vertices = np.array(
-            [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
-        )
+        center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
         # access to user conversion
         user_list = [set(), set()]
-        user_set = {"car", "truck", "bus", "motorcycle", "priorityVehicle", "taxi",
-                    "bicycle", "pedestrian", "train"}
+        user_set = {"car", "truck", "bus", "motorcycle", "priorityVehicle", "taxi", "bicycle", "pedestrian", "train"}
         direct_map_set = {"truck", "bus", "motorcycle", "pedestrian", "bicycle", "taxi"}
         vehicle_set = {"car", "truck", "bus", "motorcycle", "priorityVehicle", "taxi"}
 
@@ -241,32 +248,46 @@ class ParametricLaneGroup:
                 user = "priorityVehicle"
             elif restriction[0] == "trucks":
                 user = "truck"
-            else: # ignore other lane access types
+            else:  # ignore other lane access types
                 continue
             user_list = access_map(user_list, restriction[1] == "allow", user)
         users = (user_set if user_list[0] == set() else user_list[0]).difference(user_list[1])
         if vehicle_set.issubset(users):
             users = set.union({"vehicle"}, set.difference(users, vehicle_set))
         if self.type == "bidirectional":
-            lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
-                                        lanelet_type=self.type, line_marking_left_vertices=line_marking_left_vertices,
-                                        line_marking_right_vertices=line_marking_right_vertices,
-                                        speed=self.parametric_lanes[0].speed,
-                                        user_bidirectional=users)
+            lanelet = ConversionLanelet(
+                copy.deepcopy(self),
+                left_vertices,
+                center_vertices,
+                right_vertices,
+                self.id_,
+                lanelet_type=self.type,
+                line_marking_left_vertices=convert_line_marking(self.inner_linemarking),
+                line_marking_right_vertices=line_marking_right_vertices,
+                speed=self.parametric_lanes[0].speed,
+                user_bidirectional=users,
+            )
         else:
-            lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
-                                        lanelet_type=self.type, line_marking_left_vertices=line_marking_left_vertices,
-                                        line_marking_right_vertices=line_marking_right_vertices,
-                                        speed=self.parametric_lanes[0].speed,
-                                        user_one_way=users)
-
+            lanelet = ConversionLanelet(
+                copy.deepcopy(self),
+                left_vertices,
+                center_vertices,
+                right_vertices,
+                self.id_,
+                lanelet_type=self.type,
+                line_marking_left_vertices=convert_line_marking(self.inner_linemarking),
+                line_marking_right_vertices=line_marking_right_vertices,
+                speed=self.parametric_lanes[0].speed,
+                user_one_way=users,
+            )
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
 
         return lanelet
 
-    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature: bool = True) \
-            -> Tuple[Tuple[float, float], float, float, float]:
+    def calc_border(
+        self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature: bool = True
+    ) -> Tuple[Tuple[float, float], float, float, float]:
         """Calc vertices point of inner or outer Border.
 
         :param border: Which border to calculate (inner or outer)
@@ -301,7 +322,7 @@ class ParametricLaneGroup:
         mirror_interval: Tuple[float, float],
         adjacent_lanelet: ConversionLanelet,
         precision: float = 0.5,
-        transformer: Optional[Transformer] = None
+        transformer: Optional[Transformer] = None,
     ):
         """Convert a ParametricLaneGroup to a Lanelet with mirroring one of the borders.
 
@@ -332,9 +353,7 @@ class ParametricLaneGroup:
             original_width = np.linalg.norm(inner_pos - outer_pos)
 
             # if not mirroring lane or outside of range
-            if (
-                pos < mirror_interval[0] or pos > mirror_interval[1]
-            ) and not np.isclose(pos, mirror_interval[1]):
+            if (pos < mirror_interval[0] or pos > mirror_interval[1]) and not np.isclose(pos, mirror_interval[1]):
                 if transformer is not None:
                     left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
                     right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
@@ -352,16 +371,12 @@ class ParametricLaneGroup:
                 local_width_offset = distance_slope * pos + global_distance[0]
 
                 if mirror_border == "left":
-                    new_outer_pos = self.calc_border("inner", pos, local_width_offset)[
-                        0
-                    ]
+                    new_outer_pos = self.calc_border("inner", pos, local_width_offset)[0]
                     modified_width = np.linalg.norm(new_outer_pos - inner_pos)
 
                     # change width s.t. it does not mirror inner border but instead
                     # outer border
-                    local_width_offset = (
-                        math.copysign(1, local_width_offset) * last_width_difference
-                    )
+                    local_width_offset = math.copysign(1, local_width_offset) * last_width_difference
                     if modified_width < original_width:
                         new_vertex = self.calc_border("outer", pos, local_width_offset)[0]
                         if transformer is not None:
@@ -385,14 +400,10 @@ class ParametricLaneGroup:
                     else:
                         left_vertices.append(inner_pos)
                 elif mirror_border == "right":
-                    new_inner_pos = self.calc_border("outer", pos, local_width_offset)[
-                        0
-                    ]
+                    new_inner_pos = self.calc_border("outer", pos, local_width_offset)[0]
                     modified_width = np.linalg.norm(new_inner_pos - outer_pos)
 
-                    local_width_offset = (
-                        math.copysign(1, local_width_offset) * last_width_difference
-                    )
+                    local_width_offset = math.copysign(1, local_width_offset) * last_width_difference
                     if modified_width < original_width:
                         new_vertex = self.calc_border("inner", pos, local_width_offset)[0]
                         if transformer is not None:
@@ -422,12 +433,8 @@ class ParametricLaneGroup:
         )
         # right_vertices = np.array(right_vertices)
 
-        center_vertices = np.array(
-            [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
-        )
-        lanelet = ConversionLanelet(
-            copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_
-        )
+        center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
+        lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_)
 
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
@@ -452,8 +459,7 @@ class ParametricLaneGroup:
 
             poses = np.append(
                 poses,
-                np.linspace(0, parametric_lane.length, num_steps)[idx::]
-                + self._geo_lengths[i],
+                np.linspace(0, parametric_lane.length, num_steps)[idx::] + self._geo_lengths[i],
             )
 
         return poses
