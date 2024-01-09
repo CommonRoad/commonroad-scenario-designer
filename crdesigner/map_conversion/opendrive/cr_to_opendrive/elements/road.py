@@ -278,7 +278,7 @@ class Road:
     ):
         this_length = path_length[end_idx] - path_length[start_idx]
         if geo_type == GeometryType.LINE:
-            print("line", this_length, start_idx, end_idx)
+            # print("line", this_length, start_idx, end_idx)
             self.print_line(
                 path_length[start_idx],
                 self.center[start_idx][0],
@@ -287,7 +287,7 @@ class Road:
                 this_length,
             )
         elif geo_type == GeometryType.ARC:
-            print("arc", this_length, start_idx, end_idx)
+            # print("arc", this_length, start_idx, end_idx)
             self.print_arc(
                 path_length[start_idx],
                 self.center[start_idx][0],
@@ -297,7 +297,7 @@ class Road:
                 curv[end_idx],
             )
         elif geo_type == GeometryType.SPIRAL:
-            print("spiral", this_length, start_idx, end_idx)
+            # print("spiral", this_length, start_idx, end_idx)
             self.print_spiral(
                 path_length[start_idx],
                 self.center[start_idx][0],

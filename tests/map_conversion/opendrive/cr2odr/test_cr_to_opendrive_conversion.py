@@ -5,9 +5,6 @@ from tests.map_conversion.opendrive.cr2odr.conversion_base_test import (
     ConversionBaseTestCases,
 )
 
-# to run the tests: pytest -v --cov=crdesigner.map_conversion.opendrive.cr_to_opendrive.converter --cov-report html
-# This also generates a coverage report, see rootdir/htmlcov -> index.html
-
 
 class TestConverterConvert(ConversionBaseTestCases.ConversionBaseTest):
     def __init__(self, *args, **kwargs):
