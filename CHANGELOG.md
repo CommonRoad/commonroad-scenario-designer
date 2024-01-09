@@ -7,7 +7,7 @@
 - Logging actions of users
 - Optional functionality to get geonamesID locally without API-call
 - Test Case for local geonamesID functionality
-- OpenDRIVE to CommonRoad conversion: considering line markings of inner shared lanelet boundaries
+- OpenDRIVE to CommonRoad conversion: considering line markings of inner shared lanelet boundaries and the center line marking
 - Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
 - Optional MGRS tag for nodes in CR to Lanelet2 conversion (comptaibility with Autoware)
 - Functionality to edit vertices of a lanelet in the canvas
@@ -17,6 +17,7 @@
 - cr2lanelet: Regulatory element to corresponding way relation for lanes (required by autoware)
 - Option to display the aerial image of the current position
 - By default, if no lbdv creditials are stored, the open source credentials are used
+- File reader that optionally verifies and repairs the road network using the new map verificiation.
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files

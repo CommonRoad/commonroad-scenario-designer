@@ -3,6 +3,7 @@ from typing import Optional, Tuple
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import FileFormat, Path_T
+from commonroad.geometry.shape import Rectangle, Circle, Polygon
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario
@@ -25,8 +26,6 @@ def project_complete_scenario(scenario: Scenario, proj_string_from: str, proj_st
     """
     crs_from = CRS(proj_string_from)
     crs_to = CRS(proj_string_to)
-    # why do we convert proj to crs and then use Transformer.from_proj? Shouldn't we use Transformer.from_crs in
-    # that case - line 177 in cr2lanelet?
     transformer = Transformer.from_proj(crs_from, crs_to)
 
     # create a deep copy of the scenario
@@ -44,11 +43,26 @@ def project_complete_scenario(scenario: Scenario, proj_string_from: str, proj_st
     # transform traffic light coordinates
     for tl in scenario_copy.lanelet_network.traffic_lights:
         tl.position[0], tl.position[1] = transformer.transform(tl.position[0], tl.position[1])
-        # z coordinate stays the same?
 
     # transform traffic sign coordinates
     for ts in scenario_copy.lanelet_network.traffic_lights:
         ts.position[0], ts.position[1] = transformer.transform(ts.position[0], ts.position[1])
+
+    # transform area coordinates
+    for area in scenario_copy.lanelet_network.areas:
+        for border in area.border:
+            for vertex in border.border_vertices:
+                vertex[0], vertex[1] = transformer.transform(vertex[0], vertex[1])
+
+    # transform obstacle coordinates
+    for obstacle in scenario_copy.obstacles:
+        if obstacle.obstacle_shape == Rectangle or obstacle.obstacle_shape == Circle:
+            obstacle.obstacle_shape.center[0], obstacle.obstacle_shape.center[1] = (
+                transformer.transform(obstacle.obstacle_shape.center[0], obstacle.obstacle_shape.center[1])
+            )
+        elif obstacle.obstacle_shape == Polygon:
+            for vertex in obstacle.obstacle_shape.vertices:
+                vertex[0], vertex[1] = transformer.transform(vertex[0], vertex[1])
 
     return scenario_copy
 
