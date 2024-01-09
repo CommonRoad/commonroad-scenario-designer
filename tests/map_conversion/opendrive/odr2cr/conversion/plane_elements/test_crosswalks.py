@@ -102,7 +102,7 @@ class MyTestCase(unittest.TestCase):
         scenario = opendrive_to_commonroad(
             Path(
                 os.path.dirname(os.path.realpath(__file__))
-                + "/../../../test_maps/odr2cr/{}.xodr".format(xodr_file_name)
+                + "/../../../../test_maps/odr2cr/{}.xodr".format(xodr_file_name)
             )
         )
 
