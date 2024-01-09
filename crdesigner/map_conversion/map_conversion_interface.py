@@ -15,6 +15,8 @@ from crdesigner.common.config.opendrive_config import open_drive_config
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
@@ -176,3 +178,18 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Optional[Scenario]:
         print("__Warning__: {}.".format(e))
         return None
     return opendrive_to_commonroad(Path(opendrive_file))
+
+
+def commonroad_to_opendrive(input_file: Path, output_file: Path):
+    """
+    Converts CommonRoad file to OpenDRIVE file and stores it
+    @param input_file: Path to CommonRoad file
+    @param output_file: Path where OpenDRIVE file to be stored
+    """
+
+    # load the xml file and preprocess it
+    data = DataLoader(str(input_file))
+
+    scenario, successors, ids = data.initialize()
+    converter = Converter(str(input_file), scenario, successors, ids)
+    converter.convert(str(output_file))

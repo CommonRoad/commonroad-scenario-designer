@@ -5,12 +5,6 @@ from typing import Dict, List
 
 import numpy as np
 from commonroad.geometry.polyline_util import compute_polyline_lengths  # type: ignore
-from commonroad.geometry.polyline_util import (
-    compute_polyline_orientations,  # type: ignore
-)
-from commonroad.geometry.polyline_util import (
-    resample_polyline_with_distance,  # type: ignore
-)
 from commonroad.scenario.lanelet import Lanelet  # type: ignore
 from commonroad_dc.geometry.util import compute_curvature_from_polyline
 from lxml import etree  # type: ignore
@@ -334,7 +328,7 @@ class Road:
         geometry.set(config.GEOMETRY_HEADING_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, hdg))
         geometry.set(config.LENGTH_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, length))
 
-        line = etree.SubElement(geometry, config.LINE_TAG)
+        # line = etree.SubElement(geometry, config.LINE_TAG)
 
     # xodr for spirals
     def print_spiral(

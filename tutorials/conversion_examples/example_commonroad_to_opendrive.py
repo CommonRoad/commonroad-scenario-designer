@@ -1,25 +1,9 @@
-import os
+from pathlib import Path
 
 from crdesigner.map_conversion.map_conversion_interface import commonroad_to_opendrive
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
 
-scenario_name = "ZAM_Test-1_1_T-1"  # replace empty string
-input_folder = "/media/sebastian/TUM/06_code/internal/commonroad-io/tutorials/examples"
-# replace empty string
-output_folder = ""  # replace empty string
-input_file = os.path.join(input_folder, scenario_name + ".xml")
-output_file = os.path.join(output_folder, scenario_name + ".xodr")
-
-# ----------------------------------------------- Option 1: General API ------------------------------------------------
-commonroad_to_opendrive(input_file, output_file)
+input_path = Path.cwd().parent.parent / "tests/map_conversion/test_maps/cr2odr/ZAM_Over-1_1.xml"
+output_name = Path.cwd() / "example_files/opendrive/ZAM_Over-1_1.odr"
 
 
-# --------------------------------------- Option 2: CR2OpenDRIVE conversion APIs ---------------------------------------
-
-# load the xml file and preprocess it
-# data = DataLoader(input_file)
-#
-# scenario, successors, ids = data.initialize()
-# converter = Converter(input_file, scenario, successors, ids)
-# converter.convert(output_file)
+commonroad_to_opendrive(input_path, output_name)

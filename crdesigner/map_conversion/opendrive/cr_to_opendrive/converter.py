@@ -1,6 +1,5 @@
 import copy
 import time
-from posixpath import lexists
 from typing import Dict, List
 
 from commonroad.scenario.intersection import IntersectionIncomingElement
@@ -325,7 +324,6 @@ class Converter:
         for key, value in link_map.items():
             cur_links: dict = link_map[key]["roadLinkage"]
             # lane_2_lane=link_map[key][config.LANE_INDICES_TAG]
-            cur_key = key
             len_succ = len(set(cur_links["succ"]))
             len_pred = len(set(cur_links["pred"]))
 

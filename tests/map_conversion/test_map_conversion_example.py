@@ -80,3 +80,17 @@ class MapConversionExampleTests(unittest.TestCase):
 
         # check if the file has been created
         self.assertTrue(Path.exists(Path("./example_files/osm/test_ped_crossing.xml")))
+
+    def test_example_commonroad_to_opendrive(self):
+        # remove the file if it has already been created
+        if Path.exists(Path("./example_files/opendrive/ZAM_Over-1_1.odr")):
+            Path.unlink(Path("./example_files/opendrive/ZAM_Over-1_1.odr"))
+
+        # check if there is no file
+        self.assertFalse(Path.exists(Path("./example_files/opendrive/ZAM_Over-1_1.odr")))
+
+        # call the execution of the example script
+        exec(open("example_commonroad_to_opendrive.py").read())
+
+        # check if the file has been created
+        self.assertTrue(Path.exists(Path("./example_files/opendrive/ZAM_Over-1_1.odr")))

@@ -3,13 +3,11 @@ import unittest
 import numpy as np
 from commonroad.geometry.shape import Circle, Polygon, Rectangle
 from commonroad.scenario.obstacle import ObstacleType
-from commonroad.scenario.trajectory import InitialState
-from lxml import etree
+from commonroad.scenario.state import InitialState
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.obstacle import (
     Obstacle,
 )
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
 
@@ -18,10 +16,6 @@ class TestObstacle(unittest.TestCase):
         # Initialize lanenet
         lanelet_id = 1000
         self.lanelet = MapCreator.create_straight(2, 8, 9, lanelet_id, set())
-
-        # Initialize road
-        writer = etree.Element("ObstacleTest")
-        road = Road(lane_list=[self.lanelet], number_of_lanes=1, root=writer, junction_id=-1)
 
         # Initialize cr2opendrive obstacle
         self.shape = Rectangle(length=3.5, width=6.0)

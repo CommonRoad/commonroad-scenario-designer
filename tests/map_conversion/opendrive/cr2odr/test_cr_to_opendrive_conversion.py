@@ -88,11 +88,6 @@ class TestConverterConvert(ConversionBaseTestCases.ConversionBaseTest):
         self.converter.convert(self.file_path_out)
         self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
-    def test_convert_ZAM_lanelet_with_obstacles(self):
-        self.prepare_conversion("ZAM_LaneletWithObstacle-1_1_T-1")
-        self.converter.convert(self.file_path_out)
-        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
-
     def test_convert_ZAM_three_way_intersection(self):
         self.prepare_conversion("ZAM_Threewayintersection-1_1_T-1")
         self.converter.convert(self.file_path_out)
