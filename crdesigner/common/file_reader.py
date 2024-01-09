@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import FileFormat, Path_T
-from commonroad.geometry.shape import Rectangle, Circle, Polygon
+from commonroad.geometry.shape import Circle, Polygon, Rectangle
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario
@@ -57,8 +57,8 @@ def project_complete_scenario(scenario: Scenario, proj_string_from: str, proj_st
     # transform obstacle coordinates
     for obstacle in scenario_copy.obstacles:
         if obstacle.obstacle_shape == Rectangle or obstacle.obstacle_shape == Circle:
-            obstacle.obstacle_shape.center[0], obstacle.obstacle_shape.center[1] = (
-                transformer.transform(obstacle.obstacle_shape.center[0], obstacle.obstacle_shape.center[1])
+            obstacle.obstacle_shape.center[0], obstacle.obstacle_shape.center[1] = transformer.transform(
+                obstacle.obstacle_shape.center[0], obstacle.obstacle_shape.center[1]
             )
         elif obstacle.obstacle_shape == Polygon:
             for vertex in obstacle.obstacle_shape.vertices:
