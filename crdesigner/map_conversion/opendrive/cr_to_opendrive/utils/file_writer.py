@@ -1,13 +1,16 @@
-from lxml import etree
 from datetime import datetime
+
 import numpy as np
+from lxml import etree
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
+
 
 class Writer(object):
     """
     This class creates a OpenDRIVE file. The xml etree element is written as OpenDRIVE file.
     """
+
     def __init__(self, file_path_out: str) -> None:
         """
         This function let class Write to intialize the object with path for storing converted
@@ -141,8 +144,16 @@ class Writer(object):
 
         line = etree.SubElement(geometry, config.LINE_TAG)
 
-    def print_spiral(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
-                     length: np.float64, curv_start: np.float64, curv_end: np.float64):
+    def print_spiral(
+        self,
+        s: np.float64,
+        x: np.float64,
+        y: np.float64,
+        hdg: np.float64,
+        length: np.float64,
+        curv_start: np.float64,
+        curv_end: np.float64,
+    ):
         """
         This function add geometry child element with various attribute to planView parent element and
         then add spiral child element to geometry parent element
@@ -164,8 +175,9 @@ class Writer(object):
         spiral.set(config.GEOMETRY_CURV_START_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, curv_start))
         spiral.set(config.GEOMETRY_CURV_END_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, curv_end))
 
-    def print_arc(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
-                  length: np.float64, curvature: np.float64) -> None:
+    def print_arc(
+        self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64, curvature: np.float64
+    ) -> None:
         """
         This function add geometry child element with various attribute to planView parent element and
         then add arc child element to geometry parent element

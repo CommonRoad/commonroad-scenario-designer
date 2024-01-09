@@ -1,10 +1,12 @@
-import numpy as np
 from typing import Tuple
 
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.signal import Signal
-from commonroad.geometry.polyline_util import compute_polyline_initial_orientation # type: ignore
-from commonroad.scenario.lanelet import LaneletNetwork # type: ignore
+import numpy as np
+from commonroad.geometry.polyline_util import (
+    compute_polyline_initial_orientation,  # type: ignore
+)
+from commonroad.scenario.lanelet import LaneletNetwork  # type: ignore
 
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.signal import Signal
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
 

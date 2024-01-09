@@ -1,12 +1,12 @@
 import unittest
 
 import numpy as np
+from commonroad.scenario.lanelet import LaneletNetwork, TrafficSign
+from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSignIDGermany
 from lxml import etree
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
-from commonroad.scenario.lanelet import LaneletNetwork, TrafficSign
-from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignElement
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
 
@@ -15,9 +15,13 @@ class TestSign(unittest.TestCase):
         # Initialize LaneletNetwork
         self.lanelet = MapCreator.create_straight(2, 8, 9, 1000, set())
 
-        sign_element = TrafficSignElement(TrafficSignIDGermany.MAX_SPEED, additional_values=['13.4112'])
-        self.traffic_sign = TrafficSign(traffic_sign_id=11513, traffic_sign_elements=[sign_element],
-                                        first_occurrence={self.lanelet.lanelet_id}, position=np.array([0.0, 0.0]))
+        sign_element = TrafficSignElement(TrafficSignIDGermany.MAX_SPEED, additional_values=["13.4112"])
+        self.traffic_sign = TrafficSign(
+            traffic_sign_id=11513,
+            traffic_sign_elements=[sign_element],
+            first_occurrence={self.lanelet.lanelet_id},
+            position=np.array([0.0, 0.0]),
+        )
 
         self.network = LaneletNetwork()
         self.network.add_lanelet(self.lanelet)
@@ -47,7 +51,7 @@ class TestSign(unittest.TestCase):
         self.assertEqual(self.traffic_sign.traffic_sign_elements[0].additional_values[0], sign.value)
 
         # Test orientation
-        self.assertEqual('+', sign.get_orientation())
+        self.assertEqual("+", sign.get_orientation())
 
         # Test coordinates
         s, t = sign.compute_coordinate()

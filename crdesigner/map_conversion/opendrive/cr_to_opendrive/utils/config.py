@@ -70,7 +70,7 @@ HEADER_REV_MINOR_TAG = "revMinor"
 HEADER_VERSION_TAG = "version"
 HEADER_DATE_TAG = "date"
 
-#Geometry types
+# Geometry types
 LINE_TAG = "line"
 SPIRAL_TAG = "spiral"
 ARC_TAG = "arc"

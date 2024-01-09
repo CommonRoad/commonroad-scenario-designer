@@ -1,11 +1,11 @@
 from typing import List
 
+from commonroad.scenario.lanelet import LaneletNetwork  # type: ignore
+from commonroad.scenario.traffic_sign import TrafficSign  # type: ignore
+
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.signal import Signal
-
-from commonroad.scenario.lanelet import LaneletNetwork # type: ignore
-from commonroad.scenario.traffic_sign import TrafficSign # type: ignore
-
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
+
 
 class Sign(Signal):
     """
@@ -27,9 +27,7 @@ class Sign(Signal):
         self.name = config.SIGN_PREFIX + str(self.id)
         self.dynamic = config.NO
         self.country = self.get_country()
-        self.type = str(
-            self.od_object.traffic_sign_elements[0].traffic_sign_element_id.value
-        )
+        self.type = str(self.od_object.traffic_sign_elements[0].traffic_sign_element_id.value)
         # Since sign element with id TrafficSignIDZamunda.PRIORITY or TrafficSignIDZamunda.YIELD and values [],
         # using try catch to avoid empty values
         try:

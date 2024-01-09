@@ -1,14 +1,15 @@
-from lxml import etree  # type: ignore
-import numpy as np
 from typing import Dict
 
-from commonroad.geometry.shape import Shape, Rectangle, Circle, Polygon # type: ignore
-from commonroad.scenario.trajectory import State  # type: ignore
+import numpy as np
+from commonroad.geometry.polyline_util import (
+    compute_polyline_initial_orientation,  # type: ignore
+)
+from commonroad.geometry.shape import Circle, Polygon, Rectangle, Shape  # type: ignore
 from commonroad.scenario.obstacle import ObstacleType  # type: ignore
-from commonroad.geometry.polyline_util import compute_polyline_initial_orientation  # type: ignore
+from commonroad.scenario.trajectory import State  # type: ignore
+from lxml import etree  # type: ignore
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
-
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
 
@@ -20,8 +21,9 @@ class Obstacle:
 
     counting = 0
 
-    def __init__(self, obstacle_type: ObstacleType, lanelets: Dict[int, ObstacleType],
-                 shape: Shape, state: State) -> None:
+    def __init__(
+        self, obstacle_type: ObstacleType, lanelets: Dict[int, ObstacleType], shape: Shape, state: State
+    ) -> None:
         """
         This function let class Obstacle to initialize the object with type, lanelets, shape, state
         and converts the CommonRoad obstacles into OpenDRIVE obstacles.

@@ -1,8 +1,9 @@
 # time, size for benchmarking
-import time
 import os
-import numpy as np
+import time
 from typing import Dict, List
+
+import numpy as np
 
 # import functions to read xml file and visualize CommonRoad objects
 from commonroad.common.file_reader import CommonRoadFileReader
@@ -15,6 +16,7 @@ class DataLoader:
     Here we also prepare some additional data structures, which we then pass to the converter
     along with the scenario object
     """
+
     def __init__(self, path: str, center: bool = False) -> None:
         """
         This function let class Dataloader to initialize the object with path to CommonRoad file
@@ -91,7 +93,7 @@ class DataLoader:
         x_left, y_left = np.hsplit(coords_left, 2)
         x_right, y_right = np.hsplit(coords_right, 2)
 
-        return self.get_avg((x_right + x_left)/2, (y_right+y_left)/2)
+        return self.get_avg((x_right + x_left) / 2, (y_right + y_left) / 2)
 
     def find_successors(self, indices: dict.keys) -> List[int]:
         """

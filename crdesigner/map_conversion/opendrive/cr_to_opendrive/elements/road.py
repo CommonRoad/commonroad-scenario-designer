@@ -1,19 +1,22 @@
 import enum
 import math
-
-from lxml import etree  # type: ignore
-import numpy as np
 import warnings
-from typing import List, Dict
+from typing import Dict, List
 
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
-
-from commonroad.scenario.lanelet import Lanelet  # type: ignore
-from commonroad.geometry.polyline_util import compute_polyline_orientations  # type: ignore
-from commonroad.geometry.polyline_util import resample_polyline_with_distance  # type: ignore
+import numpy as np
 from commonroad.geometry.polyline_util import compute_polyline_lengths  # type: ignore
+from commonroad.geometry.polyline_util import (
+    compute_polyline_orientations,  # type: ignore
+)
+from commonroad.geometry.polyline_util import (
+    resample_polyline_with_distance,  # type: ignore
+)
+from commonroad.scenario.lanelet import Lanelet  # type: ignore
 from commonroad_dc.geometry.util import compute_curvature_from_polyline
+from lxml import etree  # type: ignore
+
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
 
 class GeometryType(enum.Enum):
@@ -82,7 +85,10 @@ class Road:
         self.links: dict = {}
         self.inner_links: dict = {}
         for lane in lane_list:
-            self.links[lane.lanelet_id] = {config.SUCC_TAG: lane.successor, config.PRED_TAG: lane.predecessor, }
+            self.links[lane.lanelet_id] = {
+                config.SUCC_TAG: lane.successor,
+                config.PRED_TAG: lane.predecessor,
+            }
         Road.link_map[Road.counting] = self.links
 
         # determine center lane by finding where driving direction changes
@@ -96,11 +102,19 @@ class Road:
         self.center_number = i
 
         self.center = self.lane_list[i].left_vertices
-        self.hdg = compute_heading(self.center,  self.lane_list[i].center_vertices)
-        self.center = np.insert(self.center, self.center.shape[0] - 1,
-                                np.array([self.center[-1][0] - np.cos(self.hdg[-1]) * 0.01,
-                                          self.center[-1][1] - np.sin(self.hdg[-1]) * 0.01]), 0) \
-            if self.hdg[-1] != 0.0 else self.center
+        self.hdg = compute_heading(self.center, self.lane_list[i].center_vertices)
+        self.center = (
+            np.insert(
+                self.center,
+                self.center.shape[0] - 1,
+                np.array(
+                    [self.center[-1][0] - np.cos(self.hdg[-1]) * 0.01, self.center[-1][1] - np.sin(self.hdg[-1]) * 0.01]
+                ),
+                0,
+            )
+            if self.hdg[-1] != 0.0
+            else self.center
+        )
         self.hdg = np.insert(self.hdg, self.hdg.shape[0] - 1, self.hdg[-1]) if self.hdg[-1] != 0.0 else self.hdg
 
         for i in range(0, number_of_lanes):
@@ -157,8 +171,9 @@ class Road:
         else:
             raise ValueError("Relation must be either successor or predecessor")
 
-    def add_simple_linkage(self, links: Dict[str, List[int]], len_succ: int, len_pred: int,
-                           lane_2_lane: Dict[str, Dict[int, List[int]]]) -> None:
+    def add_simple_linkage(
+        self, links: Dict[str, List[int]], len_succ: int, len_pred: int, lane_2_lane: Dict[str, Dict[int, List[int]]]
+    ) -> None:
         """
         This function add successor/predecessor child element to link parent element and
         each successor/predecessor are linked with its correponding landLink id.
@@ -227,24 +242,34 @@ class Road:
         switch = GeometryType.NONE
 
         while cur_idx <= len(self.center) - 1:
-            if np.isclose(self.hdg[cur_idx - 1], self.hdg[cur_idx], 0.0174533) and cur_type in \
-                    [GeometryType.LINE, GeometryType.NONE]:  # 0.1deg
+            if np.isclose(self.hdg[cur_idx - 1], self.hdg[cur_idx], 0.0174533) and cur_type in [
+                GeometryType.LINE,
+                GeometryType.NONE,
+            ]:  # 0.1deg
                 cur_type = GeometryType.LINE
             elif np.isclose(curv[last_idx], curv[cur_idx], 0.01) and cur_type in [GeometryType.ARC, GeometryType.NONE]:
                 cur_type = GeometryType.ARC
-            elif cur_idx == 1 and not np.isclose(curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], 0.01) or cur_idx > 1 and np.isclose(curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], 0.01) and cur_type in \
-                    [GeometryType.SPIRAL, GeometryType.NONE]:
+            elif (
+                cur_idx == 1
+                and not np.isclose(curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], 0.01)
+                or cur_idx > 1
+                and np.isclose(curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], 0.01)
+                and cur_type in [GeometryType.SPIRAL, GeometryType.NONE]
+            ):
                 cur_type = GeometryType.SPIRAL
-            elif np.isclose(self.hdg[cur_idx - 1], self.hdg[cur_idx], 0.0174533) and cur_type not in \
-                    [GeometryType.LINE, GeometryType.NONE]:  # 0.1deg
+            elif np.isclose(self.hdg[cur_idx - 1], self.hdg[cur_idx], 0.0174533) and cur_type not in [
+                GeometryType.LINE,
+                GeometryType.NONE,
+            ]:  # 0.1deg
                 switch = GeometryType.LINE
-            elif np.isclose(curv[last_idx], curv[cur_idx], 0.01) and cur_type not in \
-                    [GeometryType.ARC, GeometryType.NONE]:
+            elif np.isclose(curv[last_idx], curv[cur_idx], 0.01) and cur_type not in [
+                GeometryType.ARC,
+                GeometryType.NONE,
+            ]:
                 switch = GeometryType.ARC
             else:
                 switch = GeometryType.SPIRAL
             if switch != GeometryType.NONE:
-
                 self.print_geometry(arc_length, cur_idx - 1, cur_type, curv, last_idx)
                 cur_type = switch
                 switch = GeometryType.NONE
@@ -254,21 +279,40 @@ class Road:
             self.print_geometry(arc_length, cur_idx - 1, cur_type, curv, last_idx)
         return arc_length[-1]
 
-    def print_geometry(self, path_length: np.ndarray, end_idx: int, geo_type: GeometryType, curv: np.ndarray,
-                       start_idx: int):
+    def print_geometry(
+        self, path_length: np.ndarray, end_idx: int, geo_type: GeometryType, curv: np.ndarray, start_idx: int
+    ):
         this_length = path_length[end_idx] - path_length[start_idx]
         if geo_type == GeometryType.LINE:
             print("line", this_length, start_idx, end_idx)
-            self.print_line(path_length[start_idx], self.center[start_idx][0], self.center[start_idx][1],
-                            self.hdg[start_idx], this_length)
+            self.print_line(
+                path_length[start_idx],
+                self.center[start_idx][0],
+                self.center[start_idx][1],
+                self.hdg[start_idx],
+                this_length,
+            )
         elif geo_type == GeometryType.ARC:
             print("arc", this_length, start_idx, end_idx)
-            self.print_arc(path_length[start_idx], self.center[start_idx][0], self.center[start_idx][1],
-                           self.hdg[start_idx], this_length, curv[end_idx])
+            self.print_arc(
+                path_length[start_idx],
+                self.center[start_idx][0],
+                self.center[start_idx][1],
+                self.hdg[start_idx],
+                this_length,
+                curv[end_idx],
+            )
         elif geo_type == GeometryType.SPIRAL:
             print("spiral", this_length, start_idx, end_idx)
-            self.print_spiral(path_length[start_idx], self.center[start_idx][0], self.center[start_idx][1],
-                              self.hdg[start_idx], this_length, curv[start_idx], curv[end_idx])
+            self.print_spiral(
+                path_length[start_idx],
+                self.center[start_idx][0],
+                self.center[start_idx][1],
+                self.hdg[start_idx],
+                this_length,
+                curv[start_idx],
+                curv[end_idx],
+            )
 
     # xodr for lines
     def print_line(self, s: float, x: float, y: float, hdg: float, length: float) -> None:
@@ -293,8 +337,9 @@ class Road:
         line = etree.SubElement(geometry, config.LINE_TAG)
 
     # xodr for spirals
-    def print_spiral(self, s: float, x: float, y: float, hdg: float, length: float, curv_start: float,
-                     curv_end: float) -> None:
+    def print_spiral(
+        self, s: float, x: float, y: float, hdg: float, length: float, curv_start: float, curv_end: float
+    ) -> None:
         """
         This function print spiral on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
@@ -402,7 +447,13 @@ class Road:
         for i, cur in enumerate(self.lane_list):
             # calculate the width of a street
             # for some reason it looks better without resampling
-            width_list = list(map(lambda x, y: np.linalg.norm(x - y), cur.right_vertices, cur.left_vertices, ))
+            width_list = list(
+                map(
+                    lambda x, y: np.linalg.norm(x - y),
+                    cur.right_vertices,
+                    cur.left_vertices,
+                )
+            )
 
             dist_list = compute_polyline_lengths(cur.center_vertices)
             lane_id = i - self.center_number
@@ -429,8 +480,15 @@ class Road:
     #       color=config.STANDARD width="1.3000000000000000e-01"/>
     # </lane>
 
-    def lane_help(self, lane_id: int, lane_type: str, level: int, pos: etree._Element, width_list: List[Lanelet],
-                  dist_list: np.ndarray) -> None:
+    def lane_help(
+        self,
+        lane_id: int,
+        lane_type: str,
+        level: int,
+        pos: etree._Element,
+        width_list: List[Lanelet],
+        dist_list: np.ndarray,
+    ) -> None:
         """
         This function add lane child element to parent element which may be right, left or center.
         Link, width, roadMark elements are also added to lane element.

@@ -1,21 +1,25 @@
 import copy
 import time
-
 from posixpath import lexists
 from typing import Dict, List
 
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.obstacle import Obstacle
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.light import Light
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.stop_line import StopLine
-import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.file_writer as fwr
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.junction import Junction
-
 from commonroad.scenario.intersection import IntersectionIncomingElement
-from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import Lanelet
+from commonroad.scenario.scenario import Scenario
 
+import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.file_writer as fwr
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.junction import (
+    Junction,
+)
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.light import Light
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.obstacle import (
+    Obstacle,
+)
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.stop_line import (
+    StopLine,
+)
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
 
@@ -25,6 +29,7 @@ class Converter:
     The CommonRoad elements such as roads, junctions, traffic lights, traffic signal
     are converted to corresponding OpenDRIVE elements and OpenDRIVE file is created.
     """
+
     def __init__(self, file_path: str, sc: Scenario, successors: List[int], ids: Dict[int, bool]) -> None:
         """
         This function lets Class Converter to initialize object with path to CommonRoad file, scenario,
@@ -135,14 +140,14 @@ class Converter:
             if lanelet.stop_line is not None:
                 non_empty = True
                 data["stop_lines"][lanelet.lanelet_id] = [
-                        lanelet.stop_line,
-                        lanelet.lanelet_id,
-                    ]
+                    lanelet.stop_line,
+                    lanelet.lanelet_id,
+                ]
 
             if non_empty:
                 if len(data["stop_lines"]) == 0:
                     if self.traffic_elements.get(link_map[lanelet.lanelet_id]):
-                        data['stop_lines'] = self.traffic_elements[link_map[lanelet.lanelet_id]]['stop_lines']
+                        data["stop_lines"] = self.traffic_elements[link_map[lanelet.lanelet_id]]["stop_lines"]
 
                 self.traffic_elements[link_map[lanelet.lanelet_id]] = data
 
@@ -188,9 +193,7 @@ class Converter:
         junction_id = -1
 
         if lanelet.lanelet_id in self.inter_successors:
-            junction_id = self.lane_net.map_inc_lanelets_to_intersections[
-                lanelet.predecessor[0]
-            ].intersection_id
+            junction_id = self.lane_net.map_inc_lanelets_to_intersections[lanelet.predecessor[0]].intersection_id
 
         road = Road(road_lanes, len(road_lanes), self.writer.root, junction_id)
 
@@ -223,11 +226,7 @@ class Converter:
         """
         for lanelet in self.lane_net.lanelets:
             if not self.id_dict[lanelet.lanelet_id]:
-                raise KeyError(
-                    "Lanelet {} not visited! Check your algorithm.".format(
-                        lanelet.lanelet_id
-                    )
-                )
+                raise KeyError("Lanelet {} not visited! Check your algorithm.".format(lanelet.lanelet_id))
 
     def construct_junctions(self):
         """
@@ -259,8 +258,9 @@ class Converter:
                 obstacle.initial_state,
             )
 
-    def process_link_map(self, link_map: Dict[int, Dict[int, Dict[str, List[int]]]],
-                         lane_2_lane: Dict[int, Dict[str, Dict]]) -> None:
+    def process_link_map(
+        self, link_map: Dict[int, Dict[int, Dict[str, List[int]]]], lane_2_lane: Dict[int, Dict[str, Dict]]
+    ) -> None:
         """
         This function creates the data structure where all linkage information is stored, the link_map
         For more information on the link_map, read our documentation.
@@ -286,30 +286,22 @@ class Converter:
                     if links == "succ" and not invert:
                         for link in links_val:
                             road_succ_pred["succ"].append(link)
-                            lane_2_lane[road_id]["succ"][lane_id].append(
-                                Road.lane_to_lane[link]
-                            )
+                            lane_2_lane[road_id]["succ"][lane_id].append(Road.lane_to_lane[link])
 
                     if links == "pred" and not invert:
                         for link in links_val:
                             road_succ_pred["pred"].append(link)
-                            lane_2_lane[road_id]["pred"][lane_id].append(
-                                Road.lane_to_lane[link]
-                            )
+                            lane_2_lane[road_id]["pred"][lane_id].append(Road.lane_to_lane[link])
 
                     if links == "succ" and invert:
                         for link in links_val:
                             road_succ_pred["pred"].append(link)
-                            lane_2_lane[road_id]["pred"][lane_id].append(
-                                Road.lane_to_lane[link]
-                            )
+                            lane_2_lane[road_id]["pred"][lane_id].append(Road.lane_to_lane[link])
 
                     if links == "pred" and invert:
                         for link in links_val:
                             road_succ_pred["succ"].append(link)
-                            lane_2_lane[road_id]["succ"][lane_id].append(
-                                Road.lane_to_lane[link]
-                            )
+                            lane_2_lane[road_id]["succ"][lane_id].append(Road.lane_to_lane[link])
 
             link_map[road_id]["mergeLinkage"] = road_succ_pred
             for key, values in road_succ_pred.items():
@@ -317,8 +309,11 @@ class Converter:
                     road_succ_pred_final[key].append(Road.cr_id_to_od[value])
             link_map[road_id]["roadLinkage"] = road_succ_pred_final
 
-    def create_linkages(self, link_map: Dict[int, Dict[int, Dict[str, List[int]]]],
-                        lane_2_lane: Dict[int, Dict[str, Dict[int, List[int]]]]) -> None:
+    def create_linkages(
+        self,
+        link_map: Dict[int, Dict[int, Dict[str, List[int]]]],
+        lane_2_lane: Dict[int, Dict[str, Dict[int, List[int]]]],
+    ) -> None:
         """
         This function implements road-to-road linkage.
         This happens when a road has exactly one successor/predecessor.
@@ -341,9 +336,7 @@ class Converter:
             # either successor or predecessor road is trivial
             if len_succ == 1 or len_pred == 1:
                 # print("add_simple_linkage for road_id: ", key)
-                Road.roads[key].add_simple_linkage(
-                    cur_links, len_succ, len_pred, lane_2_lane[key]
-                )
+                Road.roads[key].add_simple_linkage(cur_links, len_succ, len_pred, lane_2_lane[key])
 
     def add_junction_linkage(self, link_map: Dict[int, Dict[int, Dict[str, List[int]]]]) -> None:
         """
@@ -360,10 +353,7 @@ class Converter:
                 road = Road.roads[road_id]
 
                 # check if junction already defined
-                if (
-                    road.lane_list[0].lanelet_id
-                    in self.lane_net.map_inc_lanelets_to_intersections
-                ):
+                if road.lane_list[0].lanelet_id in self.lane_net.map_inc_lanelets_to_intersections:
                     junction_id = self.lane_net.map_inc_lanelets_to_intersections[
                         road.lane_list[0].lanelet_id
                     ].intersection_id
@@ -379,9 +369,7 @@ class Converter:
                         successors_straight.update(lanelet.successor)
                         incomings.append(lanelet.lanelet_id)
 
-                    incoming = IntersectionIncomingElement(
-                        1, incomings, set(), successors_straight, set(), None
-                    )
+                    incoming = IntersectionIncomingElement(1, incomings, set(), successors_straight, set(), None)
 
                     Junction.counting += 1
                     Junction(

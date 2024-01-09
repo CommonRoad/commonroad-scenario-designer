@@ -1,10 +1,14 @@
 import unittest
+
 import numpy as np
+from commonroad.scenario.lanelet import LaneletNetwork, LineMarking
+from commonroad.scenario.lanelet import StopLine as Stop_line
 from lxml import etree
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.stop_line import StopLine
-from commonroad.scenario.lanelet import StopLine as Stop_line, LineMarking, LaneletNetwork
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.stop_line import (
+    StopLine,
+)
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
 
@@ -37,7 +41,7 @@ class TestStopLine(unittest.TestCase):
         self.assertEqual(f"StopLine_{self.lanelet.lanelet_id}", self.stop.name)
 
         # Test orientation
-        self.assertEqual('+', self.stop.get_orientation())
+        self.assertEqual("+", self.stop.get_orientation())
 
         # Test coordinates
         s, t = self.stop.compute_coordinate()

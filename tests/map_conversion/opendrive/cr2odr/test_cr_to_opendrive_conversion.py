@@ -1,8 +1,9 @@
 import os
 import unittest
 
-from tests.map_conversion.opendrive.cr2odr.conversion_base_test import ConversionBaseTestCases
-
+from tests.map_conversion.opendrive.cr2odr.conversion_base_test import (
+    ConversionBaseTestCases,
+)
 
 # to run the tests: pytest -v --cov=crdesigner.map_conversion.opendrive.cr_to_opendrive.converter --cov-report html
 # This also generates a coverage report, see rootdir/htmlcov -> index.html
@@ -69,8 +70,7 @@ class TestConverterConvert(ConversionBaseTestCases.ConversionBaseTest):
 
     def test_convert_ZAM_random(self):
         self.prepare_conversion("ZAM_OpenDrive-1_1_T-1")
-        self.converter.convert(
-            self.file_path_out)  # self.check_with_ground_truth(os.path.join(self.cwd_path,
+        self.converter.convert(self.file_path_out)  # self.check_with_ground_truth(os.path.join(self.cwd_path,
         # self.path_reference_xodr_file))
 
     def test_convert_ZAM_straight_lanelet(self):
@@ -84,19 +84,19 @@ class TestConverterConvert(ConversionBaseTestCases.ConversionBaseTest):
         self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_ZAM_lanelet_with_obstacles(self):
-            self.prepare_conversion("ZAM_LaneletWithObstacle-1_1_T-1")
-            self.converter.convert(self.file_path_out)
-            self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.prepare_conversion("ZAM_LaneletWithObstacle-1_1_T-1")
+        self.converter.convert(self.file_path_out)
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_ZAM_lanelet_with_obstacles(self):
-                self.prepare_conversion("ZAM_LaneletWithObstacle-1_1_T-1")
-                self.converter.convert(self.file_path_out)
-                self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.prepare_conversion("ZAM_LaneletWithObstacle-1_1_T-1")
+        self.converter.convert(self.file_path_out)
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_ZAM_three_way_intersection(self):
-                    self.prepare_conversion("ZAM_Threewayintersection-1_1_T-1")
-                    self.converter.convert(self.file_path_out)
-                    self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.prepare_conversion("ZAM_Threewayintersection-1_1_T-1")
+        self.converter.convert(self.file_path_out)
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
 
 if __name__ == "__main__":
