@@ -6,7 +6,7 @@ from commonroad.common.util import FileFormat
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 
-from crdesigner.config.opendrive_config import open_drive_config
+from crdesigner.common.config.opendrive_config import open_drive_config
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
 
 input_path = Path.cwd().parent.parent / "tests/map_conversion/test_maps/opendrive/opendrive-1.xodr"

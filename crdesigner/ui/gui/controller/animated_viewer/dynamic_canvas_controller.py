@@ -7,7 +7,7 @@ import numpy as np
 import PyQt6
 from commonroad.geometry.shape import Circle, Rectangle
 from commonroad.planning.planning_problem import PlanningProblem
-from commonroad.scenario.lanelet import LaneletType
+from commonroad.scenario.lanelet import Lanelet, LaneletType
 from commonroad.scenario.obstacle import DynamicObstacle, StaticObstacle
 from commonroad.scenario.scenario import Scenario
 from commonroad.visualization.draw_params import (
@@ -20,13 +20,15 @@ from matplotlib import pyplot as plt
 from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
+from numpy import ndarray
 from PyQt6 import QtCore
 from PyQt6.QtCore import QPoint
 from PyQt6.QtGui import QCursor, QMouseEvent
 from PyQt6.QtWidgets import QSizePolicy
 
-from crdesigner.config.gui_config import DrawParamsCustom, gui_config
-from crdesigner.config.logging import logger
+from crdesigner.common.config.gui_config import DrawParamsCustom, gui_config
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.utilities.aerial_data import (
     get_aerial_image_bing,
     get_aerial_image_ldbv,
@@ -132,13 +134,19 @@ class DynamicCanvasController(FigureCanvas):
 
         self.clear_axes()
 
-        # Parameters for curved lanlet adding
+        # Parameters for curved lanelet adding
         self.button_is_checked = False
-        self.current_curved_lanelet_scenario = None
-        self.temp_curved_lanelet = None
+        self.current_edited_lanelet_scenario = None
+        self.temp_edited_lanelet = None
         self.circle_radius = None
         self.circle_angle = None
         self.new_lanelet = False
+
+        # Parameters for show vertices
+        self.right_scatter = None
+        self.left_scatter = None
+        self.left_vertices = None
+        self.right_vertices = None
 
         gui_config.sub_curved(self.enable)
 
@@ -273,10 +281,10 @@ class DynamicCanvasController(FigureCanvas):
         :param plot_limits: [description], defaults to None
         :param draw_dynamic_only: reuses static artists
         """
-        if self.current_curved_lanelet_scenario is None:
+        if self.current_edited_lanelet_scenario is None:
             current_scenario = self.scenario_model.get_current_scenario()
         else:
-            current_scenario = self.current_curved_lanelet_scenario
+            current_scenario = self.current_edited_lanelet_scenario
         # want to update immediatly if change gui settings
         lanelet_count = len(current_scenario.lanelet_network.lanelets)
         traffic_signs_count = len(current_scenario.lanelet_network.traffic_signs)
@@ -353,8 +361,11 @@ class DynamicCanvasController(FigureCanvas):
 
         if self.show_aerial:
             self.show_aerial_image()
-
-        if self.current_curved_lanelet_scenario is not None and self.temp_curved_lanelet is not None:
+        if (
+            self.current_edited_lanelet_scenario is not None
+            and self.temp_edited_lanelet is not None
+            and self.left_vertices is None
+        ):
             self.draw_moving_points()
 
     def update_obstacles(self, draw_params=None, plot_limits=None):
@@ -394,7 +405,7 @@ class DynamicCanvasController(FigureCanvas):
         # update the map
         self._update_map()
         # now do the lanelet selection
-        self._select_lanelet()
+        lanelet = self._select_lanelet()
         # call callback_function with latest mouse position to check if a position button is pressed
         temp_point_updated = self.animated_viewer.callback_function(
             PosB(str(self.latest_mouse_pos[0]), str(self.latest_mouse_pos[1])), "", self.draw_temporary_points
@@ -410,6 +421,7 @@ class DynamicCanvasController(FigureCanvas):
                     # create menu
                     menu = PyQt6.QtWidgets.QMenu()
                     edit = menu.addAction("Edit Attributes")
+                    edit_vertices = menu.addAction("Edit Vertices")
                     remove = menu.addAction("Remove Lanelet")
                     # open menu at mouse coordinates
                     action = menu.exec((self.mouse_coordinates))
@@ -428,6 +440,8 @@ class DynamicCanvasController(FigureCanvas):
                             not self._parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.toggle_checked
                         ):
                             self._parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.pressed()
+                    if action == edit_vertices:
+                        self.show_vertices(lanelet=lanelet)
 
     def dynamic_canvas_release_callback(self, mouse_clicked_event):
         """
@@ -540,6 +554,7 @@ class DynamicCanvasController(FigureCanvas):
             elif len(self.selected_lanelets) == 1:
                 selection = " Lanelet with ID " + str(self.selected_lanelets[0].lanelet_id) + " is selected."
                 self.animated_viewer.callback_function(self.selected_lanelets[0], output + selection)
+                return self.selected_lanelets[0]
         if len(self.selected_lanelets) == 0:
             self.parent().road_network_toolbox.lanelet_controller.lanelet_ui.set_default_lanelet_information()
         self.draw_temporary_point()
@@ -1109,11 +1124,11 @@ class DynamicCanvasController(FigureCanvas):
         if is_checked and gui_config.enabled_curved_lanelet():
             self.button_is_checked = True
             self.new_lanelet = new_lanelet
-            self.current_curved_lanelet_scenario = self.scenario_model.get_copy_of_scenario()
-            self.temp_curved_lanelet = self.parent().road_network_toolbox.lanelet_controller.get_lanelet_from_toolbox(
+            self.current_edited_lanelet_scenario = self.scenario_model.get_copy_of_scenario()
+            self.temp_edited_lanelet = self.parent().road_network_toolbox.lanelet_controller.get_lanelet_from_toolbox(
                 self.new_lanelet
             )
-            if self.temp_curved_lanelet is None:
+            if self.temp_edited_lanelet is None:
                 self.parent().road_network_toolbox.text_browser.append(
                     "Something went wrong! Please ensure that the information of the lanlet is given"
                 )
@@ -1126,30 +1141,32 @@ class DynamicCanvasController(FigureCanvas):
                     )
                 )
                 self.selected_lanelets.append(selected_lanelet)
-                self.current_curved_lanelet_scenario.remove_lanelet(selected_lanelet)
+                self.current_edited_lanelet_scenario.remove_lanelet(selected_lanelet)
             if (
-                self.current_curved_lanelet_scenario.lanelet_network.find_lanelet_by_id(
-                    self.temp_curved_lanelet.lanelet_id
+                self.current_edited_lanelet_scenario.lanelet_network.find_lanelet_by_id(
+                    self.temp_edited_lanelet.lanelet_id
                 )
                 is not None
             ):
-                self.current_curved_lanelet_scenario.remove_lanelet(self.temp_curved_lanelet)
-            middle_lanelet = self.temp_curved_lanelet.center_vertices
+                self.current_edited_lanelet_scenario.remove_lanelet(self.temp_edited_lanelet)
+            middle_lanelet = self.temp_edited_lanelet.center_vertices
             count_vertices = len(middle_lanelet)
-            self.current_curved_lanelet_scenario.add_objects(self.temp_curved_lanelet)
+            self.current_edited_lanelet_scenario.add_objects(self.temp_edited_lanelet)
             self.circle_radius = plt.Circle(middle_lanelet[round(count_vertices / 2)], 0.25, color="blue", zorder=100)
             # Code for connect to successor to change the angle dot of the angle
             # if self.parent().road_network_toolbox.road_network_toolbox_ui.connect_to_successors_selection.isChecked():
             #     self.circle_angle = plt.Circle(middle_lanelet[0], 0.25, color='blue', zorder=100)
             self.circle_angle = plt.Circle(middle_lanelet[count_vertices - 1], 0.25, color="blue", zorder=100)
-            self.draw_curved_lanelet()
+            self.draw_editable_lanelet()
             self.mpl_disconnect(self.button_press_event_cid)
             self.mpl_disconnect(self.motion_notify_event_cid)
             self.button_press_event_cid = self.mpl_connect("button_press_event", self.click_on_curved_lanelet)
             self.motion_notify_event_cid = self.mpl_connect("motion_notify_event", self.move_cursor_curved_lanelet)
         else:
+            if self.left_vertices is not None:
+                return
             self.button_is_checked = False
-            self.current_curved_lanelet_scenario = None
+            self.current_edited_lanelet_scenario = None
             self.mpl_disconnect(self.button_press_event_cid)
             self.mpl_disconnect(self.button_release_event_cid)
             self.mpl_disconnect(self.motion_notify_event_cid)
@@ -1163,25 +1180,26 @@ class DynamicCanvasController(FigureCanvas):
             self.draw_scenario()
             self.draw()
 
-    def draw_curved_lanelet(self) -> None:
+    def draw_editable_lanelet(self) -> None:
         """
         Draws the temporary scenario with the curved lanelet. Collects the information of the lanelet of the
         lanelet-Controller, deletes the old temporary lanelet of the temmporary scenario and adds it with the updated
         properties.
         """
-        if self.temp_curved_lanelet is None or self.current_curved_lanelet_scenario is None:
+        if self.temp_edited_lanelet is None or self.current_edited_lanelet_scenario is None:
             return
-        self.temp_curved_lanelet = self.parent().road_network_toolbox.lanelet_controller.get_lanelet_from_toolbox(
-            self.new_lanelet
-        )
+        if self.right_vertices is None:
+            self.temp_edited_lanelet = self.parent().road_network_toolbox.lanelet_controller.get_lanelet_from_toolbox(
+                self.new_lanelet
+            )
 
         if (
-            self.current_curved_lanelet_scenario.lanelet_network.find_lanelet_by_id(self.temp_curved_lanelet.lanelet_id)
+            self.current_edited_lanelet_scenario.lanelet_network.find_lanelet_by_id(self.temp_edited_lanelet.lanelet_id)
             is not None
         ):
-            self.current_curved_lanelet_scenario.remove_lanelet(self.temp_curved_lanelet)
+            self.current_edited_lanelet_scenario.remove_lanelet(self.temp_edited_lanelet)
 
-        self.current_curved_lanelet_scenario.add_objects(self.temp_curved_lanelet)
+        self.current_edited_lanelet_scenario.add_objects(self.temp_edited_lanelet)
         self.draw_scenario()
 
         if not self.new_lanelet:
@@ -1190,8 +1208,8 @@ class DynamicCanvasController(FigureCanvas):
                     lanelet, self.selected_lanelets, None
                 )
                 if lanelet.lanelet_id == self.selected_lanelets[0].lanelet_id:
-                    draw_lanelet_polygon(self.temp_curved_lanelet, self.ax, color, alpha, zorder, label)
-                    self.animated_viewer.view.draw_lanelet_vertices(self.temp_curved_lanelet, self.ax)
+                    draw_lanelet_polygon(self.temp_edited_lanelet, self.ax, color, alpha, zorder, label)
+                    self.animated_viewer.view.draw_lanelet_vertices(self.temp_edited_lanelet, self.ax)
                 else:
                     if color == "gray":
                         continue
@@ -1209,7 +1227,7 @@ class DynamicCanvasController(FigureCanvas):
         """
         Draw the Points to manipulate the radius or angle of the lanelet
         """
-        middle_lanelet = self.temp_curved_lanelet.center_vertices
+        middle_lanelet = self.temp_edited_lanelet.center_vertices
         count_vertices = len(middle_lanelet)
         self.circle_radius.set_center(middle_lanelet[round(count_vertices / 2)])
 
@@ -1264,25 +1282,25 @@ class DynamicCanvasController(FigureCanvas):
             self.circle_radius.set_color("lightblue")
             self.mpl_disconnect(self.motion_notify_event_cid)
             self.mpl_disconnect(self.button_release_event_cid)
-            self.setCursor(QtCore.Qt.SizeAllCursor)
+            self.setCursor(QtCore.Qt.CursorShape.SizeAllCursor)
             rotation_lanelet = self.calc_angle(
                 np.array([0, 1]),
                 np.array([0, 0]),
-                self.temp_curved_lanelet.left_vertices[0],
-                self.temp_curved_lanelet.right_vertices[0],
+                self.temp_edited_lanelet.left_vertices[0],
+                self.temp_edited_lanelet.right_vertices[0],
             )
-            count_vertices = len(self.temp_curved_lanelet.left_vertices)
+            count_vertices = len(self.temp_edited_lanelet.left_vertices)
             angle_25_lanelet = self.calc_angle(
-                self.temp_curved_lanelet.left_vertices[0],
-                self.temp_curved_lanelet.right_vertices[0],
-                self.temp_curved_lanelet.left_vertices[round(count_vertices * 0.25)],
-                self.temp_curved_lanelet.right_vertices[round(count_vertices * 0.25)],
+                self.temp_edited_lanelet.left_vertices[0],
+                self.temp_edited_lanelet.right_vertices[0],
+                self.temp_edited_lanelet.left_vertices[round(count_vertices * 0.25)],
+                self.temp_edited_lanelet.right_vertices[round(count_vertices * 0.25)],
             )
             self.motion_notify_event_cid = self.mpl_connect(
                 "motion_notify_event", lambda event: self.on_motion_radius(event, angle_25_lanelet, rotation_lanelet)
             )
             self.button_release_event_cid = self.mpl_connect("button_release_event", self.on_release_curved_lanelet)
-            self.draw_curved_lanelet()
+            self.draw_editable_lanelet()
 
         elif self.circle_angle.contains(mouse_event)[0]:
             self.circle_angle.set_color("lightblue")
@@ -1291,10 +1309,10 @@ class DynamicCanvasController(FigureCanvas):
             rotation_lanelet = self.calc_angle(
                 np.array([0, 1]),
                 np.array([0, 0]),
-                self.temp_curved_lanelet.left_vertices[0],
-                self.temp_curved_lanelet.right_vertices[0],
+                self.temp_edited_lanelet.left_vertices[0],
+                self.temp_edited_lanelet.right_vertices[0],
             )
-            self.setCursor(QtCore.Qt.SizeAllCursor)
+            self.setCursor(QtCore.Qt.CursorShape.SizeAllCursor)
             self.motion_notify_event_cid = self.mpl_connect(
                 "motion_notify_event", lambda event: self.on_motion_angle(event, rotation_lanelet)
             )
@@ -1313,7 +1331,7 @@ class DynamicCanvasController(FigureCanvas):
         """
         start_x = self.circle_radius.get_center()[0]
         start_y = self.circle_radius.get_center()[1]
-        self.setCursor(QtCore.Qt.SizeAllCursor)
+        self.setCursor(QtCore.Qt.CursorShape.SizeAllCursor)
 
         if mouse_event.xdata is not None and mouse_event.ydata is not None:
             # Calculate the angle of mouse movement
@@ -1358,10 +1376,10 @@ class DynamicCanvasController(FigureCanvas):
                     self.parent().road_network_toolbox.road_network_toolbox_ui.lanelet_radius.setText(str(new_radius))
                 else:
                     self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_end_position_x.setText(
-                        str(self.temp_curved_lanelet.center_vertices[-1][0])
+                        str(self.temp_edited_lanelet.center_vertices[-1][0])
                     )
                     self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_end_position_y.setText(
-                        str(self.temp_curved_lanelet.center_vertices[-1][1])
+                        str(self.temp_edited_lanelet.center_vertices[-1][1])
                     )
                     self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_radius.setText(
                         str(new_radius)
@@ -1378,7 +1396,7 @@ class DynamicCanvasController(FigureCanvas):
         """
         start_x = self.circle_angle.get_center()[0]
         start_y = self.circle_angle.get_center()[1]
-        self.setCursor(QtCore.Qt.SizeAllCursor)
+        self.setCursor(QtCore.Qt.CursorShape.SizeAllCursor)
 
         if mouse_event.xdata is not None and mouse_event.ydata is not None:
             # Calculate the angle of mouse movement
@@ -1391,10 +1409,10 @@ class DynamicCanvasController(FigureCanvas):
                 angle += 360
 
             angle_lanelet = self.calc_angle(
-                self.temp_curved_lanelet.left_vertices[0],
-                self.temp_curved_lanelet.right_vertices[0],
-                self.temp_curved_lanelet.left_vertices[-1],
-                self.temp_curved_lanelet.right_vertices[-1],
+                self.temp_edited_lanelet.left_vertices[0],
+                self.temp_edited_lanelet.right_vertices[0],
+                self.temp_edited_lanelet.left_vertices[-1],
+                self.temp_edited_lanelet.right_vertices[-1],
             )
             if self.new_lanelet:
                 old_angle = self.parent().road_network_toolbox.get_float(
@@ -1440,10 +1458,10 @@ class DynamicCanvasController(FigureCanvas):
                     self.parent().road_network_toolbox.road_network_toolbox_ui.lanelet_angle.setText(str(new_angle))
                 else:
                     self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_end_position_x.setText(
-                        str(self.temp_curved_lanelet.center_vertices[-1][0])
+                        str(self.temp_edited_lanelet.center_vertices[-1][0])
                     )
                     self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_end_position_y.setText(
-                        str(self.temp_curved_lanelet.center_vertices[-1][1])
+                        str(self.temp_edited_lanelet.center_vertices[-1][1])
                     )
                     self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_angle.setText(
                         str(new_angle)
@@ -1456,11 +1474,11 @@ class DynamicCanvasController(FigureCanvas):
         :param mouse_event: Datastructure which contains information about the mouse
         """
         if self.circle_radius.contains(mouse_event)[0]:
-            self.setCursor(QtCore.Qt.SizeAllCursor)
+            self.setCursor(QtCore.Qt.CursorShape.SizeAllCursor)
         elif self.circle_angle.contains(mouse_event)[0]:
-            self.setCursor(QtCore.Qt.SizeAllCursor)
+            self.setCursor(QtCore.Qt.CursorShape.SizeAllCursor)
         else:
-            self.setCursor(QtCore.Qt.ArrowCursor)
+            self.setCursor(QtCore.Qt.CursorShape.ArrowCursor)
 
     def on_release_curved_lanelet(self, mouse_event: QMouseEvent) -> None:
         """
@@ -1471,7 +1489,7 @@ class DynamicCanvasController(FigureCanvas):
         self.mpl_disconnect(self.motion_notify_event_cid)
         self.circle_angle.set_color("blue")
         self.circle_radius.set_color("blue")
-        self.draw_curved_lanelet()
+        self.draw_editable_lanelet()
         self.motion_notify_event_cid = self.mpl_connect("motion_notify_event", self.move_cursor_curved_lanelet)
 
     def calc_angle(
@@ -1535,3 +1553,300 @@ class DynamicCanvasController(FigureCanvas):
             return True
         else:
             return False
+
+    @logger.log
+    def show_vertices(self, lanelet: Lanelet):
+        """
+        Enables the display of the point of each vertice of the lanelet to allow for a manipulation of the user
+
+        @param lanelet: Lanelet, which vertices should be shown.
+        """
+        self.mpl_disconnect(self.button_press_event_cid)
+        self.mpl_disconnect(self.button_release_event_cid)
+        self.mpl_disconnect(self.motion_notify_event_cid)
+        self.current_edited_lanelet_scenario = self.scenario_model.get_copy_of_scenario()
+        self.temp_edited_lanelet = copy.deepcopy(lanelet)
+        self.new_lanelet = False
+
+        self.parent().top_bar.toolbar_wrapper.tool_bar_ui.cancel_edit_vertices.setVisible(True)
+
+        self.left_vertices = copy.deepcopy(lanelet.left_vertices)
+        self.right_vertices = copy.deepcopy(lanelet.right_vertices)
+
+        self.left_scatter = Line2D(
+            self.left_vertices[:, 0], self.left_vertices[:, 1], c="g", marker="o", picker=True, zorder=10
+        )
+
+        self.right_scatter = Line2D(
+            self.right_vertices[:, 0], self.right_vertices[:, 1], c="b", marker="o", picker=True, zorder=10
+        )
+
+        self.button_press_event_cid = self.ax.figure.canvas.mpl_connect(
+            "button_press_event", lambda event: self.on_pick(event, lanelet)
+        )
+
+        self.draw_editable_lanelet()
+        self.ax.add_line(self.left_scatter)
+        self.ax.add_line(self.right_scatter)
+        self.draw()
+
+    def cancel_edit_vertices(self):
+        """
+        Disables the show of vertices and disconnects the respective functions
+        """
+        self.mpl_disconnect(self.button_press_event_cid)
+        self.mpl_disconnect(self.button_release_event_cid)
+        self.mpl_disconnect(self.motion_notify_event_cid)
+
+        self.button_release_event_cid = self.mpl_connect("button_release_event", self.dynamic_canvas_release_callback)
+        self.button_press_event_cid = self.mpl_connect("button_press_event", self.dynamic_canvas_click_callback)
+
+        self.left_vertices = None
+        self.right_vertices = None
+        self.current_edited_lanelet_scenario = None
+        self.temp_edited_lanelet = None
+        self.parent().top_bar.toolbar_wrapper.tool_bar_ui.cancel_edit_vertices.setVisible(False)
+        self.draw_scenario()
+        self.draw()
+
+    def on_pick(self, event: QMouseEvent, lanelet: Lanelet):
+        """
+        Function that determines the action depending on the mouse click. Whether it initiates the movement of a vertice
+        or Saves the new layout of the new lanelet
+
+        @param event: Event of the Mouse
+        @param lanelet: the editable lanelet
+        """
+        max_distance_to_point = 0.5
+        if event.button == MouseButton.RIGHT:
+            menu = PyQt6.QtWidgets.QMenu()
+            x, y = event.xdata, event.ydata
+            left = np.sum((self.left_vertices - np.array([x, y])) ** 2, axis=1)
+            right = np.sum((self.right_vertices - np.array([x, y])) ** 2, axis=1)
+            if min(left) < max_distance_to_point or min(right) < max_distance_to_point:
+                add_vertice = menu.addAction("Add Vertice")
+                if len(self.left_vertices) > 2:
+                    delete_vertice = menu.addAction("Delete Vertice")
+                else:
+                    delete_vertice = None
+            else:
+                add_vertice = None
+                delete_vertice = None
+            safe_changes = menu.addAction("Safe Changes")
+            remove_changes = menu.addAction("Remove Changes")
+            continue_editing = menu.addAction("Continue Editing")
+
+            action = menu.exec((self.mouse_coordinates))
+
+            if action == continue_editing:
+                return
+            elif action == safe_changes:
+                self.create_temp_lanelet_vertices()
+                self.parent().road_network_toolbox.lanelet_controller.update_lanelet(self.temp_edited_lanelet)
+
+            elif (add_vertice is not None and action == add_vertice) or (
+                delete_vertice is not None and action == delete_vertice
+            ):
+                if min(left) < min(right):
+                    ind = np.argmin(left)
+                    index = ind
+                else:
+                    ind = np.argmin(right)
+                    index = ind
+                if action == add_vertice:
+                    self.add_vertice(index)
+                else:
+                    self.delete_vertice(index)
+                self.create_temp_lanelet_vertices()
+                self.draw_editable_lanelet()
+                self.ax.add_line(self.left_scatter)
+                self.ax.add_line(self.right_scatter)
+                self.draw()
+
+            if action == remove_changes or action == safe_changes:
+                self.cancel_edit_vertices()
+
+        if event.inaxes == self.ax and event.button == MouseButton.LEFT:
+            x, y = event.xdata, event.ydata
+            left = np.sum((self.left_vertices - np.array([x, y])) ** 2, axis=1)
+            right = np.sum((self.right_vertices - np.array([x, y])) ** 2, axis=1)
+            if min(left) > max_distance_to_point and min(right) > max_distance_to_point:
+                return
+            if min(left) < min(right):
+                ind = np.argmin(left)
+                self.left_dragging_point = ind
+                self.motion_notify_event_cid = self.mpl_connect("motion_notify_event", self.on_left_motion)
+                self.button_release_event_cid = self.mpl_connect("button_release_event", self.on_left_release)
+            else:
+                ind = np.argmin(right)
+                self.right_dragging_point = ind
+                self.motion_notify_event_cid = self.mpl_connect("motion_notify_event", self.on_right_motion)
+                self.button_release_event_cid = self.mpl_connect("button_release_event", self.on_right_release)
+
+            self.draw()
+
+    def create_temp_lanelet_vertices(self):
+        """
+        Creates temporary lanelet and saves it. For the edit vertices.
+        """
+        center_vertices = copy.deepcopy(self.left_vertices)
+
+        for i in range(len(self.left_vertices)):
+            center_vertices[i] = np.array(
+                [
+                    (self.left_vertices[i][0] + self.right_vertices[i][0]) / 2,
+                    (self.left_vertices[i][1] + self.right_vertices[i][1]) / 2,
+                ]
+            )
+
+        self.temp_edited_lanelet = Lanelet(
+            self.left_vertices,
+            center_vertices,
+            self.right_vertices,
+            self.temp_edited_lanelet.lanelet_id,
+            self.temp_edited_lanelet.predecessor,
+            self.temp_edited_lanelet.successor,
+            self.temp_edited_lanelet.adj_left,
+            self.temp_edited_lanelet.adj_left_same_direction,
+            self.temp_edited_lanelet.adj_right,
+            self.temp_edited_lanelet.adj_right_same_direction,
+            self.temp_edited_lanelet.line_marking_left_vertices,
+            self.temp_edited_lanelet.line_marking_right_vertices,
+            self.temp_edited_lanelet.stop_line,
+            self.temp_edited_lanelet.lanelet_type,
+            self.temp_edited_lanelet.user_one_way,
+            self.temp_edited_lanelet.user_bidirectional,
+            self.temp_edited_lanelet.traffic_signs,
+            self.temp_edited_lanelet.traffic_lights,
+            self.temp_edited_lanelet.adjacent_areas,
+        )
+
+    def calculate_direction(self, x1: float, y1: float, x2: float, y2: float) -> float:
+        """
+        Calculates the direction in which 2 points point
+
+        @param x1: x-Coordinate of first point
+        @param y1: y-Coordinate of first point
+        @param x2: x-Coordinate of second point
+        @param y2: y-Coordinate of second point
+
+        @returns:
+        """
+        delta_x = x2 - x1
+        delta_y = y2 - y1
+        angle = math.atan2(delta_y, delta_x)
+        return angle
+
+    def get_new_coordinate(self, x: float, y: float, direction: float, distance: float = 1) -> []:
+        """
+        returns a new coordintate with a specific distance to the given point
+
+        @param x: x-Coordinate of the point of which the new point should be created
+        @param y: y-Coordinate of the point of which the new point should be created
+        @param direction: in which direction of the point should the new one be created
+        @param distance: With what distance should the new point be created (Default = 1)
+
+        @returns: List with the new coordinates
+        """
+        new_x = x + distance * math.cos(direction)
+        new_y = y + distance * math.sin(direction)
+
+        return [new_x, new_y]
+
+    def add_vertice(self, index: int):
+        """
+        Adds a new vertice after the given index
+
+        @param index: Index after which place the new point should be created
+        """
+
+        if index == len(self.left_vertices) - 1:  # If selected index is the last point
+            direction = self.calculate_direction(
+                self.left_vertices[-2][0],
+                self.left_vertices[-2][1],
+                self.left_vertices[-1][0],
+                self.left_vertices[-1][1],
+            )
+            new_left_point = self.get_new_coordinate(self.left_vertices[-1][0], self.left_vertices[-1][1], direction)
+            new_right_point = self.get_new_coordinate(self.right_vertices[-1][0], self.right_vertices[-1][1], direction)
+
+            self.left_vertices = np.vstack([self.left_vertices, new_left_point])
+            self.right_vertices = np.vstack([self.right_vertices, new_right_point])
+
+        elif 0 <= index < len(self.left_vertices) - 1:  # If selected index is in between vertices
+            new_left_point = 0.5 * (self.left_vertices[index] + self.left_vertices[index + 1])
+            new_right_point = 0.5 * (self.right_vertices[index] + self.right_vertices[index + 1])
+
+            self.left_vertices = np.insert(self.left_vertices, index + 1, new_left_point, axis=0)
+            self.right_vertices = np.insert(self.right_vertices, index + 1, new_right_point, axis=0)
+
+        # Update vertice lines
+        self.left_scatter.set_data(self.left_vertices[:, 0], self.left_vertices[:, 1])
+        self.right_scatter.set_data(self.right_vertices[:, 0], self.right_vertices[:, 1])
+
+    def delete_vertice(self, index: int):
+        """
+        Deletes the given vertices of the given index
+
+        @param index: Index of the deleted vertice
+        """
+        self.left_vertices = np.delete(self.left_vertices, index, axis=0)
+        self.right_vertices = np.delete(self.right_vertices, index, axis=0)
+        self.left_scatter.set_data(self.left_vertices[:, 0], self.left_vertices[:, 1])
+        self.right_scatter.set_data(self.right_vertices[:, 0], self.right_vertices[:, 1])
+
+    def on_left_motion(self, event: QMouseEvent):
+        """
+        Handles the motion procedure if a left vertice is dragged
+
+        @param event: MouseEvent of the movement
+        """
+        if hasattr(self, "left_dragging_point"):
+            self.left_vertices[self.left_dragging_point] = [event.xdata, event.ydata]
+            self.left_scatter.set_data(self.left_vertices[:, 0], self.left_vertices[:, 1])
+            self.draw()
+
+    def on_left_release(self, event: QMouseEvent):
+        """
+        Handles the disconnection procedure if a left vertice is dragged
+
+        @param event: MouseEvent of the movement
+        """
+        if hasattr(self, "left_dragging_point"):
+            delattr(self, "left_dragging_point")
+            self.mpl_disconnect(self.motion_notify_event_cid)
+            self.mpl_disconnect(self.button_release_event_cid)
+
+            self.create_temp_lanelet_vertices()
+            self.draw_editable_lanelet()
+            self.ax.add_line(self.left_scatter)
+            self.ax.add_line(self.right_scatter)
+            self.draw()
+
+    def on_right_motion(self, event):
+        """
+        Handles the motion procedure if a right vertice is dragged
+
+        @param event: MouseEvent of the movement
+        """
+        if hasattr(self, "right_dragging_point"):
+            self.right_vertices[self.right_dragging_point] = [event.xdata, event.ydata]
+            self.right_scatter.set_data(self.right_vertices[:, 0], self.right_vertices[:, 1])
+            self.draw()
+
+    def on_right_release(self, event: QMouseEvent):
+        """
+        Handles the disconnection procedure if a right vertice is dragged
+
+        @param event: MouseEvent of the movement
+        """
+        if hasattr(self, "right_dragging_point"):
+            delattr(self, "right_dragging_point")
+            self.mpl_disconnect(self.motion_notify_event_cid)
+            self.mpl_disconnect(self.button_release_event_cid)
+
+            self.create_temp_lanelet_vertices()
+            self.draw_editable_lanelet()
+            self.ax.add_line(self.left_scatter)
+            self.ax.add_line(self.right_scatter)
+            self.draw()

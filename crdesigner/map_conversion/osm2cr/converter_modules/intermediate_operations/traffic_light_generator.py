@@ -6,7 +6,7 @@ from commonroad.scenario.traffic_light import (
     TrafficLightState,
 )
 
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.osm_config import osm_config as config
 
 
 class TrafficLightGenerator:

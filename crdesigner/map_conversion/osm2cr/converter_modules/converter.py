@@ -1,15 +1,6 @@
-"""
-This module provides the main functionality to perform a conversion.
-You can use this module instead of using **main.py**.
-"""
 import logging
-import pickle
-import sys
 
-import matplotlib.pyplot as plt
-
-from crdesigner.config.osm_config import osm_config as config
-from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations import export
+from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import (
     intersection_merger,
     lane_linker,
@@ -24,7 +15,6 @@ from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_gr
     SublayeredGraph,
 )
 from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations import osm_parser
-from crdesigner.map_conversion.osm2cr.converter_modules.utility import plots
 
 
 def step_collection_1(file: str) -> Graph:
@@ -112,57 +102,3 @@ class GraphScenario:
 
         graph = step_collection_3(graph)
         self.graph: Graph = graph
-
-    def plot(self):
-        """
-        plots the graph and shows it
-
-        :return: None
-        """
-        logging.info("plotting graph")
-        _, ax = plt.subplots()
-        ax.set_aspect("equal")
-        plots.draw_graph(self.graph, ax)
-        if isinstance(self.graph, SublayeredGraph):
-            plots.draw_graph(self.graph.sublayer_graph, ax)
-        plots.show_plot()
-
-    def save_as_cr(self, filename: str):
-        """
-        exports the road network to a CommonRoad scenario
-
-        :param filename: file name for scenario generation tool
-        :return: None
-        """
-        if filename is not None:
-            export.export(self.graph, filename)
-        else:
-            export.export(self.graph)
-
-    def save_to_file(self, filename: str):
-        """
-        Saves the road network to a file and stores it on disk
-
-        :param filename: name of the file to save
-        :type filename: str
-        :return: None
-        """
-        sys.setrecursionlimit(10000)
-        with open(filename, "wb") as handle:
-            pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        sys.setrecursionlimit(1000)
-
-
-def load_from_file(filename: str) -> GraphScenario:
-    """
-    loads a road network from a file
-    Warning! Do only load files you trust!
-
-    :param filename: name of the file to load
-    :type filename: str
-    :return: the loaded road network
-    :rtype: graph_scenario
-    """
-    with open(filename, "rb") as handle:
-        graph_scenario = pickle.load(handle)
-        return graph_scenario

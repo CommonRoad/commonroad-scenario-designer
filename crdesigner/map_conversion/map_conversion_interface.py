@@ -9,9 +9,9 @@ from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.scenario import Scenario
 from lxml import etree
 
-from crdesigner.config.general_config import general_config
-from crdesigner.config.lanelet2_config import lanelet2_config
-from crdesigner.config.opendrive_config import open_drive_config
+from crdesigner.common.config.general_config import general_config
+from crdesigner.common.config.lanelet2_config import lanelet2_config
+from crdesigner.common.config.opendrive_config import open_drive_config
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter

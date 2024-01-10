@@ -65,6 +65,7 @@ similaritymeasures = ">=0.4.4"
 kdtree = "^0.16"
 pandas = "2.0.2"
 requests = "^2.31.0 "
+eclipse-sumo = "^1.19.0"
 
 [tool.poetry.group.dev]
 optional = true
@@ -92,7 +93,6 @@ optional = true
 [tool.poetry.group.tests.dependencies]
 pytest = "^7.2.2"
 coverage = "^7.2.2"
-prospector = {extras = ["with-mypy"], version = "^1.9.0"}
 pytest-qt = "^4.2.0"
 parameterized = "^0.8.1"
 

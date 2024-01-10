@@ -18,7 +18,8 @@ from commonroad.scenario.traffic_sign import (
 )
 from pyproj import CRS, Transformer
 
-from crdesigner.config.lanelet2_config import lanelet2_config
+from crdesigner.common.config.general_config import general_config
+from crdesigner.common.config.gui_config import lanelet2_default
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 
 # creating a testing vertices and a testing scenario from a test file (xml)
@@ -86,9 +87,9 @@ class TestCR2LaneletConverter(unittest.TestCase):
         ):
             proj_string_from = scenario.lanelet_network.location.geo_transformation.geo_reference
         if proj_string_from is None:
-            proj_string_from = lanelet2_config.proj_string_l2
+            proj_string_from = general_config.proj_string_cr
         crs_from = CRS(proj_string_from)
-        crs_to = CRS("ETRF89")
+        crs_to = CRS(lanelet2_default)
         transformer = Transformer.from_proj(crs_from, crs_to)
         self.assertEqual(cr1.transformer.definition, transformer.definition)
 

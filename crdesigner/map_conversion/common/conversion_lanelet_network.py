@@ -15,7 +15,7 @@ from commonroad.scenario.traffic_sign import TrafficSign
 from pyproj import Transformer
 from shapely import make_valid
 
-from crdesigner.config.opendrive_config import OpenDriveConfig, open_drive_config
+from crdesigner.common.config.opendrive_config import OpenDriveConfig, open_drive_config
 from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.utils import (

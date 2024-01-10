@@ -1,9 +1,9 @@
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QMessageBox
 
-from crdesigner.config.gui_config import gui_config
-from crdesigner.config.gui_config import gui_config as config
-from crdesigner.config.logging import logger
+from crdesigner.common.config.gui_config import gui_config
+from crdesigner.common.config.gui_config import gui_config as config
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.utilities.file_actions import (
     file_new,
     file_save,
@@ -60,6 +60,8 @@ class ToolBarController:
 
         # Cropp Map
         self.tool_bar_ui.crop_map.triggered.connect(lambda: self._crop_map(self.tool_bar_ui.crop_map.isChecked()))
+
+        self.tool_bar_ui.cancel_edit_vertices.triggered.connect(lambda: self._cancel_edit_vertices())
 
     def _road_network_toolbox_show(self):
         """
@@ -207,3 +209,9 @@ class ToolBarController:
         :param is_checked: Boolean which states whether the button is clicked or not
         """
         self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_crop_map(is_checked)
+
+    def _cancel_edit_vertices(self):
+        """
+        Cancels the display of the vertices
+        """
+        self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.cancel_edit_vertices()

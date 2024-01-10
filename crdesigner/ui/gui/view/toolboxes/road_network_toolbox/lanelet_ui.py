@@ -6,7 +6,7 @@ from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking, RoadU
 from numpy import ndarray
 from PyQt6.QtCore import Qt
 
-from crdesigner.config.logging import logger
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.helper import angle_between
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import (

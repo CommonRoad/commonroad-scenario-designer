@@ -15,10 +15,12 @@ from commonroad.visualization.draw_params import (
     TrajectoryParams,
 )
 
-from crdesigner.config.config_base import Attribute, BaseConfig
+from crdesigner.common.config.config_base import Attribute, BaseConfig
 
+# projects the lane-network in a way that aligns well with aerial images
 pseudo_mercator = "EPSG:3857"
 utm_default = "+proj=utm +zone=32 +ellps=WGS84"
+lanelet2_default = "ETRF89"
 
 
 @dataclass

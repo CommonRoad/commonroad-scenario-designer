@@ -3,7 +3,6 @@ import os
 import unittest
 from typing import Tuple
 
-from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.common.util import FileFormat
 from commonroad.planning.planning_problem import PlanningProblemSet
@@ -11,6 +10,9 @@ from commonroad.scenario.scenario import Scenario
 from lxml import etree
 
 import crdesigner.map_conversion.osm2cr.converter_modules.converter as converter
+from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import (
+    convert_to_scenario,
+)
 
 
 class TestOSMToCommonRoadConversion(unittest.TestCase):
@@ -21,17 +23,21 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
         if not os.path.isdir(self.out_path):
             os.makedirs(self.out_path)
 
-    def load_and_convert(self, osm_file_name: str) -> Tuple[Scenario, PlanningProblemSet, str]:
+    def load_and_convert(self, osm_file_name: str) -> Tuple[Scenario, str]:
         path = os.path.dirname(os.path.realpath(__file__)) + f"/../test_maps/osm/{osm_file_name}.osm"
 
         converted_path = os.path.join(self.out_path, osm_file_name + "_converted_scenario.xml")
 
-        # create and save converter scenario
-        graph_scenario = converter.GraphScenario(path)
-        graph_scenario.save_as_cr(converted_path)
-        cr_scenario, cr_planning_problem = CommonRoadFileReader(converted_path).open()
+        osm_graph = converter.GraphScenario(path).graph
+        cr_scenario = convert_to_scenario(osm_graph)
 
-        return cr_scenario, cr_planning_problem, converted_path
+        fw = CommonRoadFileWriter(scenario=cr_scenario, planning_problem_set=PlanningProblemSet())
+        fw.write_to_file(
+            filename=self.out_path + "/" + osm_file_name + "_converted_scenario.xml",
+            overwrite_existing_file=OverwriteExistingFile.ALWAYS,
+        )
+
+        return cr_scenario, converted_path
 
     def osm2cr_conversion_ids(self, converted_path: str):
         """Test if Scenario IDs are correctly ordered ascending"""
@@ -84,12 +90,10 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
                 distance = math.sqrt((r_v[0] - l_v[0]) ** 2 + (r_v[1] - l_v[1]) ** 2)
                 self.assertGreaterEqual(distance, min_distance)
 
-    def osm2cr_scenario_write_validates(
-        self, cr_scenario: Scenario, cr_planning_problem: PlanningProblemSet, osm_file_name: str
-    ):
+    def osm2cr_scenario_write_validates(self, cr_scenario: Scenario, osm_file_name: str):
         """Test if created CommonRoad scenario validates"""
         fw = CommonRoadFileWriter(
-            scenario=cr_scenario, planning_problem_set=cr_planning_problem, file_format=FileFormat.XML
+            scenario=cr_scenario, planning_problem_set=PlanningProblemSet(), file_format=FileFormat.XML
         )
         fw.write_to_file(
             filename=self.out_path + "/" + osm_file_name + "_written.xml",
@@ -98,11 +102,11 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
         )
 
     def execute_tests(self, osm_file_name: str):
-        cr_scenario, cr_planning_problem, converted_path = self.load_and_convert(osm_file_name)
+        cr_scenario, converted_path = self.load_and_convert(osm_file_name)
         self.osm2cr_conversion_ids(converted_path)
         self.osm2cr_conversion_geonames(converted_path)
         self.osm2cr_conversion_lane_width(cr_scenario)
-        self.osm2cr_scenario_write_validates(cr_scenario, cr_planning_problem, osm_file_name)
+        self.osm2cr_scenario_write_validates(cr_scenario, osm_file_name)
 
     def test_garching_intersection(self):
         """Testing if a single small intersection can be converted without error"""

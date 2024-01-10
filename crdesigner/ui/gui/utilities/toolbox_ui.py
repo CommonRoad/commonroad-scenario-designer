@@ -16,7 +16,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from crdesigner.config.gui_config import gui_config as config
+from crdesigner.common.config.gui_config import gui_config as config
 
 
 class QHLine(QFrame):

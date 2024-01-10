@@ -16,7 +16,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
-from crdesigner.config.logging import logger
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.utilities.toolbox_ui import (
     CheckableComboBox,
     CollapsibleArrowBox,
@@ -534,10 +534,10 @@ class AddLaneletWidget:
             "Curved Lanelet", layout_curved_box, self.toolbox.layout_lanelet_adding_groupbox, index
         )
         self.toolbox.lanelet_radius.textChanged.connect(
-            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_curved_lanelet()
+            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_editable_lanelet()
         )
         self.toolbox.lanelet_angle.textChanged.connect(
-            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_curved_lanelet()
+            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_editable_lanelet()
         )
         self.toolbox.curved_check_button.button.clicked.connect(
             lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(

@@ -1,7 +1,7 @@
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany  # type: ignore
 from lxml import etree  # type: ignore
 
-from crdesigner.config.lanelet2_config import lanelet2_config
+from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.lanelet2 import (
     Node,
     OSMLanelet,

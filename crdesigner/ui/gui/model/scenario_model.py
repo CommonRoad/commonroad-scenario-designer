@@ -18,7 +18,7 @@ from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficSign
 from PyQt6.QtCore import QObject, pyqtSignal
 
-from crdesigner.config.logging import logger
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
 

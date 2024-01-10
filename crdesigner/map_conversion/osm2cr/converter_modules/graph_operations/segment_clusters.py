@@ -5,7 +5,7 @@ from typing import Dict, List, Set, Tuple
 
 import numpy as np
 
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph import (
     Graph,

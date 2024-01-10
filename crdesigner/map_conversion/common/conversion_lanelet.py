@@ -5,7 +5,7 @@ import numpy as np
 from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking, RoadUser
 from pyproj import Transformer
 
-from crdesigner.config.opendrive_config import OpenDriveConfig, open_drive_config
+from crdesigner.common.config.opendrive_config import OpenDriveConfig, open_drive_config
 
 
 class ConversionLanelet(Lanelet):

@@ -2,16 +2,22 @@
 This module provides all methods to parse an OSM file and convert it to a graph.
 It also provides a method to project OSM nodes to cartesian coordinates.
 """
+import dataclasses
 import logging
 import xml.etree.ElementTree as ElTree
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List
+from typing import OrderedDict as typingOD
+from typing import Set, Tuple
 from xml.etree.ElementTree import Element
 
 import numpy as np
 from ordered_set import OrderedSet
+from pyproj import CRS, Transformer
 
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.general_config import general_config
+from crdesigner.common.config.osm_config import osm_config
+from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common.geometry import (
     Area,
     Point,
@@ -49,36 +55,20 @@ from crdesigner.map_conversion.osm2cr.converter_modules.utility.custom_types imp
 
 # type def
 RestrictionDict = Dict[int, Set[Restriction]]
-Bounds = Tuple[float, float, float, float]
 
 
-def read_custom_bounds(root) -> Optional[Bounds]:
-    bounds = None
-    for bound in root.findall("custom_bounds"):
-        bounds = (
-            bound.attrib["lat2"],
-            bound.attrib["lon1"],
-            bound.attrib["lat1"],
-            bound.attrib["lon2"],
-        )
-        bounds = tuple(float(value) for value in bounds)
-    return bounds
+@dataclasses.dataclass
+class Bounds:
+    lat_min: float
+    lat_max: float
+    lon_min: float
+    lon_max: float
 
 
-def get_points(
-    nodes: Dict[int, ElTree.Element], custom_bounds=None
-) -> Tuple[Dict[int, Point], Tuple[float, float], Bounds]:
-    """
-    projects a set of osm nodes on a plane and returns their positions on that plane as Points
-
-    :param custom_bounds:
-    :param nodes: dict of osm nodes
-    :type nodes: Dict[int, ElTree.Element]
-    :return: dict of points
-    :rtype: Dict[int, Point]
-    """
+def extract_lat_lon(nodes: Dict[int, ElTree.Element]) -> Tuple[List[int], List[float], List[float]]:
     if len(nodes) < 1:
         raise ValueError("Map is empty")
+
     ids = []
     lons = []
     lats = []
@@ -86,29 +76,19 @@ def get_points(
         ids.append(node_id)
         lons.append(float(node.attrib["lon"]))
         lats.append(float(node.attrib["lat"]))
-    if custom_bounds is not None:
-        bounds = custom_bounds
-    else:
-        bounds = max(lats), min(lons), min(lats), max(lons)
-    assert bounds[0] >= bounds[2]
-    assert bounds[3] >= bounds[1]
-    # TODO reuse projection in geometry.py
-    lon_center = (bounds[1] + bounds[3]) / 2
-    lat_center = (bounds[0] + bounds[2]) / 2
-    lons = np.array(lons)
-    lats = np.array(lats)
-    lons_d = lons - lon_center
-    lats_d = lats - lat_center
+
+    return ids, lats, lons
+
+
+def transform_lat_lon(
+    ids: List[int], lats: List[float], lons: List[float], transformer: Transformer
+) -> typingOD[int, Point]:
+    x, y = transformer.transform(lats, lons)
     points = OrderedDict()
-    lon_constants = np.pi / 180 * config.EARTH_RADIUS * np.cos(np.radians(lats))
-    x = lon_constants * lons_d
-    lat_constant = np.pi / 180 * config.EARTH_RADIUS
-    y = lat_constant * lats_d
     for index, point_id in enumerate(ids):
         points[int(point_id)] = Point(int(point_id), x[index], y[index])
     logging.info("{} required nodes found".format(len(points)))
-    center_point = lat_center, lon_center
-    return points, center_point, bounds
+    return points
 
 
 def get_nodes(roads: Set[ElTree.Element], root) -> Tuple[Dict[int, ElTree.Element], Dict[int, ElTree.Element]]:
@@ -342,12 +322,13 @@ def parse_file(
 ) -> Tuple[
     OrderedSet[Element],
     Dict[int, Point],
-    Dict[int, Set[Restriction]],
     Tuple[float, float],
-    Tuple[float, float, float, float],
+    Bounds,
+    Dict[int, Set[Restriction]],
     List[Dict[Any, Any]],
     List[Dict[Any, Any]],
     Dict[int, Point],
+    Transformer,
 ]:
     """
     extracts all ways with streets and all the nodes in these streets of a given osm file
@@ -362,21 +343,49 @@ def parse_file(
     root = tree.getroot()
     ways = get_ways(accepted_highways, rejected_tags, root)
     road_nodes, crossing_nodes = get_nodes(ways, root)
+
     # custom bounds were originally used this way.
     # Now they are used for sublayer extraction
     # custom_bounds = read_custom_bounds(root)
     # print("bounds", bounds, "custom_bounds", custom_bounds)
-    road_points, center_point, bounds = get_points(road_nodes, custom_bounds)
-    crossing_points, _, _ = (
-        get_points(crossing_nodes, bounds) if len(crossing_nodes) > 0 else (OrderedDict(), None, None)
+    road_ids, road_lats, road_lons = extract_lat_lon(road_nodes)
+    crossing_ids, crossing_lats, crossing_lons = (
+        extract_lat_lon(crossing_nodes) if len(crossing_nodes) > 0 else ([], [], [])
     )
+
+    if custom_bounds is not None:
+        bounds = custom_bounds
+    else:
+        # we define the bounds based on the road network
+        bounds = Bounds(min(road_lats), max(road_lats), min(road_lons), max(road_lons))
+    assert bounds.lat_max >= bounds.lat_min
+    assert bounds.lon_max >= bounds.lon_min
+    lon_center = (bounds.lon_min + bounds.lon_max) / 2
+    lat_center = (bounds.lat_max + bounds.lat_min) / 2
+    center_point = lat_center, lon_center
+
+    # create transformer for projecting lat/lon
+    crs_from = CRS(osm_config.PROJ_STRING_FROM)
+    crs_to = CRS(general_config.proj_string_cr)
+    transformer = Transformer.from_proj(crs_from, crs_to)
+
+    road_points = transform_lat_lon(road_ids, road_lats, road_lons, transformer)
+    crossing_points = transform_lat_lon(crossing_ids, crossing_lats, crossing_lons, transformer)
     traffic_rules = get_traffic_rules(road_nodes, ways, config.TRAFFIC_SIGN_KEYS, config.TRAFFIC_SIGN_VALUES)
     traffic_signs, traffic_lights = get_traffic_signs_and_lights(traffic_rules)
     restrictions = get_restrictions(root)
-    if custom_bounds is not None:
-        bounds = custom_bounds
 
-    return ways, road_points, restrictions, center_point, bounds, traffic_signs, traffic_lights, crossing_points
+    return (
+        ways,
+        road_points,
+        center_point,
+        bounds,
+        restrictions,
+        traffic_signs,
+        traffic_lights,
+        crossing_points,
+        transformer,
+    )
 
 
 def parse_turnlane(turnlane: str) -> str:
@@ -587,16 +596,13 @@ def get_graph_nodes(
     return nodes
 
 
-def get_area_from_bounds(bounds: Bounds, origin: np.ndarray) -> Area:
+def get_area_from_bounds(bounds: Bounds) -> Area:
     """
     returns a rectangular area in cartesian coordinates from given
     bounds and origin in longitude and latitude
     """
-    max_point = lon_lat_to_cartesian(np.array([bounds[0], bounds[3]]), np.array(origin)[::-1])
-    min_point = lon_lat_to_cartesian(np.array([bounds[2], bounds[1]]), np.array(origin)[::-1])
-    # print("maxpoint", max_point, "minpoint", min_point)
-    # print("bounds", bounds)
-    # print("origin", origin)
+    max_point = lon_lat_to_cartesian(np.array([bounds.lat_max, bounds.lon_max]), np.array([0, 0]))
+    min_point = lon_lat_to_cartesian(np.array([bounds.lat_min, bounds.lon_min]), np.array([0, 0]))
     return Area(min_point[0], max_point[0], min_point[1], max_point[1])
 
 
@@ -605,12 +611,11 @@ def get_graph_edges_from_road(
     nodes: Dict[int, GraphNode],
     points: Dict[int, Point],
     bounds: Bounds,
-    origin: np.ndarray,
+    transformer: Transformer,
 ) -> Dict[int, Set[GraphEdge]]:
     """
     gets graph edges from set of roads
 
-    :param origin:
     :param bounds:
     :param roads: set of osm way objects
     :type roads: Set[ElTree.Element]
@@ -630,7 +635,10 @@ def get_graph_edges_from_road(
             result = result or point_in_area_list[index + 1]
         return result
 
-    area = get_area_from_bounds(bounds, origin)
+    left, bottom, right, top = transformer.transform_bounds(
+        bounds.lat_min, bounds.lon_min, bounds.lat_max, bounds.lon_max
+    )
+    area = Area(left, right, bottom, top)
     edges = OrderedDict()
     for road_index, road in enumerate(roads):
         # get basic information of road
@@ -796,34 +804,31 @@ def roads_to_graph(
     restrictions: RestrictionDict,
     center_point: Tuple[float, float],
     bounds: Bounds,
-    origin: tuple,
     traffic_signs: List,
     traffic_lights: List,
+    transformer: Transformer,
     additional_nodes: List[GraphNode] = None,
 ) -> Graph:
     """
     converts a set of roads and points to a road graph
 
-    :param origin:
     :param bounds:
     :param roads: set of roads
     :type roads: Set[ElTree.Element]
     :param road_points: corresponding points
     :type road_points: Dict[int, Point]
     :param restrictions: restrictions which will be applied to edges
-    :param center_point: gps coordinates of the origin
     :param traffic_signs: traffic signs to apply
     :param traffic_lights: traffic lights to apply
     :param additional_nodes: nodes that should be considered additionally
     :return:
     """
-    origin = np.array(origin)[::-1]
     nodes = get_graph_nodes(roads, road_points, traffic_signs, traffic_lights)
     if additional_nodes is not None:
         for node in additional_nodes:
             nodes[node.id] = node
             logging.info("added crossing point", node)
-    edges = get_graph_edges_from_road(roads, nodes, road_points, bounds, origin)
+    edges = get_graph_edges_from_road(roads, nodes, road_points, bounds, transformer)
     graph_traffic_signs = get_graph_traffic_signs(nodes, edges, traffic_signs)
     graph_traffic_lights = get_graph_traffic_lights(nodes, traffic_lights)
     map_restrictions(edges, restrictions, nodes)
@@ -832,7 +837,7 @@ def roads_to_graph(
     # for node in nodes:
     #     node_set.add(nodes[node])
     node_set = get_node_set(edges)
-    graph = Graph(node_set, edges, center_point, bounds, graph_traffic_signs, graph_traffic_lights)
+    graph = Graph(node_set, edges, center_point, bounds, transformer, graph_traffic_signs, graph_traffic_lights)
     return graph
 
 
@@ -913,12 +918,13 @@ def create_graph(file_path: str) -> Graph:
         (
             roads,
             points,
-            restrictions,
             center_point,
             bounds,
+            restrictions,
             traffic_signs,
             traffic_lights,
             crossing_points,
+            transformer,
         ) = parse_file(file, accepted_ways, config.REJECTED_TAGS, custom_bounds)
         graph = roads_to_graph(
             roads,
@@ -926,9 +932,9 @@ def create_graph(file_path: str) -> Graph:
             restrictions,
             center_point,
             bounds,
-            center_point,
             traffic_signs,
             traffic_lights,
+            transformer,
             additional_nodes,
         )
         return graph, crossing_points
@@ -972,6 +978,7 @@ def create_graph(file_path: str) -> Graph:
             extended_main_graph.edges,
             extended_main_graph.center_point,
             extended_main_graph.bounds,
+            extended_main_graph.transformer,
             extended_main_graph.traffic_signs,
             extended_main_graph.traffic_lights,
             sub_g,

@@ -14,7 +14,7 @@ default:
     - source .venv/bin/activate
 
 .run-test-with-coverage: &run-test-with-coverage
-  - apt-get update && apt-get install -y ffmpeg sumo sumo-tools sumo-doc libegl1
+  - apt-get update && apt-get install -y ffmpeg libegl1
   - coverage run --source ./crdesigner -m pytest tests/
   - coverage report -m || true
 

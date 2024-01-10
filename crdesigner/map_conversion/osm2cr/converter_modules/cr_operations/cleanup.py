@@ -14,7 +14,7 @@ from commonroad.scenario.traffic_sign import (
 from ordered_set import OrderedSet
 from scipy import interpolate
 
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.osm_config import osm_config as config
 
 
 def sanitize(scenario: Scenario) -> None:

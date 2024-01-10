@@ -4,8 +4,7 @@ from commonroad.scenario.traffic_sign import (
     TrafficSignIDZamunda,
 )
 
-from crdesigner.config.config_base import Attribute, BaseConfig
-from crdesigner.config.gui_config import pseudo_mercator
+from crdesigner.common.config.config_base import Attribute, BaseConfig
 
 
 class Lanelet2Config(BaseConfig):
@@ -60,8 +59,6 @@ class Lanelet2Config(BaseConfig):
     adjacencies = Attribute(
         True, "Adjacencies", "Detect left and right adjacencies of lanelets if they do not share a common way"
     )
-
-    proj_string_l2 = Attribute(pseudo_mercator, "Projection string", "String used for the initialization of projection")
 
     translate = Attribute(
         False,
@@ -126,7 +123,6 @@ class Lanelet2Config(BaseConfig):
             use_local_coordinates,
             supported_lanelet2_subtypes,
             "General",
-            proj_string_l2,
             translate,
             left_driving,
         ],

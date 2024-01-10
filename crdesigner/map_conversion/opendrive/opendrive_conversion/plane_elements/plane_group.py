@@ -11,6 +11,50 @@ from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanele
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import (
     ParametricLane,
 )
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+    RoadMark,
+)
+
+
+def convert_line_marking(plane_line_marking: RoadMark) -> LineMarking:
+    """
+    Function that converts the Opendrive road mark type to the corresponding CommonRoad lanelet linemarking type.
+    :param plane_line_marking: road mark of the parametric lane
+    :return: corresponding linemarking type
+    """
+    mark = LineMarking.UNKNOWN
+
+    if plane_line_marking.type == "solid":
+        if plane_line_marking.weight == "standard":
+            mark = LineMarking.SOLID
+        elif plane_line_marking.weight == "bold":
+            mark = LineMarking.BROAD_SOLID
+
+    elif plane_line_marking.type == "broken":
+        if plane_line_marking.weight == "standard":
+            mark = LineMarking.DASHED
+        elif plane_line_marking.weight == "bold":
+            mark = LineMarking.BROAD_DASHED
+
+    elif plane_line_marking.type == "solid solid":
+        mark = LineMarking.SOLID_SOLID
+
+    elif plane_line_marking.type == "broken broken":
+        mark = LineMarking.DASHED_DASHED
+
+    elif plane_line_marking.type == "curb":
+        mark = LineMarking.CURB
+
+    elif plane_line_marking.type == "none":
+        mark = LineMarking.NO_MARKING
+
+    elif plane_line_marking.type == "solid dashed":
+        mark = LineMarking.SOLID_DASHED
+
+    elif plane_line_marking.type == "dashed solid":
+        mark = LineMarking.DASHED_SOLID
+
+    return mark
 
 
 class ParametricLaneGroup:
@@ -25,6 +69,7 @@ class ParametricLaneGroup:
         inner_neighbour=None,
         inner_neighbour_same_direction=True,
         outer_neighbour=None,
+        inner_linemarking=None,
     ):
         """Initializes a ParametricLaneGroup object.
 
@@ -36,6 +81,8 @@ class ParametricLaneGroup:
         :type inner_neighbour: str
         :param outer_neighbour: ID of the outer neighbor of this group.
         :type outer_neighbour: str
+        :param inner_linemarking: inside road mark present in 2 central inner lanelets, closest to the center line
+        :type inner_linemarking: RoadMark
         """
         self._geo_lengths = [np.array([0.0])]
         self.parametric_lanes: List[ParametricLane] = []
@@ -47,6 +94,10 @@ class ParametricLaneGroup:
         self.traffic_signs = []
         self.stop_lines = []
         self.signal_references = []
+        if inner_linemarking is None:
+            inner_linemarking = RoadMark()
+            inner_linemarking.type = "unknown"
+        self.inner_linemarking = inner_linemarking
 
         if parametric_lanes is not None:
             if isinstance(parametric_lanes, list):
@@ -134,7 +185,6 @@ class ParametricLaneGroup:
         :return: Created Lanelet.
         """
         left_vertices, right_vertices = np.array([]), np.array([])
-        line_marking_left_vertices = LineMarking.UNKNOWN
         line_marking_right_vertices = LineMarking.UNKNOWN
 
         for parametric_lane in self.parametric_lanes:
@@ -158,45 +208,11 @@ class ParametricLaneGroup:
                 right_vertices = local_right_vertices
 
         for parametric_lane in self.parametric_lanes:
-            mark = LineMarking.UNKNOWN
             line_marking = parametric_lane.line_marking
-
             if line_marking is not None:
-                if parametric_lane.side == "left":
-                    if line_marking.type == "solid":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.SOLID
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_SOLID
-
-                    elif line_marking.type == "broken":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.DASHED
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_DASHED
-
-                    else:
-                        mark = LineMarking.UNKNOWN
-
-                    line_marking_left_vertices = mark
-
-                elif parametric_lane.side == "right":
-                    if line_marking.type == "solid":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.SOLID
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_SOLID
-
-                    elif line_marking.type == "broken":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.DASHED
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_DASHED
-
-                    else:
-                        mark = LineMarking.UNKNOWN
-
-                    line_marking_right_vertices = mark
+                # for the right-hand driving, outer lanelet is always on the right side
+                # assumed right-hand driving
+                line_marking_right_vertices = convert_line_marking(line_marking)
             else:
                 pass
 
@@ -246,7 +262,7 @@ class ParametricLaneGroup:
                 right_vertices,
                 self.id_,
                 lanelet_type=self.type,
-                line_marking_left_vertices=line_marking_left_vertices,
+                line_marking_left_vertices=convert_line_marking(self.inner_linemarking),
                 line_marking_right_vertices=line_marking_right_vertices,
                 speed=self.parametric_lanes[0].speed,
                 user_bidirectional=users,
@@ -259,12 +275,11 @@ class ParametricLaneGroup:
                 right_vertices,
                 self.id_,
                 lanelet_type=self.type,
-                line_marking_left_vertices=line_marking_left_vertices,
+                line_marking_left_vertices=convert_line_marking(self.inner_linemarking),
                 line_marking_right_vertices=line_marking_right_vertices,
                 speed=self.parametric_lanes[0].speed,
                 user_one_way=users,
             )
-
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
 
