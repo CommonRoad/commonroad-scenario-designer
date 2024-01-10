@@ -9,6 +9,7 @@ from commonroad.scenario.lanelet import Lanelet  # type: ignore
 from commonroad_dc.geometry.util import compute_curvature_from_polyline
 from lxml import etree
 
+from crdesigner.common.config.opendrive_config import open_drive_config
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
@@ -49,7 +50,7 @@ class Road:
     and converts CommonRoad lanelets to OpenDRIVE roads.
     """
 
-    counting = config.INITIAL_ROAD_COUNTING
+    counting = open_drive_config.initial_road_counting
     roads: dict = {}
     cr_id_to_od: dict = {}
     lane_to_lane: dict = {}
@@ -506,10 +507,10 @@ class Road:
         lane_link = etree.SubElement(lane_pos, config.LINK_TAG)
         self.lane_link[lane_id] = lane_link
 
-        x = [n * config.STEP for n in range(len(width_list))]
+        x = [n * open_drive_config.lane_evaluation_step for n in range(len(width_list))]
 
         for w in width_list:
-            w += config.STEP
+            w += open_drive_config.lane_evaluation_step
 
         # just do it the good ol' way
         if len(width_list) > 1:

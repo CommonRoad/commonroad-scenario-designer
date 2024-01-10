@@ -1,14 +1,3 @@
-# Initial counting of Road
-INITIAL_ROAD_COUNTING = 20
-
-# Constants
-# Constant for delta curvature threshold between line and arc geometry
-EPSILON = 0.00001
-# Constant for delta curvature threshold between spiral and other geometry
-DEVIAT = 0.001
-# Constant for lane parameters evaluation
-STEP = 50
-
 # Default Values
 FALSE = "false"
 TRUE = "true"

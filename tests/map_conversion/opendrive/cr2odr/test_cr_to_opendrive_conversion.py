@@ -43,7 +43,7 @@ class TestConverterConvert(ConversionBaseTestCases.ConversionBaseTest):
     def test_function_checkAllVisited(self):
         self.prepare_conversion("DEU_Test-1_1_T-1")
         self.converter.id_dict.popitem()
-        self.assertRaises(KeyError, lambda: self.converter.check_all_visited())
+        self.assertRaises(RuntimeError, lambda: self.converter.check_all_visited())
 
     def test_convert_BEL_Wervik(self):
         self.prepare_conversion("BEL_Wervik-2_1_T-1")

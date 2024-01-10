@@ -70,9 +70,15 @@ class OpenDriveConfig(BaseConfig):
         "OpenDRIVE lane types which are considered for conversion",
     )
 
+    # cr2odr config parameters
+    initial_road_counting = Attribute(20, "Initial road ID", "Initial counting for road ID")
+
+    # Constant for lane parameters evaluation
+    lane_evaluation_step = Attribute(50, "Curvature threshold clothoid", "Constant for lane parameters evaluation")
+
     LAYOUT = [
         [
-            "Conversion Parameters",
+            "Conversion Parameters odr2cr",
             error_tolerance,
             min_delta_s,
             precision,
@@ -82,12 +88,17 @@ class OpenDriveConfig(BaseConfig):
             lane_segment_angle,
         ],
         [
-            "Lanelet Type Configuration",
+            "Lanelet Type Configuration odr2cr",
             driving_default_lanelet_type,
             general_lanelet_type_activ,
             general_lanelet_type,
             lanelet_types_backwards_compatible,
             filter_types,
+        ],
+        [
+            "Conversion Parameters cr2odr",
+            initial_road_counting,
+            lane_evaluation_step,
         ],
     ]
 
