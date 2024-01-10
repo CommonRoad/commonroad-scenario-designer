@@ -347,6 +347,7 @@ class IntermediateFormat:
             ),
         )
         net = LaneletNetwork()
+        net.location = location
 
         # Add edges
         for edge in self.edges:
