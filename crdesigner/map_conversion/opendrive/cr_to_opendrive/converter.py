@@ -1,10 +1,13 @@
 import copy
+import logging
 import time
 from typing import Dict, List
 
+import numpy as np
+from commonroad.common.file_reader import CommonRoadFileReader
+from commonroad.common.util import Path_T
 from commonroad.scenario.intersection import IntersectionIncomingElement
 from commonroad.scenario.lanelet import Lanelet
-from commonroad.scenario.scenario import Scenario
 
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.file_writer as fwr
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.junction import (
@@ -22,6 +25,20 @@ from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.stop_line impo
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
 
+def get_avg(x: np.ndarray, y: np.ndarray) -> np.ndarray:
+    """
+    This method calculate the average for ndarrays x and y
+
+    :param x: average of x_right and x_left
+    :param y: average of y_right and y_left
+    :return: average for ndarrays x and y
+    """
+    x_avg = -((np.min(x) + np.max(x)) / 2.0)
+    y_avg = -((np.min(y) + np.max(y)) / 2.0)
+    middle = np.array([x_avg, y_avg])
+    return middle
+
+
 class Converter:
     """
     This class converts the CommonRoad scenario object to CommonRoad file.
@@ -29,24 +46,102 @@ class Converter:
     are converted to corresponding OpenDRIVE elements and OpenDRIVE file is created.
     """
 
-    def __init__(self, file_path: str, sc: Scenario, successors: List[int], ids: Dict[int, bool]) -> None:
+    def __init__(self, scenario_path: Path_T, center: bool = False) -> None:
         """
         This function lets Class Converter to initialize object with path to CommonRoad file, scenario,
         list of successor and dictionary of converted roads and initialize the instant variables.
 
-        :param file_path: path to CommonRoad file
-        :param sc: CommonRoad Scenario
-        :param successors: list of successor
-        :param ids: dictionary with lanelet ids as keys and boolean values
+        :param scenario_path: path to CommonRoad file
+        :param center: boolean value
         """
-        self.path = file_path
-        self.scenario = sc
-        self.inter_successors = successors
-        self.id_dict = ids
+        self.center = center
+        self.x_avg = 0
+        self.y_avg = 0
+        # if the map is not loadable by CommonRoadFileReader we just return
+        # as there seems to be some major syntax faults in the input map
+        try:
+            self.scenario, _ = CommonRoadFileReader(scenario_path).open()
+        except AttributeError:
+            logging.error(f"{scenario_path} not loadable!")
+            exit()
+
+        # shorten variable name
         self.lane_net = self.scenario.lanelet_network
+
+        # 0 centering is mostly useless because the planning problem
+        # requires the same coordinate space as the input
+        if self.center:
+            # move lanelets into the origin
+            self.scenario.translate_rotate(self.get_center(), 0.0)
+            for element in self.scenario.lanelet_network.traffic_signs:
+                element.translate_rotate(self.get_center(), 0.0)
+
+        # intersection successors are needed for the conversion
+        self.inter_successors = self.prepare_intersection_successors()
+
+        # dictionary to keep track of converted roads
+        self.id_dict = self.prepare_id_dict()
+
         self.traffic_elements = {}
         self.writer = None
         self.conv_time = 0
+
+    def get_center(self) -> np.ndarray:
+        """
+        This method calculate the roads "center" to move everything into the origin
+
+        :return: the roads "center" as (average of x_right and x_left, average of y_right and y_left)
+        """
+        coords_left = self.lane_net.lanelets[0].left_vertices
+        coords_right = self.lane_net.lanelets[0].right_vertices
+        for let in self.lane_net.lanelets:
+            coords_left = np.concatenate((coords_left, let.left_vertices), axis=0)
+            coords_right = np.concatenate((coords_right, let.right_vertices), axis=0)
+
+        x_left, y_left = np.hsplit(coords_left, 2)
+        x_right, y_right = np.hsplit(coords_right, 2)
+
+        return get_avg((x_right + x_left) / 2, (y_right + y_left) / 2)
+
+    def find_successors(self, indices: dict.keys) -> List[int]:
+        """
+        This method creates list of successors of all incoming lanelets
+
+        :param indices: list of incoming lanelets (id's) to each intersection defined
+        :return: list of successors of all incoming lanelets (id's)
+        """
+        successors = []
+        for incoming_id in indices:
+            # find all succesors which are part of the intersection
+            lane = self.lane_net.find_lanelet_by_id(incoming_id)
+            successors.extend(lane.successor)
+        return successors
+
+    def prepare_intersection_successors(self) -> List[int]:
+        """
+        This method creates the list of successor of all incoming lanelets(id's) of intersection defined
+
+        :return: list of all successors that are part of the intersection
+        """
+        # list of all incoming lanelets (id's) to each intersection defined
+        inter_incoming_lanelets = self.lane_net.map_inc_lanelets_to_intersections.keys()
+        # list of their successors
+        inter_successors = self.find_successors(inter_incoming_lanelets)
+        return inter_successors
+
+    def prepare_id_dict(self) -> Dict[int, bool]:
+        """
+        Creates a dictionary with lanelet ids as keys and boolean values.
+        This helps keep track which lanelets already got converted
+
+        :return: dictionary with lanelet ids as keys and boolean values
+        """
+        lane_list = self.lane_net.lanelets
+        id_dict = {}
+        # this is done to keep track which lanelets already got converted
+        for i in range(0, len(lane_list)):
+            id_dict[lane_list[i].lanelet_id] = False
+        return id_dict
 
     def convert(self, file_path_out: str) -> None:
         """
@@ -90,8 +185,8 @@ class Converter:
         This function print the time required for the file conversion in the order of second.
         """
         conv = "Converter\n"
-        time = f"Conversion took: \t{self.conv_time:.2} seconds\n"
-        print(conv + time)
+        time_str = f"Conversion took: \t{self.conv_time:.2} seconds\n"
+        print(conv + time_str)
 
     def finalize(self) -> None:
         """
@@ -170,7 +265,7 @@ class Converter:
         """
         This method is responsible for road construction.
         We start from a given lanelet, we expand it left and right to construct its corresponding road,
-        then we continue with its succesors/predecessors.
+        then we continue with its successors/predecessors.
         The road network is explored in a breadth-first fashion.
 
         :param frontier: used as a queue that contains to-be-explored nodes
@@ -179,8 +274,8 @@ class Converter:
             return
 
         frontier = list(set(frontier))
-        id = frontier.pop(0)
-        lanelet = copy.deepcopy(self.lane_net.find_lanelet_by_id(id))
+        l_id = frontier.pop(0)
+        lanelet = copy.deepcopy(self.lane_net.find_lanelet_by_id(l_id))
 
         road_lanes = [lanelet]
 
@@ -344,7 +439,7 @@ class Converter:
         we make the junction to a successor/predecessor.
         Otherwise, in the case of multiple successors, we define a new junction.
 
-        :param link_map: dictionary of road ids and corresponding successors and predessors
+        :param link_map: dictionary of road ids and corresponding successors and predecessors
         """
         for road_id, road_val in link_map.items():
             if len(set(road_val["roadLinkage"]["succ"])) > 1:

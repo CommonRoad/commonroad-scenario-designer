@@ -2,10 +2,10 @@ import os
 import time
 import unittest
 
+from commonroad.common.util import Path_T
 from lxml import etree
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
 from tests.map_conversion.utils import elements_equal
 
 
@@ -29,16 +29,12 @@ class ConversionBaseTestCases:
             self.file_path_in = os.path.join(self.cwd_path, f"../../test_maps/cr2odr/{self.map_name}.xml")
             # absolute path for output
             self.file_path_out = os.path.join(self.cwd_path, f".pytest_cache/converted_xodr_files/{self.map_name}.xodr")
-            # load the xml file and preprocess it
-            self.data = DataLoader(self.file_path_in)
-            print(self.data)
 
-            scenario, successors, ids = self.data.initialize()
-            self.converter = Converter(self.file_path_in, scenario, successors, ids)
+            self.converter = Converter(self.file_path_in)
 
         # cuts out the date timestamp of both maps
         # (as they wont be equal) and compares them
-        def check_with_ground_truth(self, reference_file: str):
+        def check_with_ground_truth(self, reference_file: Path_T):
             with open("{}".format(self.file_path_out), "r") as converted_file:
                 converted_tree = etree.parse(converted_file).getroot()
                 date = time.strftime("%Y-%m-%d", time.localtime())
