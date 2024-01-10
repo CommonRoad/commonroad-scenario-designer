@@ -33,9 +33,9 @@ def transform_shape(shape: Shape, transformer: Transformer) -> Shape:
     return shape_copy
 
 
-def project_complete_scenario_and_pps(scenario: Scenario, planning_problem_set: PlanningProblemSet | None,
-                                      proj_string_from: str, proj_string_to: str)\
-        -> [Scenario, PlanningProblemSet | None]:
+def project_complete_scenario_and_pps(
+    scenario: Scenario, planning_problem_set: PlanningProblemSet | None, proj_string_from: str, proj_string_to: str
+) -> [Scenario, PlanningProblemSet | None]:
     """
     Function that performs a projection onto the entire scenario.
 
@@ -83,8 +83,9 @@ def project_complete_scenario_and_pps(scenario: Scenario, planning_problem_set: 
         if obstacle.initial_state:
             if obstacle.initial_state.position:
                 if isinstance(obstacle.initial_state.position, ValidTypes.ARRAY):
-                    obstacle.initial_state.position[0], obstacle.initial_state.position[1] = (
-                        transformer.transform(obstacle.initial_state.position[0], obstacle.initial_state.position[1]))
+                    obstacle.initial_state.position[0], obstacle.initial_state.position[1] = transformer.transform(
+                        obstacle.initial_state.position[0], obstacle.initial_state.position[1]
+                    )
                 if isinstance(obstacle.initial_state.position, Shape):
                     obstacle.initial_state.position = transform_shape(obstacle.initial_state.position, transformer)
 
@@ -100,8 +101,9 @@ def project_complete_scenario_and_pps(scenario: Scenario, planning_problem_set: 
                 for state in obstacle.prediction.trajectory.state_list:
                     if state.position:
                         if isinstance(state.position, ValidTypes.ARRAY):
-                            state.position[0], state.position[1] = transformer.transform(state.position[0],
-                                                                                         state.position[1])
+                            state.position[0], state.position[1] = transformer.transform(
+                                state.position[0], state.position[1]
+                            )
                         if isinstance(state.position, Shape):
                             state.position = transform_shape(state.position, transformer)
 
@@ -143,8 +145,9 @@ class CRDesignerFileReader(CommonRoadFileReader):
             proj_string_from = scenario.location.geo_transformation.geo_reference
             # If no source projection is defined in the scenario location element, we should skip the projection
             if proj_string_from is not None:
-                scenario, planning_problem_set = project_complete_scenario_and_pps(scenario, planning_problem_set,
-                                                                                   proj_string_from, target_projection)
+                scenario, planning_problem_set = project_complete_scenario_and_pps(
+                    scenario, planning_problem_set, proj_string_from, target_projection
+                )
 
         # check for verifying and repairing the scenario
         if verify_repair_scenario is True:
