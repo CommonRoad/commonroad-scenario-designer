@@ -243,25 +243,34 @@ class Road:
 
         while cur_idx <= len(self.center) - 1:
             # previously line or start and no orientation change
-            if np.isclose(self.hdg[cur_idx - 1], self.hdg[cur_idx], open_drive_config.heading_threshold) and cur_type in [
+            if np.isclose(
+                self.hdg[cur_idx - 1], self.hdg[cur_idx], open_drive_config.heading_threshold
+            ) and cur_type in [
                 GeometryType.LINE,
                 GeometryType.NONE,
             ]:
                 cur_type = GeometryType.LINE
             # previously arc or start and curvature stays constant
-            elif np.isclose(curv[last_idx], curv[cur_idx], open_drive_config.curvature_threshold) and cur_type in [GeometryType.ARC, GeometryType.NONE]:
+            elif np.isclose(curv[last_idx], curv[cur_idx], open_drive_config.curvature_threshold) and cur_type in [
+                GeometryType.ARC,
+                GeometryType.NONE,
+            ]:
                 cur_type = GeometryType.ARC
             # start and curvature dif increased or previously spiral and curvature dif stayed constant
             elif (
                 cur_idx == 1
-                and not np.isclose(curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], open_drive_config.curvature_dif_threshold)
+                and not np.isclose(
+                    curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], open_drive_config.curvature_dif_threshold
+                )
                 or cur_idx > 1
                 and np.isclose(curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], open_drive_config.curvature_dif_threshold)
                 and cur_type in [GeometryType.SPIRAL, GeometryType.NONE]
             ):
                 cur_type = GeometryType.SPIRAL
             # previously no line and orientation does not change -> switch to line
-            elif np.isclose(self.hdg[cur_idx - 1], self.hdg[cur_idx], open_drive_config.curvature_threshold_line) and cur_type not in [
+            elif np.isclose(
+                self.hdg[cur_idx - 1], self.hdg[cur_idx], open_drive_config.heading_threshold
+            ) and cur_type not in [
                 GeometryType.LINE,
                 GeometryType.NONE,
             ]:
