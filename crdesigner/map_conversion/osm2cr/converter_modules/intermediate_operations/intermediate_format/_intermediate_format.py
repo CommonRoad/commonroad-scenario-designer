@@ -345,7 +345,6 @@ class IntermediateFormat:
             ScenarioID(
                 country_id=general_config.country_id, map_name=general_config.map_name, map_id=general_config.map_id
             ),
-            location=location,
         )
         net = LaneletNetwork()
 
