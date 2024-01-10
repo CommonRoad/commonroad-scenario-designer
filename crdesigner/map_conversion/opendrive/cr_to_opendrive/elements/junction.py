@@ -3,6 +3,7 @@ from typing import Dict, List
 from commonroad.scenario.intersection import IntersectionIncomingElement  # type: ignore
 from commonroad.scenario.lanelet import LaneletNetwork  # type: ignore
 from lxml import etree  # type: ignore
+from lxml.etree import Element
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
@@ -23,7 +24,7 @@ class Junction:
         incoming: List[IntersectionIncomingElement],
         id_to_road: Dict[int, int],
         lane_to_lane: Dict[int, int],
-        root: etree._Element,
+        root: Element,
         lane_network: LaneletNetwork,
         junction_id: int,
     ) -> None:
@@ -92,6 +93,6 @@ class Junction:
 
                 # link them with laneLink, accordingly to OpenDrive
                 for inc, out in map_road_to_lane_link[connect]:
-                    laneLink = etree.SubElement(connection, config.JUNCTION_LANE_LINK_TAG)
-                    laneLink.set(config.JUNCTION_FROM_TAG, str.format(config.ID_FORMAT_PATTERN, inc))
-                    laneLink.set(config.JUNCTION_TO_TAG, str.format(config.ID_FORMAT_PATTERN, out))
+                    lane_link = etree.SubElement(connection, config.JUNCTION_LANE_LINK_TAG)
+                    lane_link.set(config.JUNCTION_FROM_TAG, str.format(config.ID_FORMAT_PATTERN, inc))
+                    lane_link.set(config.JUNCTION_TO_TAG, str.format(config.ID_FORMAT_PATTERN, out))

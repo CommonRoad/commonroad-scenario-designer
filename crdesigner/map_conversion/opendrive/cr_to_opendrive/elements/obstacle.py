@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import List, Union
 
 import numpy as np
 from commonroad.geometry.polyline_util import (
@@ -6,6 +6,7 @@ from commonroad.geometry.polyline_util import (
 )
 from commonroad.geometry.shape import Circle, Polygon, Rectangle, Shape  # type: ignore
 from commonroad.scenario.obstacle import ObstacleType  # type: ignore
+from commonroad.scenario.state import TraceState
 from commonroad.scenario.trajectory import State  # type: ignore
 from lxml import etree  # type: ignore
 
@@ -13,7 +14,7 @@ from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Ro
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
 
-class Obstacle:
+class OpenDRIVEObstacle:
     """
     This class adds object child element to road parent element
     and converts CommonRoad obstacles to OpenDRIVE obstacles
@@ -22,7 +23,11 @@ class Obstacle:
     counting = 0
 
     def __init__(
-        self, obstacle_type: ObstacleType, lanelets: Dict[int, ObstacleType], shape: Shape, state: State
+        self,
+        obstacle_type: ObstacleType,
+        lanelets: List[int],
+        shape: Union[Rectangle, Polygon, Circle],
+        state: TraceState,
     ) -> None:
         """
         This function let class Obstacle to initialize the object with type, lanelets, shape, state
@@ -40,8 +45,8 @@ class Obstacle:
         self.road = Road.roads[road_id]
         self.state = state
 
-        Obstacle.counting += 1
-        self.id = Obstacle.counting
+        OpenDRIVEObstacle.counting += 1
+        self.id = OpenDRIVEObstacle.counting
         self.type = obstacle_type if obstacle_type == config.BUILDING else config.OBSTACLE
         self.object = etree.SubElement(self.road.objects, config.OBJECT_TAG)
 

@@ -3,6 +3,10 @@ import copy
 from lxml import etree
 
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.file_writer as fwr
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import (
+    create_linkages,
+    process_link_map,
+)
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.junction import (
     Junction,
 )
@@ -73,8 +77,8 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
         lanelet = copy.deepcopy(lane_list[0])
         self.converter.construct_roads([lanelet.lanelet_id])
         self.converter.check_all_visited()
-        self.converter.process_link_map(Road.link_map, Road.lane_2_lane_link)
-        self.converter.create_linkages(Road.link_map, Road.lane_2_lane_link)
+        process_link_map(Road.link_map, Road.lane_2_lane_link)
+        create_linkages(Road.link_map, Road.lane_2_lane_link)
 
     def checkJunctionRoot7(self, junction):
         self.assertEqual(config.JUNCTION_TAG, junction.root[7].tag)

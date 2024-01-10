@@ -6,7 +6,7 @@ from commonroad.scenario.obstacle import ObstacleType
 from commonroad.scenario.state import InitialState
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.obstacle import (
-    Obstacle,
+    OpenDRIVEObstacle,
 )
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
@@ -28,7 +28,7 @@ class TestObstacle(unittest.TestCase):
             yaw_rate=0.0,
             slip_angle=0.0,
         )
-        self.obstacle = Obstacle(ObstacleType.UNKNOWN, [self.lanelet.lanelet_id], self.shape, self.state)
+        self.obstacle = OpenDRIVEObstacle(ObstacleType.UNKNOWN, [self.lanelet.lanelet_id], self.shape, self.state)
 
     def test_initialization(self):
         # Testing initialization is correct

@@ -6,14 +6,14 @@ from lxml import etree
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
 
-class Writer(object):
+class Writer:
     """
     This class creates a OpenDRIVE file. The xml etree element is written as OpenDRIVE file.
     """
 
     def __init__(self, file_path_out: str) -> None:
         """
-        This function let class Write to intialize the object with path for storing converted
+        This function let class Write to initialize the object with path for storing converted
         OpenDRIVE file and initialize the instance variables and creates header child elements
         with different attributes.
 
@@ -158,7 +158,7 @@ class Writer(object):
         This function add geometry child element with various attribute to planView parent element and
         then add spiral child element to geometry parent element
 
-        :param s: s-coordinate of start position
+        :param s: s-coordinate of start-position
         :param x: Start position (x inertial)
         :param y: Start position (y inertial)
         :param hdg: Start orientation (inertial heading)
@@ -182,7 +182,7 @@ class Writer(object):
         This function add geometry child element with various attribute to planView parent element and
         then add arc child element to geometry parent element
 
-        :param s: s-coordinate of start position
+        :param s: s-coordinate of start-position
         :param x: Start position (x inertial)
         :param y: Start position (y inertial)
         :param hdg: Start orientation (inertial heading)

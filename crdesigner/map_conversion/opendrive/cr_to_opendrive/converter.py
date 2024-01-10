@@ -15,9 +15,12 @@ from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.junction impor
 )
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.light import Light
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.obstacle import (
-    Obstacle,
+    OpenDRIVEObstacle,
 )
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import (
+    LinkMap_T,
+    Road,
+)
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.stop_line import (
     StopLine,
@@ -37,6 +40,84 @@ def get_avg(x: np.ndarray, y: np.ndarray) -> np.ndarray:
     y_avg = -((np.min(y) + np.max(y)) / 2.0)
     middle = np.array([x_avg, y_avg])
     return middle
+
+
+def create_linkages(
+    link_map: LinkMap_T,
+    lane_2_lane: Dict[int, Dict[str, Dict[int, List[int]]]],
+) -> None:
+    """
+    This function implements road-to-road linkage.
+    This happens when a road has exactly one successor/predecessor.
+
+    :param link_map: A dictionary of road ids and road links(dictionary of lanelet id
+    and corresponding successors and predecessors)
+    :param lane_2_lane: A dictionary of road ids and corresponding successors and predecessors
+    """
+    for key, value in link_map.items():
+        cur_links: dict = link_map[key]["roadLinkage"]
+        # lane_2_lane=link_map[key][config.LANE_INDICES_TAG]
+        len_succ = len(set(cur_links["succ"]))
+        len_pred = len(set(cur_links["pred"]))
+
+        # nothing to do in this case
+        if cur_links["succ"] == [] and cur_links["pred"] == []:
+            print("succ and pred empty for ", key)
+            continue
+        # either successor or predecessor road is trivial
+        if len_succ == 1 or len_pred == 1:
+            # print("add_simple_linkage for road_id: ", key)
+            Road.roads[key].add_simple_linkage(cur_links, len_succ, len_pred, lane_2_lane[key])
+
+
+def process_link_map(link_map: LinkMap_T, lane_2_lane: Dict[int, Dict[str, Dict]]) -> None:
+    """
+    This function creates the data structure where all linkage information is stored, the link_map
+    For more information on the link_map, read our documentation.
+
+    :param link_map: dictionary of road ids and road links(dictionary of lanelet id
+    and corresponding successors and predessors)
+    :param lane_2_lane: dictionary of road ids and corresponding successors and predessors
+    """
+    for road_id, road_val in link_map.items():
+        road_succ_pred = {"succ": [], "pred": []}
+        road_succ_pred_final = {"succ": [], "pred": []}
+        for lanelet, lanelet_val in road_val.items():
+            if lanelet == config.LANE_INDICES_TAG:
+                continue
+            lane_id = Road.lane_to_lane[lanelet]
+            lane_2_lane[road_id]["succ"][lane_id] = []
+            lane_2_lane[road_id]["pred"][lane_id] = []
+            for links, links_val in lanelet_val.items():
+                if int(link_map[road_id][config.LANE_INDICES_TAG][lanelet]) < 0:
+                    invert = False
+                else:
+                    invert = True
+                if links == "succ" and not invert:
+                    for link in links_val:
+                        road_succ_pred["succ"].append(link)
+                        lane_2_lane[road_id]["succ"][lane_id].append(Road.lane_to_lane[link])
+
+                if links == "pred" and not invert:
+                    for link in links_val:
+                        road_succ_pred["pred"].append(link)
+                        lane_2_lane[road_id]["pred"][lane_id].append(Road.lane_to_lane[link])
+
+                if links == "succ" and invert:
+                    for link in links_val:
+                        road_succ_pred["pred"].append(link)
+                        lane_2_lane[road_id]["pred"][lane_id].append(Road.lane_to_lane[link])
+
+                if links == "pred" and invert:
+                    for link in links_val:
+                        road_succ_pred["succ"].append(link)
+                        lane_2_lane[road_id]["succ"][lane_id].append(Road.lane_to_lane[link])
+
+        link_map[road_id]["mergeLinkage"] = road_succ_pred
+        for key, values in road_succ_pred.items():
+            for value in values:
+                road_succ_pred_final[key].append(Road.cr_id_to_od[value])
+        link_map[road_id]["roadLinkage"] = road_succ_pred_final
 
 
 class Converter:
@@ -166,8 +247,8 @@ class Converter:
         self.check_all_visited()
 
         # These functions are responsible for road as well as junction linkage
-        self.process_link_map(Road.link_map, Road.lane_2_lane_link)
-        self.create_linkages(Road.link_map, Road.lane_2_lane_link)
+        process_link_map(Road.link_map, Road.lane_2_lane_link)
+        create_linkages(Road.link_map, Road.lane_2_lane_link)
         self.construct_junctions()
         self.add_junction_linkage(Road.link_map)
 
@@ -201,7 +282,7 @@ class Converter:
         Road.lane_to_lane.clear()
         Road.counting = 20
         Junction.counting = 0
-        Obstacle.counting = 0
+        OpenDRIVEObstacle.counting = 0
 
     def populate_traffic_elements(self, link_map: Dict[int, int]) -> None:
         """
@@ -341,97 +422,17 @@ class Converter:
         This function converts scenario obstacles to OpenDRIVE obstacles.
         """
         obstacles = self.scenario.static_obstacles
-        lanelets = self.lane_net.map_obstacles_to_lanelets(obstacles)
         for obstacle in obstacles:
             center = obstacle.initial_state.position
             lanelets = self.lane_net.find_lanelet_by_position([center])[0]
-            Obstacle(
+            OpenDRIVEObstacle(
                 obstacle.obstacle_type,
                 lanelets,
                 obstacle.obstacle_shape,
                 obstacle.initial_state,
             )
 
-    def process_link_map(
-        self, link_map: Dict[int, Dict[int, Dict[str, List[int]]]], lane_2_lane: Dict[int, Dict[str, Dict]]
-    ) -> None:
-        """
-        This function creates the data structure where all linkage information is stored, the link_map
-        For more information on the link_map, read our documentation.
-
-        :param link_map: dictionary of road ids and road links(dictionary of lanelet id
-        and corresponding successors and predessors)
-        :param lane_2_lane: dictionary of road ids and corresponding successors and predessors
-        """
-        for road_id, road_val in link_map.items():
-            road_succ_pred = {"succ": [], "pred": []}
-            road_succ_pred_final = {"succ": [], "pred": []}
-            for lanelet, lanelet_val in road_val.items():
-                if lanelet == config.LANE_INDICES_TAG:
-                    continue
-                lane_id = Road.lane_to_lane[lanelet]
-                lane_2_lane[road_id]["succ"][lane_id] = []
-                lane_2_lane[road_id]["pred"][lane_id] = []
-                for links, links_val in lanelet_val.items():
-                    if int(link_map[road_id][config.LANE_INDICES_TAG][lanelet]) < 0:
-                        invert = False
-                    else:
-                        invert = True
-                    if links == "succ" and not invert:
-                        for link in links_val:
-                            road_succ_pred["succ"].append(link)
-                            lane_2_lane[road_id]["succ"][lane_id].append(Road.lane_to_lane[link])
-
-                    if links == "pred" and not invert:
-                        for link in links_val:
-                            road_succ_pred["pred"].append(link)
-                            lane_2_lane[road_id]["pred"][lane_id].append(Road.lane_to_lane[link])
-
-                    if links == "succ" and invert:
-                        for link in links_val:
-                            road_succ_pred["pred"].append(link)
-                            lane_2_lane[road_id]["pred"][lane_id].append(Road.lane_to_lane[link])
-
-                    if links == "pred" and invert:
-                        for link in links_val:
-                            road_succ_pred["succ"].append(link)
-                            lane_2_lane[road_id]["succ"][lane_id].append(Road.lane_to_lane[link])
-
-            link_map[road_id]["mergeLinkage"] = road_succ_pred
-            for key, values in road_succ_pred.items():
-                for value in values:
-                    road_succ_pred_final[key].append(Road.cr_id_to_od[value])
-            link_map[road_id]["roadLinkage"] = road_succ_pred_final
-
-    def create_linkages(
-        self,
-        link_map: Dict[int, Dict[int, Dict[str, List[int]]]],
-        lane_2_lane: Dict[int, Dict[str, Dict[int, List[int]]]],
-    ) -> None:
-        """
-        This function implements road-to-road linkage.
-        This happens when a road has exactly one successor/predecessor.
-
-        :param link_map: A dictionary of road ids and road links(dictionary of lanelet id
-        and corresponding successors and predessors)
-        :param lane_2_lane: A dictionary of road ids and corresponding successors and predessors
-        """
-        for key, value in link_map.items():
-            cur_links: dict = link_map[key]["roadLinkage"]
-            # lane_2_lane=link_map[key][config.LANE_INDICES_TAG]
-            len_succ = len(set(cur_links["succ"]))
-            len_pred = len(set(cur_links["pred"]))
-
-            # nothing to do in this case
-            if cur_links["succ"] == [] and cur_links["pred"] == []:
-                print("succ and pred empty for ", key)
-                continue
-            # either successor or predecessor road is trivial
-            if len_succ == 1 or len_pred == 1:
-                # print("add_simple_linkage for road_id: ", key)
-                Road.roads[key].add_simple_linkage(cur_links, len_succ, len_pred, lane_2_lane[key])
-
-    def add_junction_linkage(self, link_map: Dict[int, Dict[int, Dict[str, List[int]]]]) -> None:
+    def add_junction_linkage(self, link_map: LinkMap_T) -> None:
         """
         This function links roads to junctions.
         This happens when a road has multiple successors/predecessors.
@@ -454,13 +455,13 @@ class Converter:
 
                 # define new junction
                 else:
-                    incomings = []
+                    incomings = set()
 
                     # right,left and straight successors are treated equally
                     successors_straight = set()
                     for lanelet in road.lane_list:
                         successors_straight.update(lanelet.successor)
-                        incomings.append(lanelet.lanelet_id)
+                        incomings.add(lanelet.lanelet_id)
 
                     incoming = IntersectionIncomingElement(1, incomings, set(), successors_straight, set(), None)
 

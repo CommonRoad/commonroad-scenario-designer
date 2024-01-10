@@ -32,7 +32,7 @@ class Sign(Signal):
         # using try catch to avoid empty values
         try:
             self.value = str(self.od_object.traffic_sign_elements[0].additional_values[0])
-        except Exception:
+        except IndexError:
             self.value = "-1"
 
         self.road.print_signal(self)

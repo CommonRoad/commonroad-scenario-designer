@@ -1,16 +1,18 @@
 import enum
 import math
 import warnings
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import numpy as np
 from commonroad.geometry.polyline_util import compute_polyline_lengths  # type: ignore
 from commonroad.scenario.lanelet import Lanelet  # type: ignore
 from commonroad_dc.geometry.util import compute_curvature_from_polyline
-from lxml import etree  # type: ignore
+from lxml import etree
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
+
+LinkMap_T = Dict[int, Union[Dict[int, Dict[str, List[int]]], Dict[str, Dict[int, int]]]]
 
 
 class GeometryType(enum.Enum):
@@ -20,13 +22,14 @@ class GeometryType(enum.Enum):
     NONE = 4
 
 
-def compute_heading(polyline_left: np.ndarray, polyline_right: np.ndarray) -> np.ndarray:
+def compute_heading(polyline_left: np.ndarray, polyline_right: np.ndarray) -> np.array:
     """
     Computes the orientation of a given polyline travelled from initial
     to final coordinate. The orientation of the last coordinate is always
     assigned with the computed orientation of the penultimate one.
 
-    :param polyline: Polyline with 2D points [[x_0, y_0], [x_1, y_1], ...]
+    :param polyline_left: Polyline with 2D points [[x_0, y_0], [x_1, y_1], ...]
+    :param polyline_right: Polyline with 2D points [[x_0, y_0], [x_1, y_1], ...]
     :return: Orientations of the polyline for each coordinate [rad]
     """
     orientation = []
@@ -53,11 +56,11 @@ class Road:
 
     lane_2_lane_link: dict = {}
 
-    link_map: dict = {}
+    link_map: LinkMap_T = {}
 
-    def __init__(self, lane_list: List[Lanelet], number_of_lanes: int, root: etree._Element, junction_id: int) -> None:
+    def __init__(self, lane_list: List[Lanelet], number_of_lanes: int, root: etree.Element, junction_id: int) -> None:
         """
-        This function let class road to intialize the object with lane_list, number_of_lanes, root etree element,
+        This function let class road to initialize the object with lane_list, number_of_lanes, root etree element,
         current lanelet, junction_id and converts the CommonRoad roads into OpenDRIVE roads.
 
         :param lane_list: list of lanelets
@@ -97,7 +100,7 @@ class Road:
 
         self.center = self.lane_list[i].left_vertices
         self.hdg = compute_heading(self.center, self.lane_list[i].center_vertices)
-        self.center = (
+        self.center: np.array = (
             np.insert(
                 self.center,
                 self.center.shape[0] - 1,
@@ -109,7 +112,7 @@ class Road:
             if self.hdg[-1] != 0.0
             else self.center
         )
-        self.hdg = np.insert(self.hdg, self.hdg.shape[0] - 1, self.hdg[-1]) if self.hdg[-1] != 0.0 else self.hdg
+        self.hdg: np.array = np.insert(self.hdg, self.hdg.shape[0] - 1, self.hdg[-1]) if self.hdg[-1] != 0.0 else self.hdg
 
         for i in range(0, number_of_lanes):
             Road.cr_id_to_od[lane_list[i].lanelet_id] = Road.counting
@@ -153,7 +156,7 @@ class Road:
         This function adds relation(successor/predecessor) child element to link parent element.
 
         :param element_id: element id
-        :param relation: successor/predessor
+        :param relation: successor/predecessor
         """
         self.element_type = etree.SubElement(self.link, relation)
         self.element_type.set(config.ELEMENT_ID_TAG, str(element_id))
@@ -170,7 +173,7 @@ class Road:
     ) -> None:
         """
         This function add successor/predecessor child element to link parent element and
-        each successor/predecessor are linked with its correponding landLink id.
+        each successor/predecessor are linked with its corresponding landLink id.
         This happens when a road has exactly one successor/predecessor.
 
         :param key: curKey
@@ -271,10 +274,10 @@ class Road:
             cur_idx += 1
         if switch == GeometryType.NONE:
             self.print_geometry(arc_length, cur_idx - 1, cur_type, curv, last_idx)
-        return arc_length[-1]
+        return float(arc_length[-1])
 
     def print_geometry(
-        self, path_length: np.ndarray, end_idx: int, geo_type: GeometryType, curv: np.ndarray, start_idx: int
+        self, path_length: np.array, end_idx: int, geo_type: GeometryType, curv: np.array, start_idx: int
     ):
         this_length = path_length[end_idx] - path_length[start_idx]
         if geo_type == GeometryType.LINE:
@@ -339,11 +342,11 @@ class Road:
         Geometry child element is created with corresponding attributes and added to planview parent element.
         Spiral child element is added to geometry parent element.
 
-        :param s: s-coordinate of start position
+        :param s: s-coordinate of start-position
         :param x: Start position (x inertial)
         :param y: Start position (y inertial)
         :param hdg: Start orientation (inertial heading)
-        :param lenght: Length of the element’s reference line
+        :param length: Length of the element’s reference line
         :param curv_start: Curvature at the start of the element
         :param curv_end: Curvature at the end of the element
         """
@@ -365,7 +368,7 @@ class Road:
         Geometry child element is created with corresponding attributes and added to planview parent element.
         Arc child element is added to geometry parent element.
 
-        :param s: s-coordinate of start position
+        :param s: s-coordinate of start-position
         :param x: Start position (x inertial)
         :param y: Start position (y inertial)
         :param hdg: Start orientation (inertial heading)
