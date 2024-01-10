@@ -114,8 +114,9 @@ class OpenDriveConfig(BaseConfig):
         [
             "Conversion Parameters cr2odr",
             initial_road_counting,
-            curvature_threshold_line_arc,
-            curvature_threshold_clothoid,
+            heading_threshold,
+            curvature_threshold,
+            curvature_dif_threshold,
             lane_evaluation_step,
         ],
     ]
