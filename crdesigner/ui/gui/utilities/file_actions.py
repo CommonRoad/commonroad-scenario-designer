@@ -4,6 +4,7 @@ import os
 from commonroad.common.common_scenario import FileInformation
 from commonroad.common.file_reader import (
     CommonRoadFileReader,
+    CommonRoadMapDynamicFileReader,
     CommonRoadMapFileReader,
     CommonRoadReadAll,
     FileFormat,
@@ -63,12 +64,23 @@ def open_path(mwindow, path):
     scenario = Scenario(0.1)
     pps = PlanningProblemSet()
     try:
+        # protobuf scenario
         if "-SC.pb" in path:
             commonroad_reader = CommonRoadReadAll(path, file_format=FileFormat.PROTOBUF)
             scenario, pps, _ = commonroad_reader.open()
+        # protobuf map
         elif "-SC.pb" not in path and path.split("/")[-1].count("_") == 1 and ".xml" not in path:
             commonroad_reader = CommonRoadMapFileReader(path, file_format=FileFormat.PROTOBUF)
-            scenario.replace_lanelet_network(commonroad_reader.open())
+            scenario.replace_lanelet_network(commonroad_reader.open()[0])
+        # protobuf dynamic
+        elif (
+            "-SC.pb" not in path
+            and path.split("/")[-1].count("_") == 3
+            and path.split("/")[-1].count("-") == 2
+            and ".xml" not in path
+        ):
+            commonroad_reader = CommonRoadMapDynamicFileReader(path, file_format=FileFormat.PROTOBUF)
+            scenario = commonroad_reader.open()
         elif ".xml" in path:
             commonroad_reader = CommonRoadFileReader(path, file_format=FileFormat.XML)
             scenario, pps = commonroad_reader.open()

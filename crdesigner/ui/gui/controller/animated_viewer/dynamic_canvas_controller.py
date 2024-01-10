@@ -21,7 +21,6 @@ from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
-from numpy import ndarray
 from PyQt6 import QtCore
 from PyQt6.QtCore import QPoint
 from PyQt6.QtGui import QCursor, QMouseEvent
