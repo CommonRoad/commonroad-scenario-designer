@@ -1,15 +1,11 @@
 import copy
 from typing import Dict, List, Set, Tuple
 
-from commonroad.scenario.intersection import Intersection, IncomingGroup
+from commonroad.common.common_scenario import GeoTransformation, Location
+from commonroad.scenario.intersection import IncomingGroup, Intersection
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.obstacle import Obstacle
-from commonroad.scenario.scenario import (
-    GeoTransformation,
-    Location,
-    Scenario,
-    ScenarioID,
-)
+from commonroad.scenario.scenario import Scenario, ScenarioID
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
 

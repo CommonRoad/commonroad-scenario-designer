@@ -1,6 +1,7 @@
 from typing import Tuple
 
-from commonroad.scenario.scenario import GeoTransformation, Location, Scenario, Tag
+from commonroad.common.common_scenario import GeoTransformation, Location
+from commonroad.scenario.scenario import Scenario, Tag
 
 from crdesigner.common.config.general_config import general_config
 from crdesigner.common.config.osm_config import osm_config
