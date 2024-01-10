@@ -34,8 +34,8 @@ def transform_shape(shape: Shape, transformer: Transformer) -> Shape:
 
 
 def project_complete_scenario_and_pps(
-    scenario: Scenario, planning_problem_set: PlanningProblemSet | None, proj_string_from: str, proj_string_to: str
-) -> [Scenario, PlanningProblemSet | None]:
+    scenario: Scenario, planning_problem_set: PlanningProblemSet, proj_string_from: str, proj_string_to: str
+) -> [Scenario, PlanningProblemSet]:
     """
     Function that performs a projection onto the entire scenario.
 
