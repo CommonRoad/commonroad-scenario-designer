@@ -3,7 +3,8 @@ from typing import Optional, Tuple
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import FileFormat, Path_T
-from commonroad.geometry.shape import Circle, Polygon, Rectangle
+from commonroad.common.validity import ValidTypes
+from commonroad.geometry.shape import Circle, Polygon, Rectangle, Shape
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario
@@ -15,11 +16,31 @@ from crdesigner.verification_repairing.map_verification_repairing import (
 )
 
 
-def project_complete_scenario(scenario: Scenario, proj_string_from: str, proj_string_to: str) -> Scenario:
+def transform_shape(shape: Shape, transformer: Transformer) -> Shape:
+    """
+    Function that transforms a shape.
+
+    :param shape: Shape that is to be transformed.
+    :param transformer: Transformer that transforms the shape.
+    :return: Transformed shape.
+    """
+    shape_copy = copy.deepcopy(shape)
+    if isinstance(shape_copy, Rectangle) or isinstance(shape_copy, Circle):
+        shape_copy.center[0], shape_copy.center[1] = transformer.transform(shape_copy.center[0], shape_copy.center[1])
+    elif isinstance(shape_copy, Polygon):
+        for vertex in shape_copy.vertices:
+            vertex[0], vertex[1] = transformer.transform(vertex[0], vertex[1])
+    return shape_copy
+
+
+def project_complete_scenario_and_pps(scenario: Scenario, planning_problem_set: PlanningProblemSet | None,
+                                      proj_string_from: str, proj_string_to: str)\
+        -> [Scenario, PlanningProblemSet | None]:
     """
     Function that performs a projection onto the entire scenario.
 
     :param scenario: Scenario that needs to be projected.
+    :param planning_problem_set: PlanningProblemSet that needs to be projected (if not None)
     :param proj_string_from: Source projection.
     :param proj_string_to: Target projection.
     :return: Projected scenario.
@@ -56,15 +77,37 @@ def project_complete_scenario(scenario: Scenario, proj_string_from: str, proj_st
 
     # transform obstacle coordinates
     for obstacle in scenario_copy.obstacles:
-        if obstacle.obstacle_shape == Rectangle or obstacle.obstacle_shape == Circle:
-            obstacle.obstacle_shape.center[0], obstacle.obstacle_shape.center[1] = transformer.transform(
-                obstacle.obstacle_shape.center[0], obstacle.obstacle_shape.center[1]
-            )
-        elif obstacle.obstacle_shape == Polygon:
-            for vertex in obstacle.obstacle_shape.vertices:
-                vertex[0], vertex[1] = transformer.transform(vertex[0], vertex[1])
+        if obstacle.obstacle_shape:
+            obstacle.obstacle_shape = transform_shape(obstacle.obstacle_shape, transformer)
 
-    return scenario_copy
+        if obstacle.initial_state:
+            if obstacle.initial_state.position:
+                if isinstance(obstacle.initial_state.position, ValidTypes.ARRAY):
+                    obstacle.initial_state.position[0], obstacle.initial_state.position[1] = (
+                        transformer.transform(obstacle.initial_state.position[0], obstacle.initial_state.position[1]))
+                if isinstance(obstacle.initial_state.position, Shape):
+                    obstacle.initial_state.position = transform_shape(obstacle.initial_state.position, transformer)
+
+        if obstacle.prediction:
+            if obstacle.prediction.occupancy_set:
+                for occupancy in obstacle.prediction.occupancy_set:
+                    occupancy.shape = transform_shape(occupancy.shape, transformer)
+
+            if obstacle.prediction.shape:
+                obstacle.prediction.shape = transform_shape(obstacle.prediction.shape, transformer)
+
+            if obstacle.prediction.trajectory:
+                for state in obstacle.prediction.trajectory.state_list:
+                    if state.position:
+                        if isinstance(state.position, ValidTypes.ARRAY):
+                            state.position[0], state.position[1] = transformer.transform(state.position[0],
+                                                                                         state.position[1])
+                        if isinstance(state.position, Shape):
+                            state.position = transform_shape(state.position, transformer)
+
+    # transform planning problems
+
+    return scenario_copy, planning_problem_set
 
 
 class CRDesignerFileReader(CommonRoadFileReader):
@@ -100,7 +143,8 @@ class CRDesignerFileReader(CommonRoadFileReader):
             proj_string_from = scenario.location.geo_transformation.geo_reference
             # If no source projection is defined in the scenario location element, we should skip the projection
             if proj_string_from is not None:
-                scenario = project_complete_scenario(scenario, proj_string_from, target_projection)
+                scenario, planning_problem_set = project_complete_scenario_and_pps(scenario, planning_problem_set,
+                                                                                   proj_string_from, target_projection)
 
         # check for verifying and repairing the scenario
         if verify_repair_scenario is True:
