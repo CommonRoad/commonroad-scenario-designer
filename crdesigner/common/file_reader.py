@@ -108,6 +108,29 @@ def project_complete_scenario_and_pps(
                             state.position = transform_shape(state.position, transformer)
 
     # transform planning problems
+    for planning_problem in planning_problem_set.planning_problem_dict.values():
+        if planning_problem.initial_state:
+            if isinstance(planning_problem.initial_state.position, ValidTypes.ARRAY):
+                (
+                    planning_problem.initial_state.position[0],
+                    planning_problem.initial_state.position[1],
+                ) = transformer.transform(
+                    planning_problem.initial_state.position[0], planning_problem.initial_state.position[1]
+                )
+            if isinstance(planning_problem.initial_state.position, Shape):
+                planning_problem.initial_state.position = transform_shape(
+                    planning_problem.initial_state.position, transformer
+                )
+
+        if planning_problem.goal:
+            for state in planning_problem.goal.state_list:
+                if state.position:
+                    if isinstance(state.position, ValidTypes.ARRAY):
+                        state.position[0], state.position[1] = transformer.transform(
+                            state.position[0], state.position[1]
+                        )
+                    if isinstance(state.position, Shape):
+                        state.position = transform_shape(state.position, transformer)
 
     return scenario_copy, planning_problem_set
 
