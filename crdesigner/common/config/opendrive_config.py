@@ -73,6 +73,22 @@ class OpenDriveConfig(BaseConfig):
     # cr2odr config parameters
     initial_road_counting = Attribute(20, "Initial road ID", "Initial counting for road ID")
 
+    # 0.0174533 == 1deg
+    heading_threshold = Attribute(
+        0.0174533, "Heading threshold", "Threshold influencing selection of line (constant heading)"
+    )
+
+    # 0.01 == 0.5729578deg
+    curvature_threshold = Attribute(
+        0.01, "Curvature threshold", "Threshold influencing selection of arc (constant curvature)"
+    )
+
+    # 0.01 == 0.5729578deg
+    curvature_dif_threshold = Attribute(
+        0.01,
+        "Curvature difference threshold",
+        "Threshold influencing selection of clothoid (constant curvature difference)",
+    )
     # Constant for lane parameters evaluation
     lane_evaluation_step = Attribute(50, "Curvature threshold clothoid", "Constant for lane parameters evaluation")
 
@@ -98,6 +114,8 @@ class OpenDriveConfig(BaseConfig):
         [
             "Conversion Parameters cr2odr",
             initial_road_counting,
+            curvature_threshold_line_arc,
+            curvature_threshold_clothoid,
             lane_evaluation_step,
         ],
     ]

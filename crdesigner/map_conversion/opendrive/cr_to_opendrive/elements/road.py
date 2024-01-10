@@ -242,33 +242,39 @@ class Road:
         switch = GeometryType.NONE
 
         while cur_idx <= len(self.center) - 1:
-            if np.isclose(self.hdg[cur_idx - 1], self.hdg[cur_idx], 0.0174533) and cur_type in [
+            # previously line or start and no orientation change
+            if np.isclose(self.hdg[cur_idx - 1], self.hdg[cur_idx], open_drive_config.heading_threshold) and cur_type in [
                 GeometryType.LINE,
                 GeometryType.NONE,
-            ]:  # 0.1deg
+            ]:
                 cur_type = GeometryType.LINE
-            elif np.isclose(curv[last_idx], curv[cur_idx], 0.01) and cur_type in [GeometryType.ARC, GeometryType.NONE]:
+            # previously arc or start and curvature stays constant
+            elif np.isclose(curv[last_idx], curv[cur_idx], open_drive_config.curvature_threshold) and cur_type in [GeometryType.ARC, GeometryType.NONE]:
                 cur_type = GeometryType.ARC
+            # start and curvature dif increased or previously spiral and curvature dif stayed constant
             elif (
                 cur_idx == 1
-                and not np.isclose(curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], 0.01)
+                and not np.isclose(curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], open_drive_config.curvature_dif_threshold)
                 or cur_idx > 1
-                and np.isclose(curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], 0.01)
+                and np.isclose(curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], open_drive_config.curvature_dif_threshold)
                 and cur_type in [GeometryType.SPIRAL, GeometryType.NONE]
             ):
                 cur_type = GeometryType.SPIRAL
-            elif np.isclose(self.hdg[cur_idx - 1], self.hdg[cur_idx], 0.0174533) and cur_type not in [
+            # previously no line and orientation does not change -> switch to line
+            elif np.isclose(self.hdg[cur_idx - 1], self.hdg[cur_idx], open_drive_config.curvature_threshold_line) and cur_type not in [
                 GeometryType.LINE,
                 GeometryType.NONE,
-            ]:  # 0.1deg
+            ]:
                 switch = GeometryType.LINE
-            elif np.isclose(curv[last_idx], curv[cur_idx], 0.01) and cur_type not in [
+            # previously no arc and curvature stays constant -> switch to arc
+            elif np.isclose(curv[last_idx], curv[cur_idx], open_drive_config.curvature_threshold) and cur_type not in [
                 GeometryType.ARC,
                 GeometryType.NONE,
             ]:
                 switch = GeometryType.ARC
             else:
                 switch = GeometryType.SPIRAL
+            # we have to change the geometry type -> define arc/clothoid/line
             if switch != GeometryType.NONE:
                 self.print_geometry(arc_length, cur_idx - 1, cur_type, curv, last_idx)
                 cur_type = switch
