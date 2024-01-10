@@ -76,8 +76,8 @@ def process_link_map(link_map: LinkMap_T, lane_2_lane: Dict[int, Dict[str, Dict]
     For more information on the link_map, read our documentation.
 
     :param link_map: dictionary of road ids and road links(dictionary of lanelet id
-    and corresponding successors and predessors)
-    :param lane_2_lane: dictionary of road ids and corresponding successors and predessors
+    and corresponding successors and predecessors)
+    :param lane_2_lane: dictionary of road ids and corresponding successors and predecessors
     """
     for road_id, road_val in link_map.items():
         road_succ_pred = {"succ": [], "pred": []}
@@ -392,7 +392,6 @@ class Converter:
                         frontier.append(pred)
 
         self.construct_roads(frontier)
-        return
 
     def check_all_visited(self) -> None:
         """
@@ -400,8 +399,8 @@ class Converter:
         This is done to guarantee correctness of the road construction algorithm
         """
         for lanelet in self.lane_net.lanelets:
-            if not self.id_dict[lanelet.lanelet_id]:
-                raise KeyError("Lanelet {} not visited! Check your algorithm.".format(lanelet.lanelet_id))
+            if self.id_dict.get(lanelet.lanelet_id) is None:
+                raise RuntimeError(f"Lanelet {lanelet.lanelet_id} not visited! Check your algorithm.")
 
     def construct_junctions(self):
         """

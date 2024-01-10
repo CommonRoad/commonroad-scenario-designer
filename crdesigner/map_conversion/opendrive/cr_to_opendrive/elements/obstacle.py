@@ -4,10 +4,9 @@ import numpy as np
 from commonroad.geometry.polyline_util import (
     compute_polyline_initial_orientation,  # type: ignore
 )
-from commonroad.geometry.shape import Circle, Polygon, Rectangle, Shape  # type: ignore
+from commonroad.geometry.shape import Circle, Polygon, Rectangle  # type: ignore
 from commonroad.scenario.obstacle import ObstacleType  # type: ignore
 from commonroad.scenario.state import TraceState
-from commonroad.scenario.trajectory import State  # type: ignore
 from lxml import etree  # type: ignore
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
