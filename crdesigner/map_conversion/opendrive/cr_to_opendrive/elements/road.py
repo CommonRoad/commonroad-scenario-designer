@@ -112,7 +112,9 @@ class Road:
             if self.hdg[-1] != 0.0
             else self.center
         )
-        self.hdg: np.array = np.insert(self.hdg, self.hdg.shape[0] - 1, self.hdg[-1]) if self.hdg[-1] != 0.0 else self.hdg
+        self.hdg: np.array = (
+            np.insert(self.hdg, self.hdg.shape[0] - 1, self.hdg[-1]) if self.hdg[-1] != 0.0 else self.hdg
+        )
 
         for i in range(0, number_of_lanes):
             Road.cr_id_to_od[lane_list[i].lanelet_id] = Road.counting
