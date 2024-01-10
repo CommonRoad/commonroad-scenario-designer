@@ -2,16 +2,20 @@
 This module removes converting errors before exporting the scenario to XML
 """
 import logging
-from typing import Dict, Set
+from typing import Dict, List, Set
 
 import networkx as nx
 import numpy as np
+from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.scenario import Lanelet, LaneletNetwork, Scenario
+from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import (
     LEFT_HAND_TRAFFIC,
     TRAFFIC_SIGN_VALIDITY_START,
+    TrafficSign,
 )
 from ordered_set import OrderedSet
+from prospector.message import Location
 from scipy import interpolate
 
 from crdesigner.common.config.osm_config import osm_config as config
@@ -360,6 +364,7 @@ def smoothen_scenario(scenario: Scenario) -> None:
             scenario.lanelet_network.traffic_signs,
             scenario.lanelet_network.traffic_lights,
             scenario.lanelet_network.intersections,
+            scenario.lanelet_network.location,
         )
     )
 
@@ -638,7 +643,13 @@ def create_lanelet(
     return new_lanelet
 
 
-def create_laneletnetwork(lanelets, traffic_signs, traffic_lights, intersections) -> LaneletNetwork:
+def create_laneletnetwork(
+    lanelets: List[Lanelet],
+    traffic_signs: List[TrafficSign],
+    traffic_lights: List[TrafficLight],
+    intersections: List[Intersection],
+    location: Location,
+) -> LaneletNetwork:
     """
     Create a new lanelet network
 
@@ -649,6 +660,7 @@ def create_laneletnetwork(lanelets, traffic_signs, traffic_lights, intersections
     :return: New lanelet network
     """
     net = LaneletNetwork()
+    net.location = location
 
     # Add lanelets
     for lanelet in lanelets:
