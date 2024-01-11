@@ -54,6 +54,8 @@ class Junction:
         # Do this for every IntersectionIncomingElement
         for inter_incoming in incoming:
             all_incomings = list(inter_incoming.incoming_lanelets)
+            if len(all_incomings) == 0:  # todo this should be covered in the map verification
+                continue
 
             # get all successors of the IntersectionIncomingElement
             # inc_suc are all roads as successors with their OpenDrive ID
