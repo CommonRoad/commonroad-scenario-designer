@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import math
 from typing import TYPE_CHECKING, List, Union
 
@@ -8,19 +9,13 @@ from commonroad.common.util import Interval
 from commonroad.geometry.shape import Circle, Polygon, Rectangle, Shape, ShapeGroup
 from commonroad.planning.goal import GoalRegion
 from commonroad.planning.planning_problem import PlanningProblem
-from commonroad.scenario.scenario import (
-    Environment,
-    Location,
-    Tag,
-    Time,
-    TimeOfDay,
-    Underground,
-    Weather,
-)
+from commonroad.scenario.scenario import (Environment, Location, Tag, Time, TimeOfDay, Underground, Weather,
+                                          GeoTransformation, )
 from commonroad.scenario.state import CustomState, InitialState, TraceState
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QDockWidget, QTableWidgetItem
 
+from crdesigner.common.config import gui_config
 from crdesigner.common.logging import logger
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.view.toolboxes.scenario_toolbox.scenario_toolbox_ui import (
@@ -160,7 +155,10 @@ class ScenarioToolboxController(QDockWidget):
             lambda: self.update_scenario_meta_data()
         )
 
-        self.scenario_toolbox_ui.scenario_geo_anme_id.textChanged.connect(lambda: self.update_scenario_meta_data())
+        self.scenario_toolbox_ui.geo_reference.currentTextChanged.connect(lambda: self.change_geo_reference())
+        self.scenario_toolbox_ui.translate_button.clicked.connect(lambda: self.update_scenario_location())
+
+        self.scenario_toolbox_ui.scenario_geo_name_id.textChanged.connect(lambda: self.update_scenario_meta_data())
         self.scenario_toolbox_ui.scenario_latitude.textChanged.connect(lambda: self.update_scenario_meta_data())
         self.scenario_toolbox_ui.scenario_longitude.textChanged.connect(lambda: self.update_scenario_meta_data())
         self.scenario_toolbox_ui.scenario_time_of_day.currentTextChanged.connect(
@@ -1120,7 +1118,7 @@ class ScenarioToolboxController(QDockWidget):
             )
 
             if self.current_scenario.get_current_scenario().location:
-                self.scenario_toolbox_ui.scenario_geo_anme_id.setText(
+                self.scenario_toolbox_ui.scenario_geo_name_id.setText(
                     str(self.current_scenario.get_current_scenario().location.geo_name_id)
                 )
                 self.scenario_toolbox_ui.scenario_latitude.setText(
@@ -1129,6 +1127,24 @@ class ScenarioToolboxController(QDockWidget):
                 self.scenario_toolbox_ui.scenario_longitude.setText(
                     str(self.current_scenario.get_current_scenario().location.gps_longitude)
                 )
+
+                if self.current_scenario.get_current_scenario().location.geo_transformation:
+                    if (self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference in
+                            [self.scenario_toolbox_ui.geo_reference.itemText(i) for i in
+                             range(self.scenario_toolbox_ui.geo_reference.count())]):
+                        self.scenario_toolbox_ui.geo_reference.setCurrentText(
+                                self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference)
+                    else:
+                        self.scenario_toolbox_ui.geo_reference.addItem(
+                                self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference)
+                        self.scenario_toolbox_ui.geo_reference.setCurrentText(
+                                self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference)
+
+                    self.scenario_toolbox_ui.x_translation.setText(
+                            str(self.current_scenario.get_current_scenario().location.geo_transformation.x_translation))
+                    self.scenario_toolbox_ui.y_translation.setText(
+                            str(self.current_scenario.get_current_scenario().location.geo_transformation.y_translation))
+
                 if self.current_scenario.get_current_scenario().location.environment:
                     self.scenario_toolbox_ui.scenario_time_of_day.setCurrentText(
                         self.current_scenario.get_current_scenario().location.environment.time_of_day.value
@@ -1145,10 +1161,11 @@ class ScenarioToolboxController(QDockWidget):
                     self.scenario_toolbox_ui.scenario_time_minute.setValue(
                         self.current_scenario.get_current_scenario().location.environment.time.minutes
                     )
+
                 else:
                     self.init_scenario_location_default()
             else:
-                self.scenario_toolbox_ui.scenario_geo_anme_id.setText("-999")
+                self.scenario_toolbox_ui.scenario_geo_name_id.setText("-999")
                 self.scenario_toolbox_ui.scenario_latitude.setText("999")
                 self.scenario_toolbox_ui.scenario_longitude.setText("999")
                 self.init_scenario_location_default()  # self.initialized = True
@@ -1197,58 +1214,86 @@ class ScenarioToolboxController(QDockWidget):
 
         if self.init_settings is not True:
             if self.current_scenario.get_current_scenario() is not None:
-                self.current_scenario.get_current_scenario().author = self.scenario_toolbox_ui.scenario_author.text()
-                self.current_scenario.get_current_scenario().affiliation = (
-                    self.scenario_toolbox_ui.scenario_affiliation.text()
-                )
-                self.current_scenario.get_current_scenario().source = self.scenario_toolbox_ui.scenario_source.text()
-                self.current_scenario.get_current_scenario().tags = [
-                    Tag(t) for t in self.scenario_toolbox_ui.scenario_tags.get_checked_items()
-                ]
-                self.current_scenario.get_current_scenario().scenario_id.configuration_id = int(
-                    self.scenario_toolbox_ui.scenario_config_id.text()
-                )
-                self.current_scenario.get_current_scenario().scenario_id.cooperative = (
-                    self.scenario_toolbox_ui.cooperative_scenario.isChecked()
-                )
-                self.current_scenario.get_current_scenario().scenario_id.country_id = (
-                    self.scenario_toolbox_ui.country.currentText()
-                )
-                self.current_scenario.get_current_scenario().scenario_id.map_id = int(
-                    self.scenario_toolbox_ui.scenario_scene_id.text()
-                )
-                self.current_scenario.get_current_scenario().scenario_id.map_name = (
-                    self.scenario_toolbox_ui.scenario_scene_name.text()
-                )
-                self.current_scenario.get_current_scenario().scenario_id.obstacle_behavior = (
-                    self.scenario_toolbox_ui.prediction_type.currentText()
-                )
-                self.current_scenario.get_current_scenario().scenario_id.prediction_id = int(
-                    self.scenario_toolbox_ui.scenario_prediction_id.text()
-                )
+                author = self.scenario_toolbox_ui.scenario_author.text()
+                affiliation = self.scenario_toolbox_ui.scenario_affiliation.text()
+                source = self.scenario_toolbox_ui.scenario_source.text()
+                tags = [Tag(t) for t in self.scenario_toolbox_ui.scenario_tags.get_checked_items()]
+                configuration_id = int(self.scenario_toolbox_ui.scenario_config_id.text())
+                cooperative = self.scenario_toolbox_ui.cooperative_scenario.isChecked()
+                country_id = self.scenario_toolbox_ui.country.currentText()
+                map_id = int(self.scenario_toolbox_ui.scenario_scene_id.text())
+                map_name = self.scenario_toolbox_ui.scenario_scene_name.text()
+                obstacle_behavior = self.scenario_toolbox_ui.prediction_type.currentText()
+                prediction_id = int(self.scenario_toolbox_ui.scenario_prediction_id.text())
+                time_step_size = self.get_float(self.scenario_toolbox_ui.scenario_time_step_size)
+
                 self.sl_has_empty_values()
+                location = None
                 if self.scenario_toolbox_ui.location_storage_selection.isChecked():
-                    self.current_scenario.get_current_scenario().location = Location(
-                        int(self.scenario_toolbox_ui.scenario_geo_anme_id.text()),
-                        float(self.scenario_toolbox_ui.scenario_latitude.text()),
-                        float(self.scenario_toolbox_ui.scenario_longitude.text()),
-                        environment=Environment(
-                            Time(
-                                int(self.scenario_toolbox_ui.scenario_time_hour.text()),
-                                int(self.scenario_toolbox_ui.scenario_time_minute.text()),
+                    if self.current_scenario.get_current_scenario().location.geo_transformation:
+                        location = Location(
+                            int(self.scenario_toolbox_ui.scenario_geo_name_id.text()),
+                            float(self.scenario_toolbox_ui.scenario_latitude.text()),
+                            float(self.scenario_toolbox_ui.scenario_longitude.text()),
+                            environment=Environment(
+                                Time(
+                                    int(self.scenario_toolbox_ui.scenario_time_hour.text()),
+                                    int(self.scenario_toolbox_ui.scenario_time_minute.text()),
+                                ),
+                                TimeOfDay(self.scenario_toolbox_ui.scenario_time_of_day.currentText()),
+                                Weather(self.scenario_toolbox_ui.scenario_weather.currentText()),
+                                Underground(self.scenario_toolbox_ui.scenario_underground.currentText()),
                             ),
-                            TimeOfDay(self.scenario_toolbox_ui.scenario_time_of_day.currentText()),
-                            Weather(self.scenario_toolbox_ui.scenario_weather.currentText()),
-                            Underground(self.scenario_toolbox_ui.scenario_underground.currentText()),
-                        ),
-                    )
-                self.current_scenario.notify_all()
+                            geo_transformation=GeoTransformation(
+                                    geo_reference=self.current_scenario.get_current_scenario().location.
+                                    geo_transformation.geo_reference,
+                                    x_translation=self.current_scenario.get_current_scenario().location.
+                                    geo_transformation.x_translation,
+                                    y_translation=self.current_scenario.get_current_scenario().location.
+                                    geo_transformation.y_translation
+                            ),
+                        )
+                    else:
+                        location = Location(int(self.scenario_toolbox_ui.scenario_geo_name_id.text()),
+                                float(self.scenario_toolbox_ui.scenario_latitude.text()),
+                                float(self.scenario_toolbox_ui.scenario_longitude.text()), environment=Environment(
+                                        Time(int(self.scenario_toolbox_ui.scenario_time_hour.text()),
+                                                int(self.scenario_toolbox_ui.scenario_time_minute.text()), ),
+                                        TimeOfDay(self.scenario_toolbox_ui.scenario_time_of_day.currentText()),
+                                        Weather(self.scenario_toolbox_ui.scenario_weather.currentText()),
+                                        Underground(self.scenario_toolbox_ui.scenario_underground.currentText()), ),
+                                geo_transformation=GeoTransformation(
+                                        geo_reference=gui_config.pseudo_mercator,
+                                        x_translation= 0.0,
+                                        y_translation= 0.0
+                                ),
+                        )
+
+                self.current_scenario.update_meta_data(author, affiliation, source, tags, configuration_id, cooperative,
+                                                       country_id, map_id, map_name, obstacle_behavior, prediction_id,
+                                                       time_step_size, location)
+
 
     def sl_has_empty_values(self) -> None:
         """Checks the scenario location for empty values if yes use default values"""
-        if self.scenario_toolbox_ui.scenario_geo_anme_id.text() == "":
-            self.scenario_toolbox_ui.scenario_geo_anme_id.setText("-999")
+        if self.scenario_toolbox_ui.scenario_geo_name_id.text() == "":
+            self.scenario_toolbox_ui.scenario_geo_name_id.setText("-999")
         if self.scenario_toolbox_ui.scenario_latitude.text() == "":
             self.scenario_toolbox_ui.scenario_latitude.setText("999")
         if self.scenario_toolbox_ui.scenario_longitude.text() == "":
             self.scenario_toolbox_ui.scenario_longitude.setText("999")
+
+    def change_geo_reference(self):
+        reference = self.scenario_toolbox_ui.geo_reference.currentText()
+        if reference in [gui_config.utm_default, gui_config.pseudo_mercator, gui_config.lanelet2_default]:
+            self.scenario_toolbox_ui.geo_reference.setEditable(False)
+        else:
+            self.scenario_toolbox_ui.geo_reference.setEditable(True)
+
+    def update_scenario_location(self):
+        x_translation = self.get_float(self.scenario_toolbox_ui.x_translation)
+        y_translation = self.get_float(self.scenario_toolbox_ui.y_translation)
+        translation = np.array([x_translation, y_translation])
+
+        self.current_scenario.update_translate_scenario(
+                translation, copy.deepcopy(self.scenario_toolbox_ui.geo_reference.currentText()))

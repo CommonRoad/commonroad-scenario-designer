@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from crdesigner.common.config import gui_config
 from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox
 
 
@@ -106,6 +107,17 @@ class ScenarioSavingDialogUI(QWidget):
         self.scenario_time_minute.setMinimum(0)
         self.scenario_time_minute.setMaximum(59)
 
+        self.geo_reference = QComboBox()
+        references = [gui_config.pseudo_mercator, gui_config.utm_default, gui_config.lanelet2_default,
+                      "Enter your own Reference"]
+        self.geo_reference.addItems(references)
+
+        self.x_translation = QLineEdit()
+        self.x_translation.setAlignment(Qt.AlignmentFlag.AlignRight)
+
+        self.y_translation = QLineEdit()
+        self.y_translation.setAlignment(Qt.AlignmentFlag.AlignRight)
+
         self.button_save = QPushButton("Save Scenario/Map")
 
         scenario_information = QFormLayout()
@@ -139,6 +151,9 @@ class ScenarioSavingDialogUI(QWidget):
         time_layout.addWidget(self.scenario_time_hour)
         time_layout.addWidget(self.scenario_time_minute)
         layout_location_groupbox.addRow(time_layout)
+        layout_location_groupbox.addRow("Geo Reference: ", self.geo_reference)
+        layout_location_groupbox.addRow("x Translation", self.x_translation)
+        layout_location_groupbox.addRow("y Translation", self.y_translation)
         scenario_information.addRow(location_groupbox)
         scenario_information.addRow(self.button_save)
 
