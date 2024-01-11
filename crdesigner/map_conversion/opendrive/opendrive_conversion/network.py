@@ -222,26 +222,42 @@ class Network:
             for road_object in road.objects:
                 if road_object.name == "StopLine":
                     position, tangent, _, _ = road.planView.calc(road_object.s, compute_curvature=False)
-                    position = np.array([position[0], position[1]])
+                    position = np.array(
+                        [
+                            position[0] + road_object.t * np.cos(tangent + np.pi / 2),
+                            position[1] + road_object.t * np.sin(tangent + np.pi / 2),
+                        ]
+                    )
 
-                    position_1 = position
                     angle = road_object.hdg + tangent
                     # check if stop line is orthogonal to reference line
                     if np.round(tangent) == 0:
                         angle = np.pi / 2
                     # check orientation of stop line
                     if road_object.orientation == "+":
+                        position_1 = np.array(
+                            [
+                                position[0] - 0.5 * road_object.validLength * np.cos(angle),
+                                position[1] - 0.5 * road_object.validLength * np.sin(angle),
+                            ]
+                        )
                         position_2 = np.array(
                             [
-                                position[0] + road_object.validLength * np.cos(angle),
-                                position[1] - road_object.validLength * np.sin(angle),
+                                position[0] + 0.5 * road_object.validLength * np.cos(angle),
+                                position[1] + 0.5 * road_object.validLength * np.sin(angle),
                             ]
                         )
                     else:
+                        position_1 = np.array(
+                            [
+                                position[0] + 0.5 * road_object.validLength * np.cos(angle),
+                                position[1] + 0.5 * road_object.validLength * np.sin(angle),
+                            ]
+                        )
                         position_2 = np.array(
                             [
-                                position[0] + road_object.validLength * np.cos(angle),
-                                position[1] + road_object.validLength * np.sin(angle),
+                                position[0] - 0.5 * road_object.validLength * np.cos(angle),
+                                position[1] - 0.5 * road_object.validLength * np.sin(angle),
                             ]
                         )
 
