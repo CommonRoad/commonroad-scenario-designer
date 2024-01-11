@@ -6,6 +6,7 @@ from typing import Dict, List, Set
 
 import networkx as nx
 import numpy as np
+from commonroad.common.common_scenario import Location
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.scenario import Lanelet, LaneletNetwork, Scenario
 from commonroad.scenario.traffic_light import TrafficLight
@@ -15,7 +16,6 @@ from commonroad.scenario.traffic_sign import (
     TrafficSign,
 )
 from ordered_set import OrderedSet
-from prospector.message import Location
 from scipy import interpolate
 
 from crdesigner.common.config.osm_config import osm_config as config
