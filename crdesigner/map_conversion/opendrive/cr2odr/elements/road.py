@@ -522,7 +522,8 @@ class Road:
         lane_link = etree.SubElement(lane_pos, config.LINK_TAG)
         self.lane_link[lane_id] = lane_link
 
-        x = [n * open_drive_config.lane_evaluation_step for n in range(len(width_list))]
+        b = 0
+        a = 0
 
         for w in width_list:
             w += open_drive_config.lane_evaluation_step
