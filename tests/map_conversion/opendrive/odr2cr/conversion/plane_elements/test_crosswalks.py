@@ -5,14 +5,16 @@ from pathlib import Path
 import numpy as np
 
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.crosswalks import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.crosswalks import (
     get_crosswalks,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road import (
+    Road,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadObject import (
     Object as RoadObject,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadObject import (
     ObjectOutlineCorner,
 )
 

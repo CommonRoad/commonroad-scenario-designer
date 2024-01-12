@@ -4,10 +4,10 @@ import numpy as np
 from numpy.polynomial import polynomial
 from pyproj import Transformer
 
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.border import (
     Border,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     RoadMark,
 )
 

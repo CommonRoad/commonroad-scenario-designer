@@ -2,16 +2,14 @@ import copy
 
 from lxml import etree
 
-import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.file_writer as fwr
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import (
+import crdesigner.map_conversion.opendrive.cr2odr.utils.file_writer as fwr
+from crdesigner.map_conversion.opendrive.cr2odr.converter import (
     create_linkages,
     process_link_map,
 )
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.junction import (
-    Junction,
-)
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
+from crdesigner.map_conversion.opendrive.cr2odr.elements.junction import Junction
+from crdesigner.map_conversion.opendrive.cr2odr.elements.road import Road
+from crdesigner.map_conversion.opendrive.cr2odr.utils import config
 from tests.map_conversion.opendrive.cr2odr.conversion_base_test import (
     ConversionBaseTestCases,
 )

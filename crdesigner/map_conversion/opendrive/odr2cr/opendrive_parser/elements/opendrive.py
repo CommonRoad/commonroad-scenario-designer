@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from typing import Union
 
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.junction import (
     Junction,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road import (
+    Road,
+)
 
 
 class OpenDrive:

@@ -1,8 +1,6 @@
 import unittest
 
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import (
-    Object,
-)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser import Object
 
 
 class TestRoadObject(unittest.TestCase):

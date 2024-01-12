@@ -11,18 +11,20 @@ from commonroad.scenario.traffic_sign import (
 )
 
 from crdesigner.map_conversion.common.utils import generate_unique_id, get_default_cycle
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.traffic_signals import (
     calculate_stop_line_position,
     extract_traffic_element_id,
     get_traffic_signals,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road import (
+    Road,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     Lane,
     LaneSection,
     LaneWidth,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadSignal import (
     Signal,
 )
 

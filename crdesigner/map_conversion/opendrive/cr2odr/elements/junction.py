@@ -5,8 +5,8 @@ from commonroad.scenario.lanelet import LaneletNetwork  # type: ignore
 from lxml import etree  # type: ignore
 from lxml.etree import Element
 
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
+from crdesigner.map_conversion.opendrive.cr2odr.elements.road import Road
+from crdesigner.map_conversion.opendrive.cr2odr.utils import config
 
 
 class Junction:

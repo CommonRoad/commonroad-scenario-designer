@@ -1,25 +1,27 @@
 from typing import Union
 
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.junction import (
     Junction,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadElevationProfile import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadElevationProfile import (
     ElevationProfile,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     Lanes,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLateralProfile import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLateralProfile import (
     LateralProfile,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import Link
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLink import (
+    Link,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadObject import (
     Object,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadPlanView import (
     PlanView,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadSignal import (
     Signal,
     SignalReference,
 )

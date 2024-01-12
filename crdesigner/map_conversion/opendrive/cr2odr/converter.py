@@ -9,23 +9,16 @@ from commonroad.common.util import Path_T
 from commonroad.scenario.intersection import IntersectionIncomingElement
 from commonroad.scenario.lanelet import Lanelet
 
-import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.file_writer as fwr
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.junction import (
-    Junction,
-)
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.light import Light
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.obstacle import (
+import crdesigner.map_conversion.opendrive.cr2odr.utils.file_writer as fwr
+from crdesigner.map_conversion.opendrive.cr2odr.elements.junction import Junction
+from crdesigner.map_conversion.opendrive.cr2odr.elements.light import Light
+from crdesigner.map_conversion.opendrive.cr2odr.elements.obstacle import (
     OpenDRIVEObstacle,
 )
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import (
-    LinkMap_T,
-    Road,
-)
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.stop_line import (
-    StopLine,
-)
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
+from crdesigner.map_conversion.opendrive.cr2odr.elements.road import LinkMap_T, Road
+from crdesigner.map_conversion.opendrive.cr2odr.elements.sign import Sign
+from crdesigner.map_conversion.opendrive.cr2odr.elements.stop_line import StopLine
+from crdesigner.map_conversion.opendrive.cr2odr.utils import config
 
 
 def get_avg(x: np.ndarray, y: np.ndarray) -> np.ndarray:

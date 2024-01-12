@@ -1,6 +1,6 @@
 import unittest
 
-from crdesigner.map_conversion.opendrive.opendrive_conversion.network import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.network import (
     LinkIndex,
     Network,
 )

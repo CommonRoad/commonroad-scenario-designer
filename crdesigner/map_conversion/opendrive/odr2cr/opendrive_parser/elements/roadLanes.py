@@ -4,12 +4,12 @@ import logging
 import warnings
 from typing import TYPE_CHECKING, Union
 
-if TYPE_CHECKING:
-    from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
-
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road_record import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road_record import (
     RoadRecord,
 )
+
+if TYPE_CHECKING:
+    from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser import Road
 
 
 class Lanes:

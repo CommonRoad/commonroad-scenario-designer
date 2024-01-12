@@ -9,8 +9,8 @@ from commonroad.scenario.obstacle import ObstacleType  # type: ignore
 from commonroad.scenario.state import TraceState
 from lxml import etree  # type: ignore
 
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
+from crdesigner.map_conversion.opendrive.cr2odr.elements.road import Road
+from crdesigner.map_conversion.opendrive.cr2odr.utils import config
 
 
 class OpenDRIVEObstacle:

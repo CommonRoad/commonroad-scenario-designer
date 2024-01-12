@@ -6,7 +6,7 @@ from typing import Tuple, Union
 import numpy as np
 import scipy.optimize
 
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.eulerspiral import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.eulerspiral import (
     EulerSpiral,
 )
 

@@ -5,8 +5,8 @@ from commonroad.scenario.lanelet import LaneletNetwork, TrafficSign
 from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSignIDGermany
 from lxml import etree
 
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
+from crdesigner.map_conversion.opendrive.cr2odr.elements.road import Road
+from crdesigner.map_conversion.opendrive.cr2odr.elements.sign import Sign
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
 

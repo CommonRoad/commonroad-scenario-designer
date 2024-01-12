@@ -3,7 +3,7 @@ from typing import List, Tuple, Union
 
 import numpy as np
 
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.geometry import (
     Arc,
     Geometry,
     Line,

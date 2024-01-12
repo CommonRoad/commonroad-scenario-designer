@@ -16,15 +16,15 @@ from crdesigner.map_conversion.common.conversion_lanelet_network import (
     _JoinSplitTarget,
 )
 from crdesigner.map_conversion.common.utils import generate_unique_id
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.plane import (
     Border,
     ParametricLaneBorderGroup,
 )
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.plane_group import (
     ParametricLane,
     ParametricLaneGroup,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadPlanView import (
     PlanView,
 )
 

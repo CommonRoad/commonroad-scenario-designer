@@ -17,12 +17,12 @@ from commonroad.scenario.traffic_sign import (
 )
 
 from crdesigner.map_conversion.common.utils import generate_unique_id, get_default_cycle
-from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+from crdesigner.map_conversion.opendrive.cr2odr.elements.road import Road
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion import utils
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     LaneSection,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadSignal import (
     Signal,
 )
 

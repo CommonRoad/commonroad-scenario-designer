@@ -10,75 +10,77 @@ from crdesigner.map_conversion.common.utils import (
     clean_projection_string,
     generate_unique_id,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.junction import (
     Connection as JunctionConnection,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.junction import (
     Junction,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.junction import (
     LaneLink as JunctionConnectionLaneLink,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.opendrive import (
     Header,
     OpenDrive,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadElevationProfile import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road import (
+    Road,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadElevationProfile import (
     ElevationRecord as RoadElevationProfile,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     Lane as RoadLaneSectionLane,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     LaneBorder as RoadLaneSectionLaneBorder,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     LaneOffset as RoadLanesLaneOffset,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     LaneSection as RoadLanesSection,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     LaneWidth as RoadLaneSectionLaneWidth,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     RoadMark as RoadLaneRoadMark,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLateralProfile import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLateralProfile import (
     Crossfall as RoadLateralProfileCrossfall,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLateralProfile import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLateralProfile import (
     Shape as RoadLateralProfileShape,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLateralProfile import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLateralProfile import (
     Superelevation as RoadLateralProfileSuperelevation,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLink import (
     Neighbor as RoadLinkNeighbor,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLink import (
     Predecessor as RoadLinkPredecessor,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLink import (
     Successor as RoadLinkSuccessor,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadObject import (
     Object as RoadObject,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadObject import (
     ObjectOutlineCorner,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadSignal import (
     Signal as RoadSignal,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadSignal import (
     SignalReference,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadtype import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadtype import (
     RoadType,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadtype import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadtype import (
     Speed as RoadTypeSpeed,
 )
 

@@ -5,8 +5,12 @@ from commonroad.scenario.scenario import Scenario
 from lxml import etree
 from PyQt6.QtWidgets import QMessageBox
 
-from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
-from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.network import (
+    Network,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import (
+    parse_opendrive,
+)
 
 
 def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:

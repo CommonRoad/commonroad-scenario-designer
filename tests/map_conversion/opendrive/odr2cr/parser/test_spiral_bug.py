@@ -1,9 +1,9 @@
 import unittest
 
-from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.converter import (
     OpenDriveConverter,
 )
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.border import (
     Border,
 )
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road

@@ -11,9 +11,9 @@ from lxml import etree
 from crdesigner.map_conversion.common.conversion_lanelet_network import (
     ConversionLaneletNetwork,
 )
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
+from crdesigner.map_conversion.opendrive.cr2odr.elements.road import Road
+from crdesigner.map_conversion.opendrive.cr2odr.elements.sign import Sign
+from crdesigner.map_conversion.opendrive.cr2odr.utils import config
 from tests.map_conversion.opendrive.odr2cr.conversion.test_conversion_lanelet_network import (
     add_lanelets_to_network,
     init_lanelet_from_id,

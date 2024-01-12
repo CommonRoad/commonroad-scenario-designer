@@ -1,26 +1,26 @@
 import copy
 from typing import List, Tuple
 
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.border import (
     Border,
 )
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.plane import (
     ParametricLane,
     ParametricLaneBorderGroup,
 )
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.plane_group import (
     ParametricLaneGroup,
 )
-from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.utils import (
     encode_mark_lane_width_id,
     encode_road_section_lane_width_id,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     Lane,
     LaneSection,
     LaneWidth,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadPlanView import (
     PlanView,
 )
 

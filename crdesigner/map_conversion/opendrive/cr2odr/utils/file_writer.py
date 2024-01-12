@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 from lxml import etree
 
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
+from crdesigner.map_conversion.opendrive.cr2odr.utils import config
 
 
 class Writer:

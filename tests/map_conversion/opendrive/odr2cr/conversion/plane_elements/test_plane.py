@@ -3,15 +3,17 @@ import unittest
 import numpy as np
 from pyproj.transformer import CRS, Transformer
 
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.border import (
     Border,
 )
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.plane import (
     ParametricLane,
     ParametricLaneBorderGroup,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements import roadLanes
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements import (
+    roadLanes,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadPlanView import (
     PlanView,
 )
 

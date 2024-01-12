@@ -3,8 +3,8 @@ from typing import List
 from commonroad.scenario.lanelet import LaneletNetwork  # type: ignore
 from commonroad.scenario.traffic_light import TrafficLight  # type: ignore
 
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.signal import Signal
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
+from crdesigner.map_conversion.opendrive.cr2odr.elements.signal import Signal
+from crdesigner.map_conversion.opendrive.cr2odr.utils import config
 
 
 class Light(Signal):

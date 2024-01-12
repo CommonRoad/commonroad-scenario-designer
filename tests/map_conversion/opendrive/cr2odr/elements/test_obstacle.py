@@ -5,7 +5,7 @@ from commonroad.geometry.shape import Circle, Polygon, Rectangle
 from commonroad.scenario.obstacle import ObstacleType
 from commonroad.scenario.state import InitialState
 
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.obstacle import (
+from crdesigner.map_conversion.opendrive.cr2odr.elements.obstacle import (
     OpenDRIVEObstacle,
 )
 from crdesigner.ui.gui.utilities.map_creator import MapCreator

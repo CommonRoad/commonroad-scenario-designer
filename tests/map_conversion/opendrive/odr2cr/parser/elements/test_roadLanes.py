@@ -1,7 +1,6 @@
 import unittest
 
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser import (
     Lane,
     LaneBorder,
     LaneLink,
@@ -11,6 +10,7 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes imp
     LaneWidth,
     LeftLanes,
     RightLanes,
+    Road,
     RoadMark,
 )
 

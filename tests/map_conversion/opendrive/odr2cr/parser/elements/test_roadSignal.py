@@ -1,6 +1,6 @@
 import unittest
 
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser import (
     Signal,
     SignalReference,
 )

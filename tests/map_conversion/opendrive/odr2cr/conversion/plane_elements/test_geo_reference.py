@@ -1,6 +1,6 @@
 import unittest
 
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.geo_reference import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.geo_reference import (
     get_geo_reference,
 )
 

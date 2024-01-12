@@ -5,7 +5,7 @@ import unittest
 from commonroad.common.util import Path_T
 from lxml import etree
 
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
+from crdesigner.map_conversion.opendrive.cr2odr.converter import Converter
 from tests.map_conversion.utils import elements_equal
 
 

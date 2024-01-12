@@ -10,8 +10,8 @@ from commonroad_dc.geometry.util import compute_curvature_from_polyline
 from lxml import etree
 
 from crdesigner.common.config.opendrive_config import open_drive_config
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
+from crdesigner.map_conversion.opendrive.cr2odr.elements.sign import Sign
+from crdesigner.map_conversion.opendrive.cr2odr.utils import config
 
 LinkMap_T = Dict[int, Union[Dict[int, Dict[str, List[int]]], Dict[str, Dict[int, int]]]]
 
