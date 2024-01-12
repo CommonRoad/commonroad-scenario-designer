@@ -21,10 +21,13 @@ from commonroad.scenario.scenario import (
 )
 from commonroad.scenario.state import CustomState, InitialState, TraceState
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QDockWidget, QTableWidgetItem
+from PyQt6.QtWidgets import QDockWidget, QLineEdit, QTableWidgetItem
 
 from crdesigner.common.config import gui_config
 from crdesigner.common.logging import logger
+from crdesigner.ui.gui.controller.settings.scenario_saving_dialog_controller import (
+    get_float_position,
+)
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.view.toolboxes.scenario_toolbox.scenario_toolbox_ui import (
     ScenarioToolboxUI,
@@ -514,8 +517,8 @@ class ScenarioToolboxController(QDockWidget):
                 width=self.get_float(self.scenario_toolbox_ui.rectangle_width),
                 center=np.array(
                     [
-                        self.get_float_position(self.scenario_toolbox_ui.rectangle_x),
-                        self.get_float_position(self.scenario_toolbox_ui.rectangle_y),
+                        get_float_position(self.scenario_toolbox_ui.rectangle_x),
+                        get_float_position(self.scenario_toolbox_ui.rectangle_y),
                     ]
                 ),
                 orientation=math.radians(
@@ -550,8 +553,8 @@ class ScenarioToolboxController(QDockWidget):
                 radius=self.get_float(self.scenario_toolbox_ui.circle_radius),
                 center=np.array(
                     [
-                        self.get_float_position(self.scenario_toolbox_ui.circle_x),
-                        self.get_float_position(self.scenario_toolbox_ui.circle_y),
+                        get_float_position(self.scenario_toolbox_ui.circle_x),
+                        get_float_position(self.scenario_toolbox_ui.circle_y),
                     ]
                 ),
             )
@@ -991,40 +994,29 @@ class ScenarioToolboxController(QDockWidget):
 
     """Initial State GUI Managment"""
 
-    def get_float(self, str) -> float:
+    def get_float(self, entered_string: QLineEdit) -> float:
         """
         Validates number and replace , with . to be able to insert german floats
-        :param str: String containing float
+        :param entered_string: String containing float
         :return: string argument as valid float if not empty or not - else standard value 0.0
         """
-        if str.text() == "-":
+        if entered_string.text() == "-":
             self.text_browser.append("Inserted value of invalid. Standard value 0 will be used instead.")
-        if str.text() and str.text() != "-":
-            return float(str.text().replace(",", "."))
+        if entered_string.text() and entered_string.text() != "-":
+            return float(entered_string.text().replace(",", "."))
         else:
             return 0.0
 
-    def get_float_position(self, str) -> float:
-        """
-        Validates number and replace , with . to be able to insert german floats
-        :param str: String containing float
-        :return: string argument as valid float if not empty or not - else standard value 0.0
-        """
-        if str.text() and str.text() != "-":
-            return float(str.text().replace(",", "."))
-        else:
-            return 0.0
-
-    def get_int(self, str) -> int:
+    def get_int(self, entered_string: QLineEdit) -> int:
         """
         Validates number and replace , with . to be able to insert int
-        :param str: String containing int
+        :param entered_string: String containing int
         :return: string argument as valid int if not empty or not - else standard value 0.0
         """
-        if str.text() == "-":
+        if entered_string.text() == "-":
             self.text_browser.append("Inserted value of invalid. Standard value 0 will be used instead.")
-        if str.text() and str.text() != "-":
-            return int(str.text())
+        if entered_string.text() and entered_string.text() != "-":
+            return int(entered_string.text())
         else:
             return 0
 
@@ -1066,8 +1058,8 @@ class ScenarioToolboxController(QDockWidget):
                 and self.scenario_toolbox_ui.vertices_y[i].text() != ""
             ):
                 temp = [
-                    self.get_float_position(self.scenario_toolbox_ui.vertices_x[i]),
-                    self.get_float_position(self.scenario_toolbox_ui.vertices_y[i]),
+                    get_float_position(self.scenario_toolbox_ui.vertices_x[i]),
+                    get_float_position(self.scenario_toolbox_ui.vertices_y[i]),
                 ]
                 vertices.append(temp)
 
