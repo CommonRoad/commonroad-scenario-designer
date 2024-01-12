@@ -5,8 +5,17 @@ from typing import Optional
 
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import (Environment, Location, Scenario, Tag, Time, TimeOfDay, Underground, Weather,
-                                          GeoTransformation, )
+from commonroad.scenario.scenario import (
+    Environment,
+    GeoTransformation,
+    Location,
+    Scenario,
+    Tag,
+    Time,
+    TimeOfDay,
+    Underground,
+    Weather,
+)
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
 from crdesigner.common.config import gui_config
@@ -99,21 +108,25 @@ class ScenarioSavingDialogController:
                 self.init_scenario_location_default()
 
             if self.current_scenario.location.geo_transformation:
-                if (self.current_scenario.location.geo_transformation.geo_reference in [
-                    self.save_window.geo_reference.itemText(i) for i in range(self.save_window.geo_reference.count())]):
+                if self.current_scenario.location.geo_transformation.geo_reference in [
+                    self.save_window.geo_reference.itemText(i) for i in range(self.save_window.geo_reference.count())
+                ]:
                     self.save_window.geo_reference.setCurrentText(
-                            self.current_scenario.location.geo_transformation.geo_reference)
+                        self.current_scenario.location.geo_transformation.geo_reference
+                    )
                 else:
                     self.save_window.geo_reference.addItem(
-                            self.current_scenario.location.geo_transformation.geo_reference)
+                        self.current_scenario.location.geo_transformation.geo_reference
+                    )
                     self.save_window.geo_reference.setCurrentText(
-                            self.current_scenario.location.geo_transformation.geo_reference)
+                        self.current_scenario.location.geo_transformation.geo_reference
+                    )
 
                 self.save_window.x_translation.setText(
-                        str(self.current_scenario.location.geo_transformation.x_translation)
+                    str(self.current_scenario.location.geo_transformation.x_translation)
                 )
                 self.save_window.y_translation.setText(
-                        str(self.current_scenario.location.geo_transformation.y_translation)
+                    str(self.current_scenario.location.geo_transformation.y_translation)
                 )
 
             else:
@@ -296,14 +309,27 @@ class ScenarioSavingDialogController:
                         Underground(self.save_window.scenario_underground.currentText()),
                     ),
                     geo_transformation=GeoTransformation(
-                                geo_reference=self.save_window.geo_reference.currentText(),
-                                x_translation=self.get_float(self.save_window.x_translation),
-                                y_translation=self.get_float(self.save_window.y_translation),
+                        geo_reference=self.save_window.geo_reference.currentText(),
+                        x_translation=self.get_float(self.save_window.x_translation),
+                        y_translation=self.get_float(self.save_window.y_translation),
                     ),
                 )
             self.save_window.label_benchmark_id.setText(str(self.current_scenario.scenario_id))
-            self.current_scenario_model.update_meta_data(author, affiliation, source, tags, configuration_id,
-                  cooperative, country_id, map_id, map_name, obstacle_behavior, prediction_id, time_step_size, location)
+            self.current_scenario_model.update_meta_data(
+                author,
+                affiliation,
+                source,
+                tags,
+                configuration_id,
+                cooperative,
+                country_id,
+                map_id,
+                map_name,
+                obstacle_behavior,
+                prediction_id,
+                time_step_size,
+                location,
+            )
 
     def get_float(self, str) -> float:
         """
