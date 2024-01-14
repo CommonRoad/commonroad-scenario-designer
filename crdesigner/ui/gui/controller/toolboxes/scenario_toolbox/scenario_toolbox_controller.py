@@ -9,14 +9,25 @@ from commonroad.common.util import Interval
 from commonroad.geometry.shape import Circle, Polygon, Rectangle, Shape, ShapeGroup
 from commonroad.planning.goal import GoalRegion
 from commonroad.planning.planning_problem import PlanningProblem
-from commonroad.scenario.scenario import (Environment, Location, Tag, Time, TimeOfDay, Underground, Weather,
-                                          GeoTransformation, )
+from commonroad.scenario.scenario import (
+    Environment,
+    GeoTransformation,
+    Location,
+    Tag,
+    Time,
+    TimeOfDay,
+    Underground,
+    Weather,
+)
 from commonroad.scenario.state import CustomState, InitialState, TraceState
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QDockWidget, QTableWidgetItem
+from PyQt6.QtWidgets import QDockWidget, QLineEdit, QTableWidgetItem
 
 from crdesigner.common.config import gui_config
 from crdesigner.common.logging import logger
+from crdesigner.ui.gui.controller.settings.scenario_saving_dialog_controller import (
+    get_float_position,
+)
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.view.toolboxes.scenario_toolbox.scenario_toolbox_ui import (
     ScenarioToolboxUI,
@@ -506,8 +517,8 @@ class ScenarioToolboxController(QDockWidget):
                 width=self.get_float(self.scenario_toolbox_ui.rectangle_width),
                 center=np.array(
                     [
-                        self.get_float_position(self.scenario_toolbox_ui.rectangle_x),
-                        self.get_float_position(self.scenario_toolbox_ui.rectangle_y),
+                        get_float_position(self.scenario_toolbox_ui.rectangle_x),
+                        get_float_position(self.scenario_toolbox_ui.rectangle_y),
                     ]
                 ),
                 orientation=math.radians(
@@ -542,8 +553,8 @@ class ScenarioToolboxController(QDockWidget):
                 radius=self.get_float(self.scenario_toolbox_ui.circle_radius),
                 center=np.array(
                     [
-                        self.get_float_position(self.scenario_toolbox_ui.circle_x),
-                        self.get_float_position(self.scenario_toolbox_ui.circle_y),
+                        get_float_position(self.scenario_toolbox_ui.circle_x),
+                        get_float_position(self.scenario_toolbox_ui.circle_y),
                     ]
                 ),
             )
@@ -983,40 +994,29 @@ class ScenarioToolboxController(QDockWidget):
 
     """Initial State GUI Managment"""
 
-    def get_float(self, str) -> float:
+    def get_float(self, entered_string: QLineEdit) -> float:
         """
         Validates number and replace , with . to be able to insert german floats
-        :param str: String containing float
+        :param entered_string: String containing float
         :return: string argument as valid float if not empty or not - else standard value 0.0
         """
-        if str.text() == "-":
+        if entered_string.text() == "-":
             self.text_browser.append("Inserted value of invalid. Standard value 0 will be used instead.")
-        if str.text() and str.text() != "-":
-            return float(str.text().replace(",", "."))
+        if entered_string.text() and entered_string.text() != "-":
+            return float(entered_string.text().replace(",", "."))
         else:
             return 0.0
 
-    def get_float_position(self, str) -> float:
-        """
-        Validates number and replace , with . to be able to insert german floats
-        :param str: String containing float
-        :return: string argument as valid float if not empty or not - else standard value 0.0
-        """
-        if str.text() and str.text() != "-":
-            return float(str.text().replace(",", "."))
-        else:
-            return 0.0
-
-    def get_int(self, str) -> int:
+    def get_int(self, entered_string: QLineEdit) -> int:
         """
         Validates number and replace , with . to be able to insert int
-        :param str: String containing int
+        :param entered_string: String containing int
         :return: string argument as valid int if not empty or not - else standard value 0.0
         """
-        if str.text() == "-":
+        if entered_string.text() == "-":
             self.text_browser.append("Inserted value of invalid. Standard value 0 will be used instead.")
-        if str.text() and str.text() != "-":
-            return int(str.text())
+        if entered_string.text() and entered_string.text() != "-":
+            return int(entered_string.text())
         else:
             return 0
 
@@ -1058,8 +1058,8 @@ class ScenarioToolboxController(QDockWidget):
                 and self.scenario_toolbox_ui.vertices_y[i].text() != ""
             ):
                 temp = [
-                    self.get_float_position(self.scenario_toolbox_ui.vertices_x[i]),
-                    self.get_float_position(self.scenario_toolbox_ui.vertices_y[i]),
+                    get_float_position(self.scenario_toolbox_ui.vertices_x[i]),
+                    get_float_position(self.scenario_toolbox_ui.vertices_y[i]),
                 ]
                 vertices.append(temp)
 
@@ -1129,21 +1129,27 @@ class ScenarioToolboxController(QDockWidget):
                 )
 
                 if self.current_scenario.get_current_scenario().location.geo_transformation:
-                    if (self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference in
-                            [self.scenario_toolbox_ui.geo_reference.itemText(i) for i in
-                             range(self.scenario_toolbox_ui.geo_reference.count())]):
+                    if self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference in [
+                        self.scenario_toolbox_ui.geo_reference.itemText(i)
+                        for i in range(self.scenario_toolbox_ui.geo_reference.count())
+                    ]:
                         self.scenario_toolbox_ui.geo_reference.setCurrentText(
-                                self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference)
+                            self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference
+                        )
                     else:
                         self.scenario_toolbox_ui.geo_reference.addItem(
-                                self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference)
+                            self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference
+                        )
                         self.scenario_toolbox_ui.geo_reference.setCurrentText(
-                                self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference)
+                            self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference
+                        )
 
                     self.scenario_toolbox_ui.x_translation.setText(
-                            str(self.current_scenario.get_current_scenario().location.geo_transformation.x_translation))
+                        str(self.current_scenario.get_current_scenario().location.geo_transformation.x_translation)
+                    )
                     self.scenario_toolbox_ui.y_translation.setText(
-                            str(self.current_scenario.get_current_scenario().location.geo_transformation.y_translation))
+                        str(self.current_scenario.get_current_scenario().location.geo_transformation.y_translation)
+                    )
 
                 if self.current_scenario.get_current_scenario().location.environment:
                     self.scenario_toolbox_ui.scenario_time_of_day.setCurrentText(
@@ -1245,34 +1251,45 @@ class ScenarioToolboxController(QDockWidget):
                                 Underground(self.scenario_toolbox_ui.scenario_underground.currentText()),
                             ),
                             geo_transformation=GeoTransformation(
-                                    geo_reference=self.current_scenario.get_current_scenario().location.
-                                    geo_transformation.geo_reference,
-                                    x_translation=self.current_scenario.get_current_scenario().location.
-                                    geo_transformation.x_translation,
-                                    y_translation=self.current_scenario.get_current_scenario().location.
-                                    geo_transformation.y_translation
+                                geo_reference=self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference,
+                                x_translation=self.current_scenario.get_current_scenario().location.geo_transformation.x_translation,
+                                y_translation=self.current_scenario.get_current_scenario().location.geo_transformation.y_translation,
                             ),
                         )
                     else:
-                        location = Location(int(self.scenario_toolbox_ui.scenario_geo_name_id.text()),
-                                float(self.scenario_toolbox_ui.scenario_latitude.text()),
-                                float(self.scenario_toolbox_ui.scenario_longitude.text()), environment=Environment(
-                                        Time(int(self.scenario_toolbox_ui.scenario_time_hour.text()),
-                                                int(self.scenario_toolbox_ui.scenario_time_minute.text()), ),
-                                        TimeOfDay(self.scenario_toolbox_ui.scenario_time_of_day.currentText()),
-                                        Weather(self.scenario_toolbox_ui.scenario_weather.currentText()),
-                                        Underground(self.scenario_toolbox_ui.scenario_underground.currentText()), ),
-                                geo_transformation=GeoTransformation(
-                                        geo_reference=gui_config.pseudo_mercator,
-                                        x_translation= 0.0,
-                                        y_translation= 0.0
+                        location = Location(
+                            int(self.scenario_toolbox_ui.scenario_geo_name_id.text()),
+                            float(self.scenario_toolbox_ui.scenario_latitude.text()),
+                            float(self.scenario_toolbox_ui.scenario_longitude.text()),
+                            environment=Environment(
+                                Time(
+                                    int(self.scenario_toolbox_ui.scenario_time_hour.text()),
+                                    int(self.scenario_toolbox_ui.scenario_time_minute.text()),
                                 ),
+                                TimeOfDay(self.scenario_toolbox_ui.scenario_time_of_day.currentText()),
+                                Weather(self.scenario_toolbox_ui.scenario_weather.currentText()),
+                                Underground(self.scenario_toolbox_ui.scenario_underground.currentText()),
+                            ),
+                            geo_transformation=GeoTransformation(
+                                geo_reference=gui_config.pseudo_mercator, x_translation=0.0, y_translation=0.0
+                            ),
                         )
 
-                self.current_scenario.update_meta_data(author, affiliation, source, tags, configuration_id, cooperative,
-                                                       country_id, map_id, map_name, obstacle_behavior, prediction_id,
-                                                       time_step_size, location)
-
+                self.current_scenario.update_meta_data(
+                    author,
+                    affiliation,
+                    source,
+                    tags,
+                    configuration_id,
+                    cooperative,
+                    country_id,
+                    map_id,
+                    map_name,
+                    obstacle_behavior,
+                    prediction_id,
+                    time_step_size,
+                    location,
+                )
 
     def sl_has_empty_values(self) -> None:
         """Checks the scenario location for empty values if yes use default values"""
@@ -1304,7 +1321,8 @@ class ScenarioToolboxController(QDockWidget):
             translation = np.array([x_translation, y_translation])
 
             self.current_scenario.update_translate_scenario(
-                    translation, copy.deepcopy(self.scenario_toolbox_ui.geo_reference.currentText()))
+                translation, copy.deepcopy(self.scenario_toolbox_ui.geo_reference.currentText())
+            )
         else:
             self.text_browser.append("Please add the location to the scenario. Than the scenario can be translated to "
                                      "a new position")

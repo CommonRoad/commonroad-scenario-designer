@@ -13,7 +13,7 @@ from commonroad.scenario.obstacle import (
     PhantomObstacle,
     StaticObstacle,
 )
-from commonroad.scenario.scenario import Scenario, ScenarioID, Location, Tag
+from commonroad.scenario.scenario import Location, Scenario, ScenarioID, Tag
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficSign
 from PyQt6.QtCore import QObject, pyqtSignal
@@ -769,9 +769,22 @@ class ScenarioModel(QObject):
         """
         return copy.deepcopy(self._current_scenario())
 
-    def update_meta_data(self, author: str, affiliation: str, source: str, tags: [Tag], configuration_id: int,
-                         cooperative: bool, country_id: str, map_id: int, map_name: str, obstacle_behavior: str,
-                         prediction_id: int, time_step_size: float, location: Location = None):
+    def update_meta_data(
+        self,
+        author: str,
+        affiliation: str,
+        source: str,
+        tags: [Tag],
+        configuration_id: int,
+        cooperative: bool,
+        country_id: str,
+        map_id: int,
+        map_name: str,
+        obstacle_behavior: str,
+        prediction_id: int,
+        time_step_size: float,
+        location: Location = None,
+    ):
         """
         updates the scenario settings
 
@@ -804,7 +817,6 @@ class ScenarioModel(QObject):
         if location is not None:
             self._current_scenario().location = location
 
-
     def update_translate_scenario(self, translation: np.ndarray, geo_reference: str):
         """
         updates the geo_reference and translates the scenario
@@ -813,8 +825,12 @@ class ScenarioModel(QObject):
         @param geo_reference: Geo reference
         """
         self._update_scenario()
-        new_translation = translation - np.array([self._current_scenario().location.geo_transformation.x_translation,
-                                                  self._current_scenario().location.geo_transformation.y_translation])
+        new_translation = translation - np.array(
+            [
+                self._current_scenario().location.geo_transformation.x_translation,
+                self._current_scenario().location.geo_transformation.y_translation,
+            ]
+        )
 
         self._current_scenario().location.geo_transformation.x_translation = translation[0]
         self._current_scenario().location.geo_transformation.y_translation = translation[1]

@@ -5,9 +5,18 @@ from typing import Optional
 
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import (Environment, Location, Scenario, Tag, Time, TimeOfDay, Underground, Weather,
-                                          GeoTransformation, )
-from PyQt6.QtWidgets import QFileDialog, QMessageBox
+from commonroad.scenario.scenario import (
+    Environment,
+    GeoTransformation,
+    Location,
+    Scenario,
+    Tag,
+    Time,
+    TimeOfDay,
+    Underground,
+    Weather,
+)
+from PyQt6.QtWidgets import QFileDialog, QLineEdit, QMessageBox
 
 from crdesigner.common.config import gui_config
 from crdesigner.common.logging import logger
@@ -17,6 +26,18 @@ from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.settings.scenario_saving_dialog_ui import (
     ScenarioSavingDialogUI,
 )
+
+
+def get_float_position(entered_string: QLineEdit) -> float:
+    """
+    Validates number and replace , with . to be able to insert german floats
+    :param entered_string: String containing float
+    :return: string argument as valid float if not empty or not - else standard value 0.0
+    """
+    if entered_string.text() and entered_string.text() != "-":
+        return float(entered_string.text().replace(",", "."))
+    else:
+        return 0.0
 
 
 class ScenarioSavingDialogController:
@@ -99,21 +120,25 @@ class ScenarioSavingDialogController:
                 self.init_scenario_location_default()
 
             if self.current_scenario.location.geo_transformation:
-                if (self.current_scenario.location.geo_transformation.geo_reference in [
-                    self.save_window.geo_reference.itemText(i) for i in range(self.save_window.geo_reference.count())]):
+                if self.current_scenario.location.geo_transformation.geo_reference in [
+                    self.save_window.geo_reference.itemText(i) for i in range(self.save_window.geo_reference.count())
+                ]:
                     self.save_window.geo_reference.setCurrentText(
-                            self.current_scenario.location.geo_transformation.geo_reference)
+                        self.current_scenario.location.geo_transformation.geo_reference
+                    )
                 else:
                     self.save_window.geo_reference.addItem(
-                            self.current_scenario.location.geo_transformation.geo_reference)
+                        self.current_scenario.location.geo_transformation.geo_reference
+                    )
                     self.save_window.geo_reference.setCurrentText(
-                            self.current_scenario.location.geo_transformation.geo_reference)
+                        self.current_scenario.location.geo_transformation.geo_reference
+                    )
 
                 self.save_window.x_translation.setText(
-                        str(self.current_scenario.location.geo_transformation.x_translation)
+                    str(self.current_scenario.location.geo_transformation.x_translation)
                 )
                 self.save_window.y_translation.setText(
-                        str(self.current_scenario.location.geo_transformation.y_translation)
+                    str(self.current_scenario.location.geo_transformation.y_translation)
                 )
 
             else:
@@ -265,7 +290,7 @@ class ScenarioSavingDialogController:
             affiliation = self.save_window.scenario_affiliation.text()
             source = self.save_window.scenario_source.text()
             tags = [Tag(t) for t in self.save_window.scenario_tags.get_checked_items()]
-            time_step_size = self.get_float(self.save_window.scenario_time_step_size)
+            time_step_size = get_float_position(self.save_window.scenario_time_step_size)
             configuration_id = int(self.save_window.scenario_config_id.text())
             cooperative = self.save_window.cooperative_scenario.isChecked()
             country_id = self.save_window.country.currentText()
@@ -296,22 +321,24 @@ class ScenarioSavingDialogController:
                         Underground(self.save_window.scenario_underground.currentText()),
                     ),
                     geo_transformation=GeoTransformation(
-                                geo_reference=self.save_window.geo_reference.currentText(),
-                                x_translation=self.get_float(self.save_window.x_translation),
-                                y_translation=self.get_float(self.save_window.y_translation),
+                        geo_reference=self.save_window.geo_reference.currentText(),
+                        x_translation=get_float_position(self.save_window.x_translation),
+                        y_translation=get_float_position(self.save_window.y_translation),
                     ),
                 )
             self.save_window.label_benchmark_id.setText(str(self.current_scenario.scenario_id))
-            self.current_scenario_model.update_meta_data(author, affiliation, source, tags, configuration_id,
-                  cooperative, country_id, map_id, map_name, obstacle_behavior, prediction_id, time_step_size, location)
-
-    def get_float(self, str) -> float:
-        """
-        Validates number and replace , with . to be able to insert german floats
-        :param str: String containing float
-        :return: string argument as valid float if not empty or not - else standard value 0.0
-        """
-        if str.text() and str.text() != "-":
-            return float(str.text().replace(",", "."))
-        else:
-            return 0.0
+            self.current_scenario_model.update_meta_data(
+                author,
+                affiliation,
+                source,
+                tags,
+                configuration_id,
+                cooperative,
+                country_id,
+                map_id,
+                map_name,
+                obstacle_behavior,
+                prediction_id,
+                time_step_size,
+                location,
+            )

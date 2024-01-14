@@ -108,8 +108,12 @@ class ScenarioSavingDialogUI(QWidget):
         self.scenario_time_minute.setMaximum(59)
 
         self.geo_reference = QComboBox()
-        references = [gui_config.pseudo_mercator, gui_config.utm_default, gui_config.lanelet2_default,
-                      "Enter your own Reference"]
+        references = [
+            gui_config.pseudo_mercator,
+            gui_config.utm_default,
+            gui_config.lanelet2_default,
+            "Enter your own Reference",
+        ]
         self.geo_reference.addItems(references)
 
         self.x_translation = QLineEdit()
