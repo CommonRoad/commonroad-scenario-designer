@@ -1,13 +1,14 @@
 import copy
 import logging
 import time
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import numpy as np
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Path_T
 from commonroad.scenario.intersection import IntersectionIncomingElement
 from commonroad.scenario.lanelet import Lanelet
+from commonroad.scenario.scenario import Scenario
 
 import crdesigner.map_conversion.opendrive.cr2odr.utils.file_writer as fwr
 from crdesigner.map_conversion.opendrive.cr2odr.elements.junction import Junction
@@ -120,24 +121,28 @@ class Converter:
     are converted to corresponding OpenDRIVE elements and OpenDRIVE file is created.
     """
 
-    def __init__(self, scenario_path: Path_T, center: bool = False) -> None:
+    def __init__(self, scenario: Union[Path_T, Scenario], center: bool = False) -> None:
         """
         This function lets Class Converter to initialize object with path to CommonRoad file, scenario,
         list of successor and dictionary of converted roads and initialize the instant variables.
 
-        :param scenario_path: path to CommonRoad file
+        :param scenario: path to CommonRoad file
         :param center: boolean value
         """
         self.center = center
         self.x_avg = 0
         self.y_avg = 0
-        # if the map is not loadable by CommonRoadFileReader we just return
-        # as there seems to be some major syntax faults in the input map
-        try:
-            self.scenario, _ = CommonRoadFileReader(scenario_path).open()
-        except AttributeError:
-            logging.error(f"{scenario_path} not loadable!")
-            exit()
+
+        if isinstance(scenario, Scenario):
+            self.scenario = scenario
+        else:
+            # if the map is not loadable by CommonRoadFileReader we just return
+            # as there seems to be some major syntax faults in the input map
+            try:
+                self.scenario, _ = CommonRoadFileReader(scenario).open()
+            except AttributeError:
+                logging.error(f"{scenario} not loadable!")
+                exit()
 
         # shorten variable name
         self.lane_net = self.scenario.lanelet_network
@@ -226,7 +231,11 @@ class Converter:
         """
         start = time.time()
         # initialize writer object
-        self.writer = fwr.Writer(file_path_out)
+        if self.scenario.location.geo_transformation is not None and self.scenario.location.geo_transformation.geo_reference is not None:
+            geo_reference = self.scenario.location.geo_transformation.geo_reference
+        else:
+            geo_reference = ""
+        self.writer = fwr.Writer(file_path_out,  geo_reference)
 
         lane_list = self.lane_net.lanelets
 

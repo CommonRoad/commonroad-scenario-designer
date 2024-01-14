@@ -11,18 +11,19 @@ class Writer:
     This class creates a OpenDRIVE file. The xml etree element is written as OpenDRIVE file.
     """
 
-    def __init__(self, file_path_out: str) -> None:
+    def __init__(self, file_path_out: str, geo_reference: str) -> None:
         """
         This function let class Write to initialize the object with path for storing converted
         OpenDRIVE file and initialize the instance variables and creates header child elements
         with different attributes.
 
         :param file_path_out: path of converted OpenDRIVE file to be stored
+        :geo_reference: Geo-reference of map.
         """
         self.file_path_out = file_path_out
         self.root = etree.Element(config.OPENDRIVE)
         etree.indent(self.root, space="    ")
-        self.write_header()
+        self.write_header(geo_reference)
         self.tree = etree.ElementTree(self.root)
 
     def save(self) -> None:
@@ -39,9 +40,11 @@ class Writer:
         )
 
     # TODO: does this need to be <header></header> or is <header/> fine?
-    def write_header(self) -> None:
+    def write_header(self, geo_reference: str) -> None:
         """
-        This function creates header child element with various attributes and add it to Opendrive root element.
+        This function creates header child element with various attributes and add it to OpenDrive root element.
+
+        :param geo_reference: Geo-reference of the map.
         """
         name = self.file_path_out.split("/")[-1].split(".")[0]
         self.header = etree.SubElement(self.root, config.HEADER_TAG)
@@ -56,10 +59,9 @@ class Writer:
         self.header.set(config.SOUTH, str.format(config.DOUBLE_FORMAT_PATTERN, val))
         self.header.set(config.EAST, str.format(config.DOUBLE_FORMAT_PATTERN, val))
         self.header.set(config.WEST, str.format(config.DOUBLE_FORMAT_PATTERN, val))
-        self.geo_reference = etree.SubElement(self.header, config.GEO_REFFERENCE_TAG)
-        # TODO: do we need to convert the gps latitude and longitude
-        # into something like that:   <![CDATA[epsg:25833]]>    ?
-        self.geo_id = etree.SubElement(self.geo_reference, config.TODO)
+        if geo_reference != "":
+            self.geo_reference = etree.SubElement(self.header, config.GEO_REFFERENCE_TAG)
+            self.geo_reference.text = f"<![CDATA[{geo_reference}]]>"
 
     def set_child_of_road(self, name: str) -> etree:
         """

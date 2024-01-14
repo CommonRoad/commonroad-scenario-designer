@@ -195,7 +195,7 @@ class ScenarioSavingDialogController:
                 self.save_window,
                 "CommonRoad file not created!",
                 "The CommonRoad file was not saved due to an error.\n\n" + "{}".format(e),
-                QMessageBox.Ok,
+                QMessageBox.StandardButton.Ok,
             )
 
         self.current_scenario_model.notify_all()

@@ -349,7 +349,7 @@ class Road:
         geometry.set(config.GEOMETRY_HEADING_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, hdg))
         geometry.set(config.LENGTH_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, length))
 
-        # line = etree.SubElement(geometry, config.LINE_TAG)
+        etree.SubElement(geometry, config.LINE_TAG)
 
     # xodr for spirals
     def print_spiral(
