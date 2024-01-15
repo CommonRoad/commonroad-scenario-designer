@@ -1312,17 +1312,12 @@ class ScenarioToolboxController(QDockWidget):
 
     def update_scenario_location(self):
         """
-        updates the sceanrio geo transformation settings and if necessary starts the process for the translation
+        Updates the scenario geo transformation settings and if necessary starts the process for the translation
         """
-        if (self.current_scenario.get_current_scenario().location and
-                self.current_scenario.get_current_scenario().location.geo_transformation):
-            x_translation = self.get_float(self.scenario_toolbox_ui.x_translation)
-            y_translation = self.get_float(self.scenario_toolbox_ui.y_translation)
-            translation = np.array([x_translation, y_translation])
+        x_translation = self.get_float(self.scenario_toolbox_ui.x_translation)
+        y_translation = self.get_float(self.scenario_toolbox_ui.y_translation)
+        translation = np.array([x_translation, y_translation])
 
-            self.current_scenario.update_translate_scenario(
-                translation, copy.deepcopy(self.scenario_toolbox_ui.geo_reference.currentText())
-            )
-        else:
-            self.text_browser.append("Please add the location to the scenario. Than the scenario can be translated to "
-                                     "a new position")
+        self.current_scenario.update_translate_scenario(
+            translation, copy.deepcopy(self.scenario_toolbox_ui.geo_reference.currentText())
+        )

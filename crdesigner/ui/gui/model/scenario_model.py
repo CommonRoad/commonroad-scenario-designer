@@ -13,7 +13,13 @@ from commonroad.scenario.obstacle import (
     PhantomObstacle,
     StaticObstacle,
 )
-from commonroad.scenario.scenario import Location, Scenario, ScenarioID, Tag
+from commonroad.scenario.scenario import (
+    GeoTransformation,
+    Location,
+    Scenario,
+    ScenarioID,
+    Tag,
+)
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficSign
 from PyQt6.QtCore import QObject, pyqtSignal
@@ -825,11 +831,20 @@ class ScenarioModel(QObject):
         @param geo_reference: Geo reference
         """
         self._update_scenario()
-        new_translation = translation - np.array(
-            [
-                self._current_scenario().location.geo_transformation.x_translation,
-                self._current_scenario().location.geo_transformation.y_translation,
-            ]
+
+        if self._current_scenario().location is None or self._current_scenario().location.geo_transformation is None:
+            self._current_scenario().location = Location(
+                geo_transformation=GeoTransformation(geo_reference="", x_translation=0.0, y_translation=0.0)
+            )
+
+        new_translation = (
+            np.array(
+                [
+                    self._current_scenario().location.geo_transformation.x_translation,
+                    self._current_scenario().location.geo_transformation.y_translation,
+                ]
+            )
+            - translation
         )
 
         self._current_scenario().location.geo_transformation.x_translation = translation[0]
