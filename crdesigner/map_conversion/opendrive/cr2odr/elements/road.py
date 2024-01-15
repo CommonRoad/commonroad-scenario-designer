@@ -6,7 +6,8 @@ from typing import Dict, List, Union
 import numpy as np
 from commonroad.geometry.polyline_util import compute_polyline_lengths  # type: ignore
 from commonroad.scenario.lanelet import Lanelet  # type: ignore
-from commonroad_dc.geometry.util import compute_curvature_from_polyline
+from commonroad_dc.geometry.util import compute_curvature_from_polyline, compute_orientation_from_polyline, \
+    compute_pathlength_from_polyline
 from lxml import etree
 
 from crdesigner.common.config.opendrive_config import open_drive_config
@@ -100,7 +101,7 @@ class Road:
         self.center_number = i
 
         self.center = self.lane_list[i].left_vertices
-        self.hdg = compute_heading(self.center, self.lane_list[i].center_vertices)
+        self.hdg = compute_orientation_from_polyline(self.center)
         self.center: np.array = (
             np.insert(
                 self.center,
@@ -229,7 +230,7 @@ class Road:
         :return: Length of lanelet
         """
         curv = compute_curvature_from_polyline(self.center)
-        arc_length = compute_polyline_lengths(self.center)
+        arc_length = compute_pathlength_from_polyline(self.center)
         curv_dif = np.ediff1d(curv)
         # loop through all the points in the polyline check if
         # the delta curvature is below DEVIAT
