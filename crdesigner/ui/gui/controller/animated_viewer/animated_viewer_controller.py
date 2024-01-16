@@ -7,9 +7,7 @@ from commonroad.visualization.mp_renderer import MPRenderer
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
 from crdesigner.config.gui_config import gui_config
-from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import (
-    DynamicCanvasController,
-)
+from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import (DynamicCanvasController, )
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.helper import draw_lanelet_polygon
@@ -55,9 +53,8 @@ class AnimatedViewerController:
         self.pps_model: PlanningProblemSetModel = mwindow.pps_model
         self.parent = mwindow.mwindow_ui
         self.scenario_model = scenario_model
-        self.dynamic = DynamicCanvasController(
-            self.parent, self.scenario_model, width=5, height=10, dpi=100, animated_viewer=self
-        )
+        self.dynamic = DynamicCanvasController(self.parent, self.scenario_model, width=5, height=10, dpi=100,
+                                               animated_viewer=self)
         self.callback_function = callback_function
         self.original_lanelet_network = None
         self.update_window()
@@ -84,13 +81,11 @@ class AnimatedViewerController:
         # safe here the original scenario -> this is needed for zooming in / out and for moving around
 
         self.original_lanelet_network = LaneletNetwork.create_from_lanelet_network(
-            lanelet_network=self.scenario_model.get_lanelet_network()
-        )
+                lanelet_network=self.scenario_model.get_lanelet_network())
 
         # if we have not subscribed already, subscribe now
         if config is not None:
             if not self._config:
-
                 def set_config(conf):
                     self._config = conf
                     self._calc_max_timestep()
@@ -131,15 +126,12 @@ class AnimatedViewerController:
 
         if start == end:
             warning_dialog = QMessageBox()
-            warning_dialog.warning(
-                None, "Warning", "This Scenario only has one time step!", QMessageBox.Ok, QMessageBox.Ok
-            )
+            warning_dialog.warning(None, "Warning", "This Scenario only has one time step!", QMessageBox.Ok,
+                                   QMessageBox.Ok)
             warning_dialog.close()
 
         assert start <= end, "<video/create_scenario_video> time_begin=%i needs to smaller than time_end=%i." % (
-            start,
-            end,
-        )
+            start, end,)
 
         def draw_frame(draw_params):
             self.time_step.value += 1
@@ -192,33 +184,25 @@ class AnimatedViewerController:
         self.time_step.silent_set(timestep)
 
     def save_animation(self):
-        path, _ = QFileDialog.getSaveFileName(
-            caption="QFileDialog.getSaveFileName()",
-            directory=self.scenario_model.get_scenario_id().__str__() + ".mp4",
-            filter="MP4 (*.mp4);;GIF (*.gif);; AVI (*avi)",
-        )
+        path, _ = QFileDialog.getSaveFileName(caption="QFileDialog.getSaveFileName()",
+                                              directory=self.scenario_model.get_scenario_id().__str__() + ".mp4",
+                                              filter="MP4 (*.mp4);;GIF (*.gif);; AVI (*avi)", )
         if not path:
             return
 
         try:
             rnd = MPRenderer()
             with open(path, "w"):
-                QMessageBox.about(
-                    None,
-                    "Information",
-                    "Exporting the video will take few minutes, please wait " "until process is finished!",
-                )
-                rnd.create_video(
-                    [self.scenario_model.get_current_scenario()], path, draw_params=self.dynamic.draw_params
-                )
+                QMessageBox.about(None, "Information",
+                                  "Exporting the video will take few minutes, please wait " "until process is "
+                                  "finished!", )
+                rnd.create_video([self.scenario_model.get_current_scenario()], path,
+                                 draw_params=self.dynamic.draw_params)
                 print("finished")
         except IOError as e:
-            QMessageBox.critical(
-                self,
-                "CommonRoad file not created!",
-                "The CommonRoad scenario was not saved as video due to an error.\n\n{}".format(e),
-                QMessageBox.StandardButton.Ok,
-            )
+            QMessageBox.critical(self, "CommonRoad file not created!",
+                                 "The CommonRoad scenario was not saved as video due to an error.\n\n{}".format(e),
+                                 QMessageBox.StandardButton.Ok, )
             return
 
     def _calc_max_timestep(self) -> int:
@@ -226,30 +210,19 @@ class AnimatedViewerController:
         if not self.scenario_model.scenario_created():
             return 0
 
-        if (
-            len(self.scenario_model.get_dynamic_obstacles()) > 0
-            and self.scenario_model.get_dynamic_obstacles()[0].prediction is not None
-        ):
-            time_steps = [
-                obstacle.prediction.occupancy_set[-1].time_step
-                for obstacle in self.scenario_model.get_dynamic_obstacles()
-            ]
+        if (len(self.scenario_model.get_dynamic_obstacles()) > 0 and self.scenario_model.get_dynamic_obstacles()[
+            0].prediction is not None):
+            time_steps = [obstacle.prediction.occupancy_set[-1].time_step for obstacle in
+                          self.scenario_model.get_dynamic_obstacles()]
             self.max_timestep = np.max(time_steps) if time_steps else 0
         else:
             self.max_timestep = 0
 
         return self.max_timestep
 
-    def update_plot(
-        self,
-        sel_lanelets: Lanelet = None,
-        sel_intersection: Intersection = None,
-        time_step_changed: bool = False,
-        time_step: int = 0,
-        clear_artists: bool = False,
-        new_file_added: bool = False,
-        plot_limits: Optional[List[float]] = None,
-    ):
+    def update_plot(self, sel_lanelets: Lanelet = None, sel_intersection: Intersection = None,
+                    time_step_changed: bool = False, time_step: int = 0, clear_artists: bool = False,
+                    new_file_added: bool = False, plot_limits: Optional[List[float]] = None, ):
         """Update the plot accordingly to the selection of scenario elements
         :param new_file_added: if a new cr file was created or added
         :param sel_lanelets: selected lanelet, defaults to None
@@ -319,9 +292,8 @@ class AnimatedViewerController:
                     label = "{} selected".format(lanelet.lanelet_id)
 
                 elif (
-                    lanelet.lanelet_id in selected_lanelet.predecessor
-                    and lanelet.lanelet_id in selected_lanelet.successor
-                ):
+                        lanelet.lanelet_id in selected_lanelet.predecessor and lanelet.lanelet_id in
+                        selected_lanelet.successor):
                     color = "purple"
                     alpha = 0.5
                     zorder = 10
@@ -341,20 +313,16 @@ class AnimatedViewerController:
                     color = "yellow"
                     alpha = 0.5
                     zorder = 10
-                    label = "{} adj left of {} ({})".format(
-                        lanelet.lanelet_id,
-                        selected_lanelet.lanelet_id,
-                        "same" if selected_lanelet.adj_left_same_direction else "opposite",
-                    )
+                    label = "{} adj left of {} ({})".format(lanelet.lanelet_id, selected_lanelet.lanelet_id,
+                                                            "same" if selected_lanelet.adj_left_same_direction else
+                                                            "opposite", )
                 elif lanelet.lanelet_id == selected_lanelet.adj_right:
                     color = "orange"
                     alpha = 0.5
                     zorder = 10
-                    label = "{} adj right of {} ({})".format(
-                        lanelet.lanelet_id,
-                        selected_lanelet.lanelet_id,
-                        "same" if selected_lanelet.adj_right_same_direction else "opposite",
-                    )
+                    label = "{} adj right of {} ({})".format(lanelet.lanelet_id, selected_lanelet.lanelet_id,
+                                                             "same" if selected_lanelet.adj_right_same_direction else
+                                                             "opposite", )
                 else:
                     color = "gray"
                     alpha = 0.3
@@ -409,10 +377,5 @@ class AnimatedViewerController:
 
     def update_window(self):
         self.dynamic.setStyleSheet(
-            "background-color:"
-            + self.parent.colorscheme().second_background
-            + "; color:"
-            + self.parent.colorscheme().color
-            + ";font-size: "
-            + self.parent.colorscheme().font_size
-        )
+                "background-color:" + self.parent.colorscheme().second_background + "; color:" +
+                self.parent.colorscheme().color + ";font-size: " + self.parent.colorscheme().font_size)
