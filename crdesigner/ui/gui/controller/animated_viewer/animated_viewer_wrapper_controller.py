@@ -1,17 +1,17 @@
 """Wrapper for the middle visualization."""
-from typing import Union
+from typing import Union, List
 
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.obstacle import Obstacle
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt6.QtWidgets import QVBoxLayout, QWidget
-
+from PyQt6.QtCore import Qt
 from crdesigner.config.logging import logger
 from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_controller import (
     AnimatedViewerController,
 )
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-from crdesigner.ui.gui.utilities.toolbox_ui import PosB
+from crdesigner.ui.gui.utilities.toolbox_ui import PosB, CheckableComboBox
 
 
 class AnimatedViewerWrapperController:
@@ -56,23 +56,53 @@ class AnimatedViewerWrapperController:
         self.viewer_dock.setLayout(layout)
         self.mwindow.setCentralWidget(self.viewer_dock)
 
+    def _uncheck_current_items(self, check_box: CheckableComboBox):
+        checked_items = (
+            check_box.get_checked_items())
+
+        check_box.uncheck_items(checked_items)
+
     @logger.log
-    def viewer_callback(self, selected_object: Union[Lanelet, Obstacle], output: str, temporary_positions=None):
+    def viewer_callback(self, selected_object: Union[Lanelet, Obstacle, List], output: str, temporary_positions=None):
         """
         Callback when the user clicks a lanelet, an obstacle or a position inside the scenario visualization.
         @return: returns draw_temporary_position which indicates whether temporary position should be drawn afterwards
         """
         draw_temporary_position = False
-        if isinstance(selected_object, Lanelet):
-            self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_two.setCurrentText(
-                self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one.currentText()
-            )
-            self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one.setCurrentText(
-                str(selected_object.lanelet_id)
-            )
+
+        if isinstance(selected_object, List) and all([isinstance(obj, Lanelet) for obj in selected_object]):
+            self._uncheck_current_items(check_box=self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update)
+            self._uncheck_current_items(check_box=self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one)
+
+            self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.set_checked_items(
+                    [str(lanelet.lanelet_id) for lanelet in selected_object])
+
+            self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one.set_checked_items(
+                    [str(lanelet.lanelet_id) for lanelet in selected_object])
+
             self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.setCurrentText(
-                str(selected_object.lanelet_id)
-            )
+                str(selected_object[-1].lanelet_id))
+
+            self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one.setCurrentText(
+                    str(selected_object[-1].lanelet_id))
+
+        elif isinstance(selected_object, Lanelet):
+            self._uncheck_current_items(
+                check_box=self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update)
+            self._uncheck_current_items(
+                check_box=self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one)
+
+            self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.set_checked_items([str(selected_object.lanelet_id)])
+            self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.setCurrentText(str(selected_object.lanelet_id))
+
+            self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one.set_checked_items(
+                    [str(selected_object.lanelet_id)])
+            self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one.setCurrentText(
+                str(selected_object.lanelet_id))
+
+            self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_two.setCurrentText(
+                    self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one.currentText())
+
         elif isinstance(selected_object, Obstacle):
             self.mwindow.obstacle_toolbox.obstacle_toolbox_ui.selected_obstacle.setCurrentText(
                 str(selected_object.obstacle_id)

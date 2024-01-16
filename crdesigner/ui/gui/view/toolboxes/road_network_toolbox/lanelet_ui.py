@@ -33,6 +33,7 @@ class AddLaneletUI:
             and not self.road_network_toolbox_ui.connect_to_previous_selection.isChecked()
             and not self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked()
             and not self.road_network_toolbox_ui.connect_to_successors_selection.isChecked()
+            and not self.road_network_toolbox_ui.connect_to_selected_selection.isChecked()
         ):
             self.road_network_toolbox_ui.adding_method = ""
             return

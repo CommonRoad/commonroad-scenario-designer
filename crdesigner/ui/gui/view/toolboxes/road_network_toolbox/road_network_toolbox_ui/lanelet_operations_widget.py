@@ -16,6 +16,8 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
+from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox
+
 
 class LaneletOperationsWidget:
     """
@@ -29,7 +31,8 @@ class LaneletOperationsWidget:
         widget_lanelet_operations = QFrame(self.toolbox.tree)
         layout_lanelet_operations = QVBoxLayout(widget_lanelet_operations)
 
-        self.toolbox.selected_lanelet_one = QComboBox()
+        # self.toolbox.selected_lanelet_one = QComboBox()
+        self.toolbox.selected_lanelet_one = CheckableComboBox(self.toolbox)
         self.toolbox.selected_lanelet_two = QComboBox()
 
         self.toolbox.adjacent_left_right_button_group = QButtonGroup()

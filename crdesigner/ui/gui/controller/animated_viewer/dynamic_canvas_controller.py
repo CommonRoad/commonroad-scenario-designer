@@ -2,7 +2,6 @@ import copy
 import math
 import warnings
 from typing import List, Union
-
 import numpy as np
 import PyQt6
 from commonroad.geometry.shape import Circle, Rectangle
@@ -24,6 +23,7 @@ from PyQt6 import QtCore
 from PyQt6.QtCore import QPoint
 from PyQt6.QtGui import QCursor, QMouseEvent
 from PyQt6.QtWidgets import QSizePolicy
+from PyQt6.QtCore import Qt
 
 from crdesigner.config.gui_config import DrawParamsCustom, gui_config
 from crdesigner.config.logging import logger
@@ -71,6 +71,7 @@ class DynamicCanvasController(FigureCanvas):
         self.flag = False
         if parent is not None:
             self.flag = True
+
         self.animated_viewer = animated_viewer
         self.ax = None
         self.drawer = Figure(figsize=(width, height), dpi=dpi)
@@ -124,8 +125,9 @@ class DynamicCanvasController(FigureCanvas):
         self.mpl_connect("scroll_event", self.zoom)
 
         # any callbacks for interaction per keyboard
-        self.mpl_connect("key_press_event", self.dynamic_canvas_ctrl_press_callback)
-        self.mpl_connect("key_release_event", self.dynamic_canvas_ctrl_release_callback)
+        # self.key_press_event_cid = self.mpl_connect("key_press_event", self.dynamic_canvas_ctrl_press_callback)
+        self.key_release_event_cid = self.mpl_connect("key_release_event", self.dynamic_canvas_ctrl_release_callback)
+        self.keyPressEvent = self.dynamic_canvas_ctrl_press_callback
 
         # initializes mouse coordinates
         self.mouse_coordinates = QPoint(0, 0)
@@ -141,6 +143,9 @@ class DynamicCanvasController(FigureCanvas):
         self.new_lanelet = False
 
         gui_config.sub_curved(self.enable)
+
+    def on_press(self, key_event):
+        print('you pressed', key_event.event)
 
     def parent(self):
         return self._parent
@@ -388,7 +393,6 @@ class DynamicCanvasController(FigureCanvas):
 
         :params mouse_clicked_event:
         """
-
         # when the mouse is clicked we remember where this was -> use this for lanelet selection
         self.latest_mouse_pos = np.array([mouse_clicked_event.xdata, mouse_clicked_event.ydata])
         # update the map
@@ -443,11 +447,11 @@ class DynamicCanvasController(FigureCanvas):
         """
         Check whether control key is pressed
         """
-        if key_event.key == "control":
+        if key_event.key() == Qt.Key.Key_Control.value:
             self.control_key = True
 
     def dynamic_canvas_ctrl_release_callback(self, key_event):
-        if key_event.key == "control":
+        if key_event.key == 'control':
             self.control_key = False
 
     def _update_map(self):
@@ -537,12 +541,16 @@ class DynamicCanvasController(FigureCanvas):
             if len(selected_obstacles) > 0:
                 selection = " Obstacle with ID " + str(selected_obstacles[0].obstacle_id) + " is selected."
                 self.animated_viewer.callback_function(selected_obstacles[0], output + selection)
+            elif len(self.selected_lanelets) > 1:
+                selection = " Lanelet with ID " + str(self.selected_lanelets[0].lanelet_id) + " is selected."
+                self.animated_viewer.callback_function(self.selected_lanelets, output + selection)
             elif len(self.selected_lanelets) == 1:
                 selection = " Lanelet with ID " + str(self.selected_lanelets[0].lanelet_id) + " is selected."
                 self.animated_viewer.callback_function(self.selected_lanelets[0], output + selection)
         if len(self.selected_lanelets) == 0:
             self.parent().road_network_toolbox.lanelet_controller.lanelet_ui.set_default_lanelet_information()
         self.draw_temporary_point()
+
 
     def get_center_and_axes_values(self) -> ((float, float), float, float, (float, float), (float, float)):
         """

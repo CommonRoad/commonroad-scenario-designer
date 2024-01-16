@@ -130,11 +130,13 @@ class RoadNetworkController(
         connect_to_last_selection = self.road_network_toolbox_ui.connect_to_previous_selection.isChecked()
         connect_to_predecessors_selection = self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked()
         connect_to_successors_selection = self.road_network_toolbox_ui.connect_to_successors_selection.isChecked()
+        connect_to_selected_selection = self.road_network_toolbox_ui.connect_to_selected_selection.isChecked()
         if button_title == "Add Lanelet" and (
             place_at_position
             or connect_to_last_selection
             or connect_to_predecessors_selection
             or connect_to_successors_selection
+            or connect_to_selected_selection
         ):
             if self.road_network_toolbox_ui.curved_check_button is not None:
                 self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(

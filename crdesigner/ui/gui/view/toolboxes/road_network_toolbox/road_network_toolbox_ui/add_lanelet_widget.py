@@ -427,6 +427,7 @@ class AddLaneletWidget:
         self.toolbox.layout_lanelet_adding_groupbox.insertRow(16, self.toolbox.line2)
 
     def init_connect_to_selected_selection_fields(self):
+
         self.toolbox.line1 = QFrame()
         self.toolbox.line1.setFrameShape(QFrame.Shape.HLine)
         self.toolbox.layout_lanelet_adding_groupbox.insertRow(4, self.toolbox.line1)
@@ -453,15 +454,39 @@ class AddLaneletWidget:
 
         self.toolbox.layout_lanelet_adding_groupbox.insertRow(6, self.toolbox.lanelet_connect_to_selected_method)
 
-        self.add_curved_fields(7)
-        self.add_line_marking_fields(9)
-        self.add_neighboring_lanelets_fields(11)
-        self.add_advanced_fields(13)
+        self.add_curved_fields(9)
+        self.add_line_marking_fields(11)
+        self.add_neighboring_lanelets_fields(13)
+        self.add_advanced_fields(15)
 
         # seperation line at the end of place at position block
         self.toolbox.line2 = QFrame()
         self.toolbox.line2.setFrameShape(QFrame.Shape.HLine)
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(15, self.toolbox.line2)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(17, self.toolbox.line2)
+        """
+        self.toolbox.line1 = QFrame()
+        self.toolbox.line1.setFrameShape(QFrame.Shape.HLine)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(4, self.toolbox.line1)
+
+        self.toolbox.successors = CheckableComboBox()
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(6, "Successors:", self.toolbox.successors)
+
+        # Lanelet Length and Width
+        self.init_length_width()
+
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(7, "Length [m]", self.toolbox.lanelet_length)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(8, "Width [m]", self.toolbox.lanelet_width)
+
+        self.add_curved_fields(10)
+        self.add_line_marking_fields(12)
+        self.add_neighboring_lanelets_fields(14)
+        self.add_advanced_fields(16)
+
+        # seperation line at the end of place at position block
+        self.toolbox.line2 = QFrame()
+        self.toolbox.line2.setFrameShape(QFrame.Shape.HLine)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(17, self.toolbox.line2)
+        """
 
     def remove_adding_method_fields(self):
         if self.toolbox.adding_method == "place_at_position":
@@ -519,8 +544,7 @@ class AddLaneletWidget:
             self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.line2)
 
         elif self.toolbox.adding_method == "connect_to_selected":
-            self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.as_successor)
-            self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.as_predecessor)
+            self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.lanelet_connect_to_selected_method)
             self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.line1)
             self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.lanelet_length)
             self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.lanelet_width)
@@ -530,6 +554,7 @@ class AddLaneletWidget:
             self.toolbox.neighboring_lanelets_button.remove()
             self.toolbox.advanced_button.remove()
             self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.line2)
+
 
         # TODO: Maybe change
         if self.toolbox.curved_check_button is not None:
@@ -545,7 +570,6 @@ class AddLaneletWidget:
         self.toolbox.lanelet_width.setValidator(self.toolbox.float_validator)
         self.toolbox.lanelet_width.setMaxLength(5)
         self.toolbox.lanelet_width.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.toolbox.lanelet_width.setDisabled(True)
         self.toolbox.lanelet_width.setStyleSheet(
             "background-color: "
             + self.toolbox.mwindow.mwindow_ui.colorscheme().second_background

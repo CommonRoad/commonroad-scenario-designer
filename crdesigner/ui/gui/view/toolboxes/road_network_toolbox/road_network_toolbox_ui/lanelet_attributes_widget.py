@@ -41,7 +41,8 @@ class LaneletAttributesWidget:
         self.toolbox.layout_lanelet_attributes_groupbox = QFormLayout()
         self.toolbox.lanelet_attributes_groupbox.setLayout(self.toolbox.layout_lanelet_attributes_groupbox)
 
-        self.toolbox.selected_lanelet_update = QComboBox()
+        # self.toolbox.selected_lanelet_update = QComboBox()
+        self.toolbox.selected_lanelet_update = CheckableComboBox(self.toolbox)
         self.toolbox.button_remove_lanelet = QPushButton("Remove")
 
         self.toolbox.layout_lanelet_attributes_groupbox.addRow("Selected Lanelet", self.toolbox.selected_lanelet_update)
@@ -476,8 +477,15 @@ class LaneletAttributesWidget:
         y_end = float(self.toolbox.selected_lanelet_end_position_y.text().replace(",", "."))
         length_old = math.sqrt((x_start - x_end) ** 2 + (y_start - y_end) ** 2)
 
-        x = x_start + (1 / length_old * (x_end - x_start) * length_new)
-        y = y_start + (1 / length_old * (y_end - y_start) * length_new)
+        try:
+            x = x_start + (1 / length_old * (x_end - x_start) * length_new)
+        except Exception as ZeroDivisionError:
+            x = x_start
+
+        try:
+            y = y_start + (1 / length_old * (y_end - y_start) * length_new)
+        except Exception as ZeroDivisionError:
+            y = y_start
 
         self.toolbox.selected_end_position_x_changed = True
         self.toolbox.selected_end_position_y_changed = True
