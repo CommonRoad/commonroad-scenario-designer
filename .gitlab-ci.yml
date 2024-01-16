@@ -15,6 +15,7 @@ default:
 
 .run-test-with-coverage: &run-test-with-coverage
   - apt-get update && apt-get install -y ffmpeg libegl1
+  - poetry update
   - coverage run --source ./crdesigner -m pytest tests/
   - coverage report -m || true
 
