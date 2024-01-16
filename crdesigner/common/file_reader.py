@@ -61,12 +61,19 @@ def project_complete_scenario_and_pps(
         for center_vertex in lanelet.center_vertices:
             center_vertex[0], center_vertex[1] = transformer.transform(center_vertex[0], center_vertex[1])
 
+        # transform stop line coordinates
+        if lanelet.stop_line is not None:
+            lanelet.stop_line.start[0], lanelet.stop_line.start[1] = transformer.transform(lanelet.stop_line.start[0],
+                                                                                           lanelet.stop_line.start[1])
+            lanelet.stop_line.end[0], lanelet.stop_line.end[1] = transformer.transform(lanelet.stop_line.end[0],
+                                                                                       lanelet.stop_line.end[1])
+
     # transform traffic light coordinates
     for tl in scenario_copy.lanelet_network.traffic_lights:
         tl.position[0], tl.position[1] = transformer.transform(tl.position[0], tl.position[1])
 
     # transform traffic sign coordinates
-    for ts in scenario_copy.lanelet_network.traffic_lights:
+    for ts in scenario_copy.lanelet_network.traffic_signs:
         ts.position[0], ts.position[1] = transformer.transform(ts.position[0], ts.position[1])
 
     # transform area coordinates
