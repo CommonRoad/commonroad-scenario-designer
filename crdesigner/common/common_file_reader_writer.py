@@ -169,13 +169,13 @@ def project_scenario_and_pps(
     scenario: Scenario, planning_problem_set: PlanningProblemSet, proj_string_from: str, proj_string_to: str
 ) -> [Scenario, PlanningProblemSet]:
     """
-    Function that performs a projection onto the entire scenario.
+    Function that performs a projection onto the entire scenario and a planning problem set.
 
     :param scenario: Scenario that needs to be projected.
     :param planning_problem_set: PlanningProblemSet that needs to be projected (if not None)
     :param proj_string_from: Source projection.
     :param proj_string_to: Target projection.
-    :return: Projected scenario.
+    :return: Projected scenario and a planning problem set.
     """
 
     # create a deep copy of the scenario
