@@ -18,6 +18,7 @@
 - Option to display the aerial image of the current position
 - By default, if no lbdv creditials are stored, the open source credentials are used
 - File reader that optionally verifies and repairs the road network using the new map verificiation.
+- Possibility to change the geo reference and translate the scenario
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files

@@ -60,7 +60,7 @@ from commonroad.scenario.traffic_light import (
     TrafficLightDirection,
 )
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficSign
-from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
+from commonroad.scenario.traffic_sign_interpreter import TrafficSignInterpreter
 from commonroad.scenario.trajectory import State
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
@@ -146,7 +146,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._max_vehicle_width = max(self.conf.veh_params["width"].values())
 
         # traffic signs
-        self._traffic_sign_interpreter: TrafficSigInterpreter = TrafficSigInterpreter(
+        self._traffic_sign_interpreter: TrafficSignInterpreter = TrafficSignInterpreter(
             self.country_id, self.lanelet_network
         )
         # Read Edge Types from template

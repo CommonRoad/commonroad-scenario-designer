@@ -7,7 +7,7 @@ from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
 from pyparsing import Literal
 from PyQt6 import QtCore
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QDoubleValidator, QFont, QIcon, QIntValidator
+from PyQt6.QtGui import QFont, QIcon, QIntValidator
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -25,6 +25,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from crdesigner.common.config import gui_config
 from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox, Toolbox
 
 
@@ -137,7 +138,6 @@ class ScenarioToolboxUI(Toolbox):
         self.scenario_tags.addItems(tag_list)
 
         self.scenario_time_step_size = QLineEdit()
-        self.scenario_time_step_size.setValidator(QDoubleValidator())
         self.scenario_time_step_size.setMaxLength(4)
         self.scenario_time_step_size.setAlignment(Qt.AlignmentFlag.AlignRight)
 
@@ -152,16 +152,14 @@ class ScenarioToolboxUI(Toolbox):
 
         self.location_storage_selection = QCheckBox("Store Location")
 
-        self.scenario_geo_anme_id = QLineEdit()
-        self.scenario_geo_anme_id.setValidator(QIntValidator())
-        self.scenario_geo_anme_id.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.scenario_geo_name_id = QLineEdit()
+        self.scenario_geo_name_id.setValidator(QIntValidator())
+        self.scenario_geo_name_id.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_latitude = QLineEdit()
-        self.scenario_latitude.setValidator(QDoubleValidator())
         self.scenario_latitude.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_longitude = QLineEdit()
-        self.scenario_longitude.setValidator(QDoubleValidator())
         self.scenario_longitude.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.scenario_time_of_day = QComboBox()
@@ -183,6 +181,23 @@ class ScenarioToolboxUI(Toolbox):
         self.scenario_time_minute = QSpinBox()
         self.scenario_time_minute.setMinimum(0)
         self.scenario_time_minute.setMaximum(59)
+
+        self.geo_reference = QComboBox()
+        references = [
+            gui_config.pseudo_mercator,
+            gui_config.utm_default,
+            gui_config.lanelet2_default,
+            "Enter your own Reference",
+        ]
+        self.geo_reference.addItems(references)
+
+        self.x_translation = QLineEdit()
+        self.x_translation.setAlignment(Qt.AlignmentFlag.AlignRight)
+
+        self.y_translation = QLineEdit()
+        self.y_translation.setAlignment(Qt.AlignmentFlag.AlignRight)
+
+        self.translate_button = QPushButton("Update Scenario")
 
         """Scenario Settings add Buttons"""
         scenario_settings_groupbox = QGroupBox()
@@ -208,7 +223,7 @@ class ScenarioToolboxUI(Toolbox):
         layout_location_groupbox = QFormLayout()
         location_groupbox.setLayout(layout_location_groupbox)
         layout_location_groupbox.addRow(self.location_storage_selection)
-        layout_location_groupbox.addRow("GeoNameID:", self.scenario_geo_anme_id)
+        layout_location_groupbox.addRow("GeoNameID:", self.scenario_geo_name_id)
         layout_location_groupbox.addRow("Latitude:", self.scenario_latitude)
         layout_location_groupbox.addRow("Longitude:", self.scenario_longitude)
         layout_location_groupbox.addRow("Time of Day:", self.scenario_time_of_day)
@@ -219,6 +234,16 @@ class ScenarioToolboxUI(Toolbox):
         time_layout.addWidget(self.scenario_time_hour)
         time_layout.addWidget(self.scenario_time_minute)
         layout_location_groupbox.addRow(time_layout)
+
+        geo_referencec_groupbox = QGroupBox()
+        layout_geo_referencec_groupbox = QFormLayout()
+        geo_referencec_groupbox.setLayout(layout_geo_referencec_groupbox)
+        layout_geo_referencec_groupbox.addRow("Geo Ref. : ", self.geo_reference)
+        layout_geo_referencec_groupbox.addRow("x Translation:", self.x_translation)
+        layout_geo_referencec_groupbox.addRow("y Translation:", self.y_translation)
+        layout_geo_referencec_groupbox.addRow(self.translate_button)
+        layout_location_groupbox.addRow(geo_referencec_groupbox)
+
         scenario_information.addRow(location_groupbox)
 
         scenario_settings_groupbox.setLayout(scenario_information)
@@ -254,13 +279,11 @@ class ScenarioToolboxUI(Toolbox):
 
         """"Position"""
         self.initial_position_x = QLineEdit()
-        self.initial_position_x.setValidator(QDoubleValidator())
         self.initial_position_x.setMaxLength(8)
         self.initial_position_x.setFixedWidth(150)
         self.initial_position_x.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.initial_position_y = QLineEdit()
-        self.initial_position_y.setValidator(QDoubleValidator())
         self.initial_position_y.setMaxLength(8)
         self.initial_position_y.setFixedWidth(150)
         self.initial_position_y.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -279,7 +302,6 @@ class ScenarioToolboxUI(Toolbox):
 
         """"Velocity"""
         self.initial_velocity = QLineEdit()
-        self.initial_velocity.setValidator(QDoubleValidator())
         self.initial_velocity.setMaxLength(8)
         self.initial_velocity.setFixedWidth(150)
         self.initial_velocity.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -292,7 +314,6 @@ class ScenarioToolboxUI(Toolbox):
 
         """Orientation"""
         self.initial_orientation = QLineEdit()
-        self.initial_orientation.setValidator(QDoubleValidator())
         self.initial_orientation.setMaxLength(8)
         self.initial_orientation.setFixedWidth(150)
         self.initial_orientation.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -305,7 +326,6 @@ class ScenarioToolboxUI(Toolbox):
 
         """Yaw Rate"""
         self.initial_yawRate = QLineEdit()
-        self.initial_yawRate.setValidator(QDoubleValidator())
         self.initial_yawRate.setMaxLength(8)
         self.initial_yawRate.setFixedWidth(150)
         self.initial_yawRate.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -318,7 +338,6 @@ class ScenarioToolboxUI(Toolbox):
 
         """Slip Angle"""
         self.initial_slipAngle = QLineEdit()
-        self.initial_slipAngle.setValidator(QDoubleValidator())
         self.initial_slipAngle.setMaxLength(8)
         self.initial_slipAngle.setFixedWidth(150)
         self.initial_slipAngle.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -344,7 +363,6 @@ class ScenarioToolboxUI(Toolbox):
 
         """Acceleration"""
         self.initial_acceleration = QLineEdit()
-        self.initial_acceleration.setValidator(QDoubleValidator())
         self.initial_acceleration.setMaxLength(8)
         self.initial_acceleration.setFixedWidth(150)
         self.initial_acceleration.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -449,14 +467,12 @@ class ScenarioToolboxUI(Toolbox):
 
         """Velocity Start & End"""
         self.goal_velocity_start = QLineEdit()
-        self.goal_velocity_start.setValidator(QDoubleValidator())
         self.goal_velocity_start.setMaxLength(8)
         self.goal_velocity_start.setFixedWidth(80)
         self.goal_velocity_start.setFixedHeight(24)
         self.goal_velocity_start.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.goal_velocity_end = QLineEdit()
-        self.goal_velocity_end.setValidator(QDoubleValidator())
         self.goal_velocity_end.setMaxLength(8)
         self.goal_velocity_end.setFixedWidth(80)
         self.goal_velocity_end.setFixedHeight(24)
@@ -477,14 +493,12 @@ class ScenarioToolboxUI(Toolbox):
 
         """Goal Orientation Start & End"""
         self.goal_orientation_start = QLineEdit()
-        self.goal_orientation_start.setValidator(QDoubleValidator())
         self.goal_orientation_start.setMaxLength(8)
         self.goal_orientation_start.setFixedWidth(80)
         self.goal_orientation_start.setFixedHeight(24)
         self.goal_orientation_start.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.goal_orientation_end = QLineEdit()
-        self.goal_orientation_end.setValidator(QDoubleValidator())
         self.goal_orientation_end.setMaxLength(8)
         self.goal_orientation_end.setFixedWidth(80)
         self.goal_orientation_end.setFixedHeight(24)
@@ -664,31 +678,26 @@ class ScenarioToolboxUI(Toolbox):
     def init_rectangle_fields(self) -> None:
         """Adds the Rectangle Shape fields"""
         self.rectangle_length = QLineEdit()
-        self.rectangle_length.setValidator(QDoubleValidator())
         self.rectangle_length.setMaxLength(8)
         self.rectangle_length.setFixedWidth(50)
         self.rectangle_length.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.rectangle_width = QLineEdit()
-        self.rectangle_width.setValidator(QDoubleValidator())
         self.rectangle_width.setMaxLength(8)
         self.rectangle_width.setFixedWidth(50)
         self.rectangle_width.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.rectangle_x = QLineEdit()
-        self.rectangle_x.setValidator(QDoubleValidator())
         self.rectangle_x.setMaxLength(8)
         self.rectangle_x.setFixedWidth(50)
         self.rectangle_x.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.rectangle_y = QLineEdit()
-        self.rectangle_y.setValidator(QDoubleValidator())
         self.rectangle_y.setMaxLength(8)
         self.rectangle_y.setFixedWidth(50)
         self.rectangle_y.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.rectangle_orientation = QLineEdit()
-        self.rectangle_orientation.setValidator(QDoubleValidator())
         self.rectangle_orientation.setMaxLength(8)
         self.rectangle_orientation.setFixedWidth(50)
         self.rectangle_orientation.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -725,19 +734,16 @@ class ScenarioToolboxUI(Toolbox):
     def init_circle_fields(self) -> None:
         """Adds the Circle Fields"""
         self.circle_radius = QLineEdit()
-        self.circle_radius.setValidator(QDoubleValidator())
         self.circle_radius.setMaxLength(8)
         self.circle_radius.setFixedWidth(50)
         self.circle_radius.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.circle_x = QLineEdit()
-        self.circle_x.setValidator(QDoubleValidator())
         self.circle_x.setMaxLength(8)
         self.circle_x.setFixedWidth(50)
         self.circle_x.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.circle_y = QLineEdit()
-        self.circle_y.setValidator(QDoubleValidator())
         self.circle_y.setMaxLength(8)
         self.circle_y.setFixedWidth(50)
         self.circle_y.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -821,12 +827,10 @@ class ScenarioToolboxUI(Toolbox):
         self.polygon_label.append(QLabel("Vertice " + str(i)))
 
         self.vertices_x.append(QLineEdit())
-        self.vertices_x[i].setValidator(QDoubleValidator())
         self.vertices_x[i].setMaxLength(6)
         self.vertices_x[i].setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.vertices_y.append(QLineEdit())
-        self.vertices_y[i].setValidator(QDoubleValidator())
         self.vertices_y[i].setMaxLength(6)
         self.vertices_y[i].setAlignment(Qt.AlignmentFlag.AlignRight)
 

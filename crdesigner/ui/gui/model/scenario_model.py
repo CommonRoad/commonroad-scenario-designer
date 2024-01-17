@@ -13,7 +13,13 @@ from commonroad.scenario.obstacle import (
     PhantomObstacle,
     StaticObstacle,
 )
-from commonroad.scenario.scenario import Scenario, ScenarioID
+from commonroad.scenario.scenario import (
+    GeoTransformation,
+    Location,
+    Scenario,
+    ScenarioID,
+    Tag,
+)
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficSign
 from PyQt6.QtCore import QObject, pyqtSignal
@@ -768,3 +774,83 @@ class ScenarioModel(QObject):
         @returns: Returns a copy of the scenario
         """
         return copy.deepcopy(self._current_scenario())
+
+    def update_meta_data(
+        self,
+        author: str,
+        affiliation: str,
+        source: str,
+        tags: [Tag],
+        configuration_id: int,
+        cooperative: bool,
+        country_id: str,
+        map_id: int,
+        map_name: str,
+        obstacle_behavior: str,
+        prediction_id: int,
+        time_step_size: float,
+        location: Location = None,
+    ):
+        """
+        updates the scenario settings
+
+        @param author: Author of the scenario
+        @param affiliation: Affiliation of the Auther
+        @param source: Where was the scenario created
+        @param tags: Tags of the scenario
+        @param configuration_id: configuration ID
+        @param cooperative: Statement if the scenario is cooperative
+        @param country_id: Id of the country in which the scenario takes place
+        @param map_id: Id of the map
+        @param map_name: Name of the map
+        @param obstacle_behavior: Indicator of the behavior of obstacles
+        @param prediction_id: Id of prediction
+        @param time_step_size: Size of the time steps
+        @param location: Element where the location of the scenario is stored
+        """
+        self._current_scenario().author = author
+        self._current_scenario().affiliation = affiliation
+        self._current_scenario().source = source
+        self._current_scenario().tags = tags
+        self._current_scenario().dt = time_step_size
+        self._current_scenario().scenario_id.configuration_id = configuration_id
+        self._current_scenario().scenario_id.cooperative = cooperative
+        self._current_scenario().scenario_id.country_id = country_id
+        self._current_scenario().scenario_id.map_id = map_id
+        self._current_scenario().scenario_id.map_name = map_name
+        self._current_scenario().scenario_id.obstacle_behavior = obstacle_behavior
+        self._current_scenario().scenario_id.prediction_id = prediction_id
+        if location is not None:
+            self._current_scenario().location = location
+
+    def update_translate_scenario(self, translation: np.ndarray, geo_reference: str):
+        """
+        updates the geo_reference and translates the scenario
+
+        @param translation: Translation element of the scenario
+        @param geo_reference: Geo reference
+        """
+        self._update_scenario()
+
+        if self._current_scenario().location is None or self._current_scenario().location.geo_transformation is None:
+            self._current_scenario().location = Location(
+                geo_transformation=GeoTransformation(geo_reference="", x_translation=0.0, y_translation=0.0)
+            )
+
+        new_translation = (
+            np.array(
+                [
+                    self._current_scenario().location.geo_transformation.x_translation,
+                    self._current_scenario().location.geo_transformation.y_translation,
+                ]
+            )
+            - translation
+        )
+
+        self._current_scenario().location.geo_transformation.x_translation = translation[0]
+        self._current_scenario().location.geo_transformation.y_translation = translation[1]
+        self._current_scenario().location.geo_transformation.geo_reference = geo_reference
+
+        self._current_scenario().translate_rotate(new_translation, 0)
+
+        self.notify_all()
