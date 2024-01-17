@@ -7,7 +7,7 @@ from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario
 
 from crdesigner.common.common_file_reader_writer import (
-    project_complete_scenario_and_pps,
+    project_scenario_and_pps,
 )
 from crdesigner.verification_repairing.map_verification_repairing import (
     verify_and_repair_map,
@@ -48,7 +48,7 @@ class CRDesignerFileReader(CommonRoadFileReader):
             proj_string_from = scenario.location.geo_transformation.geo_reference
             # If no source projection is defined in the scenario location element, we should skip the projection
             if proj_string_from is not None:
-                scenario, planning_problem_set = project_complete_scenario_and_pps(
+                scenario, planning_problem_set = project_scenario_and_pps(
                     scenario, planning_problem_set, proj_string_from, target_projection
                 )
 

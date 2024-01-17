@@ -3,6 +3,7 @@ import copy
 from commonroad.common.validity import ValidTypes
 from commonroad.geometry.shape import Circle, Polygon, Rectangle, Shape
 from commonroad.planning.planning_problem import PlanningProblemSet
+from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario
 from pyproj import CRS, Transformer
 
@@ -24,27 +25,66 @@ def transform_shape(shape: Shape, transformer: Transformer) -> Shape:
     return shape_copy
 
 
-def project_complete_scenario_and_pps(
-    scenario: Scenario, planning_problem_set: PlanningProblemSet, proj_string_from: str, proj_string_to: str
-) -> [Scenario, PlanningProblemSet]:
+def project_planning_problem_set(
+    planning_problem_set: PlanningProblemSet, proj_string_from: str, proj_string_to: str
+) -> PlanningProblemSet:
     """
-    Function that performs a projection onto the entire scenario.
+    Function that performs a projection onto the planning problem set.
 
-    :param scenario: Scenario that needs to be projected.
     :param planning_problem_set: PlanningProblemSet that needs to be projected (if not None)
     :param proj_string_from: Source projection.
     :param proj_string_to: Target projection.
-    :return: Projected scenario.
+    :return: Projected planning problem set.
     """
     crs_from = CRS(proj_string_from)
     crs_to = CRS(proj_string_to)
     transformer = Transformer.from_proj(crs_from, crs_to)
 
-    # create a deep copy of the scenario
-    scenario_copy = copy.deepcopy(scenario)
+    planning_problem_set = copy.deepcopy(planning_problem_set)
+    # transform planning problems
+    for planning_problem in planning_problem_set.planning_problem_dict.values():
+        if planning_problem.initial_state:
+            if isinstance(planning_problem.initial_state.position, ValidTypes.ARRAY):
+                (
+                    planning_problem.initial_state.position[0],
+                    planning_problem.initial_state.position[1],
+                ) = transformer.transform(
+                    planning_problem.initial_state.position[0], planning_problem.initial_state.position[1]
+                )
+            if isinstance(planning_problem.initial_state.position, Shape):
+                planning_problem.initial_state.position = transform_shape(
+                    planning_problem.initial_state.position, transformer
+                )
 
-    # transform lanelet vertex coordinates
-    for lanelet in scenario_copy.lanelet_network.lanelets:
+        if planning_problem.goal:
+            for state in planning_problem.goal.state_list:
+                if state.position:
+                    if isinstance(state.position, ValidTypes.ARRAY):
+                        state.position[0], state.position[1] = transformer.transform(
+                            state.position[0], state.position[1]
+                        )
+                    if isinstance(state.position, Shape):
+                        state.position = transform_shape(state.position, transformer)
+
+    return planning_problem_set
+
+
+def project_lanelet_network(
+    lanelet_network: LaneletNetwork, proj_string_from: str, proj_string_to: str
+) -> LaneletNetwork:
+    """
+    Function that performs a projection onto the lanelet network.
+
+    :param lanelet_network: LaneletNetwork that needs to be projected (if not None)
+    :param proj_string_from: Source projection.
+    :param proj_string_to: Target projection.
+    :return: Projected lanelet network.
+    """
+    crs_from = CRS(proj_string_from)
+    crs_to = CRS(proj_string_to)
+    transformer = Transformer.from_proj(crs_from, crs_to)
+
+    for lanelet in lanelet_network.lanelets:
         for left_vertex in lanelet.left_vertices:
             left_vertex[0], left_vertex[1] = transformer.transform(left_vertex[0], left_vertex[1])
         for right_vertex in lanelet.right_vertices:
@@ -62,21 +102,36 @@ def project_complete_scenario_and_pps(
             )
 
     # transform traffic light coordinates
-    for tl in scenario_copy.lanelet_network.traffic_lights:
+    for tl in lanelet_network.traffic_lights:
         tl.position[0], tl.position[1] = transformer.transform(tl.position[0], tl.position[1])
 
     # transform traffic sign coordinates
-    for ts in scenario_copy.lanelet_network.traffic_signs:
+    for ts in lanelet_network.traffic_signs:
         ts.position[0], ts.position[1] = transformer.transform(ts.position[0], ts.position[1])
 
     # transform area coordinates
-    for area in scenario_copy.lanelet_network.areas:
+    for area in lanelet_network.areas:
         for border in area.border:
             for vertex in border.border_vertices:
                 vertex[0], vertex[1] = transformer.transform(vertex[0], vertex[1])
 
-    # transform obstacle coordinates
-    for obstacle in scenario_copy.obstacles:
+    return lanelet_network
+
+
+def project_obstacles(scenario: Scenario, proj_string_from: str, proj_string_to: str) -> Scenario:
+    """
+    Function that performs a projection onto the obstacles of a scenario.
+
+    :param scenario: Scenario where obstacles need to be projected (if not None)
+    :param proj_string_from: Source projection.
+    :param proj_string_to: Target projection.
+    :return: Scenario with the projected obstacles.
+    """
+    crs_from = CRS(proj_string_from)
+    crs_to = CRS(proj_string_to)
+    transformer = Transformer.from_proj(crs_from, crs_to)
+
+    for obstacle in scenario.obstacles:
         if obstacle.obstacle_shape:
             obstacle.obstacle_shape = transform_shape(obstacle.obstacle_shape, transformer)
 
@@ -107,29 +162,32 @@ def project_complete_scenario_and_pps(
                         if isinstance(state.position, Shape):
                             state.position = transform_shape(state.position, transformer)
 
-    # transform planning problems
-    for planning_problem in planning_problem_set.planning_problem_dict.values():
-        if planning_problem.initial_state:
-            if isinstance(planning_problem.initial_state.position, ValidTypes.ARRAY):
-                (
-                    planning_problem.initial_state.position[0],
-                    planning_problem.initial_state.position[1],
-                ) = transformer.transform(
-                    planning_problem.initial_state.position[0], planning_problem.initial_state.position[1]
-                )
-            if isinstance(planning_problem.initial_state.position, Shape):
-                planning_problem.initial_state.position = transform_shape(
-                    planning_problem.initial_state.position, transformer
-                )
+    return scenario
 
-        if planning_problem.goal:
-            for state in planning_problem.goal.state_list:
-                if state.position:
-                    if isinstance(state.position, ValidTypes.ARRAY):
-                        state.position[0], state.position[1] = transformer.transform(
-                            state.position[0], state.position[1]
-                        )
-                    if isinstance(state.position, Shape):
-                        state.position = transform_shape(state.position, transformer)
+
+def project_scenario_and_pps(
+    scenario: Scenario, planning_problem_set: PlanningProblemSet, proj_string_from: str, proj_string_to: str
+) -> [Scenario, PlanningProblemSet]:
+    """
+    Function that performs a projection onto the entire scenario.
+
+    :param scenario: Scenario that needs to be projected.
+    :param planning_problem_set: PlanningProblemSet that needs to be projected (if not None)
+    :param proj_string_from: Source projection.
+    :param proj_string_to: Target projection.
+    :return: Projected scenario.
+    """
+
+    # create a deep copy of the scenario
+    scenario_copy = copy.deepcopy(scenario)
+
+    # project the lanelet network
+    project_lanelet_network(scenario_copy.lanelet_network, proj_string_from, proj_string_to)
+
+    # project the obstacles
+    project_obstacles(scenario_copy, proj_string_from, proj_string_to)
+
+    # project the planning problem set
+    planning_problem_set = project_planning_problem_set(planning_problem_set, proj_string_from, proj_string_to)
 
     return scenario_copy, planning_problem_set

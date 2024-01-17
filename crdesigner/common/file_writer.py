@@ -7,7 +7,7 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Location, Scenario, Tag
 
 from crdesigner.common.common_file_reader_writer import (
-    project_complete_scenario_and_pps,
+    project_scenario_and_pps,
 )
 from crdesigner.verification_repairing.map_verification_repairing import (
     verify_and_repair_scenario,
@@ -72,7 +72,7 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
             proj_string_from = self._file_writer.scenario.location.geo_transformation.geo_reference
             # If no source projection is defined in the scenario location element, we should skip the projection
             if proj_string_from is not None:
-                self._file_writer.scenario, self._file_writer.planning_problem_set = project_complete_scenario_and_pps(
+                self._file_writer.scenario, self._file_writer.planning_problem_set = project_scenario_and_pps(
                     self._file_writer.scenario,
                     self._file_writer.planning_problem_set,
                     proj_string_from,
