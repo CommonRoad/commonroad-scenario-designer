@@ -9,7 +9,7 @@
 - Test Case for local geonamesID functionality
 - OpenDRIVE to CommonRoad conversion: considering line markings of inner shared lanelet boundaries and the center line marking
 - Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
-- Optional MGRS tag for nodes in CR to Lanelet2 conversion (comptaibility with Autoware)
+- Optional MGRS tag for nodes in CR to Lanelet2 conversion (compatibility with Autoware)
 - Functionality to edit vertices of a lanelet in the canvas
 - Eclipse-SUMO Python package dependency for better integration of SUMO
 - cr2lanelet: Option of local coordinates for traffic lights
@@ -17,7 +17,8 @@
 - cr2lanelet: Regulatory element to corresponding way relation for lanes (required by autoware)
 - Option to display the aerial image of the current position
 - By default, if no lbdv creditials are stored, the open source credentials are used
-- File reader that optionally verifies and repairs the road network using the new map verificiation.
+- File reader that optionally verifies and repairs the road network using the new map verification.
+- Additional option to the s-d file reader and writer to project the scenario
 - Possibility to change the geo reference and translate the scenario
 
 ### Changed
