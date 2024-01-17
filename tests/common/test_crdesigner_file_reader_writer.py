@@ -25,9 +25,15 @@ class TestCRDesignerFileReaderWriter(unittest.TestCase):
         scenario = crdesigner_reader.open(verify_repair_scenario=False)[0]
         # opening it with verifying and repairing
         repaired_scenario = crdesigner_reader.open(verify_repair_scenario=True)[0]
-
         self.assertNotEqual(scenario, repaired_scenario)
         self.assertEqual(repaired_scenario, verify_and_repair_scenario(scenario)[0])
+
+        # opening it with the projection
+        projected_scenario = crdesigner_reader.open(
+            target_projection=scenario.location.geo_transformation.geo_reference
+        )[0]
+        # scenarios should be the same as the proj_string is the same
+        self.assertEqual(projected_scenario.lanelet_network, scenario.lanelet_network)
 
     def test_crdesigner_file_writer(self):
         # reading a scenario

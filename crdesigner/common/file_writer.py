@@ -6,6 +6,9 @@ from commonroad.common.writer.file_writer_interface import OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Location, Scenario, Tag
 
+from crdesigner.common.common_file_reader_writer import (
+    project_complete_scenario_and_pps,
+)
 from crdesigner.verification_repairing.map_verification_repairing import (
     verify_and_repair_scenario,
 )
@@ -49,6 +52,7 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
         overwrite_existing_file: OverwriteExistingFile = OverwriteExistingFile.ASK_USER_INPUT,
         check_validity: bool = False,
         verify_repair_scenario=False,
+        target_projection: str = None,
     ):
         """
         Writes CommonRoad scenario and planning problems to file.
@@ -58,8 +62,24 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
         :param overwrite_existing_file: Overwriting mode
         :param check_validity: Validity check or not
         :param verify_repair_scenario: Boolean that indicates if the function will verify and repair the scenario.
+        :param target_projection: Target projection that the user provides.
         :return: Scenario and planning problems
         """
+
+        # check for a projection
+        # If target projection is not provided, no projection should be applied
+        if target_projection is not None:
+            proj_string_from = self._file_writer.scenario.location.geo_transformation.geo_reference
+            # If no source projection is defined in the scenario location element, we should skip the projection
+            if proj_string_from is not None:
+                self._file_writer.scenario, self._file_writer.planning_problem_set = project_complete_scenario_and_pps(
+                    self._file_writer.scenario,
+                    self._file_writer.planning_problem_set,
+                    proj_string_from,
+                    target_projection,
+                )
+
+        # check for verifying and repairing the scenario
         if verify_repair_scenario is True:
             self._file_writer.scenario = verify_and_repair_scenario(self._file_writer.scenario)[0]
 
