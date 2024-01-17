@@ -6,8 +6,11 @@ from typing import Dict, List, Union
 import numpy as np
 from commonroad.geometry.polyline_util import compute_polyline_lengths  # type: ignore
 from commonroad.scenario.lanelet import Lanelet  # type: ignore
-from commonroad_dc.geometry.util import compute_curvature_from_polyline, compute_orientation_from_polyline, \
-    compute_pathlength_from_polyline
+from commonroad_dc.geometry.util import (
+    compute_curvature_from_polyline,
+    compute_orientation_from_polyline,
+    compute_pathlength_from_polyline,
+)
 from lxml import etree
 
 from crdesigner.common.config.opendrive_config import open_drive_config
@@ -101,8 +104,8 @@ class Road:
         self.center_number = i
 
         self.center = self.lane_list[i].left_vertices
-        self.hdg = compute_orientation_from_polyline(self.center)
-        self.center: np.array = (
+        self.hdg = compute_heading(self.center, self.lane_list[i].center_vertices)
+        self.center = (
             np.insert(
                 self.center,
                 self.center.shape[0] - 1,
@@ -114,9 +117,7 @@ class Road:
             if self.hdg[-1] != 0.0
             else self.center
         )
-        self.hdg: np.array = (
-            np.insert(self.hdg, self.hdg.shape[0] - 1, self.hdg[-1]) if self.hdg[-1] != 0.0 else self.hdg
-        )
+        self.hdg = np.insert(self.hdg, self.hdg.shape[0] - 1, self.hdg[-1]) if self.hdg[-1] != 0.0 else self.hdg
 
         for i in range(0, number_of_lanes):
             Road.cr_id_to_od[lane_list[i].lanelet_id] = Road.counting

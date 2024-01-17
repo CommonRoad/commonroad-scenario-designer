@@ -1,9 +1,9 @@
-from pathlib import Path
-import warnings
-import traceback
 import logging
-from multiprocessing import Pool
+import traceback
+import warnings
 from functools import partial
+from multiprocessing import Pool
+from pathlib import Path
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
@@ -14,15 +14,18 @@ from commonroad.visualization.mp_renderer import MPRenderer
 
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
 from crdesigner.map_conversion.opendrive.cr2odr.converter import Converter
-from crdesigner.verification_repairing.map_verification_repairing import verify_and_repair_map
 from crdesigner.verification_repairing.config import MapVerParams
+from crdesigner.verification_repairing.map_verification_repairing import (
+    verify_and_repair_map,
+)
 from crdesigner.verification_repairing.verification.formula_ids import LaneletFormulaID
 
 warnings.filterwarnings("ignore")
 date_strftime_format = "%d-%b-%y %H:%M:%S"
 message_format = "%(asctime)s - %(levelname)s - %(message)s"
-logging.basicConfig(filename='exceptions.log', encoding='utf-8', level=logging.INFO, format=message_format,
-                    datefmt=date_strftime_format)
+logging.basicConfig(
+    filename="exceptions.log", encoding="utf-8", level=logging.INFO, format=message_format, datefmt=date_strftime_format
+)
 
 
 def render_maps(network_id: str, scenario: Scenario, scenario_path: Path):
@@ -120,7 +123,7 @@ def convert_scenarios():
     script_dir = Path(__file__).parent
 
     #  Path to the folder where the script will write the new protobuf files
-    conversion_path_odr = script_dir / Path("opendrive")#
+    conversion_path_odr = script_dir / Path("opendrive")  #
     conversion_path_cr = script_dir / Path("opendrive_cr")
 
     #  Path to the folder from which the script collects the old xml files
@@ -128,21 +131,30 @@ def convert_scenarios():
     scenarios_paths = list(Path.rglob(scenarios_root_path, "*.xml"))
 
     # TODO cooperative scenarios can be directly integrated in new format
-    scenarios_paths_reduced = \
-        list(filter(lambda sc_path: "cooperative" not in str(sc_path)
-                                    and not any([dir_dupl in str(sc_path) for dir_dupl in duplicated_dirs])
-                                    and convert_single_scenario in str(sc_path)
-                                    or convert_single_scenario is None
-                                    or convert_single_scenario == "", scenarios_paths))
+    scenarios_paths_reduced = list(
+        filter(
+            lambda sc_path: "cooperative" not in str(sc_path)
+            and not any([dir_dupl in str(sc_path) for dir_dupl in duplicated_dirs])
+            and convert_single_scenario in str(sc_path)
+            or convert_single_scenario is None
+            or convert_single_scenario == "",
+            scenarios_paths,
+        )
+    )
     map_paths = list(filter(map_conversion_scenario, scenarios_paths_reduced))
     map_conversion_scenario.map_ids = set()
-    scenarios_paths = \
-        list(filter(lambda sc_path: "cooperative" not in str(sc_path)
-                                    and convert_single_scenario in str(sc_path)
-                                    or convert_single_scenario is None
-                                    or convert_single_scenario == "", scenarios_paths))
-    map_paths += list(filter(lambda sc_path: any([dir_dupl in str(sc_path) for dir_dupl in duplicated_dirs]),
-                             scenarios_paths))
+    scenarios_paths = list(
+        filter(
+            lambda sc_path: "cooperative" not in str(sc_path)
+            and convert_single_scenario in str(sc_path)
+            or convert_single_scenario is None
+            or convert_single_scenario == "",
+            scenarios_paths,
+        )
+    )
+    map_paths += list(
+        filter(lambda sc_path: any([dir_dupl in str(sc_path) for dir_dupl in duplicated_dirs]), scenarios_paths)
+    )
 
     func = partial(convert_single_map, conversion_path_odr, conversion_path_cr)
     with Pool(processes=num_cores) as pool:
@@ -160,20 +172,30 @@ def convert_single_map(conversion_path_odr: Path, conversion_path_cr: Path, scen
     """
     scenario, planning_problem_set = CommonRoadFileReader(scenario_path).open()
     scenario_id = scenario.scenario_id
-    network_id = str(scenario_id.country_id) + '_' + str(scenario_id.map_name) + '-' + str(scenario_id.map_id)
+    network_id = str(scenario_id.country_id) + "_" + str(scenario_id.map_name) + "-" + str(scenario_id.map_id)
 
     try:
-        formulas = [LaneletFormulaID.EXISTENCE_RIGHT_ADJ, LaneletFormulaID.EXISTENCE_LEFT_ADJ,
-                    LaneletFormulaID.EXISTENCE_PREDECESSOR, LaneletFormulaID.EXISTENCE_SUCCESSOR,
-                    LaneletFormulaID.NON_PREDECESSOR_AS_SUCCESSOR, LaneletFormulaID.NON_SUCCESSOR_AS_PREDECESSOR,
-                    LaneletFormulaID.POLYLINES_INTERSECTION, LaneletFormulaID.RIGHT_SELF_INTERSECTION,
-                    LaneletFormulaID.LEFT_SELF_INTERSECTION, LaneletFormulaID.POTENTIAL_SUCCESSOR,
-                    LaneletFormulaID.POTENTIAL_PREDECESSOR, LaneletFormulaID.POTENTIAL_RIGHT_MERGING_ADJ,
-                    LaneletFormulaID.POTENTIAL_LEFT_MERGING_ADJ, LaneletFormulaID.POTENTIAL_RIGHT_SAME_DIR_PARALLEL_ADJ,
-                    LaneletFormulaID.POTENTIAL_LEFT_SAME_DIR_PARALLEL_ADJ,
-                    LaneletFormulaID.POTENTIAL_RIGHT_OPPOSITE_DIR_PARALLEL_ADJ,
-                    LaneletFormulaID.POTENTIAL_LEFT_OPPOSITE_DIR_PARALLEL_ADJ,
-                    LaneletFormulaID.POTENTIAL_LEFT_FORKING_ADJ, LaneletFormulaID.POTENTIAL_RIGHT_FORKING_ADJ, ]
+        formulas = [
+            LaneletFormulaID.EXISTENCE_RIGHT_ADJ,
+            LaneletFormulaID.EXISTENCE_LEFT_ADJ,
+            LaneletFormulaID.EXISTENCE_PREDECESSOR,
+            LaneletFormulaID.EXISTENCE_SUCCESSOR,
+            LaneletFormulaID.NON_PREDECESSOR_AS_SUCCESSOR,
+            LaneletFormulaID.NON_SUCCESSOR_AS_PREDECESSOR,
+            LaneletFormulaID.POLYLINES_INTERSECTION,
+            LaneletFormulaID.RIGHT_SELF_INTERSECTION,
+            LaneletFormulaID.LEFT_SELF_INTERSECTION,
+            LaneletFormulaID.POTENTIAL_SUCCESSOR,
+            LaneletFormulaID.POTENTIAL_PREDECESSOR,
+            LaneletFormulaID.POTENTIAL_RIGHT_MERGING_ADJ,
+            LaneletFormulaID.POTENTIAL_LEFT_MERGING_ADJ,
+            LaneletFormulaID.POTENTIAL_RIGHT_SAME_DIR_PARALLEL_ADJ,
+            LaneletFormulaID.POTENTIAL_LEFT_SAME_DIR_PARALLEL_ADJ,
+            LaneletFormulaID.POTENTIAL_RIGHT_OPPOSITE_DIR_PARALLEL_ADJ,
+            LaneletFormulaID.POTENTIAL_LEFT_OPPOSITE_DIR_PARALLEL_ADJ,
+            LaneletFormulaID.POTENTIAL_LEFT_FORKING_ADJ,
+            LaneletFormulaID.POTENTIAL_RIGHT_FORKING_ADJ,
+        ]
         config = MapVerParams()
         config.verification.formulas = formulas
         scenario.replace_lanelet_network(verify_and_repair_map(scenario.lanelet_network, config)[0])
@@ -190,9 +212,14 @@ def convert_single_map(conversion_path_odr: Path, conversion_path_cr: Path, scen
             obs.obstacle_id = scenario_new.generate_object_id()
             scenario_new.add_objects(obs)
         scenario_new.scenario_id = scenario.scenario_id
-        writer = CommonRoadFileWriter(scenario=scenario_new, planning_problem_set=PlanningProblemSet(),
-                                      author=scenario.author, affiliation=scenario.affiliation,
-                                      source=scenario.source, tags=scenario.tags)
+        writer = CommonRoadFileWriter(
+            scenario=scenario_new,
+            planning_problem_set=PlanningProblemSet(),
+            author=scenario.author,
+            affiliation=scenario.affiliation,
+            source=scenario.source,
+            tags=scenario.tags,
+        )
 
         output_path = conversion_path_cr / f"{scenario_id}.xml"
         if not conversion_path_cr.exists():

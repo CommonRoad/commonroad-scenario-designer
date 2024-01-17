@@ -231,11 +231,14 @@ class Converter:
         """
         start = time.time()
         # initialize writer object
-        if self.scenario.location.geo_transformation is not None and self.scenario.location.geo_transformation.geo_reference is not None:
+        if (
+            self.scenario.location.geo_transformation is not None
+            and self.scenario.location.geo_transformation.geo_reference is not None
+        ):
             geo_reference = self.scenario.location.geo_transformation.geo_reference
         else:
             geo_reference = ""
-        self.writer = fwr.Writer(file_path_out,  geo_reference)
+        self.writer = fwr.Writer(file_path_out, geo_reference)
 
         lane_list = self.lane_net.lanelets
 
@@ -365,6 +368,7 @@ class Converter:
         road_lanes = self.extend_road(lanelet, road_lanes, left=False, append=False)
         road_lanes = self.extend_road(lanelet, road_lanes, left=True, append=True)
 
+        # remove adjacent lanes from frontier so that they are not visited anymore
         self.add_ids(road_lanes, frontier)
 
         junction_id = -1

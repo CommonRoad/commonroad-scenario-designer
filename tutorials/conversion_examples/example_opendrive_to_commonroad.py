@@ -1,36 +1,48 @@
-import os
 from pathlib import Path
 
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
-from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import Tag
+import matplotlib.pyplot as plt
+import numpy as np
+from commonroad.visualization.mp_renderer import MPRenderer
 
-from crdesigner.common.config.opendrive_config import open_drive_config
-from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
-
-input_path = Path.cwd().parent.parent / "tests/map_conversion/test_maps/odr2cr/opendrive-1.xodr"
-output_path = Path.cwd() / "example_files/opendrive/opendrive-1.xml"
-
-config = open_drive_config
-config.lanelet_types_backwards_compatible = False
-
-# load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
-scenario = opendrive_to_commonroad(input_path)
-
-# store converted file as CommonRoad scenario
-writer = CommonRoadFileWriter(
-    scenario=scenario,
-    planning_problem_set=PlanningProblemSet(),
-    author="Sebastian Maierhofer",
-    affiliation="Technical University of Munich",
-    source="CommonRoad Scenario Designer",
-    tags={Tag.URBAN},
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.network import (
+    Network,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import (
+    parse_opendrive,
 )
 
-# create a folder for the example file if it does not exist
-if os.path.exists(Path.cwd() / "example_files") is False:
-    os.mkdir(Path.cwd() / "example_files")
-if os.path.exists(Path.cwd() / "example_files/opendrive") is False:
-    os.mkdir(Path.cwd() / "example_files/opendrive")
+input_path = Path("/home/sebastian/Downloads/CrossingComplex8Course.xodr")
 
-writer.write_to_file(str(output_path), OverwriteExistingFile.ALWAYS)
+
+opendrive = parse_opendrive(input_path)
+road_network = Network()
+road_network.load_opendrive(opendrive)
+scenario = road_network.export_commonroad_scenario()
+
+road = opendrive.roads[0]
+
+plt.figure(figsize=(25, 10))
+
+
+rnd = MPRenderer()
+# rnd.draw_params.lanelet_network.lanelet.fill_lanelet = False
+rnd.draw_params.lanelet_network.lanelet.draw_line_markings = False
+
+
+scenario.translate_rotate(-scenario.lanelet_network.lanelets[0].left_vertices[0], np.pi / 2)
+scenario.draw(rnd)
+rnd.render()
+la = scenario.lanelet_network.lanelets[0]
+for lane_section in road.planView._geo_lengths:
+    if lane_section > 11 or lane_section < 0.1:
+        continue
+    line = la.interpolate_position(lane_section)
+    plt.plot(
+        [la.left_vertices[line[-1]][0], la.right_vertices[line[-1]][0]],
+        [la.left_vertices[line[-1]][1], la.right_vertices[line[-1]][1]],
+        "b-",
+        zorder=10,
+    )
+plt.plot([pos[0] for pos in la.left_vertices], [pos[1] for pos in la.left_vertices], "r->", zorder=10)
+
+plt.show()

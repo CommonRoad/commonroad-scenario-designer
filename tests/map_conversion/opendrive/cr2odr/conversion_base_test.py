@@ -33,7 +33,7 @@ class ConversionBaseTestCases:
             self.converter = Converter(self.file_path_in)
 
         # cuts out the date timestamp of both maps
-        # (as they wont be equal) and compares them
+        # (as they won't be equal) and compares them
         def check_with_ground_truth(self, reference_file: Path_T):
             with open("{}".format(self.file_path_out), "r") as converted_file:
                 converted_tree = etree.parse(converted_file).getroot()
