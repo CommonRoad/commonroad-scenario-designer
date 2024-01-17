@@ -6,9 +6,7 @@ from commonroad.common.writer.file_writer_interface import OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Location, Scenario, Tag
 
-from crdesigner.common.common_file_reader_writer import (
-    project_scenario_and_pps,
-)
+from crdesigner.common.common_file_reader_writer import project_scenario_and_pps
 from crdesigner.verification_repairing.map_verification_repairing import (
     verify_and_repair_scenario,
 )
