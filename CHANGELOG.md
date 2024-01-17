@@ -17,8 +17,8 @@
 - cr2lanelet: Regulatory element to corresponding way relation for lanes (required by autoware)
 - Option to display the aerial image of the current position
 - By default, if no lbdv creditials are stored, the open source credentials are used
-- File reader that optionally verifies and repairs the road network using the new map verification.
-- Additional option to the s-d file reader and writer to project the scenario
+- File reader that optionally verifies and repairs the road network
+- Option for the scenario designer file reader and writer to project the scenario
 - Possibility to change the geo reference and translate the scenario
 
 ### Changed
