@@ -1,10 +1,10 @@
 import os
 from pathlib import Path
 
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.map_conversion.map_conversion_interface import (
     osm_to_commonroad_using_sumo,
 )
@@ -13,7 +13,7 @@ scenario = osm_to_commonroad_using_sumo(
     str(Path.cwd().parent.parent / "tests/map_conversion/test_maps/osm/ped_crossing.osm")
 )
 
-writer = CommonRoadFileWriter(
+writer = CRDesignerFileWriter(
     scenario=scenario,
     planning_problem_set=PlanningProblemSet(),
     author="YOUR NAME",

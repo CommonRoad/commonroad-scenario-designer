@@ -8,12 +8,12 @@ from typing import List
 
 import numpy as np
 import pytest
-from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.obstacle import ObstacleType
 from parameterized import parameterized
 from sumocr.interface.sumo_simulation import SumoSimulation
 
+from crdesigner.common.file_reader import CRDesignerFileReader
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.map_conversion.sumo_map.config import SumoConfig
 from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
 
@@ -46,7 +46,7 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
 
         self.path = os.path.join(self.cwd_path, folder, cr_file_name + ".xml")
 
-        self.scenario, planning_problem = CommonRoadFileReader(self.path).open()
+        self.scenario, planning_problem = CRDesignerFileReader(self.path).open()
 
         # translate scenario to center
         centroid = np.mean(
@@ -84,7 +84,7 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
         self.assertIsNotNone(simulated_scenario)
 
         # write simulated scenario to disk
-        CommonRoadFileWriter(
+        CRDesignerFileWriter(
             simulated_scenario,
             None,
             author=self.scenario.author,

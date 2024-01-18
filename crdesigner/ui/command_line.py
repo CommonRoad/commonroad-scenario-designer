@@ -3,14 +3,14 @@ from pathlib import Path
 from typing import List, Optional
 
 import typer
-from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Scenario, Tag
 from typing_extensions import Annotated
 
 from crdesigner.common.config.general_config import general_config
 from crdesigner.common.config.lanelet2_config import lanelet2_config
+from crdesigner.common.file_reader import CRDesignerFileReader
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.map_conversion.map_conversion_interface import (
     commonroad_to_lanelet,
     commonroad_to_sumo,
@@ -43,7 +43,7 @@ def store_scenario(
     @param tags: Tags of CommonRoad scenario.
     """
     tags = set([Tag(t) for t in tags]) if tags is not None else None
-    writer = CommonRoadFileWriter(
+    writer = CRDesignerFileWriter(
         scenario=sc,
         planning_problem_set=PlanningProblemSet(),
         author=author,
@@ -90,10 +90,10 @@ def gui(ctx: typer.Context):
 
 @cli.command()
 def verify_map(ctx: typer.Context):
-    sc, pp = CommonRoadFileReader(ctx.obj["input_file"]).open()
+    sc, pp = CRDesignerFileReader(ctx.obj["input_file"]).open()
     sc, valid = verify_and_repair_scenario(sc)
     if not valid:
-        writer = CommonRoadFileWriter(scenario=sc, planning_problem_set=pp)
+        writer = CRDesignerFileWriter(scenario=sc, planning_problem_set=pp)
 
         file_path = str(ctx.obj["output_file"]) if ctx.obj["output_file"] is not None else str(ctx.obj["input_file"])
 
