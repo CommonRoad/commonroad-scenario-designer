@@ -433,30 +433,6 @@ class AddLaneletWidget:
         self.toolbox.line2 = QFrame()
         self.toolbox.line2.setFrameShape(QFrame.Shape.HLine)
         self.toolbox.layout_lanelet_adding_groupbox.insertRow(17, self.toolbox.line2)
-        """
-        self.toolbox.line1 = QFrame()
-        self.toolbox.line1.setFrameShape(QFrame.Shape.HLine)
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(4, self.toolbox.line1)
-
-        self.toolbox.successors = CheckableComboBox()
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(6, "Successors:", self.toolbox.successors)
-
-        # Lanelet Length and Width
-        self.init_length_width()
-
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(7, "Length [m]", self.toolbox.lanelet_length)
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(8, "Width [m]", self.toolbox.lanelet_width)
-
-        self.add_curved_fields(10)
-        self.add_line_marking_fields(12)
-        self.add_neighboring_lanelets_fields(14)
-        self.add_advanced_fields(16)
-
-        # seperation line at the end of place at position block
-        self.toolbox.line2 = QFrame()
-        self.toolbox.line2.setFrameShape(QFrame.Shape.HLine)
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(17, self.toolbox.line2)
-        """
 
     def remove_adding_method_fields(self):
         if self.toolbox.adding_method == "place_at_position":

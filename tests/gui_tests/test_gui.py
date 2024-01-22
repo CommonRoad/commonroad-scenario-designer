@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 from commonroad.common.common_lanelet import LineMarking
-from commonroad.common.common_scenario import FileInformation
+from commonroad.common.common_scenario import FileInformation, ScenarioID
 from commonroad.geometry.shape import Rectangle
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.obstacle import ObstacleType, StaticObstacle
@@ -31,6 +31,8 @@ def test_pyqt_framework(qtbot):
     qtbot.addWidget(window.mwindow_ui)
 
     # ----- PERFORM TESTS ------ #
+    # -- Adding lanelets by connect to selected
+    execute_add_lanelet_test(window)
     # -- TOOLBAR
     execute_toolbar_test(window)
     # -- Scenario
@@ -271,6 +273,40 @@ def execute_add_obstacle_test(window):
         print(f"Add Obstacle failed with exception: {str(e)}.")
 
     assert expected_obstacle == actual_obstacle
+
+
+def execute_add_lanelet_test(window):
+    # set a scenario in the window
+    scenario = Scenario(0.1, ScenarioID())
+    window.scenario_model.set_scenario(scenario=scenario)
+    # simulate a clikc on the place_at_position button
+    window.road_network_toolbox.road_network_toolbox_ui.place_at_position.click()
+    # add a lanelet at default position
+    window.road_network_toolbox.lanelet_controller.add_lanelet()
+    first_l_id = window.road_network_toolbox.last_added_lanelet_id
+
+    # add second lanelet as predecessor
+    window.road_network_toolbox.road_network_toolbox_ui.connect_to_selected_selection.click()
+    window.road_network_toolbox.road_network_toolbox_ui.as_predecessor.setChecked(True)
+    window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one.setCurrentText(str(first_l_id))
+    window.road_network_toolbox.lanelet_controller.add_lanelet()
+    predecessor_l_id = window.road_network_toolbox.last_added_lanelet_id
+
+    # add third lanelet as successor
+    window.road_network_toolbox.road_network_toolbox_ui.connect_to_selected_selection.click()
+    window.road_network_toolbox.road_network_toolbox_ui.as_predecessor.setChecked(False)
+    window.road_network_toolbox.road_network_toolbox_ui.as_successor.setChecked(True)
+    window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one.setCurrentText(str(first_l_id))
+    window.road_network_toolbox.lanelet_controller.add_lanelet()
+    successor_l_id = window.road_network_toolbox.last_added_lanelet_id
+    # find all three created lanelets
+    first_lanelet = window.scenario_model.find_lanelet_by_id(first_l_id)
+    predecessor_lanelet = window.scenario_model.find_lanelet_by_id(predecessor_l_id)
+    successor_lanelet = window.scenario_model.find_lanelet_by_id(successor_l_id)
+
+    # check if predecessor and successor relationship is correctly set
+    assert successor_lanelet.lanelet_id in first_lanelet.successor
+    assert predecessor_lanelet.lanelet_id in first_lanelet.predecessor
 
 
 def execute_load_scenario_test(window):
