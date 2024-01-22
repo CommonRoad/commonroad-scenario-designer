@@ -999,7 +999,6 @@ class AddLaneletController:
         connect_to_last_selection = self.road_network_toolbox_ui.connect_to_previous_selection.isChecked()
         connect_to_predecessors_selection = self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked()
         connect_to_successors_selection = self.road_network_toolbox_ui.connect_to_successors_selection.isChecked()
-        connect_to_selected = self.road_network_toolbox_ui.connect_to_selected_selection.isChecked()
 
         if connect_to_last_selection and self.road_network_controller.last_added_lanelet_id is None:
             self.road_network_controller.text_browser.append(

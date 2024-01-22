@@ -31,8 +31,6 @@ def test_pyqt_framework(qtbot):
     qtbot.addWidget(window.mwindow_ui)
 
     # ----- PERFORM TESTS ------ #
-    # -- Adding lanelets by connect to selected
-    execute_add_lanelet_test(window)
     # -- TOOLBAR
     execute_toolbar_test(window)
     # -- Scenario
@@ -43,6 +41,8 @@ def test_pyqt_framework(qtbot):
     execute_menubar_test(window)
     # -- Load Scenario
     execute_load_scenario_test(window)
+    # -- Adding lanelets by connect to selected
+    execute_add_lanelet_test(window)
 
     if os.path.exists(path_autosave):
         os.remove(path_autosave)
@@ -229,6 +229,7 @@ def execute_scenario_tests(window):
 
     try:
         window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.setCurrentIndex(1)
+        window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.set_checked_items(['1'])
         actual_selected_lanelet_length = window.road_network_toolbox.get_float(
             window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_length
         )
