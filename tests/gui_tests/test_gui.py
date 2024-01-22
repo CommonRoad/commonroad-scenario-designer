@@ -229,7 +229,7 @@ def execute_scenario_tests(window):
 
     try:
         window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.setCurrentIndex(1)
-        window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.set_checked_items(['1'])
+        window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.set_checked_items(["1"])
         actual_selected_lanelet_length = window.road_network_toolbox.get_float(
             window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_length
         )

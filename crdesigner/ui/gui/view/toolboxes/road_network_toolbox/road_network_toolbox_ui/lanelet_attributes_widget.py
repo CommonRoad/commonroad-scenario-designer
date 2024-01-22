@@ -479,12 +479,12 @@ class LaneletAttributesWidget:
 
         try:
             x = x_start + (1 / length_old * (x_end - x_start) * length_new)
-        except Exception as _:
+        except ZeroDivisionError:
             x = x_start
 
         try:
             y = y_start + (1 / length_old * (y_end - y_start) * length_new)
-        except Exception as _:
+        except ZeroDivisionError:
             y = y_start
 
         self.toolbox.selected_end_position_x_changed = True
