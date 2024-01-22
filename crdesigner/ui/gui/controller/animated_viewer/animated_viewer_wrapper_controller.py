@@ -1,17 +1,18 @@
 """Wrapper for the middle visualization."""
-from typing import Union, List
+from typing import List, Union
 
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.obstacle import Obstacle
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from PyQt6.QtWidgets import QVBoxLayout, QWidget
 from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QVBoxLayout, QWidget
+
 from crdesigner.config.logging import logger
 from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_controller import (
     AnimatedViewerController,
 )
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-from crdesigner.ui.gui.utilities.toolbox_ui import PosB, CheckableComboBox
+from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox, PosB
 
 
 class AnimatedViewerWrapperController:

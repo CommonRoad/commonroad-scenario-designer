@@ -2,6 +2,7 @@ import copy
 import math
 import warnings
 from typing import List, Union
+
 import numpy as np
 import PyQt6
 from commonroad.geometry.shape import Circle, Rectangle
@@ -20,10 +21,9 @@ from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt6 import QtCore
-from PyQt6.QtCore import QPoint
+from PyQt6.QtCore import QPoint, Qt
 from PyQt6.QtGui import QCursor, QMouseEvent
 from PyQt6.QtWidgets import QSizePolicy
-from PyQt6.QtCore import Qt
 
 from crdesigner.config.gui_config import DrawParamsCustom, gui_config
 from crdesigner.config.logging import logger
