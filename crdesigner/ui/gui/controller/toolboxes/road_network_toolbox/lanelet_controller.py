@@ -502,7 +502,9 @@ class AddLaneletController:
         lanelet_width = self.road_network_controller.get_float(self.road_network_toolbox_ui.selected_lanelet_width)
         line_marking_left = LineMarking(self.road_network_toolbox_ui.selected_line_marking_left.currentText())
         line_marking_right = LineMarking(self.road_network_toolbox_ui.selected_line_marking_right.currentText())
+
         num_vertices = int(self.road_network_toolbox_ui.selected_number_vertices.text())
+
         adjacent_left = (
             int(self.road_network_toolbox_ui.selected_adjacent_left.currentText())
             if self.road_network_toolbox_ui.selected_adjacent_left.currentText() != "None"
