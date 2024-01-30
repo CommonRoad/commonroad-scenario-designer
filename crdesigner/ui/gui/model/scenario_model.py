@@ -21,7 +21,7 @@ from commonroad.scenario.scenario import (
     Tag,
 )
 from commonroad.scenario.traffic_light import TrafficLight
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficSign, TrafficSignIDCountries
+from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignIDCountries
 from PyQt6.QtCore import QObject, pyqtSignal
 
 from crdesigner.common.logging import logger

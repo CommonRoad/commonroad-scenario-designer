@@ -1,6 +1,7 @@
 """
 This module provides methods to download OSM maps within the application.
 """
+
 import xml.etree.ElementTree
 from typing import Tuple
 from urllib.request import urlopen

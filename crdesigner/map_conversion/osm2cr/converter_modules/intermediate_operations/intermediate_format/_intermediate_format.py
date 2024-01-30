@@ -30,7 +30,6 @@ Crossings = Dict[int, Set[int]]
 
 
 class IntermediateFormat:
-
     """
     Class that represents the intermediate format
     """

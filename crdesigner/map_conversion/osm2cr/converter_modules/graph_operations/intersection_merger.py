@@ -3,6 +3,7 @@ This module brings the functionality to merge intersections which are very close
 This occurs sometimes at large intersection in OSM.
 It was, however, found, that this module is often not very useful.
 """
+
 from queue import Queue
 from typing import Set, Tuple
 
