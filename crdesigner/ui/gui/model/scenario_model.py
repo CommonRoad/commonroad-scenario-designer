@@ -21,7 +21,7 @@ from commonroad.scenario.scenario import (
     Tag,
 )
 from commonroad.scenario.traffic_light import TrafficLight
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficSign
+from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficSign, TrafficSignIDCountries
 from PyQt6.QtCore import QObject, pyqtSignal
 
 from crdesigner.common.logging import logger
@@ -462,9 +462,7 @@ class ScenarioModel(QObject):
         @param add_traffic_lights: boolean if traffic lights should be added
         """
         self._update_scenario()
-        country_signs = globals()[
-            "TrafficSignID" + SupportedTrafficSignCountry(self.get_country_id()).name.capitalize()
-        ]
+        country_signs = TrafficSignIDCountries[self.get_country_id()]
         intersection, new_traffic_signs, new_traffic_lights, new_lanelets = MapCreator.create_three_way_intersection(
             width,
             diameter,
@@ -494,9 +492,7 @@ class ScenarioModel(QObject):
         @param add_traffic_lights: boolean if traffic lights should be added
         """
         self._update_scenario()
-        country_signs = globals()[
-            "TrafficSignID" + SupportedTrafficSignCountry(self.get_country_id()).name.capitalize()
-        ]
+        country_signs = TrafficSignIDCountries[self.get_country_id()]
         intersection, new_traffic_signs, new_traffic_lights, new_lanelets = MapCreator.create_four_way_intersection(
             width,
             diameter,
