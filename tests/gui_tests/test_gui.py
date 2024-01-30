@@ -5,7 +5,7 @@ import numpy as np
 from commonroad.common.common_lanelet import LineMarking
 from commonroad.common.common_scenario import FileInformation, ScenarioID
 from commonroad.geometry.shape import Rectangle
-from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
+from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.scenario.obstacle import ObstacleType, StaticObstacle
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.state import InitialState
@@ -94,8 +94,12 @@ def execute_menubar_test(window):
 def execute_toolbar_test(window):
     # action_new
     toolbar_wrapper_action_new_successful = False
-    scenario = Scenario(0.1, file_information=FileInformation(affiliation="Technical University of Munich",
-            source="CommonRoad Scenario Designer"), )
+    scenario = Scenario(
+        0.1,
+        file_information=FileInformation(
+            affiliation="Technical University of Munich", source="CommonRoad Scenario Designer"
+        ),
+    )
     net = LaneletNetwork()
     scenario.replace_lanelet_network(net)
     scenario_in_app = None
@@ -159,8 +163,12 @@ def execute_toolbar_test(window):
 
 def execute_scenario_tests(window):
     # Tests for adding a Lanelet to a Scenario
-    scenario = Scenario(0.1, file_information=FileInformation(affiliation="Technical University of Munich",
-            source="CommonRoad Scenario Designer"), )
+    scenario = Scenario(
+        0.1,
+        file_information=FileInformation(
+            affiliation="Technical University of Munich", source="CommonRoad Scenario Designer"
+        ),
+    )
     net = LaneletNetwork()
     scenario.replace_lanelet_network(net)
     lanelet_start_pos_x = 0.0
@@ -185,10 +193,28 @@ def execute_scenario_tests(window):
     traffic_lights = set()
     stop_line_at_end = False
     stop_line_at_beginning = False
-    lanelet = MapCreator.create_straight(lanelet_width, lanelet_length, num_vertices, lanelet_id, lanelet_type,
-            predecessors, successors, adjacent_left, adjacent_right, adjacent_left_same_direction,
-            adjacent_right_same_direction, user_one_way, user_bidirectional, line_marking_left, line_marking_right,
-            stop_line, traffic_signs, traffic_lights, stop_line_at_end, stop_line_at_beginning, )
+    lanelet = MapCreator.create_straight(
+        lanelet_width,
+        lanelet_length,
+        num_vertices,
+        lanelet_id,
+        lanelet_type,
+        predecessors,
+        successors,
+        adjacent_left,
+        adjacent_right,
+        adjacent_left_same_direction,
+        adjacent_right_same_direction,
+        user_one_way,
+        user_bidirectional,
+        line_marking_left,
+        line_marking_right,
+        stop_line,
+        traffic_signs,
+        traffic_lights,
+        stop_line_at_end,
+        stop_line_at_beginning,
+    )
 
     lanelet.translate_rotate(np.array([lanelet_start_pos_x, lanelet_start_pos_y]), 0)
     scenario.add_objects(lanelet)
@@ -212,11 +238,13 @@ def execute_scenario_tests(window):
         window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.setCurrentIndex(1)
         window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.set_checked_items(["1"])
         actual_selected_lanelet_length = window.road_network_toolbox.get_float(
-                window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_length)
+            window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_length
+        )
         window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_length.setText("20.0")
         window.road_network_toolbox.road_network_toolbox_ui.button_update_lanelet.click()
         changed_lanelet_length_after_update = window.road_network_toolbox.lanelet_controller.lanelet_ui.get_length(
-                window.scenario_model.find_lanelet_by_id(1))
+            window.scenario_model.find_lanelet_by_id(1)
+        )
 
     except Exception as e:
         print("Select_lanelet failed with exception: " + str(e))
@@ -229,9 +257,14 @@ def execute_scenario_tests(window):
 
 
 def execute_add_obstacle_test(window):
-    expected_obstacle = StaticObstacle(obstacle_id=2, obstacle_type=ObstacleType("unknown"),
-            obstacle_shape=Rectangle(length=5.0, width=5.0), initial_state=InitialState(
-                    **{"position": np.array([0.0, 0.0]), "orientation": math.radians(0.0), "time_step": 1}), )
+    expected_obstacle = StaticObstacle(
+        obstacle_id=2,
+        obstacle_type=ObstacleType("unknown"),
+        obstacle_shape=Rectangle(length=5.0, width=5.0),
+        initial_state=InitialState(
+            **{"position": np.array([0.0, 0.0]), "orientation": math.radians(0.0), "time_step": 1}
+        ),
+    )
 
     actual_obstacle = None
 
@@ -293,7 +326,8 @@ def execute_add_lanelet_test(window):
 def execute_remove_multiple_lanelet_test(window):
     first_lanelet, predecessor_lanelet, successor_lanelet = add_lanelets(window=window)
     window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.set_checked_items(
-            [str(first_lanelet.lanelet_id), str(predecessor_lanelet.lanelet_id), str(successor_lanelet.lanelet_id)])
+        [str(first_lanelet.lanelet_id), str(predecessor_lanelet.lanelet_id), str(successor_lanelet.lanelet_id)]
+    )
     window.road_network_toolbox.lanelet_controller.remove_lanelet()
 
     assert 0 == len(window.scenario_model.get_current_scenario().lanelet_network.lanelets)
@@ -303,15 +337,16 @@ def execute_update_multiple_lanelet_test(window):
     first_lanelet, predecessor_lanelet, successor_lanelet = add_lanelets(window=window)
 
     # window.road_network_toolbox.lanelet_controller.lanelet_ui.set_default_lanelet_information()
-    window.road_network_toolbox.road_network_toolbox_ui.selected_number_vertices.setText('20')
+    window.road_network_toolbox.road_network_toolbox_ui.selected_number_vertices.setText("20")
     window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.set_checked_items(
-            [str(first_lanelet.lanelet_id), str(predecessor_lanelet.lanelet_id), str(successor_lanelet.lanelet_id)])
-    window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_start_position_x.setText('0')
-    window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_start_position_y.setText('0')
-    window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_end_position_x.setText('10')
-    window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_end_position_y.setText('0')
-    window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_length.setText('10')
-    window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_width.setText('3')
+        [str(first_lanelet.lanelet_id), str(predecessor_lanelet.lanelet_id), str(successor_lanelet.lanelet_id)]
+    )
+    window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_start_position_x.setText("0")
+    window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_start_position_y.setText("0")
+    window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_end_position_x.setText("10")
+    window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_end_position_y.setText("0")
+    window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_length.setText("10")
+    window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_width.setText("3")
     window.road_network_toolbox.lanelet_controller.update_lanelet()
 
     for lanelet in [first_lanelet, predecessor_lanelet, successor_lanelet]:
@@ -323,10 +358,11 @@ def execute_translate_multiple_lanelet_test(window):
     first_lanelet, predecessor_lanelet, successor_lanelet = add_lanelets(window=window)
     # add them to the selected lanelets combo box
     window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one.set_checked_items(
-            [str(first_lanelet.lanelet_id), str(predecessor_lanelet.lanelet_id), str(successor_lanelet.lanelet_id)])
+        [str(first_lanelet.lanelet_id), str(predecessor_lanelet.lanelet_id), str(successor_lanelet.lanelet_id)]
+    )
 
-    window.road_network_toolbox.road_network_toolbox_ui.y_translation.setText('10')
-    window.road_network_toolbox.road_network_toolbox_ui.x_translation.setText('10')
+    window.road_network_toolbox.road_network_toolbox_ui.y_translation.setText("10")
+    window.road_network_toolbox.road_network_toolbox_ui.x_translation.setText("10")
     # save the old left vertices of each lanelet
     first_lanelet_left_vertices_old = first_lanelet.left_vertices
     predecessor_lanelet_left_vertices_old = predecessor_lanelet.left_vertices
@@ -350,20 +386,29 @@ def execute_translate_multiple_lanelet_test(window):
 def calculate_width(lanelet_1: Lanelet):
     return lanelet_1.left_vertices[0][1] - lanelet_1.right_vertices[0][1]
 
+
 def execute_rotate_multiple_lanelet_test(window):
     # create three connected lanelets
     first_lanelet, predecessor_lanelet, successor_lanelet = add_lanelets(window=window)
     # add them to the selected lanelets combo box
     window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one.set_checked_items(
-            [str(first_lanelet.lanelet_id), str(predecessor_lanelet.lanelet_id), str(successor_lanelet.lanelet_id)])
+        [str(first_lanelet.lanelet_id), str(predecessor_lanelet.lanelet_id), str(successor_lanelet.lanelet_id)]
+    )
 
     window.road_network_toolbox.road_network_toolbox_ui.rotation_angle.setValue(90)
 
     window.road_network_toolbox.lanelet_controller.rotate_lanelet()
     # iterate through lanelets and compare with new lanelets
     for lanelet in [first_lanelet, predecessor_lanelet, successor_lanelet]:
-        new_lanelet = [elem for elem in window.scenario_model.get_current_scenario().lanelet_network.lanelets if elem.lanelet_id == lanelet.lanelet_id][0]
-        assert lanelet.left_vertices[-1][1] + 10 - (calculate_width(lanelet_1=first_lanelet) / 2) == new_lanelet.left_vertices[-1][1]
+        new_lanelet = [
+            elem
+            for elem in window.scenario_model.get_current_scenario().lanelet_network.lanelets
+            if elem.lanelet_id == lanelet.lanelet_id
+        ][0]
+        assert (
+            lanelet.left_vertices[-1][1] + 10 - (calculate_width(lanelet_1=first_lanelet) / 2)
+            == new_lanelet.left_vertices[-1][1]
+        )
 
 
 def execute_load_scenario_test(window):
