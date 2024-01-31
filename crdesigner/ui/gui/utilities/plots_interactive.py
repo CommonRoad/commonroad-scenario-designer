@@ -4,6 +4,7 @@ The plot objects allow some interaction with them.
 All plot functions in this module can plot in cartesian coordinates as well as in latitude and longitude.
 
 """
+
 from abc import ABC
 from typing import Dict, List, Optional, Set, Tuple, Union
 

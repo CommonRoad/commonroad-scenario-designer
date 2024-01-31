@@ -1,4 +1,5 @@
 """Wrapper for the middle visualization."""
+
 from typing import List, Union
 
 from commonroad.scenario.lanelet import Lanelet

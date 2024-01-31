@@ -1,6 +1,7 @@
 """
 This module provides methods to download and use aerial images from Bing Maps
 """
+
 import json
 import os
 from io import BytesIO

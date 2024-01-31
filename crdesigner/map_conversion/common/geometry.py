@@ -1,6 +1,7 @@
 """
 This module provides various methods to handle geometric problems.
 """
+
 from typing import Iterable, List, Optional, Tuple
 
 import numpy as np

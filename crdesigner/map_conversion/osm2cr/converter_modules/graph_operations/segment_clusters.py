@@ -1,6 +1,7 @@
 """
 This module holds all methods necessary to cluster segments at intersections.
 """
+
 from typing import Dict, List, Set, Tuple
 
 import numpy as np

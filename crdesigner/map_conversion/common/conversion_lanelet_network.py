@@ -1,5 +1,6 @@
 """Module to enhance LaneletNetwork class,
 so it can be used for conversion from the opendrive format."""
+
 import itertools
 import logging
 import warnings

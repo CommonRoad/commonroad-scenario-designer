@@ -2,6 +2,7 @@
 This module provides functions to analyse the available data.
 It is not used in the conversion process.
 """
+
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import (
     road_graph,
 )

@@ -2,6 +2,7 @@
 This module holds all interaction between this application and the ***CommonRoad python tools**.
 It allows to export a scenario to CR or plot a CR scenario.
 """
+
 import logging
 from typing import List, Tuple
 

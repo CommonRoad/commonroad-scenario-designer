@@ -1,5 +1,6 @@
 """ This class contains functions for converting a CommonRoad map into a .net.xml SUMO map
 """
+
 import itertools
 import logging
 import os

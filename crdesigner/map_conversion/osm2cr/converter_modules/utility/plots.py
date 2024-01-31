@@ -2,6 +2,7 @@
 This module provides many functions to plot a scenario.
 It is not used in the conversion process.
 """
+
 import matplotlib.axes as axis
 import matplotlib.pyplot as plt
 import numpy as np

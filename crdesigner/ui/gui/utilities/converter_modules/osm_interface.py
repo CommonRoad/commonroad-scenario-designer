@@ -2,7 +2,6 @@
 This module contains the GUI of the osm -> CR converter
 """
 
-
 import os
 
 from matplotlib.pyplot import close
