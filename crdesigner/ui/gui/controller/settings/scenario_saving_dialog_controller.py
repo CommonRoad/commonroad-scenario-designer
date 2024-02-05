@@ -17,7 +17,7 @@ from commonroad.scenario.scenario import (
 )
 from PyQt6.QtWidgets import QFileDialog, QLineEdit, QMessageBox
 
-from crdesigner.common.config import gui_config
+from crdesigner.common.config.gui_config import gui_config
 from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.common.logging import logger
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
@@ -210,9 +210,13 @@ class ScenarioSavingDialogController:
             )
             filename = DIR_AUTOSAVE + "/autosave" + ".xml"
             if self.current_pps is None:
-                writer.write_scenario_to_file(filename, OverwriteExistingFile.ALWAYS)
+                writer.write_scenario_to_file(
+                    filename, OverwriteExistingFile.ALWAYS, verify_repair_scenario=gui_config.verify_repair_scenario
+                )
             else:
-                writer.write_to_file(filename, OverwriteExistingFile.ALWAYS)
+                writer.write_to_file(
+                    filename, OverwriteExistingFile.ALWAYS, verify_repair_scenario=gui_config.verify_repair_scenario
+                )
             sys.stdout = original_stdout
             sys.stderr = original_stderr
             logging.getLogger().setLevel(original_level)
