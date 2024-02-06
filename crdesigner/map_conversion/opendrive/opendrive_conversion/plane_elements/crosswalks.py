@@ -4,6 +4,7 @@ import numpy as np
 
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 
 
 def get_crosswalks(road: Road) -> List[ConversionLanelet]:
