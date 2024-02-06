@@ -1,4 +1,5 @@
 import copy
+import os
 import unittest
 from pathlib import Path
 
@@ -6,6 +7,7 @@ from commonroad.common.writer.file_writer_interface import OverwriteExistingFile
 
 from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.common.file_writer import CRDesignerFileWriter
+from crdesigner.verification_repairing.config import MapVerParams
 from crdesigner.verification_repairing.map_verification_repairing import (
     verify_and_repair_scenario,
 )
@@ -39,6 +41,30 @@ class TestCRDesignerFileReaderWriter(unittest.TestCase):
         projected_scenario = crdesigner_reader.open(target_projection="+proj=utm +zone=30 +ellps=WGS84")[0]
         # scenarios should not be the same as the projections are different
         self.assertNotEqual(projected_scenario, scenario)
+
+    def test_crdesigner_file_reader_error_visualization(self):
+        # reading a scenario
+        crdesigner_reader = CRDesignerFileReader(
+            Path(__file__).parent.parent / "map_verification/test_maps/USA_US101-9_1_T-1.xml"
+        )
+
+        # creating a path for error visualization images
+        if Path.exists(Path.cwd() / "error_visualization_images") is False:
+            os.mkdir(Path.cwd() / "error_visualization_images")
+
+        # defining map verification parameters for error visualization
+        mapver_params = MapVerParams()
+        mapver_params.evaluation.file_format = "svg"
+        mapver_params.evaluation.invalid_states_draw_dir = "./error_visualization_images"
+        # assigning the map verification parameters to the file reader
+        crdesigner_reader.mapver_params = mapver_params
+
+        # opening the reader, this should create visualization files
+        crdesigner_reader.open(verify_repair_scenario=True)
+
+        # checking that the visualization files exist
+        self.assertTrue(Path.exists(Path.cwd() / "error_visualization_images/initial_result_USA_US101-9.svg"))
+        self.assertTrue(Path.exists(Path.cwd() / "error_visualization_images/final_result_USA_US101-9.svg"))
 
     def test_crdesigner_file_writer(self):
         # reading a scenario
@@ -80,3 +106,34 @@ class TestCRDesignerFileReaderWriter(unittest.TestCase):
         self.assertNotEqual(scenario, writer_repaired_scenario)
         self.assertNotEqual(scenario, function_repaired_scenario)
         self.assertEqual(writer_repaired_scenario, function_repaired_scenario)
+
+    def test_crdesigner_file_writer_error_visualization(self):
+        # reading a scenario
+        crdesigner_reader = CRDesignerFileReader(
+            Path(__file__).parent.parent / "map_verification/test_maps/CHN_Merging-1.xml"
+        )
+        scenario, pp = crdesigner_reader.open()
+
+        # creating a path for error visualization images
+        if Path.exists(Path.cwd() / "error_visualization_images") is False:
+            os.mkdir(Path.cwd() / "error_visualization_images")
+
+        # defining map verification parameters for error visualization
+        mapver_params = MapVerParams()
+        mapver_params.evaluation.file_format = "svg"
+        mapver_params.evaluation.invalid_states_draw_dir = "./error_visualization_images"
+
+        crdesigner_writer = CRDesignerFileWriter(scenario, pp)
+        # assigning the map verification parameters to the file writer
+        crdesigner_writer.mapver_params = mapver_params
+
+        # writing the scenario with verifying and repairing
+        crdesigner_writer.write_to_file(
+            str(Path(__file__).parent / "CHN_Merging-1.xml"),
+            overwrite_existing_file=OverwriteExistingFile.ALWAYS,
+            verify_repair_scenario=True,
+        )
+
+        # checking that the visualization files exist
+        self.assertTrue(Path.exists(Path.cwd() / "error_visualization_images/initial_result_CHN_Merging-1.svg"))
+        self.assertTrue(Path.exists(Path.cwd() / "error_visualization_images/final_result_CHN_Merging-1.svg"))
