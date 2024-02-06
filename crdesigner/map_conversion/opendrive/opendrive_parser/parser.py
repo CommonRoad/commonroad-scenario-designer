@@ -592,13 +592,16 @@ def parse_opendrive_road_object(new_road: Road, obj: etree.ElementTree):
 
     """
     corners = []
-    if obj.find("outline") is not None:
-        for outline in obj.find("outline").findall("cornerLocal"):
-            if outline is not None:
+    outlines = obj.find("outlines").findall("outline") if obj.find("outlines") is not None else []
+    if len(outlines) > 0:
+        if len(outlines) > 1:
+            logging.warning("We do not support outlines consisting of several shapes at the moment.")
+        for corner_local in outlines[0].findall("cornerLocal"):
+            if corner_local is not None:
                 corner = ObjectOutlineCorner()
-                corner.u = outline.get("u")
-                corner.v = outline.get("v")
-                corner.z = outline.get("z")
+                corner.u = corner_local.get("u")
+                corner.v = corner_local.get("v")
+                corner.z = corner_local.get("z")
                 corners.append(corner)
 
     road_object = RoadObject()

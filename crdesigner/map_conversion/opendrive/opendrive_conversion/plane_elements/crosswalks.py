@@ -6,7 +6,7 @@ from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanele
 from crdesigner.map_conversion.common.utils import generate_unique_id
 
 
-def get_crosswalks(road) -> List[ConversionLanelet]:
+def get_crosswalks(road: Road) -> List[ConversionLanelet]:
     """identify and convert crosswalks
 
     :param road: The road object from which to extract signals.
