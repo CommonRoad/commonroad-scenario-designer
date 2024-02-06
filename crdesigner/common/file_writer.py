@@ -7,6 +7,7 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Location, Scenario, Tag
 
 from crdesigner.common.common_file_reader_writer import project_scenario_and_pps
+from crdesigner.verification_repairing.config import MapVerParams
 from crdesigner.verification_repairing.map_verification_repairing import (
     verify_and_repair_scenario,
 )
@@ -43,6 +44,22 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
         super().__init__(
             scenario, planning_problem_set, author, affiliation, source, tags, location, decimal_precision, file_format
         )
+        # map verification parameters
+        self._mapver_params = MapVerParams()
+
+    @property
+    def mapver_params(self) -> MapVerParams:
+        """
+        Get the map verification parameters of the file writer.
+
+        :return: map verification parameter
+        :rtype: map verification parameters
+        """
+        return self._mapver_params
+
+    @mapver_params.setter
+    def mapver_params(self, mapver_params_value: MapVerParams):
+        self._mapver_params = mapver_params_value
 
     def write_to_file(
         self,
@@ -79,7 +96,9 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
 
         # check for verifying and repairing the scenario
         if verify_repair_scenario is True:
-            self._file_writer.scenario = verify_and_repair_scenario(self._file_writer.scenario)[0]
+            self._file_writer.scenario = verify_and_repair_scenario(
+                self._file_writer.scenario, config=self.mapver_params
+            )[0]
 
         super().write_to_file(filename, overwrite_existing_file, check_validity)
 
@@ -99,7 +118,9 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
         :return: Scenario
         """
         if verify_repair_scenario is True:
-            self._file_writer.scenario = verify_and_repair_scenario(self._file_writer.scenario)[0]
+            self._file_writer.scenario = verify_and_repair_scenario(
+                self._file_writer.scenario, config=self.mapver_params
+            )[0]
 
         super().write_scenario_to_file(filename, overwrite_existing_file)
 

@@ -7,6 +7,7 @@ from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario
 
 from crdesigner.common.common_file_reader_writer import project_scenario_and_pps
+from crdesigner.verification_repairing.config import MapVerParams
 from crdesigner.verification_repairing.map_verification_repairing import (
     verify_and_repair_map,
     verify_and_repair_scenario,
@@ -25,6 +26,22 @@ class CRDesignerFileReader(CommonRoadFileReader):
         :return:
         """
         super().__init__(filename, file_format)
+        # map verification parameters
+        self._mapver_params = MapVerParams()
+
+    @property
+    def mapver_params(self) -> MapVerParams:
+        """
+        Get the map verification parameters of the file reader.
+
+        :return: map verification parameter
+        :rtype: map verification parameters
+        """
+        return self._mapver_params
+
+    @mapver_params.setter
+    def mapver_params(self, mapver_params_value: MapVerParams):
+        self._mapver_params = mapver_params_value
 
     def open(
         self, verify_repair_scenario: bool = False, target_projection: str = None, lanelet_assignment: bool = False
@@ -52,7 +69,7 @@ class CRDesignerFileReader(CommonRoadFileReader):
 
         # check for verifying and repairing the scenario
         if verify_repair_scenario is True:
-            scenario = verify_and_repair_scenario(scenario)[0]
+            scenario = verify_and_repair_scenario(scenario, config=self.mapver_params)[0]
 
         return scenario, planning_problem_set
 
@@ -67,5 +84,5 @@ class CRDesignerFileReader(CommonRoadFileReader):
         """
         lanelet_network = super().open_lanelet_network()
         if verify_repair_lanelet_network is True:
-            lanelet_network = verify_and_repair_map(lanelet_network)[0]
+            lanelet_network = verify_and_repair_map(lanelet_network, config=self.mapver_params)[0]
         return lanelet_network

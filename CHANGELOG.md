@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.2] - 2024-02-XX
+
+### Added
+- Integrated map verification/repairing error visualization
+
 ## [0.8.1] - 2023-12-XX
 
 ### Added
