@@ -360,6 +360,11 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
             np.array([692933.6754881, 5338901.6846093]),
         )
 
+    def test_conflicting_references(self):
+        name = "conflicting_references"
+        scenario = load_and_convert_opendrive(name)
+        for la in scenario.lanelet_network.lanelets:
+            self.assertLess(np.max(np.linalg.norm(la.left_vertices[:-1] - la.left_vertices[1:], axis=1)), 1)
 
 if __name__ == "__main__":
     unittest.main()

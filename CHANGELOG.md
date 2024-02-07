@@ -44,6 +44,8 @@
 - Map verification/repairing: Checking unique ID of traffic light cycle element
 - Consider x-, y-translation for cr2lanelet conversion (and vice versa)
 - osm2cr projection
+- odr2cr object crosswalk conversion
+- odr2cr neglect merging of lanelets with conflicting references
 
 ### Removed
 - Unused osm2cr functions, e.g., for plotting graphs
