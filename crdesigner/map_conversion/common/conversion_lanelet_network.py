@@ -379,10 +379,18 @@ class ConversionLaneletNetwork(LaneletNetwork):
         mergeable_lanelets = []
 
         # neglect conflicting references (references pointing to each other) since this can cause errors in later processing steps when working with references
-        if lanelet.parametric_lane_group and lanelet.parametric_lane_group.id_ and any([int(
-                lanelet.parametric_lane_group.id_.split(".")[2]) * int(
-                self.find_lanelet_by_id(lane_id).parametric_lane_group.id_.split(".")[2]) < 0 for lane_id in
-                                                                                        lanelet.successor]):
+        if (
+            lanelet.parametric_lane_group
+            and lanelet.parametric_lane_group.id_
+            and any(
+                [
+                    int(lanelet.parametric_lane_group.id_.split(".")[2])
+                    * int(self.find_lanelet_by_id(lane_id).parametric_lane_group.id_.split(".")[2])
+                    < 0
+                    for lane_id in lanelet.successor
+                ]
+            )
+        ):
             return None
 
         neighbor_ok = self.successor_is_neighbor_of_neighbors_successor(lanelet)
