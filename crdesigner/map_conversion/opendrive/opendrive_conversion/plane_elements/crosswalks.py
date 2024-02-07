@@ -38,7 +38,7 @@ def get_crosswalks(road: Road) -> List[ConversionLanelet]:
 
         # object has four elements -> assume they are corners -> left and right
         # boundary each represented by two vertices
-        if len(corners) == 5:
+        if len(corners) == 5 or len(corners) == 4:
             # select long side as lanelet boundaries assuming index 0 corresponds to lower left corner
             if np.linalg.norm(corners[0] - corners[1]) > np.linalg.norm(corners[0] - corners[3]):
                 left_vertices = np.array([corners[0], corners[1]])
