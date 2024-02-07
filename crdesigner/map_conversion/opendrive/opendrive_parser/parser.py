@@ -592,7 +592,14 @@ def parse_opendrive_road_object(new_road: Road, obj: etree.ElementTree):
 
     """
     corners = []
-    outlines = obj.find("outlines").findall("outline") if obj.find("outlines") is not None else []
+    if obj.find("outlines") is not None:
+        outlines = obj.find("outlines").findall("outline")
+    elif obj.find("outline") is not None:  # based on the OpenDRIVE specification outline should be within outlines;
+        # probably a bug in a previous RoadRunner version
+        outlines = [obj.find("outline")]
+    else:
+        outlines = []
+
     if len(outlines) > 0:
         if len(outlines) > 1:
             logging.warning("We do not support outlines consisting of several shapes at the moment.")
