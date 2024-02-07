@@ -263,10 +263,10 @@ class ConversionLaneletNetwork(LaneletNetwork):
         js_targets = []
         for lanelet in self.lanelets:
             lanelet_split, lanelet_join = False, False
-            if not lanelet.predecessor and np.allclose(lanelet.left_vertices[0], lanelet.right_vertices[0]):
+            if not lanelet.predecessor and np.allclose(lanelet.left_vertices[0], lanelet.right_vertices[0], rtol=0):
                 lanelet_split = True
 
-            if not lanelet.successor and np.allclose(lanelet.left_vertices[-1], lanelet.right_vertices[-1]):
+            if not lanelet.successor and np.allclose(lanelet.left_vertices[-1], lanelet.right_vertices[-1], rtol=0):
                 lanelet_join = True
 
             if lanelet_join or lanelet_split:
@@ -379,14 +379,10 @@ class ConversionLaneletNetwork(LaneletNetwork):
         mergeable_lanelets = []
 
         # neglect conflicting references (references pointing to each other) since this can cause errors in later processing steps when working with references
-        if any(
-            [
-                int(lanelet.parametric_lane_group.id_.split(".")[2])
-                * int(self.find_lanelet_by_id(lane_id).parametric_lane_group.id_.split(".")[2])
-                < 0
-                for lane_id in lanelet.successor
-            ]
-        ):
+        if lanelet.parametric_lane_group and lanelet.parametric_lane_group.id_ and any([int(
+                lanelet.parametric_lane_group.id_.split(".")[2]) * int(
+                self.find_lanelet_by_id(lane_id).parametric_lane_group.id_.split(".")[2]) < 0 for lane_id in
+                                                                                        lanelet.successor]):
             return None
 
         neighbor_ok = self.successor_is_neighbor_of_neighbors_successor(lanelet)

@@ -46,6 +46,7 @@
 - osm2cr projection
 - odr2cr object crosswalk conversion
 - odr2cr neglect merging of lanelets with conflicting references
+- odr2cr fix overlapping boundaries
 
 ### Removed
 - Unused osm2cr functions, e.g., for plotting graphs

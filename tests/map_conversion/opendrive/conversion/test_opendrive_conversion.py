@@ -202,7 +202,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         self.assertEqual(LineMarking.SOLID, lanelet_with_stop_line.stop_line.line_marking)
 
         # test number of driving lanes
-        self.assertEqual(29, len(network.lanelets))
+        self.assertEqual(38, len(network.lanelets))
 
     def test_cul_de_sac(self):
         """Test the file CulDeSac.xodr"""
@@ -266,7 +266,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         network = scenario.lanelet_network
 
         # test number of driving lanes
-        self.assertEqual(19, len(network.lanelets))
+        self.assertEqual(28, len(network.lanelets))
 
         # test number of traffic lights
         self.assertEqual(8, len(network.traffic_lights))
