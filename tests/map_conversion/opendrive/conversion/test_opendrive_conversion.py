@@ -366,5 +366,6 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         for la in scenario.lanelet_network.lanelets:
             self.assertLess(np.max(np.linalg.norm(la.left_vertices[:-1] - la.left_vertices[1:], axis=1)), 1)
 
+
 if __name__ == "__main__":
     unittest.main()
