@@ -1,6 +1,8 @@
+import logging
 from typing import List
 
 import numpy as np
+from shapely.geometry.multipoint import MultiPoint
 
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
@@ -8,12 +10,10 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import R
 
 
 def get_crosswalks(road: Road) -> List[ConversionLanelet]:
-    """identify and convert crosswalks
+    """Identify and converts crossing lanelets (represented as OpenDRIVE objects)
 
     :param road: The road object from which to extract signals.
-    :type road: :class:`Road`
     :return: list of ConversionLanelets with lanelet_type='crosswalk'
-    :rtype: list[ConversionLanelet]
     """
     crosswalks = []
     for crosswalk in [obj for obj in road.objects if obj.type == "crosswalk"]:
@@ -36,11 +36,45 @@ def get_crosswalks(road: Road) -> List[ConversionLanelet]:
             rot_p = np.squeeze((rotation_matrix @ (p.T - o.T) + o.T).T)
             corners = np.vstack((corners, rot_p))
 
-        # indices 1 and 2 of corners define the left bound
-        left_vertices = np.array([corners[1], corners[2]])
-        # indices 0 and 3 of corners define the right bound
-        right_vertices = np.array([corners[0], corners[3]])
+        # object has four elements -> assume they are corners -> left and right
+        # boundary each represented by two vertices
+        if len(corners) == 5:
+            # select long side as lanelet boundaries assuming index 0 corresponds to lower left corner
+            if np.linalg.norm(corners[0] - corners[1]) > np.linalg.norm(corners[0] - corners[3]):
+                left_vertices = np.array([corners[0], corners[1]])
+                right_vertices = np.array([corners[3], corners[2]])
+            else:
+                right_vertices = np.array([corners[0], corners[3]])
+                left_vertices = np.array([corners[1], corners[2]])
+        # object has more than four elements -> fit rectangle over polygon and select closest vertices as corners
+        else:
+            rect = MultiPoint(corners).minimum_rotated_rectangle
+            lower_left = np.argmin(np.linalg.norm(np.array(rect.boundary.coords[1]) - corners, axis=1))
+            lower_right = np.argmin(np.linalg.norm(np.array(rect.boundary.coords[2]) - corners, axis=1))
+            upper_left = np.argmin(np.linalg.norm(np.array(rect.boundary.coords[0]) - corners, axis=1))
 
+            # select long side as lanelet boundaries assuming index 0 corresponds to lower left corner
+            if np.linalg.norm(corners[lower_left] - corners[upper_left]) > np.linalg.norm(
+                corners[lower_left] - corners[lower_right]
+            ):
+                if lower_left == 0:
+                    left_vertices = corners[lower_left : upper_left + 1]
+                    right_vertices = np.flip(corners[upper_left + 1 : lower_right + 1], axis=0)
+                elif lower_left == 3:
+                    left_vertices = corners[lower_left : upper_left + 1]
+                    right_vertices = np.flip(corners[0 : lower_right + 1], axis=0)
+                else:
+                    left_vertices = []
+                    right_vertices = []
+                    logging.warning("odr2cr crossing computation: case not supported yet.")
+            else:
+                if lower_left == 5:
+                    left_vertices = corners[upper_left:lower_right]
+                    right_vertices = np.flip(corners[lower_right : lower_left + 1], axis=0)
+                else:
+                    left_vertices = []
+                    right_vertices = []
+                    logging.warning("odr2cr crossing computation: case not supported yet.")
         center_vertices = (left_vertices + right_vertices) / 2
         # create ConversionLanelet
         lanelet = ConversionLanelet(
