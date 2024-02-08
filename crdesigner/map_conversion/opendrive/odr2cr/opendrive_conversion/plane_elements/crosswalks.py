@@ -6,7 +6,7 @@ from shapely.geometry.multipoint import MultiPoint
 
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road import Road
 
 
 def get_crosswalks(road: Road) -> List[ConversionLanelet]:
