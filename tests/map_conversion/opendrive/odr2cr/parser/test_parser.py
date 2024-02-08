@@ -5,13 +5,19 @@ from pathlib import Path
 import numpy as np
 from lxml import etree
 
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.geometry import (
     Arc,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.opendrive import (
     Header,
-    Junction,
     OpenDrive,
-    Road,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     RoadMark,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import (
+    Junction,
+    Road,
     parse_opendrive,
     parse_opendrive_road_elevation_profile,
     parse_opendrive_road_geometry,

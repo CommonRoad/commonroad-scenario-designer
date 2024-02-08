@@ -2,18 +2,32 @@ import unittest
 
 import numpy as np
 
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadElevationProfile import (
     ElevationRecord,
-    Junction,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     LaneOffset,
-    Object,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLateralProfile import (
+    Superelevation,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLink import (
     Predecessor,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadObject import (
+    Object,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadSignal import (
+    Signal,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadtype import (
+    Speed,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import (
+    Junction,
     Road,
     RoadType,
-    Signal,
     SignalReference,
-    Speed,
-    Superelevation,
 )
 
 

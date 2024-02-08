@@ -1,18 +1,21 @@
 import unittest
 
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.junction import (
+    Connection,
+    LaneLink,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     Lane,
     LaneBorder,
-    LaneLink,
     LaneOffset,
     Lanes,
     LaneSection,
     LaneWidth,
     LeftLanes,
     RightLanes,
-    Road,
     RoadMark,
 )
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import Road
 
 
 class TestRoadLanes(unittest.TestCase):
@@ -110,8 +113,8 @@ class TestRoadLanes(unittest.TestCase):
         lane_link.predecessorId = "-1"
         lane_link.successorId = "1"
 
-        self.assertEqual(lane_link.predecessorId, -1)
-        self.assertEqual(lane_link.successorId, 1)
+        self.assertEqual(lane_link.predecessorId, "-1")
+        self.assertEqual(lane_link.successorId, "1")
 
     def test_initialize_width(self):
         a, b, c, d = 2.0, 3.0, 5.0, 1.0

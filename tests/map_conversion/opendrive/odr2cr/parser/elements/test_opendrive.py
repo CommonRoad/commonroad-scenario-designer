@@ -1,12 +1,10 @@
 import unittest
 
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import (
-    Junction,
-)
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.opendrive import (
     Header,
     OpenDrive,
 )
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import Junction
 
 
 class TestOpenDrive(unittest.TestCase):

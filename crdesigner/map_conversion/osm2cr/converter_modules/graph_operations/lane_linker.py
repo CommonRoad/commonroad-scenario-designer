@@ -1,6 +1,7 @@
 """
 This module provides all methods necessary to interconnect lanes.
 """
+
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np

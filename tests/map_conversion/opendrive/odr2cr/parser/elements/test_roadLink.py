@@ -1,6 +1,6 @@
 import unittest
 
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLink import (
     Link,
     Neighbor,
     Predecessor,

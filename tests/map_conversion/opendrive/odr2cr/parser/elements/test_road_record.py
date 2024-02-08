@@ -1,6 +1,8 @@
 import unittest
 
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser import RoadRecord
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road_record import (
+    RoadRecord,
+)
 
 
 class TestRoadRecord(unittest.TestCase):

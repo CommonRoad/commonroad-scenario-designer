@@ -1,6 +1,9 @@
 import unittest
 
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser import RoadType, Speed
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadtype import (
+    RoadType,
+    Speed,
+)
 
 
 class TestRoadType(unittest.TestCase):

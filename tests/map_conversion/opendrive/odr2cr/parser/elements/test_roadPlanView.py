@@ -2,13 +2,15 @@ import unittest
 
 import numpy as np
 
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.geometry import (
     Arc,
     Line,
     ParamPoly3,
-    PlanView,
     Poly3,
     Spiral,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadPlanView import (
+    PlanView,
 )
 
 

@@ -2,6 +2,7 @@
 This module provides all methods to parse an OSM file and convert it to a graph.
 It also provides a method to project OSM nodes to cartesian coordinates.
 """
+
 import dataclasses
 import logging
 import xml.etree.ElementTree as ElTree

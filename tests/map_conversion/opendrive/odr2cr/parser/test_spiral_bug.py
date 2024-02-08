@@ -6,12 +6,12 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.converter i
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.border import (
     Border,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     Lane,
     LaneSection,
     LaneWidth,
 )
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import Road
 
 # parameter guessed
 MAX_DIST = 20

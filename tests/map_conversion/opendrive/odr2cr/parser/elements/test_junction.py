@@ -1,10 +1,10 @@
 import unittest
 
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.junction import (
     Connection,
-    Junction,
     LaneLink,
 )
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import Junction
 
 
 class TestJunction(unittest.TestCase):

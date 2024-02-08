@@ -46,9 +46,11 @@ class ConversionLanelet(Lanelet):
         self.parametric_lane_group = parametric_lane_group
         self._default_lanelet_type = (
             {
-                LaneletType(config.general_lanelet_type)
-                if LaneletType(config.general_lanelet_type) is not None
-                else LaneletType.UNKNOWN
+                (
+                    LaneletType(config.general_lanelet_type)
+                    if LaneletType(config.general_lanelet_type) is not None
+                    else LaneletType.UNKNOWN
+                )
             }
             if config.general_lanelet_type_activ
             else set()

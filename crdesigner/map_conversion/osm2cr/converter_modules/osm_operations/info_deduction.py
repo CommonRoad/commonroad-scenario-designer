@@ -1,6 +1,7 @@
 """
 This module provides the main two methods to complete missing info of roads.
 """
+
 from math import ceil
 from typing import Tuple
 

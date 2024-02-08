@@ -27,9 +27,7 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadSi
 )
 
 
-def extract_traffic_element_id(
-    signal_type: str, signal_subtype: str, traffic_sign_enum: enum
-) -> Union[
+def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_sign_enum: enum) -> Union[
     TrafficSignIDZamunda,
     TrafficSignIDGermany,
     TrafficSignIDUsa,

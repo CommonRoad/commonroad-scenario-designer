@@ -2,9 +2,11 @@ import unittest
 
 import numpy as np
 
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry import (
-    Arc,
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.eulerspiral import (
     EulerSpiral,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.geometry import (
+    Arc,
     Line,
     ParamPoly3,
     Poly3,

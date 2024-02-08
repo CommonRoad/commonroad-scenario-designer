@@ -1,6 +1,7 @@
 """
 This module removes converting errors before exporting the scenario to XML
 """
+
 import logging
 from typing import Dict, Set
 
