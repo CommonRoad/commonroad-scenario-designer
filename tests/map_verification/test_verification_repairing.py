@@ -3,8 +3,7 @@ import unittest
 from pathlib import Path
 from typing import List
 
-from commonroad.common.file_reader import CommonRoadFileReader
-
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.verification_repairing.config import MapVerParams, VerificationParams
 from crdesigner.verification_repairing.map_verification_repairing import (
     collect_scenario_paths,
@@ -20,7 +19,7 @@ from crdesigner.verification_repairing.verification.hol.satisfaction import (
 class TestAll(unittest.TestCase):
     def verify(self, formula_ids: List[FormulaID]):
         for sc_name in self.network_names:
-            sc, _ = CommonRoadFileReader(str(self.network_path) + "/test_maps/" + sc_name + ".xml").open()
+            sc, _ = CRDesignerFileReader(str(self.network_path) + "/test_maps/" + sc_name + ".xml").open()
             config = MapVerParams()
             config.verification.formulas = formula_ids
             sc, _ = verify_and_repair_scenario(sc, config)
@@ -56,7 +55,7 @@ class TestAll(unittest.TestCase):
 
     def test_path_collection(self):
         self.assertEqual(
-            8,
+            9,
             len(
                 collect_scenario_paths(
                     Path(f"{os.path.dirname(os.path.realpath(__file__))}/../map_verification/test_maps"), subdir=False
@@ -65,7 +64,7 @@ class TestAll(unittest.TestCase):
         )
 
         self.assertEqual(
-            11,
+            12,
             len(
                 collect_scenario_paths(
                     Path(f"{os.path.dirname(os.path.realpath(__file__))}/../map_verification/test_maps"), subdir=True

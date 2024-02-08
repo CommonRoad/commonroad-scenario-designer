@@ -2,10 +2,10 @@ import os
 import unittest
 from pathlib import Path
 
-from commonroad.common.file_reader import CommonRoadFileReader  # type: ignore
 from lxml import etree  # type: ignore
 
 from crdesigner.common.config.lanelet2_config import lanelet2_config
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
 from tests.map_conversion.utils import elements_equal
@@ -14,7 +14,7 @@ from tests.map_conversion.utils import elements_equal
 def load_and_convert(xml_file_name: str) -> etree.Element:
     """Load the osm file and convert it to a scenario."""
     try:
-        commonroad_reader = CommonRoadFileReader(
+        commonroad_reader = CRDesignerFileReader(
             f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/{xml_file_name}.xml"
         )
         scenario, _ = commonroad_reader.open()

@@ -143,6 +143,12 @@ class GuiConfig(BaseConfig):
     pseudo_mercator = Attribute(pseudo_mercator, "Pseudo Mercator")
     utm_default = Attribute(utm_default, "UTM Default")
 
+    verify_repair_scenario = Attribute(
+        value=True,
+        display_name="Verify and Repair Map",
+        description="Verify and Repair CommonRoad Map when Loading/Storing Scenario",
+    )
+
     OBSTACLE_SPECS = {
         "car": {"width": "1.610", "length": "4.508", "shape": "Rectangle"},
         "truck": {"width": "2.550", "length": "16.50", "shape": "Rectangle"},
@@ -186,6 +192,7 @@ class GuiConfig(BaseConfig):
             LDBV_USERNAME,
             LDBV_PASSWORD,
             LOG_ACTIONS_OF_THE_USER,
+            verify_repair_scenario,
         ],
     ]
 

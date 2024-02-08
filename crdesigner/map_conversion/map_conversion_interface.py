@@ -5,13 +5,13 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
-from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.scenario import Scenario
 from lxml import etree
 
 from crdesigner.common.config.general_config import general_config
 from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.common.config.opendrive_config import open_drive_config
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
@@ -64,8 +64,8 @@ def commonroad_to_lanelet(input_file: str, output_name: str, config: lanelet2_co
     :param config: Lanelet2 config parameters.
     """
     try:
-        commonroad_reader = CommonRoadFileReader(input_file)
-        scenario, _ = commonroad_reader.open()
+        crdesigner_reader = CRDesignerFileReader(input_file)
+        scenario, _ = crdesigner_reader.open()
 
     except etree.XMLSyntaxError as xml_error:
         print(f"SyntaxError: {xml_error}")
@@ -121,8 +121,8 @@ def commonroad_to_sumo(input_file: str, output_file: str):
     :return: CommonRoad scenario
     """
     try:
-        commonroad_reader = CommonRoadFileReader(input_file)
-        scenario, _ = commonroad_reader.open()
+        crdesigner_reader = CRDesignerFileReader(input_file)
+        scenario, _ = crdesigner_reader.open()
     except etree.XMLSyntaxError as xml_error:
         print(f"SyntaxError: {xml_error}")
         print("There was an error during the loading of the selected CommonRoad file.\n")

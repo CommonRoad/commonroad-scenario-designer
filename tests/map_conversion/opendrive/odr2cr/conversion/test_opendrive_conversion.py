@@ -202,7 +202,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         self.assertEqual(LineMarking.SOLID, lanelet_with_stop_line.stop_line.line_marking)
 
         # test number of driving lanes
-        self.assertEqual(29, len(network.lanelets))
+        self.assertEqual(38, len(network.lanelets))
 
     def test_cul_de_sac(self):
         """Test the file CulDeSac.xodr"""
@@ -266,7 +266,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         network = scenario.lanelet_network
 
         # test number of driving lanes
-        self.assertEqual(19, len(network.lanelets))
+        self.assertEqual(28, len(network.lanelets))
 
         # test number of traffic lights
         self.assertEqual(8, len(network.traffic_lights))
@@ -359,6 +359,12 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
             scenario.lanelet_network.find_lanelet_by_id(1).center_vertices[0],
             np.array([692933.6754881, 5338901.6846093]),
         )
+
+    def test_conflicting_references(self):
+        name = "conflicting_references"
+        scenario = load_and_convert_opendrive(name)
+        for la in scenario.lanelet_network.lanelets:
+            self.assertLess(np.max(np.linalg.norm(la.left_vertices[:-1] - la.left_vertices[1:], axis=1)), 1)
 
 
 if __name__ == "__main__":

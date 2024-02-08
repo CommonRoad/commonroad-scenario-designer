@@ -1,12 +1,14 @@
 import logging
 import os
 
-from commonroad.common.file_reader import CommonRoadFileReader, FileFormat
+from commonroad.common.util import FileFormat
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
+from crdesigner.common.config.gui_config import gui_config
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 
 if SUMO_AVAILABLE:
@@ -48,10 +50,10 @@ def open_path(mwindow, path):
     """ """
     try:
         if ".pb" in path:
-            commonroad_reader = CommonRoadFileReader(path, file_format=FileFormat.PROTOBUF)
+            commonroad_reader = CRDesignerFileReader(path, file_format=FileFormat.PROTOBUF)
         else:
-            commonroad_reader = CommonRoadFileReader(path, file_format=FileFormat.XML)
-        scenario, pps = commonroad_reader.open()
+            commonroad_reader = CRDesignerFileReader(path, file_format=FileFormat.XML)
+        scenario, pps = commonroad_reader.open(verify_repair_scenario=gui_config.verify_repair_scenario)
     except Exception as e:
         QMessageBox.warning(
             mwindow.mwindow_ui,

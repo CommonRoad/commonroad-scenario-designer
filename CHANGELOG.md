@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.2] - 2024-02-XX
+
+### Added
+- Integrated map verification/repairing error visualization
+
 ## [0.8.1] - 2023-12-XX
 
 ### Added
@@ -7,9 +12,9 @@
 - Logging actions of users
 - Optional functionality to get geonamesID locally without API-call
 - Test Case for local geonamesID functionality
-- OpenDRIVE to CommonRoad conversion: considering line markings of inner shared lanelet boundaries
+- OpenDRIVE to CommonRoad conversion: considering line markings of inner shared lanelet boundaries and the center line marking
 - Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
-- Optional MGRS tag for nodes in CR to Lanelet2 conversion (comptaibility with Autoware)
+- Optional MGRS tag for nodes in CR to Lanelet2 conversion (compatibility with Autoware)
 - Functionality to edit vertices of a lanelet in the canvas
 - Eclipse-SUMO Python package dependency for better integration of SUMO
 - cr2lanelet: Option of local coordinates for traffic lights
@@ -17,6 +22,9 @@
 - cr2lanelet: Regulatory element to corresponding way relation for lanes (required by autoware)
 - Option to display the aerial image of the current position
 - By default, if no lbdv creditials are stored, the open source credentials are used
+- File reader that optionally verifies and repairs the road network
+- Option for the scenario designer file reader and writer to project the scenario
+- Possibility to change the geo reference and translate the scenario
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
@@ -36,6 +44,9 @@
 - Map verification/repairing: Checking unique ID of traffic light cycle element
 - Consider x-, y-translation for cr2lanelet conversion (and vice versa)
 - osm2cr projection
+- odr2cr object crosswalk conversion
+- odr2cr neglect merging of lanelets with conflicting references
+- odr2cr fix overlapping boundaries
 
 ### Removed
 - Unused osm2cr functions, e.g., for plotting graphs
