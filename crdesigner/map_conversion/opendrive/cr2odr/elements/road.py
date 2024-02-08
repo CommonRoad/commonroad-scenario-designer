@@ -8,7 +8,6 @@ from commonroad.geometry.polyline_util import compute_polyline_lengths  # type: 
 from commonroad.scenario.lanelet import Lanelet  # type: ignore
 from commonroad_dc.geometry.util import (
     compute_curvature_from_polyline,
-    compute_orientation_from_polyline,
     compute_pathlength_from_polyline,
 )
 from lxml import etree

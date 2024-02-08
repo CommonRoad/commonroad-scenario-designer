@@ -1,7 +1,6 @@
 import unittest
 
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.junction import (
-    Connection,
     LaneLink,
 )
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
