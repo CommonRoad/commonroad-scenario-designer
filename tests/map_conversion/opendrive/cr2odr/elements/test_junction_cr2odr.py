@@ -70,7 +70,7 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
         # self.checkJunctionRoot7(junction)
 
     def prepare_junctions(self):
-        self.converter.writer = fwr.Writer("ZAM_Threewayintersection-1_1_T-1-test.xml")
+        self.converter.writer = fwr.Writer("ZAM_Threewayintersection-1_1_T-1-test.xml", "")
         lane_list = self.converter.lane_net.lanelets
         lanelet = copy.deepcopy(lane_list[0])
         self.converter.construct_roads([lanelet.lanelet_id])

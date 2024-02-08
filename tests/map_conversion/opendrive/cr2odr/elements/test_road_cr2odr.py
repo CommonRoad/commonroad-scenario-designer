@@ -300,7 +300,7 @@ class TestRoad(unittest.TestCase):
         self.assertEqual(config.NO, road.signals[-1].get(config.SIGNAL_DYNAMIC_TAG))
         self.assertEqual(config.MINUS_SIGN, road.signals[-1].get(config.SIGNAL_ORIENTATION_TAG))
         self.assertEqual("3.3885", road.signals[-1].get(config.SIGNAL_ZOFFSET_TAG))
-        self.assertEqual("ZAMUNDA", road.signals[-1].get(config.SIGNAL_COUNTRY_TAG))
+        self.assertEqual("GERMANY", road.signals[-1].get(config.SIGNAL_COUNTRY_TAG))
         self.assertEqual("114", road.signals[-1].get(config.TYPE_TAG))
         self.assertEqual("-1", road.signals[-1].get(config.SIGNAL_SUBTYPE_TAG))
         self.assertEqual("2021", road.signals[-1].get(config.SIGNAL_COUNTRY_REVISION_TAG))
