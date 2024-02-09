@@ -70,7 +70,7 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
         # self.checkJunctionRoot7(junction)
 
     def prepare_junctions(self):
-        self.converter.writer = fwr.Writer("ZAM_Threewayintersection-1_1_T-1-test.xml", "")
+        self.converter.writer = fwr.Writer("ZAM_Threewayintersection-1_1_T-1-test.xml", config.TODO)
         lane_list = self.converter.lane_net.lanelets
         lanelet = copy.deepcopy(lane_list[0])
         self.converter.construct_roads([lanelet.lanelet_id])
@@ -132,7 +132,7 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
         self.assertEqual("1", junction.root[7][5][0].get(config.JUNCTION_FROM_TAG))
         self.assertEqual("-1", junction.root[7][5][0].get(config.JUNCTION_TO_TAG))
 
-    def checkJunctionRoot0(self, junction):
+    def checkJunctionRoot0(self, junction: Junction):
         self.assertEqual(8, len(junction.root))
         self.assertEqual(config.HEADER_TAG, junction.root[0].tag)
         self.assertEqual("1", junction.root[0].get(config.HEADER_REV_MAJOR_TAG))
@@ -144,9 +144,9 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
         self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[0].get(config.EAST))
         self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[0].get(config.WEST))
         self.assertEqual(config.GEO_REFFERENCE_TAG, junction.root[0][0].tag)
-        self.assertEqual(config.TODO, junction.root[0][0][0].tag)
+        self.assertEqual(f"<![CDATA[{config.TODO}]]>", junction.root[0][0].text)
 
-    def checkJunctionRoot1(self, junction):
+    def checkJunctionRoot1(self, junction: Junction):
         self.assertEqual(config.ROAD_TAG, junction.root[1].tag)
         self.assertEqual("", junction.root[1].get(config.NAME_TAG))
         self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 20), junction.root[1].get(config.LENGTH_TAG))

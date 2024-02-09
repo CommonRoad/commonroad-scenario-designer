@@ -83,14 +83,14 @@ class MapConversionExampleTests(unittest.TestCase):
 
     def test_example_commonroad_to_opendrive(self):
         # remove the file if it has already been created
-        if Path.exists(Path("./example_files/opendrive/ZAM_Over-1_1.odr")):
-            Path.unlink(Path("./example_files/opendrive/ZAM_Over-1_1.odr"))
+        if Path.exists(Path("./example_files/opendrive/ARG_Carcarana-1_1_T-1.xodr")):
+            Path.unlink(Path("./example_files/opendrive/ARG_Carcarana-1_1_T-1.xodr"))
 
         # check if there is no file
-        self.assertFalse(Path.exists(Path("./example_files/opendrive/ZAM_Over-1_1.odr")))
+        self.assertFalse(Path.exists(Path("./example_files/opendrive/ARG_Carcarana-1_1_T-1.xodr")))
 
         # call the execution of the example script
         exec(open("example_commonroad_to_opendrive.py").read())
 
         # check if the file has been created
-        self.assertTrue(Path.exists(Path("./example_files/opendrive/ZAM_Over-1_1.odr")))
+        self.assertTrue(Path.exists(Path("./example_files/opendrive/ARG_Carcarana-1_1_T-1.xodr")))
