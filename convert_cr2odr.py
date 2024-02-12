@@ -1,3 +1,4 @@
+import argparse
 import logging
 import traceback
 import warnings
@@ -111,26 +112,16 @@ map_conversion_scenario.map_ids = set()  # static variable of corresponding func
 # which should be converted
 
 
-def convert_scenarios():
-    """Converts 2020a scenarios to 2024a scenarios."""
+def convert_scenarios(cr_scenarios_path: Path, odr_path: Path, num_threads: int = 1) -> None:
+    """Converts 2020a maps to OpenDRIVE maps."""
 
-    convert_single_scenario = "USA_US101-1_1_T-1"
-    convert_single_scenario = "ZAM_Tjunction-1_1_T-1"
+    convert_single_scenario = ""
     duplicated_dirs = ["environment-model", "commonroad-monitor"]
-    num_cores = 60 if convert_single_scenario == "" else 1
-
-    #  Getting the absolute path of the directory where the script resides
-    script_dir = Path(__file__).parent
-
-    #  Path to the folder where the script will write the new protobuf files
-    conversion_path_odr = script_dir / Path("opendrive")  #
-    conversion_path_cr = script_dir / Path("opendrive_cr")
+    num_cores = num_threads if convert_single_scenario == "" else 1
 
     #  Path to the folder from which the script collects the old xml files
-    scenarios_root_path = Path("/media/sebastian/TUM/06_code/scenarios/commonroad/scenarios_2020a")
-    scenarios_paths = list(Path.rglob(scenarios_root_path, "*.xml"))
+    scenarios_paths = list(Path.rglob(cr_scenarios_path, "*.xml"))
 
-    # TODO cooperative scenarios can be directly integrated in new format
     scenarios_paths_reduced = list(
         filter(
             lambda sc_path: "cooperative" not in str(sc_path)
@@ -156,21 +147,19 @@ def convert_scenarios():
         filter(lambda sc_path: any([dir_dupl in str(sc_path) for dir_dupl in duplicated_dirs]), scenarios_paths)
     )
 
-    func = partial(convert_single_map, conversion_path_odr, conversion_path_cr)
+    func = partial(convert_single_map, odr_path)
     with Pool(processes=num_cores) as pool:
         pool.map(func, scenarios_paths)
 
-    # shutil.make_archive("scenarios_2024a_fig", "gztar", "scenarios_2024a_fig")
 
-
-def convert_single_map(conversion_path_odr: Path, conversion_path_cr: Path, scenario_path: Path):
+def convert_single_map(conversion_path_odr: Path, path_cr: Path):
     """
     Converts single CommonRoad map to new format.
 
-    :param conversion_path: Path where new scenario files without figures should be stored.
-    :param scenario_path: Path of old format scenario.
+    :param conversion_path_odr: Path where new scenario files without figures should be stored.
+    :param path_cr: Path of old format scenario.
     """
-    scenario, planning_problem_set = CommonRoadFileReader(scenario_path).open()
+    scenario, planning_problem_set = CommonRoadFileReader(path_cr).open()
     scenario_id = scenario.scenario_id
     network_id = str(scenario_id.country_id) + "_" + str(scenario_id.map_name) + "-" + str(scenario_id.map_id)
 
@@ -205,31 +194,25 @@ def convert_single_map(conversion_path_odr: Path, conversion_path_cr: Path, scen
             conversion_path_odr.mkdir(parents=True, exist_ok=True)
         converter = Converter(scenario)
         converter.convert(str(output_name))
-        logging.info(f"Conversion of {scenario_path} was successful.")
+        logging.info(f"Conversion of {path_cr} was successful.")
 
         scenario_new = opendrive_to_commonroad(output_name)
         for obs in scenario.obstacles:
             obs.obstacle_id = scenario_new.generate_object_id()
             scenario_new.add_objects(obs)
         scenario_new.scenario_id = scenario.scenario_id
-        writer = CommonRoadFileWriter(
-            scenario=scenario_new,
-            planning_problem_set=PlanningProblemSet(),
-            author=scenario.author,
-            affiliation=scenario.affiliation,
-            source=scenario.source,
-            tags=scenario.tags,
-        )
-
-        output_path = conversion_path_cr / f"{scenario_id}.xml"
-        if not conversion_path_cr.exists():
-            conversion_path_cr.mkdir(parents=True, exist_ok=True)
-
-        writer.write_to_file(str(output_path), OverwriteExistingFile.ALWAYS)
 
     except Exception as e:
-        logging.error(f"Conversion of {scenario_path} was unsuccessful: {str(e)}\n{traceback.format_exc()}")
+        logging.error(f"Conversion of {path_cr} was unsuccessful: {str(e)}\n{traceback.format_exc()}")
 
 
 if __name__ == "__main__":
-    convert_scenarios()
+    parser = argparse.ArgumentParser(description='Convert CommonRoad maps to OpenDRIVE.')
+    parser.add_argument('--num_threads', type=int, help='Number of threads', default=1, required=False)
+    parser.add_argument('--input_path', type=Path, help='Path to CommonRoad maps',
+                        default=Path("/media/sebastian/TUM/06_code/scenarios/commonroad/scenarios_2020a"), required=False)
+    parser.add_argument('--output_path', type=Path, help='Path where OpenDRIVE maps should be stored.',
+                        default=Path("/home/sebastian/Downloads"), required=False)
+
+    args = parser.parse_args()
+    convert_scenarios(args.input_path, args.output_path, args.num_threads)
