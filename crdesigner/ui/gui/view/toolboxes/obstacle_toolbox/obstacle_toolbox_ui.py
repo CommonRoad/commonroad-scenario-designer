@@ -29,8 +29,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from crdesigner.config.gui_config import gui_config
-from crdesigner.config.logging import logger
+from crdesigner.common.config.gui_config import gui_config
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 
 # try to import sumo functionality

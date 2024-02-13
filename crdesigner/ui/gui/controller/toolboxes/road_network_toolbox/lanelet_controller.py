@@ -1,6 +1,6 @@
 import copy
 import math
-from typing import List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 from commonroad.scenario.lanelet import (
@@ -12,7 +12,7 @@ from commonroad.scenario.lanelet import (
 )
 from numpy import ndarray
 
-from crdesigner.config.logging import logger
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.lanelet_ui import (
@@ -328,9 +328,11 @@ class AddLaneletController:
         self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
 
     @logger.log
-    def update_lanelet(self):
+    def update_lanelet(self, new_lanelet: Optional[Lanelet] = None):
         """
         Updates a given lanelet based on the information configured by the user.
+
+        :param new_lanelet: new lanelet which replaces the old lanelet
         """
         if self.road_network_controller.mwindow.play_activated:
             self.road_network_controller.text_browser.append("Please stop the animation first.")
@@ -483,8 +485,8 @@ class AddLaneletController:
         self, lanelet_id: int, left_vertices: np.array = None, right_vertices: np.array = None
     ) -> Lanelet:
         """
-        Adds an updated lanelet to the scenario based on the selected parameters by the user.
-        The original lanelet has to be removed beforeward.
+                Adds an updated lanelet to the scenario based on the selected parameters by the user.
+                The original lanelet has to be removed beforewards.
 
         @param lanelet_id: Id which the new lanelet should have.
         @param update: Boolean indicating whether lanelet is updated or newly created.

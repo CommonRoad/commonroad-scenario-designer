@@ -118,6 +118,10 @@ class ToolBarUI:
         self.tb5.addAction(self.crop_map)
         self.crop_map.setCheckable(True)
 
+        self.cancel_edit_vertices = QAction(QIcon(":/icons/close.png"), "Stop editing vertices", mwindow_ui)
+        self.tb5.addAction(self.cancel_edit_vertices)
+        self.cancel_edit_vertices.setVisible(False)
+
     def reset_toolbar(self):
         if self.split_lanelet.isChecked():
             self.split_lanelet.trigger()

@@ -7,7 +7,7 @@ import json
 from urllib.error import URLError
 from urllib.request import urlopen
 
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph import (
     Graph,
 )
@@ -78,7 +78,7 @@ def add_mapillary_signs_to_graph(graph: Graph):
     """
 
     # graph bounds are not ordered as mapillary API expects it and need to be rearranged
-    bbox = Bbox(graph.bounds[1], graph.bounds[2], graph.bounds[3], graph.bounds[0])
+    bbox = Bbox(graph.bounds.lon_min, graph.bounds.lat_min, graph.bounds.lon_max, graph.bounds.lat_max)
     # retrieve traffic signs from given bbox
     signs = get_mappilary_traffic_signs(bbox)
     if signs is not None:

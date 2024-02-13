@@ -155,10 +155,10 @@ class LaneletAttributesWidget:
             lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.change_direction_of_curve()
         )
         self.toolbox.selected_lanelet_radius.textChanged.connect(
-            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_curved_lanelet()
+            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_editable_lanelet()
         )
         self.toolbox.selected_lanelet_angle.textChanged.connect(
-            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_curved_lanelet()
+            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_editable_lanelet()
         )
         self.toolbox.selected_curved_checkbox = CollapsibleCheckBox(
             "Curved Lanelet", layout_curved, layout_attributes, 4

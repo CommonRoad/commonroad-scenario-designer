@@ -17,9 +17,8 @@ from PIL import Image
 from PIL.JpegImagePlugin import JpegImageFile
 from pyproj import Proj
 
-from crdesigner.config.gui_config import gui_config
-from crdesigner.config.gui_config import gui_config as config_settings
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.gui_config import gui_config
+from crdesigner.common.config.osm_config import osm_config as config
 
 # Moved to services/arial data
 
@@ -66,7 +65,7 @@ def get_bin_maps_api_response() -> None:
     """
 
     global bing_maps_api_response
-    bingMapsKey = config_settings.BING_MAPS_KEY
+    bingMapsKey = gui_config.BING_MAPS_KEY
     if bingMapsKey == "":
         print("_Warning__: No Bing Maps key specified. Go to settings and set Password.")
         return
@@ -87,7 +86,7 @@ def validate_bing_key() -> bool:
     Validates the password specified by BING_MAPS_KEY in the config of the settings.
     :return: bool: True for valid password, False for wrong password
     """
-    bingMapsKey = config_settings.BING_MAPS_KEY
+    bingMapsKey = gui_config.BING_MAPS_KEY
     request = (
         "http://dev.virtualearth.net/REST/V1/Imagery/Metadata/Aerial?output=json&include=ImageryProviders&key={"
         "}".format(bingMapsKey)
@@ -108,8 +107,8 @@ def validate_bing_key() -> bool:
 
 def validate_ldbv_credentials() -> bool:
     url = "https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi?service=wms&request=GetMap&version=1.1.1&bbox=11.65541,48.26142,11.66093,48.26386&width=100&height=100&layers=by_dop20c&format=image/jpeg&srs=EPSG:4326"
-    ldbv_username = config_settings.LDBV_USERNAME
-    ldbv_password = config_settings.LDBV_PASSWORD
+    ldbv_username = gui_config.LDBV_USERNAME
+    ldbv_password = gui_config.LDBV_PASSWORD
 
     try:
         auth_handler = HTTPBasicAuthHandler()
@@ -143,7 +142,7 @@ def get_tile(quadkey: str) -> JpegImageFile:
         try:
             if bing_maps_api_response is None:
                 get_bin_maps_api_response()
-            if config_settings.BING_MAPS_KEY == "":
+            if gui_config.BING_MAPS_KEY == "":
                 return
             request = bing_maps_api_response["imageUrl"]
             sub_domain = bing_maps_api_response["imageUrlSubdomains"][0]
@@ -303,8 +302,8 @@ def get_aerial_image_ldbv(bounds: Tuple[float, float, float, float]) -> Image.Im
     :return: Image
     """
     lat1, lon1, lat2, lon2 = bounds
-    ldbv_username = config_settings.LDBV_USERNAME
-    ldbv_password = config_settings.LDBV_PASSWORD
+    ldbv_username = gui_config.LDBV_USERNAME
+    ldbv_password = gui_config.LDBV_PASSWORD
 
     lat_diff = lat1 - lat2
     lon_diff = lon2 - lon1
@@ -323,19 +322,26 @@ def get_aerial_image_ldbv(bounds: Tuple[float, float, float, float]) -> Image.Im
     #   longitude and latitude);
     #   for other options, see https://geodatenonline.bayern.de/geodatenonline/seiten/wms_dop20cm?36
     ref_system = "EPSG:4326"
-    url = f"https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi?service=wms&request=GetMap&version=1.1.1&bbox={str(lon1)},{str(lat2)},{str(lon2)},{str(lat1)}&width={str(lat_pixels)}&height={str(lon_pixels)}&layers=by_dop20c&format=image/jpeg&srs={ref_system}"
-
-    auth_handler = HTTPBasicAuthHandler()
-    auth_handler.add_password(
-        realm="WMS DOP20",
-        uri="https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi",
-        user=ldbv_username,
-        passwd=ldbv_password,
-    )
-    opener = build_opener(auth_handler)
-    install_opener(opener)
-    tile = urlopen(url).read()
-    image = Image.open(BytesIO(tile))
+    if ldbv_username == "" or ldbv_password == "":
+        url = f"https://geoservices.bayern.de/wms/v2/ogc_dop80_oa.cgi?service=wms&request=GetMap&version=1.1.1&bbox={str(lon1)},{str(lat2)},{str(lon2)},{str(lat1)}&width={str(lat_pixels)}&height={str(lon_pixels)}&layers=by_dop80c&format=image/jpeg&srs={ref_system}"
+        auth_handler = HTTPBasicAuthHandler()
+        opener = build_opener(auth_handler)
+        install_opener(opener)
+        tile = urlopen(url).read()
+        image = Image.open(BytesIO(tile))
+    else:
+        url = f"https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi?service=wms&request=GetMap&version=1.1.1&bbox={str(lon1)},{str(lat2)},{str(lon2)},{str(lat1)}&width={str(lat_pixels)}&height={str(lon_pixels)}&layers=by_dop20c&format=image/jpeg&srs={ref_system}"
+        auth_handler = HTTPBasicAuthHandler()
+        auth_handler.add_password(
+            realm="WMS DOP20",
+            uri="https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi",
+            user=ldbv_username,
+            passwd=ldbv_password,
+        )
+        opener = build_opener(auth_handler)
+        install_opener(opener)
+        tile = urlopen(url).read()
+        image = Image.open(BytesIO(tile))
 
     return image
 
@@ -358,4 +364,9 @@ def get_aerial_image_limits(
     proj = Proj(proj_string)
     lower_left = proj(longitude=lon1, latitude=lat2)
     upper_right = proj(longitude=lon2, latitude=lat1)
-    return lower_left[0], upper_right[0], lower_left[1], upper_right[1]
+    return (
+        lower_left[0] - scenario.location.geo_transformation.x_translation,
+        upper_right[0] - scenario.location.geo_transformation.x_translation,
+        lower_left[1] - scenario.location.geo_transformation.y_translation,
+        upper_right[1] - scenario.location.geo_transformation.y_translation,
+    )

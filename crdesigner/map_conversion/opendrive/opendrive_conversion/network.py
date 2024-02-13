@@ -21,8 +21,8 @@ from commonroad.scenario.traffic_sign import (
 )
 from pyproj import CRS, Transformer
 
-from crdesigner.config.general_config import GeneralConfig, general_config
-from crdesigner.config.opendrive_config import OpenDriveConfig, open_drive_config
+from crdesigner.common.config.general_config import GeneralConfig, general_config
+from crdesigner.common.config.opendrive_config import OpenDriveConfig, open_drive_config
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.conversion_lanelet_network import (
     ConversionLaneletNetwork,
@@ -48,6 +48,46 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive imp
     OpenDrive,
 )
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
+
+
+def update_line_markings(lanelet_network: ConversionLaneletNetwork) -> ConversionLaneletNetwork:
+    """
+    Updates line markings of lanelets vertices in the conversion lanelet network,
+    as Opendrive format only supports line markings for the outer vertices of the lanelet.
+    If the two lanelets are adjacent, corresponding line marking of the shared vertices should be the same.
+
+    :param lanelet_network: ConversionLaneletNetwork that should be updated.
+    :return: Updated ConversionLaneletNetwork.
+    """
+    for la in lanelet_network.lanelets:
+        # left vertices line marking
+        if la.line_marking_left_vertices is LineMarking.UNKNOWN:
+            # check if there exists an adjacent left lanelet
+            if la.adj_left is not None:
+                # if the adjacent left lanelet is of the same direction, copy the line marking of the right vertices
+                if la.adj_left_same_direction is True:
+                    la.line_marking_left_vertices = lanelet_network.find_lanelet_by_id(
+                        la.adj_left
+                    ).line_marking_right_vertices
+                else:
+                    la.line_marking_left_vertices = lanelet_network.find_lanelet_by_id(
+                        la.adj_left
+                    ).line_marking_left_vertices
+        # right vertices line marking
+        if la.line_marking_right_vertices is LineMarking.UNKNOWN:
+            # check if there exists an adjacent right lanelet
+            if la.adj_right is not None:
+                # if the adjacent right lanelet is of the same direction, copy the line marking of the left
+                if la.adj_right_same_direction is True:
+                    la.line_marking_right_vertices = lanelet_network.find_lanelet_by_id(
+                        la.adj_right
+                    ).line_marking_left_vertices
+                else:
+                    la.line_marking_right_vertices = lanelet_network.find_lanelet_by_id(
+                        la.adj_right
+                    ).line_marking_right_vertices
+
+    return lanelet_network
 
 
 def convert_to_base_lanelet_network(lanelet_network: ConversionLaneletNetwork) -> LaneletNetwork:
@@ -292,6 +332,7 @@ class Network:
 
         self.find_lane_speed_changes(drivable_lanelets, lanelet_network)
         self.reference_traffic_signs_with_equal_speed(drivable_lanelets, lanelet_network)
+        lanelet_network = update_line_markings(lanelet_network)
         return convert_to_base_lanelet_network(lanelet_network)
 
     def relate_crosswalks_to_intersection(self, lanelet_network: ConversionLaneletNetwork):

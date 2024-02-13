@@ -27,8 +27,9 @@ from commonroad.scenario.traffic_sign import (
 from pyproj import CRS, Transformer
 from shapely.geometry import LineString  # type: ignore
 
-from crdesigner.config.general_config import GeneralConfig, general_config
-from crdesigner.config.lanelet2_config import Lanelet2Config, lanelet2_config
+from crdesigner.common.config.general_config import GeneralConfig, general_config
+from crdesigner.common.config.gui_config import lanelet2_default
+from crdesigner.common.config.lanelet2_config import Lanelet2Config, lanelet2_config
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.conversion_lanelet_network import (
     ConversionLaneletNetwork,
@@ -224,19 +225,22 @@ class Lanelet2CRConverter:
         """
         self._config = config
         self._cr_config = cr_config
-        crs_from = CRS("ETRF89")
-        crs_to = CRS(self._config.proj_string_l2)
+        crs_from = CRS(lanelet2_default)
+        crs_to = CRS(general_config.proj_string_cr)
         self.transformer = Transformer.from_proj(crs_from, crs_to)
-        self._left_way_ids, self._right_way_ids = None, None
-        self.first_left_pts, self.last_left_pts = None, None
-        self.first_right_pts, self.last_right_pts = None, None
-        self.osm = None
-        self.lanelet_network = None
+        self._left_way_ids: Optional[Dict[str, str]] = None
+        self._right_way_ids: Optional[Dict[str, str]] = None
+        self.first_left_pts: Optional[Dict[str, List[str]]] = None
+        self.last_left_pts: Optional[Dict[str, List[str]]] = None
+        self.first_right_pts: Optional[Dict[str, List[str]]] = None
+        self.last_right_pts: Optional[Dict[str, List[str]]] = None
+        self.osm: Optional[OSMLanelet] = None
+        self.lanelet_network: Optional[LaneletNetwork] = None
 
         # Origin of the transformed coordinates
         # if config.translate = False: defaults to (0, 0)
         # if config.translate = True: origin is set to the geo location, and transformed coordinates are translated
-        self.origin_utm = None
+        self.origin_utm: Optional[Tuple[float, float]] = None
 
     def __call__(self, osm: OSMLanelet) -> Union[Scenario, None]:
         """
@@ -287,7 +291,7 @@ class Lanelet2CRConverter:
 
         # add GeoTransformation
         geo_transformation = GeoTransformation()
-        geo_transformation.geo_reference = self._config.proj_string_l2
+        geo_transformation.geo_reference = self._cr_config.proj_string_cr
         # consider x ans y translation (relevant if self._config.translate is set)
         geo_transformation.x_translation = self.origin_utm[0]
         geo_transformation.y_translation = self.origin_utm[1]

@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
     QTextEdit,
 )
 
-from crdesigner.config.config_base import Attribute
+from crdesigner.common.config.config_base import Attribute
 from crdesigner.ui.gui.utilities.size_policy import (
     create_size_policy_for_settings_elements,
 )
@@ -333,7 +333,9 @@ class SettingsTabUI:
                 input_widget = QCheckBox(dialog)
                 input_widget.setChecked(value)
                 input_widget.stateChanged.connect(
-                    lambda _state, _name=name: attribute.value.update({_name: _state == QtCore.Qt.Checked})
+                    lambda _state, _name=name: attribute.value.update(
+                        {_name: _state == QtCore.Qt.CheckState.Checked.value}
+                    )
                 )
                 attribute.subscribe(lambda _value, _name=name, _iw=input_widget: _iw.setChecked(_value[_name]))
 

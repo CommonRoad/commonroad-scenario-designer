@@ -7,7 +7,7 @@ from commonroad.scenario.obstacle import Obstacle
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt6.QtWidgets import QVBoxLayout, QWidget
 
-from crdesigner.config.logging import logger
+from crdesigner.common.logging import logger
 from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_controller import (
     AnimatedViewerController,
 )

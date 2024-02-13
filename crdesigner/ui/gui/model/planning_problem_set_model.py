@@ -4,7 +4,7 @@ from commonroad.planning.goal import GoalRegion
 from commonroad.planning.planning_problem import PlanningProblem, PlanningProblemSet
 from PyQt6.QtCore import QObject, pyqtSignal
 
-from crdesigner.config.logging import logger
+from crdesigner.common.logging import logger
 
 
 class PlanningProblemSetModel(QObject):

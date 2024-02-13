@@ -1,5 +1,5 @@
-from crdesigner.config.config_base import Attribute, BaseConfig
-from crdesigner.config.gui_config import pseudo_mercator
+from crdesigner.common.config.config_base import Attribute, BaseConfig
+from crdesigner.common.config.gui_config import pseudo_mercator
 
 
 class OpenDriveConfig(BaseConfig):

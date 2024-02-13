@@ -6,7 +6,7 @@ from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
-from crdesigner.config.gui_config import gui_config
+from crdesigner.common.config.gui_config import gui_config
 from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import (
     DynamicCanvasController,
 )

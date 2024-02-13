@@ -10,7 +10,7 @@ from typing import List, Set
 import numpy as np
 from commonroad.scenario.lanelet import Lanelet, LaneletType
 
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.common.config.osm_config import osm_config as config
 
 from ._intermediate_node import Node
 

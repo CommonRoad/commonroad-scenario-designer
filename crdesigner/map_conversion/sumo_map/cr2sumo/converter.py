@@ -1525,7 +1525,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._output_file = str(output_path)
         # Calling of Netconvert
         command = (
-            f"netconvert "
+            f"{os.environ['SUMO_HOME']}/bin/netconvert "
             f" --no-turnarounds=true"
             f" --junctions.internal-link-detail=20"
             f" --geometry.avoid-overlap=true"

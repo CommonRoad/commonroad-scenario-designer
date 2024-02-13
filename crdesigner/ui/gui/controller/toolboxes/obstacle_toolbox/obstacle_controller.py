@@ -16,7 +16,7 @@ from commonroad.scenario.trajectory import Trajectory
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QColorDialog, QDockWidget
 
-from crdesigner.config.logging import logger
+from crdesigner.common.logging import logger
 
 # TODO to change the call
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE

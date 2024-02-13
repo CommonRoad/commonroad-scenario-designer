@@ -19,7 +19,7 @@ try:
 except ModuleNotFoundError:
     logging.error("MapVerification: Please install CommonRoad Drivability Checker manually.")
 
-from crdesigner.config.lanelet2_config import Lanelet2Config
+from crdesigner.common.config.lanelet2_config import Lanelet2Config
 
 
 def has_left_adj_ref(lanelet: Lanelet) -> bool:

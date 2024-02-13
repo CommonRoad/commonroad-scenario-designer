@@ -1,4 +1,4 @@
-from crdesigner.config.config_base import Attribute, BaseConfig
+from crdesigner.common.config.config_base import Attribute, BaseConfig
 
 
 class OsmConfig(BaseConfig):
@@ -6,35 +6,25 @@ class OsmConfig(BaseConfig):
     This class contains all settings for the OSM import.
     """
 
-    # Benchmark Settings
-    # name of the benchmark
-    BENCHMARK_ID = Attribute("ZAM_Test-1_1_T-1", "Benchmark ID")
-    # author of the benchmark
-    AUTHOR = Attribute("Automated converter by Maximilian Rieger", "Author")
-    # affiliation of the benchmark
-    AFFILIATION = Attribute("Technical University of Munich, Germany", "Affiliation")
-    # source of the benchmark
-    SOURCE = Attribute("OpenStreetMaps (OSM)", "Source")
-    # additional tags for the benchmark
-    TAGS = Attribute("urban", "Tags")
-    # Geonames username to retrieve geonamesID for created scenarios
     GEONAMES_USERNAME = Attribute("demo", "Geonames Username")
     # Mapillary Client ID which can be set to extract additional traffic signs. If set to "demo",
     # mapillary signs will be disabled
     MAPILLARY_CLIENT_ID = Attribute("demo", "Mapillary Client ID")
-    # time step size for the benchmark in seconds
-    TIMESTEPSIZE = Attribute(0.1, "Timestep Size")
+
+    # Proj string used by OSM; should not be changed in general.
+    # See: https://osmdata.openstreetmap.de/info/projections.html
+    PROJ_STRING_FROM = Attribute(
+        "EPSG:4326",
+        "Projection string",
+        "String describing the projection of the OSM map",
+    )
 
     # Lanelet type each lanelet should have
     LANELETTYPE = Attribute("urban", "Lanelet Type")
 
     # Aerial Image Settings
-    # Use aerial images for edit
-    AERIAL_IMAGES = Attribute(False, "Use Aerial Images")
     # Path to save downloaded aerial images
     IMAGE_SAVE_PATH = Attribute("files/imagery/", "Image Save Path")
-    # The zoom level of Bing Maps tiles
-    ZOOM_LEVEL = Attribute(19, "Zoom Level")
     # aerial image area threshold limiting the user input for the coordinates
     AERIAL_IMAGE_THRESHOLD = Attribute(0.01, "Aerial Image Threshold")
 
@@ -188,8 +178,6 @@ class OsmConfig(BaseConfig):
     INTERPOLATION_DISTANCE = Attribute(0.5, "Interpolation Distance")
     # allowed inaccuracy of exported lines to reduce number of way points in meters
     COMPRESSION_THRESHOLD = Attribute(0.05, "Compression Threshold")
-    # export the scenario in UTM coordinates
-    EXPORT_IN_UTM = Attribute(False, "Export in UTM")
     # toggle filtering of negligible waypoints
     FILTER = Attribute(True, "Filter")
     # delete invalid lanes before export
@@ -263,19 +251,8 @@ class OsmConfig(BaseConfig):
     # exclude traffic signs based on their id, e.g. "MAX_SPEED". "ALL" has to be set in ACCEPTED_TRAFFIC_SIGNS
     EXCLUDED_TRAFFIC_SIGNS = []
 
-    # User edit activation
-    # Toggle edit for user
-    USER_EDIT = False
-
     LAYOUT = [
         [
-            "Benchmark",
-            BENCHMARK_ID,
-            AUTHOR,
-            AFFILIATION,
-            SOURCE,
-            TAGS,
-            TIMESTEPSIZE,
             "Scenario Settings",
             LOAD_TUNNELS,
             MAKE_CONTIGUOUS,
@@ -288,7 +265,6 @@ class OsmConfig(BaseConfig):
             "Export Settings",
             INTERPOLATION_DISTANCE,
             COMPRESSION_THRESHOLD,
-            EXPORT_IN_UTM,
             FILTER,
         ],
         [
