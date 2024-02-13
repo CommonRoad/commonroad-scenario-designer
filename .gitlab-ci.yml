@@ -21,14 +21,16 @@ default:
 
 # static_check
 formatting_check:
-  stage: style_check
+  stage: static-test
   script:
+    - pip install "black~=24.1.1" "isort~=5.13.1"
     - black --check .
     - isort --check-only .
 
 lint_flake8:
-  stage: style_check
+  stage: static-test
   script:
+    - pip install "flake8 ~=6.1.0"
     - flake8 .
 
 build_and_test_python:
