@@ -483,9 +483,9 @@ class CR2LaneletConverter:
         for country in self._config.supported_countries:
             if sign_found is True:
                 break
-            for countrySign in country:
-                if subtype == str(countrySign.value):
-                    sign_name = countrySign.name
+            for country_sign in country:
+                if subtype == str(country_sign.value):
+                    sign_name = country_sign.name
                     sign_found = True
         # no need to add the speed limit sign to the way of rel
         if sign_name != "MAX_SPEED":

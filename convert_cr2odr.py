@@ -7,9 +7,6 @@ from multiprocessing import Pool
 from pathlib import Path
 
 from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.common.file_writer import CommonRoadFileWriter
-from commonroad.common.writer.file_writer_interface import OverwriteExistingFile
-from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Scenario
 from commonroad.visualization.mp_renderer import MPRenderer
 

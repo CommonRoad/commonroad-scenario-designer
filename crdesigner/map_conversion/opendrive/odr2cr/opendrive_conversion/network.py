@@ -647,18 +647,18 @@ class LinkIndex:
                     # First lane section! > Previous road
                     # Try to get previous road
                     elif road.link.predecessor is not None and road.link.predecessor.elementType != "junction":
-                        prevRoad = opendrive.getRoad(road.link.predecessor.element_id)
+                        prev_road = opendrive.getRoad(road.link.predecessor.element_id)
 
-                        if prevRoad is not None:
+                        if prev_road is not None:
                             if road.link.predecessor.contactPoint == "start":
                                 predecessor_id = encode_road_section_lane_width_id(
-                                    prevRoad.id, 0, lane.link.predecessorId, -1
+                                    prev_road.id, 0, lane.link.predecessorId, -1
                                 )
 
                             else:  # contact point = end
                                 predecessor_id = encode_road_section_lane_width_id(
-                                    prevRoad.id,
-                                    prevRoad.lanes.getLastLaneSectionIdx(),
+                                    prev_road.id,
+                                    prev_road.lanes.getLastLaneSectionIdx(),
                                     lane.link.predecessorId,
                                     -1,
                                 )

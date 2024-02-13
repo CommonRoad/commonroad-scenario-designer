@@ -209,9 +209,9 @@ class Road:
 
             # lane_2_lane linkage
             for lane_id, predecessors in lane_2_lane[config.PRED_TAG].items():
-                for predId in predecessors:
+                for pred_id in predecessors:
                     pred = etree.SubElement(self.lane_link[lane_id], config.PREDECESSOR_TAG)
-                    pred.set(config.ID_TAG, str(predId))
+                    pred.set(config.ID_TAG, str(pred_id))
 
     def set_child_of_road(self, name: str) -> etree:
         """

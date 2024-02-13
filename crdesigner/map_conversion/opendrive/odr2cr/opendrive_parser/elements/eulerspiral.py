@@ -62,24 +62,24 @@ class EulerSpiral:
         """
 
         # Start
-        C0 = x0 + 1j * y0
+        c0 = x0 + 1j * y0
 
         if self._gamma == 0 and kappa0 == 0:
             # Straight line
-            Cs = C0 + np.exp(1j * theta0) * s
+            cs = c0 + np.exp(1j * theta0) * s
 
         elif self._gamma == 0 and kappa0 != 0:
             # Arc, (1/kappa) = radius
-            Cs = C0 + np.exp(1j * theta0) / kappa0 * (np.sin(kappa0 * s) + 1j * (1 - np.cos(kappa0 * s)))
+            cs = c0 + np.exp(1j * theta0) / kappa0 * (np.sin(kappa0 * s) + 1j * (1 - np.cos(kappa0 * s)))
 
         else:
             # Fresnel integrals
-            Cs = self._calc_fresnel_integral(s, kappa0, theta0, C0)
+            cs = self._calc_fresnel_integral(s, kappa0, theta0, c0)
 
         # Tangent at each point
         theta = self._gamma * s**2 / 2 + kappa0 * s + theta0
 
-        return Cs.real, Cs.imag, theta, self.curvature(s, kappa0)
+        return cs.real, cs.imag, theta, self.curvature(s, kappa0)
 
     def _calc_fresnel_integral(self, s: float, kappa0: float, theta0: float, C0: complex) -> complex:
         """
