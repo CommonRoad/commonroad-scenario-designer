@@ -29,7 +29,6 @@ formatting_check:
 lint_flake8:
   stage: style_check
   script:
-    - pip install flake8
     - flake8 .
 
 build_and_test_python:
