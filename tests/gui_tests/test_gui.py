@@ -48,7 +48,8 @@ def test_pyqt_framework(qtbot):
     execute_rotate_multiple_lanelet_test(window)
     # -- Translating multiple lanelets at once
     execute_translate_multiple_lanelet_test(window)
-    # execute_update_multiple_lanelet_test(window)
+
+    execute_update_multiple_lanelet_test(window)
 
     if os.path.exists(path_autosave):
         os.remove(path_autosave)
