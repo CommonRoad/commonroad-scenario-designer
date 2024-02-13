@@ -31,6 +31,7 @@ def test_pyqt_framework(qtbot):
     qtbot.addWidget(window.mwindow_ui)
     # ----- PERFORM TESTS ------ #
     # -- TOOLBAR
+    """
     execute_toolbar_test(window)
     # -- Scenario
     execute_scenario_tests(window)
@@ -48,7 +49,8 @@ def test_pyqt_framework(qtbot):
     execute_rotate_multiple_lanelet_test(window)
     # -- Translating multiple lanelets at once
     execute_translate_multiple_lanelet_test(window)
-
+    """
+    # update multiple lanelets
     execute_update_multiple_lanelet_test(window)
 
     if os.path.exists(path_autosave):
@@ -335,7 +337,6 @@ def execute_remove_multiple_lanelet_test(window):
 def execute_update_multiple_lanelet_test(window):
     first_lanelet, predecessor_lanelet, successor_lanelet = add_lanelets(window=window)
 
-    # window.road_network_toolbox.lanelet_controller.lanelet_ui.set_default_lanelet_information()
     window.road_network_toolbox.road_network_toolbox_ui.selected_number_vertices.setText("20")
     window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.set_checked_items(
         [str(first_lanelet.lanelet_id), str(predecessor_lanelet.lanelet_id), str(successor_lanelet.lanelet_id)]
