@@ -24,7 +24,7 @@ formatting_check:
   stage: style_check
   before_script: [ ]
   script:
-    - pip install black isort
+    - poetry install --only dev
     - black --check .
     - isort --check-only .
 
@@ -32,6 +32,7 @@ lint_flake8:
   stage: style_check
   before_script: [ ]
   script:
+    - poetry install --only dev
     - pip install flake8
     - flake8 .
 
