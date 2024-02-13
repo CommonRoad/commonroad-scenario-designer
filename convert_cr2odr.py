@@ -207,12 +207,22 @@ def convert_single_map(conversion_path_odr: Path, path_cr: Path):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Convert CommonRoad maps to OpenDRIVE.')
-    parser.add_argument('--num_threads', type=int, help='Number of threads', default=1, required=False)
-    parser.add_argument('--input_path', type=Path, help='Path to CommonRoad maps',
-                        default=Path("/media/sebastian/TUM/06_code/scenarios/commonroad/scenarios_2020a"), required=False)
-    parser.add_argument('--output_path', type=Path, help='Path where OpenDRIVE maps should be stored.',
-                        default=Path("/home/sebastian/Downloads"), required=False)
+    parser = argparse.ArgumentParser(description="Convert CommonRoad maps to OpenDRIVE.")
+    parser.add_argument("--num_threads", type=int, help="Number of threads", default=1, required=False)
+    parser.add_argument(
+        "--input_path",
+        type=Path,
+        help="Path to CommonRoad maps",
+        default=Path("/media/sebastian/TUM/06_code/scenarios/commonroad/scenarios_2020a"),
+        required=False,
+    )
+    parser.add_argument(
+        "--output_path",
+        type=Path,
+        help="Path where OpenDRIVE maps should be stored.",
+        default=Path("/home/sebastian/Downloads"),
+        required=False,
+    )
 
     args = parser.parse_args()
     convert_scenarios(args.input_path, args.output_path, args.num_threads)
