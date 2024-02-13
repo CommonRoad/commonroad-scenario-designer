@@ -3,6 +3,7 @@ This module provides custom types for an easier type description:
  * **Road_info** stores information about a road
  * **Assumption_info** stores information about the assumptions made when determining the road information
 """
+
 from typing import List, Optional, Tuple
 
 # type to store information about a road

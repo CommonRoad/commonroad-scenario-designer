@@ -2,6 +2,7 @@
 This module is used to retrieve a geonamesID for a given coordinate.
 An Internet connection is needed and a valid geonames username has to be provided in the osm_config.py file
 """
+
 import json
 import logging
 from urllib.error import URLError
