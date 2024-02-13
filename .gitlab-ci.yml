@@ -22,15 +22,12 @@ default:
 # static_check
 formatting_check:
   stage: style_check
-  before_script: [ ]
   script:
-    - pip install black isort
     - black --check .
     - isort --check-only .
 
 lint_flake8:
   stage: style_check
-  before_script: [ ]
   script:
     - pip install flake8
     - flake8 .
