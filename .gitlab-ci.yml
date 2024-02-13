@@ -10,7 +10,7 @@ default:
     - pip install poetry
     - poetry config virtualenvs.in-project true
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
-    - poetry install --with tests,docs,tutorials
+    - poetry install --with tests,docs,tutorials,dev
     - source .venv/bin/activate
 
 .run-test-with-coverage: &run-test-with-coverage
@@ -22,17 +22,13 @@ default:
 # static_check
 formatting_check:
   stage: style_check
-  before_script: [ ]
   script:
-    - poetry install --only dev
     - black --check .
     - isort --check-only .
 
 lint_flake8:
   stage: style_check
-  before_script: [ ]
   script:
-    - poetry install --only dev
     - pip install flake8
     - flake8 .
 
