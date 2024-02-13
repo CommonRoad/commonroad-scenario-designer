@@ -1123,31 +1123,31 @@ class ScenarioToolboxController(QDockWidget):
                 else 1
             )
 
-            if self.current_scenario.get_current_scenario().location:
+            if self.current_scenario.get_current_scenario().lanelet_network.location:
                 self.scenario_toolbox_ui.scenario_geo_anme_id.setText(
-                    str(self.current_scenario.get_current_scenario().location.geo_name_id)
+                    str(self.current_scenario.get_current_scenario().lanelet_network.location.geo_name_id)
                 )
                 self.scenario_toolbox_ui.scenario_latitude.setText(
-                    str(self.current_scenario.get_current_scenario().location.gps_latitude)
+                    str(self.current_scenario.get_current_scenario().lanelet_network.location.gps_latitude)
                 )
                 self.scenario_toolbox_ui.scenario_longitude.setText(
-                    str(self.current_scenario.get_current_scenario().location.gps_longitude)
+                    str(self.current_scenario.get_current_scenario().lanelet_network.location.gps_longitude)
                 )
-                if self.current_scenario.get_current_scenario().location.environment:
+                if self.current_scenario.get_current_scenario().environment:
                     self.scenario_toolbox_ui.scenario_time_of_day.setCurrentText(
                         self.current_scenario.get_current_scenario().environment.time_of_day.value
                     )
                     self.scenario_toolbox_ui.scenario_weather.setCurrentText(
-                        self.current_scenario.get_current_scenario().lanelet_network.location.environment.weather.value
+                        self.current_scenario.get_current_scenario().environment.weather.value
                     )
                     self.scenario_toolbox_ui.scenario_underground.setCurrentText(
-                        self.current_scenario.get_current_scenario().lanelet_network.location.environment.underground.value
+                        self.current_scenario.get_current_scenario().environment.underground.value
                     )
                     self.scenario_toolbox_ui.scenario_time_hour.setValue(
-                        self.current_scenario.get_current_scenario().lanelet_network.location.environment.time.hours
+                        self.current_scenario.get_current_scenario().environment.time.hours
                     )
                     self.scenario_toolbox_ui.scenario_time_minute.setValue(
-                        self.current_scenario.get_current_scenario().lanelet_network.location.environment.time.minutes
+                        self.current_scenario.get_current_scenario().environment.time.minutes
                     )
                 else:
                     self.init_scenario_location_default()
@@ -1232,7 +1232,7 @@ class ScenarioToolboxController(QDockWidget):
                 )
                 self.sl_has_empty_values()
                 if self.scenario_toolbox_ui.location_storage_selection.isChecked():
-                    self.current_scenario.get_current_scenario().location = Location(
+                    self.current_scenario.get_current_scenario().lanelet_network.location = Location(
                         int(self.scenario_toolbox_ui.scenario_geo_anme_id.text()),
                         float(self.scenario_toolbox_ui.scenario_latitude.text()),
                         float(self.scenario_toolbox_ui.scenario_longitude.text()),

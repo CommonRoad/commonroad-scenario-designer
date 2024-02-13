@@ -76,20 +76,34 @@ class AddAerialImageController:
                 return
             bounds = extract_plot_limits(self.scenario_model.get_lanelet_network())
             if (
-                self.scenario_model.get_current_scenario().location.geo_transformation is not None
-                and self.scenario_model.get_current_scenario().location.geo_transformation.x_translation != 0.0
+                self.scenario_model.get_current_scenario().lanelet_network.location.geo_transformation is not None
+                and self.scenario_model.get_current_scenario().lanelet_network.location.geo_transformation.x_translation
+                != 0.0
             ):
-                max_x = bounds[1] + self.scenario_model.get_current_scenario().location.geo_transformation.x_translation
-                min_x = bounds[0] + self.scenario_model.get_current_scenario().location.geo_transformation.x_translation
+                max_x = (
+                    bounds[1]
+                    + self.scenario_model.get_current_scenario().lanelet_network.location.geo_transformation.x_translation
+                )
+                min_x = (
+                    bounds[0]
+                    + self.scenario_model.get_current_scenario().lanelet_network.location.geo_transformation.x_translation
+                )
             else:
                 max_x = bounds[1]
                 min_x = bounds[0]
             if (
-                self.scenario_model.get_current_scenario().location.geo_transformation is not None
-                and self.scenario_model.get_current_scenario().location.geo_transformation.y_translation != 0.0
+                self.scenario_model.get_current_scenario().lanelet_network.location.geo_transformation is not None
+                and self.scenario_model.get_current_scenario().lanelet_network.location.geo_transformation.y_translation
+                != 0.0
             ):
-                min_y = bounds[2] + self.scenario_model.get_current_scenario().location.geo_transformation.y_translation
-                max_y = bounds[3] + self.scenario_model.get_current_scenario().location.geo_transformation.y_translation
+                min_y = (
+                    bounds[2]
+                    + self.scenario_model.get_current_scenario().lanelet_network.location.geo_transformation.y_translation
+                )
+                max_y = (
+                    bounds[3]
+                    + self.scenario_model.get_current_scenario().lanelet_network.location.geo_transformation.y_translation
+                )
             else:
                 min_y = bounds[2]
                 max_y = bounds[3]
