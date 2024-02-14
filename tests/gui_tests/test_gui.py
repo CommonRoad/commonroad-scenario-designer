@@ -31,7 +31,7 @@ def test_pyqt_framework(qtbot):
     qtbot.addWidget(window.mwindow_ui)
     # ----- PERFORM TESTS ------ #
     # -- TOOLBAR
-    """
+
     execute_toolbar_test(window)
     # -- Scenario
     execute_scenario_tests(window)
@@ -49,7 +49,6 @@ def test_pyqt_framework(qtbot):
     execute_rotate_multiple_lanelet_test(window)
     # -- Translating multiple lanelets at once
     execute_translate_multiple_lanelet_test(window)
-    """
     # update multiple lanelets
     execute_update_multiple_lanelet_test(window)
 
@@ -335,22 +334,37 @@ def execute_remove_multiple_lanelet_test(window):
 
 
 def execute_update_multiple_lanelet_test(window):
+    # create three connected lanelets in road network
     first_lanelet, predecessor_lanelet, successor_lanelet = add_lanelets(window=window)
 
     window.road_network_toolbox.road_network_toolbox_ui.selected_number_vertices.setText("20")
+    # select all lanelets
     window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.set_checked_items(
         [str(first_lanelet.lanelet_id), str(predecessor_lanelet.lanelet_id), str(successor_lanelet.lanelet_id)]
     )
+    window.road_network_toolbox.lanelet_controller.lanelet_ui.update_lanelet_information(first_lanelet)
+    # set parameters for updating
     window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_start_position_x.setText("0")
     window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_start_position_y.setText("0")
     window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_end_position_x.setText("10")
     window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_end_position_y.setText("0")
     window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_length.setText("10")
     window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_width.setText("3")
+    # update all lanelets
     window.road_network_toolbox.lanelet_controller.update_lanelet()
 
-    for lanelet in [first_lanelet, predecessor_lanelet, successor_lanelet]:
-        pass
+    # since all lanelets were updated to same position -> they all have the same left and right vertices
+    left_vertices = window.scenario_model.get_lanelets()[0].left_vertices
+    rights_vertices = window.scenario_model.get_lanelets()[0].right_vertices
+    for lanelet in window.scenario_model.get_lanelets()[1:]:
+        # compare left vertices
+        assert len(lanelet.left_vertices) == len(left_vertices)
+        for index, vertex in enumerate(lanelet.left_vertices):
+            assert vertex[0] == left_vertices[index][0]
+        # compare right vertices
+        assert len(lanelet.right_vertices) == len(rights_vertices)
+        for index, vertex in enumerate(lanelet.right_vertices):
+            assert vertex[0] == rights_vertices[index][0]
 
 
 def execute_translate_multiple_lanelet_test(window):
