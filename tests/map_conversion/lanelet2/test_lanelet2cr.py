@@ -622,6 +622,47 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertEqual(third_color, "green")
         self.assertEqual(third_duration, 5)
 
+    def test_speed_limit_conversion(self):
+        l2cr = Lanelet2CRConverter()
+        l2cr(osm)
+        traffic_signs_before = len(l2cr.lanelet_network.traffic_signs)
+        way_rel = list(osm.way_relations.values())[0]
+        speed_limit = RegulatoryElement(
+            "1000",
+            tag_dict={"sign_type": "de274-50", "subtype": "speed_limit", "type": "regulatory_element"},
+        )
+        # add the speed limit sign to the osm
+        osm.add_speed_limit_sign(speed_limit.id_, "50", "DE-274")
+        # add the id of the speed limit sign to the lanelet
+        way_rel.regulatory_elements.append("1000")
+
+        l2cr(osm)
+        traffic_signs_after = len(l2cr.lanelet_network.traffic_signs)
+
+        # testing that the new traffic sign has been added
+        self.assertEqual(traffic_signs_before + 1, traffic_signs_after)
+
+        # testing the attributes of the newly created traffic sign
+        converted_traffic_sign = l2cr.lanelet_network.traffic_signs[-1]
+        self.assertEqual(converted_traffic_sign.traffic_sign_elements[0].traffic_sign_element_id, "DE-274")
+        speed_limit = converted_traffic_sign.traffic_sign_elements[0].additional_values[0]
+        self.assertEqual(speed_limit, "50")
+
+        # testing when the speed limit does not refer to any lanelet
+        speed_limit = RegulatoryElement(
+            "11",
+            tag_dict={"sign_type": "de274-50", "subtype": "speed_limit", "type": "regulatory_element"},
+        )
+
+        # add the speed limit sign to the osm
+        osm.add_speed_limit_sign(speed_limit.id_, "50", "DE-274")
+        # add the wrong id of the speed limit sign to the lanelet, so the sign does not get assigned to a lanelet
+        way_rel.regulatory_elements.append("100")
+        traffic_signs_before = len(l2cr.lanelet_network.traffic_signs)
+        l2cr(osm)
+        traffic_signs_after = len(l2cr.lanelet_network.traffic_signs)
+        self.assertEqual(traffic_signs_before, traffic_signs_after)
+
 
 if __name__ == "__main__":
     unittest.main()
