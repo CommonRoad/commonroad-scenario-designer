@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.9.0]
+### Added
+- possibility of selecting multiple lanelets by clicking and control key
+- updating / rotating / translating / deleting multiple lanelets at once
+- New option for adding a new lanelet (connect to selected) 
+
 ## [0.8.1] - 2023-12-XX
 
 ### Added
