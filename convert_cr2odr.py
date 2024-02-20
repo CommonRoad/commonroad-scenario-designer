@@ -22,7 +22,11 @@ warnings.filterwarnings("ignore")
 date_strftime_format = "%d-%b-%y %H:%M:%S"
 message_format = "%(asctime)s - %(levelname)s - %(message)s"
 logging.basicConfig(
-    filename="exceptions.log", encoding="utf-8", level=logging.INFO, format=message_format, datefmt=date_strftime_format
+    filename="exceptions.log",
+    encoding="utf-8",
+    level=logging.ERROR,
+    format=message_format,
+    datefmt=date_strftime_format,
 )
 
 
