@@ -124,15 +124,13 @@ def select_random_lanelet(lanelet_list: List[Lanelet]) -> Lanelet:
     """
     for lanelet in lanelet_list:
         if (
-            set(
-                [
-                    LaneletType.CROSSWALK,
-                    LaneletType.BICYCLE_LANE,
-                    LaneletType.BUS_STOP,
-                    LaneletType.BORDER,
-                    LaneletType.UNKNOWN,
-                ]
-            ).isdisjoint(lanelet.lanelet_type)
+            {
+                LaneletType.CROSSWALK,
+                LaneletType.BICYCLE_LANE,
+                LaneletType.BUS_STOP,
+                LaneletType.BORDER,
+                LaneletType.UNKNOWN,
+            }.isdisjoint(lanelet.lanelet_type)
         ) is True:
             return lanelet
 

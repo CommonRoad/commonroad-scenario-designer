@@ -171,6 +171,6 @@
         <y>-1.5</y>
       </point>
     </rightBound>
-    <laneletType>unknown</laneletType>
+    <laneletType>urban</laneletType>
   </lanelet>
 </commonRoad>
