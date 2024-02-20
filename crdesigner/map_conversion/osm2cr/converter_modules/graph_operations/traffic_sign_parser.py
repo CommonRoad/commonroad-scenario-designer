@@ -47,11 +47,6 @@ class TrafficSignParser:
                             max_speed = float(sign[6:])
                         else:
                             max_speed = float(sign[sign.find("[") + 1 : sign.find("]")])
-                    # debugging
-                    # if max_speed == -99:
-                    #     print(sign)
-                    # else:
-                    #     print(max_speed)
                     if max_speed != -99:
                         if not zone:
                             # convert km/h to m/s and add to traffic sign elements

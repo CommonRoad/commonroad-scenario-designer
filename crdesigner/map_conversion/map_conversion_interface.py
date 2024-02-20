@@ -68,8 +68,9 @@ def commonroad_to_lanelet(input_file: str, output_name: str, config: lanelet2_co
         scenario, _ = crdesigner_reader.open()
 
     except etree.XMLSyntaxError as xml_error:
-        print(f"SyntaxError: {xml_error}")
-        print("There was an error during the loading of the selected CommonRoad file.\n")
+        logging.error(
+            f"SyntaxError: {xml_error}.\n" f"There was an error during the loading of the selected CommonRoad file."
+        )
         return
 
     l2osm = CR2LaneletConverter(config=config)
@@ -124,8 +125,9 @@ def commonroad_to_sumo(input_file: str, output_file: str):
         crdesigner_reader = CRDesignerFileReader(input_file)
         scenario, _ = crdesigner_reader.open()
     except etree.XMLSyntaxError as xml_error:
-        print(f"SyntaxError: {xml_error}")
-        print("There was an error during the loading of the selected CommonRoad file.\n")
+        logging.error(
+            f"SyntaxError: {xml_error}.\n" f"There was an error during the loading of the selected CommonRoad file."
+        )
         return
 
     if SUMO_AVAILABLE:
@@ -178,7 +180,7 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Optional[Scenario]:
             ]
         )
     except Exception as e:
-        print("__Warning__: {}.".format(e))
+        logging.error(format(e))
         return None
     return opendrive_to_commonroad(Path(opendrive_file))
 

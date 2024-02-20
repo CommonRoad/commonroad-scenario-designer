@@ -348,7 +348,6 @@ def parse_file(
     # custom bounds were originally used this way.
     # Now they are used for sublayer extraction
     # custom_bounds = read_custom_bounds(root)
-    # print("bounds", bounds, "custom_bounds", custom_bounds)
     road_ids, road_lats, road_lons = extract_lat_lon(road_nodes)
     crossing_ids, crossing_lats, crossing_lons = (
         extract_lat_lon(crossing_nodes) if len(crossing_nodes) > 0 else ([], [], [])

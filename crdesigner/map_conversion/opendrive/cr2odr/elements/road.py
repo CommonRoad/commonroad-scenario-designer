@@ -54,11 +54,11 @@ class Road:
     """
 
     counting = open_drive_config.initial_road_counting
-    roads: dict = {}
-    cr_id_to_od: dict = {}
-    lane_to_lane: dict = {}
+    roads: Dict = {}
+    cr_id_to_od: Dict = {}
+    lane_to_lane: Dict = {}
 
-    lane_2_lane_link: dict = {}
+    lane_2_lane_link: Dict[int, Dict[str, Dict[int, List[int]]]] = {}
 
     link_map: LinkMap_T = {}
 
@@ -180,14 +180,11 @@ class Road:
         each successor/predecessor are linked with its corresponding landLink id.
         This happens when a road has exactly one successor/predecessor.
 
-        :param key: curKey
         :param links: A dictionary with successor/predecessor as key and list of road linkage id as value
         :param len_succ: Number of successors
         :param len_pred: Number of predecessors
-        :param curl_links_lanelets: A dictionary of road ids and road links with all linkage information
         such as mergeLinkage, roadLinkage, laneIndices
-        :param lane_2_lane: A dictionary with successor/predecessor
-        as key and dictionaries of corresponding ids as value
+        :param lane_2_lane: Dictionary with successor/predecessor as key and dictionaries of corresponding ids as value
         """
         if len_succ == 1:
             successor = self.element_type = etree.SubElement(self.link, config.SUCCESSOR_TAG)
@@ -300,7 +297,6 @@ class Road:
     ):
         this_length = path_length[end_idx] - path_length[start_idx]
         if geo_type == GeometryType.LINE:
-            # print("line", this_length, start_idx, end_idx)
             self.print_line(
                 path_length[start_idx],
                 self.center[start_idx][0],
@@ -309,7 +305,6 @@ class Road:
                 this_length,
             )
         elif geo_type == GeometryType.ARC:
-            # print("arc", this_length, start_idx, end_idx)
             self.print_arc(
                 path_length[start_idx],
                 self.center[start_idx][0],
@@ -319,7 +314,6 @@ class Road:
                 curv[end_idx],
             )
         elif geo_type == GeometryType.SPIRAL:
-            # print("spiral", this_length, start_idx, end_idx)
             self.print_spiral(
                 path_length[start_idx],
                 self.center[start_idx][0],

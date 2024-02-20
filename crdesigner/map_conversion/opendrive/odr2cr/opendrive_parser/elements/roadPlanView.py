@@ -147,7 +147,6 @@ class PlanView:
         :param length: length of the geometry which is added
         """
         self._geo_lengths = np.append(self._geo_lengths, length + self._geo_lengths[-1])
-        # print("Adding geo length",self._geo_lengths)
 
     @property
     def length(self) -> float:
@@ -286,7 +285,6 @@ class PlanView:
             "called.",
             DeprecationWarning,
         )
-        #        print("Checking required lanelet mesh", self._geo_lengths)
 
         # start = time.time()
         # this threshold was determined by quick prototyping tests
@@ -294,7 +292,6 @@ class PlanView:
         if self.should_precalculate < 1:
             return
 
-        # print("Checking required lanelet mesh", self._geo_lengths, num_steps)
         _precalculation = []
         s = 0
         # i = 0

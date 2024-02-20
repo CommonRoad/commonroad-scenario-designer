@@ -4,6 +4,7 @@ import time
 from typing import Dict, List, Union
 
 import numpy as np
+from commonroad.common.common_lanelet import LaneletType
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Path_T
 from commonroad.scenario.intersection import IntersectionIncomingElement
@@ -60,7 +61,6 @@ def create_linkages(
             continue
         # either successor or predecessor road is trivial
         if len_succ == 1 or len_pred == 1:
-            # print("add_simple_linkage for road_id: ", key)
             Road.roads[key].add_simple_linkage(cur_links, len_succ, len_pred, lane_2_lane[key])
 
 
@@ -112,6 +112,29 @@ def process_link_map(link_map: LinkMap_T, lane_2_lane: Dict[int, Dict[str, Dict]
             for value in values:
                 road_succ_pred_final[key].append(Road.cr_id_to_od[value])
         link_map[road_id]["roadLinkage"] = road_succ_pred_final
+
+
+def select_random_lanelet(lanelet_list: List[Lanelet]) -> Lanelet:
+    """
+    Selects a lanelet from a given list, where the lanelet must not be of type crosswalk,
+    bicycle lane, bus stop, border, or unknown.
+
+    :param lanelet_list: List of lanelets.
+    :return: Lanelet.
+    """
+    for lanelet in lanelet_list:
+        if (
+            set(
+                [
+                    LaneletType.CROSSWALK,
+                    LaneletType.BICYCLE_LANE,
+                    LaneletType.BUS_STOP,
+                    LaneletType.BORDER,
+                    LaneletType.UNKNOWN,
+                ]
+            ).isdisjoint(lanelet.lanelet_type)
+        ) is True:
+            return lanelet
 
 
 class Converter:
@@ -243,7 +266,7 @@ class Converter:
         lane_list = self.lane_net.lanelets
 
         # choose lanelet as starting point
-        lanelet = copy.deepcopy(lane_list[0])
+        lanelet = copy.deepcopy(select_random_lanelet(lane_list))
 
         # this function constructs all roads
         # using a breadth first search approach
@@ -270,9 +293,8 @@ class Converter:
         """
         This function print the time required for the file conversion in the order of second.
         """
-        conv = "Converter\n"
         time_str = f"Conversion took: \t{self.conv_time:.2} seconds\n"
-        print(conv + time_str)
+        logging.info(time_str)
 
     def finalize(self) -> None:
         """
@@ -303,7 +325,6 @@ class Converter:
             if len(lanelet.traffic_signs) > 0:
                 non_empty = True
                 for sign in lanelet.traffic_signs:
-                    # print(sign)
                     data["signs"][sign] = [
                         self.lane_net.find_traffic_sign_by_id(sign),
                         lanelet.lanelet_id,

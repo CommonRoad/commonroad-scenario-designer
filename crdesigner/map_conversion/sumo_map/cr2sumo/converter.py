@@ -551,8 +551,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 # only disallow vehicles longer than car (class passenger)
                 if veh_length**2 > max_vehicle_length_sq and veh_length > self.conf.veh_params["length"]["passenger"]:
                     disallow.append(veh_class)
-                    # print("{} disallowed on lanelet {}, allowed max_vehicle_length={}".format(veh_class, lanelet_id,
-                    #                                                                           max_vehicle_length))
         return disallow
 
     def _get_speeds_list(self):
@@ -625,7 +623,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     # however sumo doesn't need a junction for this
                     continue
                 cluster_instruction = self.get_cluster_instruction(intersection, lanelet_network, intersecting_edges)
-                print(cluster_instruction)
                 intersect_any = False
                 if cluster_instruction != ClusterInstruction.NO_CLUSTERING:
                     for incoming in intersection.incomings:
