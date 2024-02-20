@@ -26,67 +26,28 @@ logging.basicConfig(
 )
 
 
-def render_maps(network_id: str, scenario: Scenario, scenario_path: Path):
+def render_maps_before_after(sc_before: Scenario, sc_after: Scenario, scenario_path: Path):
     """
     Creates figure for evaluating intersection conversion
 
-    :param network_id: Map ID.
-    :param scenario: CommonRoad scenario.
+    :param sc_before: CommonRoad scenario before conversion.
+    :param sc_after: CommonRoad scenario after conversion.
     :param scenario_path: Path where images should be stored.
     """
     rnd = MPRenderer()
     rnd.draw_params.lanelet_network.intersection.draw_intersections = True
     rnd.draw_params.lanelet_network.intersection.draw_crossings = False
-    rnd.draw_params.lanelet_network.traffic_light.draw_traffic_lights = False
-    rnd.draw_params.lanelet_network.traffic_sign.draw_traffic_signs = False
+    rnd.draw_params.lanelet_network.traffic_light.draw_traffic_lights = True
+    rnd.draw_params.lanelet_network.traffic_sign.draw_traffic_signs = True
+    rnd.draw_params.lanelet_network.intersection.draw_successors = True
+    rnd.draw_params.lanelet_network.intersection.draw_incoming_lanelets = True
     rnd.draw_params.axis_visible = False
 
-    # only incoming lanelets
-    rnd.draw_params.lanelet_network.intersection.draw_outgoings = False
-    rnd.draw_params.lanelet_network.intersection.draw_outgoing_group_lanelets = False
-    scenario.lanelet_network.draw(rnd)
-    rnd.render(filename=str(scenario_path / Path(f"{network_id}_incomings.svg")))
+    sc_before.lanelet_network.draw(rnd)
+    rnd.render(filename=str(scenario_path / Path(f"{sc_before.scenario_id}_before.png")))
 
-    # only traffic signs
-    rnd.draw_params.lanelet_network.intersection.draw_incoming_lanelets = False
-    # rnd.draw_params.lanelet_network.traffic_sign.draw_traffic_signs = True
-    # scenario.lanelet_network.draw(rnd)
-    # rnd.render(filename=scenario_path + "/" + network_id + "_signs")
-
-    # only lanelet IDs
-    # rnd.draw_params.lanelet_network.lanelet.show_label = True
-    rnd.draw_params.lanelet_network.traffic_sign.draw_traffic_signs = False
-    # scenario.lanelet_network.draw(rnd)
-    # rnd.render(filename=scenario_path + "/" + network_id + "_lanelets")
-
-    # only traffic lights
-    rnd.draw_params.lanelet_network.lanelet.show_label = False
-    # rnd.draw_params.lanelet_network.traffic_light.draw_traffic_lights = True
-    # scenario.lanelet_network.draw(rnd)
-    # rnd.render(filename=scenario_path + "/" + network_id + "_lights")
-
-    # only outgoing lanelets
-    rnd.draw_params.lanelet_network.intersection.draw_outgoing_group_lanelets = True
-    rnd.draw_params.lanelet_network.traffic_light.draw_traffic_lights = False
-    scenario.lanelet_network.draw(rnd)
-    rnd.render(filename=str(scenario_path / Path(f"{network_id}_outgoing_groups.svg")))
-
-    # only outgoing dir lanelets
-    rnd.draw_params.lanelet_network.intersection.draw_outgoings = True
-    rnd.draw_params.lanelet_network.intersection.draw_outgoing_group_lanelets = False
-    scenario.lanelet_network.draw(rnd)
-    rnd.render(filename=str(scenario_path / Path(f"{network_id}_outgoing_dir_lanelets.svg")))
-
-    # all
-    rnd.draw_params.lanelet_network.intersection.draw_incoming_lanelets = True
-    rnd.draw_params.lanelet_network.intersection.draw_outgoing_group_lanelets = True
-    scenario.lanelet_network.draw(rnd)
-    rnd.render(filename=str(scenario_path / Path(f"{network_id}.svg")))
-
-    # all with labels
-    # rnd.draw_params.lanelet_network.intersection.show_label = True
-    # scenario.lanelet_network.draw(rnd)
-    # rnd.render(filename=scenario_path + "/" + network_id + "_labeled")
+    sc_after.lanelet_network.draw(rnd)
+    rnd.render(filename=str(scenario_path / Path(f"{sc_after.scenario_id}_after.png")))
 
 
 def map_conversion_scenario(file_path: Path) -> bool:
@@ -199,6 +160,7 @@ def convert_single_map(conversion_path_odr: Path, path_cr: Path):
             scenario_new.add_objects(obs)
         scenario_new.scenario_id = scenario.scenario_id
 
+        render_maps_before_after(scenario, scenario_new, conversion_path_odr)
     except Exception as e:
         logging.error(f"Conversion of {path_cr} was unsuccessful: {str(e)}\n{traceback.format_exc()}")
 
