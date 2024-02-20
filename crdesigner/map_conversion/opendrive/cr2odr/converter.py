@@ -133,6 +133,7 @@ def select_random_lanelet(lanelet_list: List[Lanelet]) -> Lanelet:
             }.isdisjoint(lanelet.lanelet_type)
         ) is True:
             return lanelet
+    return lanelet_list[0]
 
 
 class Converter:

@@ -176,14 +176,14 @@ if __name__ == "__main__":
         "--input_path",
         type=Path,
         help="Path to CommonRoad maps",
-        default=Path("/media/sebastian/TUM/06_code/scenarios/commonroad/scenarios_2020a"),
+        default=Path("/media/sebastian/TUM/06_code/scenarios/commonroad/scenarios_2020a/hand-crafted"),
         required=False,
     )
     parser.add_argument(
         "--output_path",
         type=Path,
         help="Path where OpenDRIVE maps should be stored.",
-        default=Path("/home/sebastian/Downloads"),
+        default=Path("/home/sebastian/Downloads/odr"),
         required=False,
     )
 
