@@ -7,6 +7,8 @@ class OpenDriveConfig(BaseConfig):
     This config holds all configs for the Open Drive conversion.
     """
 
+    initial_cr_id = Attribute(1, "Initial CommonRoad element ID", "Initial CommonRoad element ID")
+
     error_tolerance = Attribute(
         0.15, "Error tolerance", "Max. error between reference geometry and polyline of vertices"
     )
@@ -95,6 +97,7 @@ class OpenDriveConfig(BaseConfig):
     LAYOUT = [
         [
             "Conversion Parameters odr2cr",
+            initial_cr_id,
             error_tolerance,
             min_delta_s,
             precision,

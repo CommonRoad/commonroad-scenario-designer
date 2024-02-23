@@ -6,6 +6,7 @@ from typing import Dict, Optional
 import numpy as np
 from lxml import etree
 
+from crdesigner.common.config.opendrive_config import open_drive_config
 from crdesigner.map_conversion.common.utils import (
     clean_projection_string,
     generate_unique_id,
@@ -85,14 +86,15 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadty
 )
 
 
-def parse_opendrive(file_path: Path) -> OpenDrive:
+def parse_opendrive(file_path: Path, odr_conf: open_drive_config = open_drive_config) -> OpenDrive:
     """
     Tries to parse XML tree, returns OpenDRIVE object
 
-    :param file_path: path to opendrive
+    :param file_path: path to OpenDRIVE file
+    :param odr_conf: OpenDRIVE configuration.
     :return: Object representing an OpenDrive specification
     """
-    generate_unique_id(0)  # reset IDs
+    generate_unique_id(odr_conf.initial_cr_id)  # reset IDs
 
     with file_path.open("r") as file_in:
         root_node = etree.parse(file_in)

@@ -90,7 +90,7 @@ def opendrive_to_commonroad(
     :param odr_conf: OpenDRIVE config parameters.
     :return: CommonRoad scenario
     """
-    opendrive = parse_opendrive(input_file)
+    opendrive = parse_opendrive(input_file, odr_conf)
     road_network = Network()
     road_network.load_opendrive(opendrive)
     for index in range(len(road_network._traffic_lights)):
