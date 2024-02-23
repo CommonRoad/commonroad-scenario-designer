@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 
+from crdesigner.common.config.opendrive_config import open_drive_config
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.crosswalks import (
     get_crosswalks,
@@ -101,11 +102,14 @@ class MyTestCase(unittest.TestCase):
     def test_four_way_crossing(self):
         """Test the crosswalk conversion for four_way_crossing.xodr"""
         xodr_file_name = "four_way_crossing"
+        config = open_drive_config
+        config.initial_cr_id = 0
         scenario = opendrive_to_commonroad(
             Path(
                 os.path.dirname(os.path.realpath(__file__))
                 + "/../../../../test_maps/odr2cr/{}.xodr".format(xodr_file_name)
-            )
+            ),
+            odr_conf=config,
         )
 
         lanelet_7 = scenario.lanelet_network.find_lanelet_by_id(7)

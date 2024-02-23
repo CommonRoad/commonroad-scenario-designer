@@ -8,6 +8,7 @@ from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import TrafficSignIDZamunda
 
 from crdesigner.common.config.gui_config import utm_default
+from crdesigner.common.config.opendrive_config import open_drive_config
 from crdesigner.common.config.opendrive_config import (
     open_drive_config as opendrive_config,
 )
@@ -29,6 +30,9 @@ def load_and_convert_opendrive(xodr_file_name: str) -> Scenario:
 class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
     """Performs some basic tests of the conversion by comparing what the converter produced with the content
     of the respective .xodr files."""
+
+    def setUp(self):
+        open_drive_config.initial_cr_id = 0
 
     def test_straight_road(self):
         """Test the file straight_road.xodr"""
