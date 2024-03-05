@@ -184,7 +184,7 @@ class BaseConfig:
 
     def save_to_yaml_file(self):
         """This function will save the none default settings of the derived settings class to a yaml file,
-        which is specified by the file_path."""
+        which is specified by the cities_file."""
         if isinstance(self.CUSTOM_SETTINGS_PATH, str):
             yaml_path = self.CUSTOM_SETTINGS_PATH
         else:
@@ -210,7 +210,7 @@ class BaseConfig:
 
     def restore_from_yaml_file(self):
         """This function will restore the none default settings of the derived settings class from a yaml file,
-        which is specified by the file_path."""
+        which is specified by the cities_file."""
         if isinstance(self.CUSTOM_SETTINGS_PATH, str):
             yaml_path = self.CUSTOM_SETTINGS_PATH
         else:
