@@ -53,7 +53,7 @@ class AddIntersectionUI:
             if row != self.road_network_toolbox_ui.intersection_incomings_table.rowCount() - 1:
                 index = self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).findText(
                     self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).currentText(),
-                    Qt.MatchFixedString,
+                    Qt.MatchFlag.MatchFixedString,
                 )
             else:
                 index = -1
@@ -121,12 +121,12 @@ class AddIntersectionUI:
                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 4).set_checked_items(
                     [str(la_id) for la_id in incoming.outgoing_right]
                 )
-                index = self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 5).findText(
-                    str(incoming.left_of)
-                )
-                self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 5).setCurrentIndex(
-                    index
-                )
+                # index = self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 5).findText(
+                #     str(incoming.left_of)
+                # )
+                # self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 5).setCurrentIndex(
+                #     index
+                # )
             self.road_network_toolbox_ui.intersection_crossings.set_checked_items(
                 [str(cr) for cr in intersection.crossings]
             )

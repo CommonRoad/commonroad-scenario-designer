@@ -1,9 +1,14 @@
 from typing import Set
 
+import numpy as np
 from commonroad.scenario.intersection import IncomingGroup, Intersection
 
 from crdesigner.common.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
+from crdesigner.ui.gui.utilities.string_util import (
+    check_string_for_null,
+    convert_string_to_float,
+)
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.intersections_ui import (
     AddIntersectionUI,
 )
@@ -41,6 +46,10 @@ class AddIntersectionController:
         self.road_network_toolbox_ui.button_add_intersection.clicked.connect(lambda: self.add_intersection())
         self.road_network_toolbox_ui.button_remove_intersection.clicked.connect(lambda: self.remove_intersection())
         self.road_network_toolbox_ui.button_update_intersection.clicked.connect(lambda: self.update_intersection())
+        self.road_network_toolbox_ui.button_rotate_intersection.clicked.connect(lambda: self.rotate_intersection())
+        self.road_network_toolbox_ui.button_translate_intersection.clicked.connect(
+            lambda: self.translate_intersection()
+        )
 
     def add_four_way_intersection(self):
         """
@@ -193,6 +202,10 @@ class AddIntersectionController:
             self.road_network_controller.text_browser.append("Please stop the animation first.")
             return
 
+        if check_string_for_null(txt=self.road_network_toolbox_ui.selected_intersection.currentText()):
+            self.road_network_controller.text_browser.append("Please select an intersection first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("_Warning:_ Create a new file")
             return
@@ -238,6 +251,10 @@ class AddIntersectionController:
             self.road_network_controller.text_browser.append("Please stop the animation first.")
             return
 
+        if check_string_for_null(txt=self.road_network_toolbox_ui.selected_intersection.currentText()):
+            self.road_network_controller.text_browser.append("Please select an intersection first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("_Warning:_ Create a new file")
             return
@@ -246,3 +263,56 @@ class AddIntersectionController:
             selected_intersection_id = int(self.road_network_toolbox_ui.selected_intersection.currentText())
             self.scenario_model.update_intersection(selected_intersection_id)
             self.add_intersection(selected_intersection_id)
+
+    def rotate_intersection(self):
+        """
+        _summary_: translate intersections by user-defined x- and y-values.
+        """
+
+        # Getting rotation details.
+
+        if check_string_for_null(txt=self.road_network_toolbox_ui.selected_intersection.currentText()):
+            self.road_network_controller.text_browser.append("Please select an intersection first.")
+            return
+
+        angle = convert_string_to_float(self.road_network_toolbox_ui.intersection_rotation_angle.text())
+
+        # Finding intersection.
+        selected_intersection_id = int(self.road_network_toolbox_ui.selected_intersection.currentText())
+        intersection = self.scenario_model.find_intersection_by_id(selected_intersection_id)
+
+        lanelets = intersection.compute_member_lanelets(self.scenario_model.get_current_scenario().lanelet_network)
+
+        for lanelet_id in lanelets:
+            lanelet = self.scenario_model.find_lanelet_by_id(lanelet_id)
+            lanelet.translate_rotate(np.array([0, 0]), np.deg2rad(angle))
+
+        self.update_intersection()
+        self.road_network_controller.set_default_road_network_list_information()
+
+    def translate_intersection(self):
+        """
+        _summary_: translate intersections by user-defined x- and y-values.
+        """
+
+        # Getting rotation details.
+
+        if check_string_for_null(txt=self.road_network_toolbox_ui.selected_intersection.currentText()):
+            self.road_network_controller.text_browser.append("Please select an intersection first.")
+            return
+
+        x = convert_string_to_float(self.road_network_toolbox_ui.intersection_x_translation.text())
+        y = convert_string_to_float(self.road_network_toolbox_ui.intersection_y_translation.text())
+
+        # Finding intersection
+        selected_intersection_id = int(self.road_network_toolbox_ui.selected_intersection.currentText())
+        intersection = self.scenario_model.find_intersection_by_id(selected_intersection_id)
+
+        lanelets = intersection.compute_member_lanelets(self.scenario_model.get_current_scenario().lanelet_network)
+
+        for lanelet_id in lanelets:
+            lanelet = self.scenario_model.find_lanelet_by_id(lanelet_id)
+            lanelet.translate_rotate(np.array([x, y]), np.deg2rad(0))
+
+        self.update_intersection()
+        self.road_network_controller.set_default_road_network_list_information()

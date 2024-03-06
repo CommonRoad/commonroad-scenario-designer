@@ -5,10 +5,12 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QFormLayout,
     QFrame,
+    QGridLayout,
     QGroupBox,
     QLabel,
     QLineEdit,
     QPushButton,
+    QSpinBox,
     QTableWidget,
     QVBoxLayout,
 )
@@ -46,6 +48,13 @@ class IntersectionsWidget:
         self.toolbox.intersection_incoming_length.setMaxLength(4)
         self.toolbox.intersection_incoming_length.setAlignment(Qt.AlignmentFlag.AlignRight)
 
+        self.toolbox.intersection_start_position_x = QLineEdit()
+        self.toolbox.intersection_start_position_x.setValidator(self.toolbox.float_validator)
+        self.toolbox.intersection_start_position_x.setMaxLength(8)
+        self.toolbox.intersection_start_position_y = QLineEdit()
+        self.toolbox.intersection_start_position_y.setValidator(self.toolbox.float_validator)
+        self.toolbox.intersection_start_position_y.setMaxLength(8)
+
         self.toolbox.intersection_with_traffic_signs = QCheckBox("Add Traffic Signs")
         self.toolbox.intersection_with_traffic_lights = QCheckBox("Add Traffic Lights")
 
@@ -81,6 +90,33 @@ class IntersectionsWidget:
         self.toolbox.button_fit_intersection = QPushButton("Fit to intersection")
         self.toolbox.intersection_fitting_groupbox = QGroupBox("Intersection fitting")
 
+        self.toolbox.button_rotate_intersection = QPushButton("Rotate")
+        self.toolbox.button_rotate_intersection.setMinimumWidth(120)
+        self.toolbox.intersection_rotation_angle = QSpinBox()
+        self.toolbox.intersection_rotation_angle.setMinimum(-180)
+        self.toolbox.intersection_rotation_angle.setMaximum(180)
+
+        self.toolbox.intersection_rotate = QGridLayout()
+        self.toolbox.intersection_rotate.addWidget(QLabel("angle: "), 1, 0)
+        self.toolbox.intersection_rotate.addWidget(self.toolbox.intersection_rotation_angle, 1, 1)
+        self.toolbox.intersection_rotate.addWidget(QLabel("[deg]"), 1, 2)
+
+        self.toolbox.button_translate_intersection = QPushButton("Translate")
+        self.toolbox.button_translate_intersection.setMinimumWidth(120)
+        self.toolbox.intersection_x_translation = QLineEdit()
+        self.toolbox.intersection_x_translation.setMaximumWidth(45)
+        self.toolbox.intersection_x_translation.setValidator(QDoubleValidator())
+
+        self.toolbox.intersection_y_translation = QLineEdit()
+        self.toolbox.intersection_y_translation.setMaximumWidth(45)
+        self.toolbox.intersection_y_translation.setValidator(QDoubleValidator())
+
+        self.toolbox.intersection_translate = QGridLayout()
+        self.toolbox.intersection_translate.addWidget(QLabel("x: "), 1, 0)
+        self.toolbox.intersection_translate.addWidget(self.toolbox.intersection_x_translation, 1, 1)
+        self.toolbox.intersection_translate.addWidget(QLabel("y: "), 1, 2)
+        self.toolbox.intersection_translate.addWidget(self.toolbox.intersection_y_translation, 1, 3)
+
         intersection_templates_layout = QFormLayout()
         intersection_template_groupbox = QGroupBox()
         intersection_template_groupbox.setLayout(intersection_templates_layout)
@@ -88,6 +124,9 @@ class IntersectionsWidget:
         intersection_templates_layout.addRow("Diameter [m]:", self.toolbox.intersection_diameter)
         intersection_templates_layout.addRow("Lanelet Width [m]:", self.toolbox.intersection_lanelet_width)
         intersection_templates_layout.addRow("Incoming Length [m]:", self.toolbox.intersection_incoming_length)
+        intersection_templates_layout.addRow(
+            self.toolbox.intersection_with_traffic_signs, self.toolbox.intersection_with_traffic_lights
+        )
         intersection_templates_layout.addRow(
             self.toolbox.intersection_with_traffic_signs, self.toolbox.intersection_with_traffic_lights
         )
@@ -112,6 +151,12 @@ class IntersectionsWidget:
         intersection_adding_updating_layout.addRow(self.toolbox.button_add_intersection)
         intersection_adding_updating_layout.addRow(self.toolbox.button_remove_intersection)
         intersection_adding_updating_layout.addRow(self.toolbox.button_update_intersection)
+        intersection_adding_updating_layout.addRow(
+            self.toolbox.button_rotate_intersection, self.toolbox.intersection_rotate
+        )
+        intersection_adding_updating_layout.addRow(
+            self.toolbox.button_translate_intersection, self.toolbox.intersection_translate
+        )
         intersection_adding_updating_layout.addRow(self.toolbox.button_fit_intersection)
         layout_intersection.addWidget(intersection_adding_updating_groupbox)
 
