@@ -2,11 +2,6 @@ import os
 import time
 import unittest
 
-from commonroad.common.file_writer import (  # type: ignore
-    CommonRoadFileWriter,
-    OverwriteExistingFile,
-)
-from commonroad.common.util import FileFormat
 from commonroad.planning.planning_problem import PlanningProblemSet  # type: ignore
 from commonroad.scenario.scenario import Scenario, Tag  # type: ignore
 from lxml import etree  # type: ignore
@@ -14,6 +9,7 @@ from lxml import etree  # type: ignore
 from crdesigner.common.config.general_config import general_config
 from crdesigner.common.config.gui_config import utm_default
 from crdesigner.common.config.lanelet2_config import lanelet2_config
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
@@ -85,14 +81,13 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         ) as fh:
             parser = etree.XMLParser(remove_blank_text=True)
             tree_import = etree.parse(fh, parser=parser).getroot()
-            writer = CommonRoadFileWriter(
+            writer = CRDesignerFileWriter(
                 scenario=self.load_and_convert(file_name, translate=translate, file_path=file_path),
                 planning_problem_set=PlanningProblemSet(),
                 author="",
                 affiliation="",
                 source="CommonRoad Scenario Designer",
                 tags={Tag.URBAN, Tag.HIGHWAY},
-                file_format=FileFormat.XML,
             )
             writer.write_to_file(get_tmp_dir() + xml_output_name + translated + ".xml", OverwriteExistingFile.ALWAYS)
 

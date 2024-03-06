@@ -1,12 +1,11 @@
 import os
 from pathlib import Path
 
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
-from commonroad.common.util import FileFormat
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 
 from crdesigner.common.config.opendrive_config import open_drive_config
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
 
 input_path = Path.cwd().parent.parent / "tests/map_conversion/test_maps/opendrive/opendrive-1.xodr"
@@ -19,14 +18,13 @@ config.lanelet_types_backwards_compatible = False
 scenario = opendrive_to_commonroad(input_path)
 
 # store converted file as CommonRoad scenario
-writer = CommonRoadFileWriter(
+writer = CRDesignerFileWriter(
     scenario=scenario,
     planning_problem_set=PlanningProblemSet(),
     author="Sebastian Maierhofer",
     affiliation="Technical University of Munich",
     source="CommonRoad Scenario Designer",
     tags={Tag.URBAN},
-    file_format=FileFormat.XML,
 )
 
 # create a folder for the example file if it does not exist

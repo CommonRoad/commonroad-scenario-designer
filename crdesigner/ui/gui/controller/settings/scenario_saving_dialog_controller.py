@@ -4,18 +4,20 @@ import sys
 from typing import Optional
 
 from commonroad.common.common_scenario import (
+    GeoTransformation,
     Location,
     Time,
     TimeOfDay,
     Underground,
     Weather,
 )
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.common.util import FileFormat
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Environment, Scenario, Tag
-from PyQt6.QtWidgets import QFileDialog, QMessageBox
+from PyQt6.QtWidgets import QFileDialog, QLineEdit, QMessageBox
 
+from crdesigner.common.config import gui_config
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.common.logging import logger
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
@@ -23,6 +25,18 @@ from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.settings.scenario_saving_dialog_ui import (
     ScenarioSavingDialogUI,
 )
+
+
+def get_float_position(entered_string: QLineEdit) -> float:
+    """
+    Validates number and replace , with . to be able to insert german floats
+    :param entered_string: String containing float
+    :return: string argument as valid float if not empty or not - else standard value 0.0
+    """
+    if entered_string.text() and entered_string.text() != "-":
+        return float(entered_string.text().replace(",", "."))
+    else:
+        return 0.0
 
 
 class ScenarioSavingDialogController:
@@ -48,6 +62,7 @@ class ScenarioSavingDialogController:
         self.save_window.prediction_type.currentTextChanged.connect(lambda: self.update_scenario_meta_data())
         self.save_window.scenario_prediction_id.valueChanged.connect(lambda: self.update_scenario_meta_data())
         self.save_window.cooperative_scenario.stateChanged.connect(lambda: self.update_scenario_meta_data())
+        self.save_window.geo_reference.currentTextChanged.connect(lambda: self.change_geo_reference())
 
         self.save_window.button_directory.clicked.connect(lambda: self.select_directory())
         self.save_window.button_save.clicked.connect(lambda: self.save_scenario())
@@ -104,11 +119,40 @@ class ScenarioSavingDialogController:
                 self.save_window.scenario_time_minute.setValue(self.current_scenario.environment.time.minutes)
             else:
                 self.init_scenario_location_default()
+
+            if self.current_scenario.location.geo_transformation:
+                if self.current_scenario.location.geo_transformation.geo_reference in [
+                    self.save_window.geo_reference.itemText(i) for i in range(self.save_window.geo_reference.count())
+                ]:
+                    self.save_window.geo_reference.setCurrentText(
+                        self.current_scenario.location.geo_transformation.geo_reference
+                    )
+                else:
+                    self.save_window.geo_reference.addItem(
+                        self.current_scenario.location.geo_transformation.geo_reference
+                    )
+                    self.save_window.geo_reference.setCurrentText(
+                        self.current_scenario.location.geo_transformation.geo_reference
+                    )
+
+                self.save_window.x_translation.setText(
+                    str(self.current_scenario.location.geo_transformation.x_translation)
+                )
+                self.save_window.y_translation.setText(
+                    str(self.current_scenario.location.geo_transformation.y_translation)
+                )
+
+            else:
+                self.save_window.x_translation.setText(str(0.0))
+                self.save_window.y_translation.setText(str(0.0))
+
         else:
             self.save_window.scenario_geo_anme_id.setText("-999")
             self.save_window.scenario_latitude.setText("999")
             self.save_window.scenario_longitude.setText("999")
             self.init_scenario_location_default()
+            self.save_window.x_translation.setText(str(0.0))
+            self.save_window.y_translation.setText(str(0.0))
         self.save_window.show()
         self.initialized = True
 
@@ -119,6 +163,13 @@ class ScenarioSavingDialogController:
         self.save_window.scenario_underground.setCurrentText(Underground.UNKNOWN.value)
         self.save_window.scenario_time_hour.setValue(0)
         self.save_window.scenario_time_minute.setValue(0)
+
+    def change_geo_reference(self):
+        reference = self.save_window.geo_reference.currentText()
+        if reference in [gui_config.utm_default, gui_config.pseudo_mercator, gui_config.lanelet2_default]:
+            self.save_window.geo_reference.setEditable(False)
+        else:
+            self.save_window.geo_reference.setEditable(True)
 
     @logger.log
     def select_directory(self):
@@ -150,7 +201,7 @@ class ScenarioSavingDialogController:
             logging.getLogger().setLevel(logging.ERROR)
             sys.stdout = open(os.devnull, "w")
             sys.stderr = open(os.devnull, "w")
-            writer = CommonRoadFileWriter(
+            writer = CRDesignerFileWriter(
                 scenario=scenario,
                 planning_problem_set=self.current_pps,
                 author="Default Author",
@@ -175,7 +226,7 @@ class ScenarioSavingDialogController:
         self.update_scenario_meta_data()
         try:
             self.current_pps = self.current_pps_model.get_pps()
-            writer = CommonRoadFileWriter(
+            writer = CRDesignerFileWriter(
                 scenario=self.current_scenario,
                 planning_problem_set=self.current_pps,
                 author=self.current_scenario.author,
@@ -198,7 +249,7 @@ class ScenarioSavingDialogController:
                 self.save_window,
                 "CommonRoad file not created!",
                 "The CommonRoad file was not saved due to an error.\n\n" + "{}".format(e),
-                QMessageBox.Ok,
+                QMessageBox.StandardButton.Ok,
             )
 
         self.current_scenario_model.notify_all()
@@ -238,27 +289,28 @@ class ScenarioSavingDialogController:
         self.current_scenario = self.current_scenario_model.get_current_scenario()
 
         if self.initialized:
-            self.current_scenario.author = self.save_window.scenario_author.text()
-            self.current_scenario.affiliation = self.save_window.scenario_affiliation.text()
-            self.current_scenario.source = self.save_window.scenario_source.text()
-            self.current_scenario.tags = [Tag(t) for t in self.save_window.scenario_tags.get_checked_items()]
-            self.current_scenario.get_scenario_id().configuration_id = int(self.save_window.scenario_config_id.text())
-            self.current_scenario.get_scenario_id().cooperative = self.save_window.cooperative_scenario.isChecked()
-            self.current_scenario.get_scenario_id().country_id = self.save_window.country.currentText()
-            self.current_scenario.get_scenario_id().map_id = int(self.save_window.scenario_scene_id.text())
-            self.current_scenario.get_scenario_id().map_name = self.save_window.scenario_scene_name.text()
-            self.current_scenario.get_scenario_id().obstacle_behavior = self.save_window.prediction_type.currentText()
-            self.current_scenario.get_scenario_id().prediction_id = int(self.save_window.scenario_prediction_id.text())
+            author = self.save_window.scenario_author.text()
+            affiliation = self.save_window.scenario_affiliation.text()
+            source = self.save_window.scenario_source.text()
+            tags = [Tag(t) for t in self.save_window.scenario_tags.get_checked_items()]
+            time_step_size = get_float_position(self.save_window.scenario_time_step_size)
+            configuration_id = int(self.save_window.scenario_config_id.text())
+            cooperative = self.save_window.cooperative_scenario.isChecked()
+            country_id = self.save_window.country.currentText()
+            map_id = int(self.save_window.scenario_scene_id.text())
+            map_name = self.save_window.scenario_scene_name.text()
+            obstacle_behavior = self.save_window.prediction_type.currentText()
+            prediction_id = int(self.save_window.scenario_prediction_id.text())
             if self.location_equals_default() and self.current_scenario.location is None:
-                self.current_scenario.location = None
+                location = None
             elif self.environment_equals_default() and not self.location_equals_default():
-                self.current_scenario.location = Location(
+                location = Location(
                     self.save_window.scenario_geo_anme_id.text(),
                     self.save_window.scenario_latitude.text(),
                     self.save_window.scenario_longitude.text(),
                 )
             else:
-                self.current_scenario.location = Location(
+                location = Location(
                     self.save_window.scenario_geo_anme_id.text(),
                     self.save_window.scenario_latitude.text(),
                     self.save_window.scenario_longitude.text(),
@@ -271,6 +323,25 @@ class ScenarioSavingDialogController:
                         Weather(self.save_window.scenario_weather.currentText()),
                         Underground(self.save_window.scenario_underground.currentText()),
                     ),
+                    geo_transformation=GeoTransformation(
+                        geo_reference=self.save_window.geo_reference.currentText(),
+                        x_translation=get_float_position(self.save_window.x_translation),
+                        y_translation=get_float_position(self.save_window.y_translation),
+                    ),
                 )
             self.save_window.label_benchmark_id.setText(str(self.current_scenario.scenario_id))
-            self.current_scenario_model.notify_all()
+            self.current_scenario_model.update_meta_data(
+                author,
+                affiliation,
+                source,
+                tags,
+                configuration_id,
+                cooperative,
+                country_id,
+                map_id,
+                map_name,
+                obstacle_behavior,
+                prediction_id,
+                time_step_size,
+                location,
+            )

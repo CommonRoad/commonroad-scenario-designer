@@ -6,8 +6,9 @@ from os.path import join
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-from commonroad.common.file_reader import CommonRoadFileReader, FileFormat
+from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+from commonroad.common.util import FileFormat
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario, ScenarioID
 
@@ -65,8 +66,9 @@ def verify_and_repair_scenario(scenario: Scenario, config: MapVerParams = MapVer
     :return: Boolean indicating whether there were errors and updated scenario
     """
     network, result = verify_and_repair_map(copy.deepcopy(scenario.lanelet_network), config, scenario.scenario_id)
-    scenario.replace_lanelet_network(network)
-    return scenario, len(result.map_verifications[0].map_verification_result.invalid_states) == 0
+    new_scenario = copy.deepcopy(scenario)
+    new_scenario.replace_lanelet_network(network)
+    return new_scenario, len(result.map_verifications[0].map_verification_result.invalid_states) == 0
 
 
 def verify_and_repair_map(

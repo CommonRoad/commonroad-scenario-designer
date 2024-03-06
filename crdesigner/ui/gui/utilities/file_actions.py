@@ -2,19 +2,13 @@ import logging
 import os
 
 from commonroad.common.common_scenario import FileInformation
-from commonroad.common.file_reader import (
-    CommonRoadFileReader,
-    CommonRoadMapDynamicFileReader,
-    CommonRoadMapFileReader,
-    CommonRoadReadAll,
-    FileFormat,
-)
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 
 if SUMO_AVAILABLE:
@@ -66,12 +60,21 @@ def open_path(mwindow, path):
     try:
         # protobuf scenario
         if "-SC.pb" in path:
-            commonroad_reader = CommonRoadReadAll(path, file_format=FileFormat.PROTOBUF)
-            scenario, pps, _ = commonroad_reader.open()
+            # we need all 3 paths for the open_all() function
+            # we assume that all 3 files are in the same folder
+            filename_scenario = path
+            filename_dynamic = path[:-3]
+            # filename_map = re.match(r'([^_]+_[^_]+)', filename).group(1)
+            filename_map = path.split("_")[0] + "_" + path.split("_")[1]
+
+            commonroad_reader = CRDesignerFileReader(
+                filename_map=filename_map, filename_scenario=filename_scenario, filename_dynamic=filename_dynamic
+            )
+            scenario, pps, _ = commonroad_reader.open_all()
         # protobuf map
         elif "-SC.pb" not in path and path.split("/")[-1].count("_") == 1 and ".xml" not in path:
-            commonroad_reader = CommonRoadMapFileReader(path, file_format=FileFormat.PROTOBUF)
-            scenario.replace_lanelet_network(commonroad_reader.open()[0])
+            commonroad_reader = CRDesignerFileReader(filename_map=path)
+            scenario.replace_lanelet_network(commonroad_reader.open_map()[0])
         # protobuf dynamic
         elif (
             "-SC.pb" not in path
@@ -79,10 +82,15 @@ def open_path(mwindow, path):
             and path.split("/")[-1].count("-") == 2
             and ".xml" not in path
         ):
-            commonroad_reader = CommonRoadMapDynamicFileReader(path, file_format=FileFormat.PROTOBUF)
-            scenario = commonroad_reader.open()
+            # we need both map and dynamic path for the open_map_dynamic() function
+            # we assume that both files are in the same folder
+            filename_dynamic = path
+            # filename_map = re.match(r'([^_]+_[^_]+)', filename).group(1)
+            filename_map = path.split("_")[0] + "_" + path.split("_")[1]
+            commonroad_reader = CRDesignerFileReader(filename_map=filename_map, filename_dynamic=filename_dynamic)
+            scenario = commonroad_reader.open_dynamic()
         elif ".xml" in path:
-            commonroad_reader = CommonRoadFileReader(path, file_format=FileFormat.XML)
+            commonroad_reader = CRDesignerFileReader(filename_2020a=path)
             scenario, pps = commonroad_reader.open()
         else:
             raise FileExistsError("Unknown File type.")
