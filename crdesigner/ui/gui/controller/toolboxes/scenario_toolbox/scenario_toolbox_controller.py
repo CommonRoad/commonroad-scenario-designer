@@ -1131,27 +1131,31 @@ class ScenarioToolboxController(QDockWidget):
                     str(self.current_scenario.get_current_scenario().lanelet_network.location.gps_longitude)
                 )
 
-                if self.current_scenario.get_current_scenario().location.geo_transformation:
-                    if self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference in [
+                if self.current_scenario.get_current_scenario().lanelet_network.location.geo_transformation:
+                    if self.current_scenario.get_current_scenario().lanelet_network.location.geo_transformation.geo_reference in [
                         self.scenario_toolbox_ui.geo_reference.itemText(i)
                         for i in range(self.scenario_toolbox_ui.geo_reference.count())
                     ]:
                         self.scenario_toolbox_ui.geo_reference.setCurrentText(
-                            self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference
+                            self.current_scenario.get_current_scenario().lanelet_network.location.geo_transformation.geo_reference
                         )
                     else:
                         self.scenario_toolbox_ui.geo_reference.addItem(
-                            self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference
+                            self.current_scenario.get_current_scenario().lanelet_network.location.geo_transformation.geo_reference
                         )
                         self.scenario_toolbox_ui.geo_reference.setCurrentText(
-                            self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference
+                            self.current_scenario.get_current_scenario().lanelet_network.location.geo_transformation.geo_reference
                         )
 
                     self.scenario_toolbox_ui.x_translation.setText(
-                        str(self.current_scenario.get_current_scenario().location.geo_transformation.x_translation)
+                        str(
+                            self.current_scenario.get_current_scenario().lanelet_network.location.geo_transformation.x_translation
+                        )
                     )
                     self.scenario_toolbox_ui.y_translation.setText(
-                        str(self.current_scenario.get_current_scenario().location.geo_transformation.y_translation)
+                        str(
+                            self.current_scenario.get_current_scenario().lanelet_network.location.geo_transformation.y_translation
+                        )
                     )
                 if self.current_scenario.get_current_scenario().environment:
                     self.scenario_toolbox_ui.scenario_time_of_day.setCurrentText(

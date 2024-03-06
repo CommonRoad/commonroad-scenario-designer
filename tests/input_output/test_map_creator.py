@@ -387,11 +387,13 @@ class TestLanelet(unittest.TestCase):
         np.testing.assert_array_almost_equal(lanelet_connect.center_vertices[-1], lanelet2.center_vertices[0])
 
     def test_four_way_intersection(self):
+        sc = Scenario(dt=0.1)
+        sc._id_counter = 0
+
         incoming_1 = IncomingGroup(21, {1}, 1, {20}, {3}, {5})
         incoming_2 = IncomingGroup(22, {8}, 1, {6}, {13}, {11})
         incoming_3 = IncomingGroup(23, {10}, 1, {12}, {4}, {17})
         incoming_4 = IncomingGroup(24, {16}, 1, {18}, {14}, {19})
-        sc = Scenario(dt=0.1)
 
         intersection, traffic_signs, traffic_lights, lanelets = MapCreator.create_four_way_intersection(
             3, 20, 30, sc, True, True, TrafficSignIDZamunda.YIELD

@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.9.0]
+### Added
+- Possibility of rotating and translating an intersection
+
 ## [0.8.1] - 2023-12-XX
 
 ### Added
