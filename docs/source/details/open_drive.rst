@@ -58,7 +58,7 @@ Python API
 
     from pathlib import Path
     from commonroad.scenario.scenario import Tag
-    from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+    from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
     from commonroad.planning.planning_problem import PlanningProblemSet
 
     from crdesigner.config.opendrive_config import open_drive_config
@@ -73,7 +73,7 @@ Python API
     scenario = opendrive_to_commonroad(Path(input_path))
 
     # store converted file as CommonRoad scenario
-    writer = CommonRoadFileWriter(
+    writer = CRDesignerFileWriter(
         scenario=scenario,
         planning_problem_set=PlanningProblemSet(),
         author="Sebastian Maierhofer",

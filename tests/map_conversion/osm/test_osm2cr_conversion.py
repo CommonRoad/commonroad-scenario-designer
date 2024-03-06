@@ -3,13 +3,12 @@ import os
 import unittest
 from typing import Tuple
 
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
-from commonroad.common.util import FileFormat
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Scenario
 from lxml import etree
 
 import crdesigner.map_conversion.osm2cr.converter_modules.converter as converter
+from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import (
     convert_to_scenario,
 )
@@ -31,9 +30,7 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
         osm_graph = converter.GraphScenario(path).graph
         cr_scenario = convert_to_scenario(osm_graph)
 
-        fw = CommonRoadFileWriter(
-            scenario=cr_scenario, planning_problem_set=PlanningProblemSet(), file_format=FileFormat.XML
-        )
+        fw = CRDesignerFileWriter(scenario=cr_scenario, planning_problem_set=PlanningProblemSet())
         fw.write_to_file(
             filename=self.out_path + "/" + osm_file_name + "_converted_scenario.xml",
             overwrite_existing_file=OverwriteExistingFile.ALWAYS,
@@ -94,9 +91,7 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
 
     def osm2cr_scenario_write_validates(self, cr_scenario: Scenario, osm_file_name: str):
         """Test if created CommonRoad scenario validates"""
-        fw = CommonRoadFileWriter(
-            scenario=cr_scenario, planning_problem_set=PlanningProblemSet(), file_format=FileFormat.XML
-        )
+        fw = CRDesignerFileWriter(scenario=cr_scenario, planning_problem_set=PlanningProblemSet())
         fw.write_to_file(
             filename=self.out_path + "/" + osm_file_name + "_written.xml",
             overwrite_existing_file=OverwriteExistingFile.ALWAYS,

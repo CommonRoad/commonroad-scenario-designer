@@ -56,7 +56,7 @@ Python APIs
 .. code:: python
 
     from commonroad.scenario.scenario import Tag
-    from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+    from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
     from commonroad.planning.planning_problem import PlanningProblemSet
 
     from crdesigner.config.lanelet2_config import lanelet2_config
@@ -70,7 +70,7 @@ Python APIs
     scenario = lanelet_to_commonroad(input_path)
 
     # store converted file as CommonRoad scenario
-    writer = CommonRoadFileWriter(
+    writer = CRDesignerFileWriter(
         scenario=scenario,
         planning_problem_set=PlanningProblemSet(),
         author="Sebastian Maierhofer",
