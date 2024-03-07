@@ -1173,6 +1173,7 @@ class ScenarioToolboxController(QDockWidget):
                     self.scenario_toolbox_ui.scenario_time_minute.setValue(
                         self.current_scenario.get_current_scenario().environment.time.minutes
                     )
+
                 else:
                     self.init_scenario_location_default()
             else:

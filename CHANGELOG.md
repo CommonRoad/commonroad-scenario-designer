@@ -4,7 +4,7 @@
 ### Added
 - Possibility of rotating and translating an intersection
 
-## [0.8.1] - 2023-12-XX
+## [0.8.1] - 2024-03-XX
 
 ### Added
 - Test cases for GUI
@@ -24,6 +24,7 @@
 - File reader that optionally verifies and repairs the road network
 - Option for the scenario designer file reader and writer to project the scenario
 - Possibility to change the geo reference and translate the scenario
+- Integrated map verification/repairing error visualization
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
@@ -43,6 +44,10 @@
 - Map verification/repairing: Checking unique ID of traffic light cycle element
 - Consider x-, y-translation for cr2lanelet conversion (and vice versa)
 - osm2cr projection
+- odr2cr object crosswalk conversion
+- odr2cr neglect merging of lanelets with conflicting references
+- odr2cr fix overlapping boundaries
+- lanelet2cr: traffic sign (speed limit) conversion bug
 
 ### Removed
 - Unused osm2cr functions, e.g., for plotting graphs

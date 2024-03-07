@@ -13,6 +13,9 @@ from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario, ScenarioID
 
 from crdesigner.verification_repairing.config import MapVerParams
+from crdesigner.verification_repairing.drawing.invalid_states.invalid_states_drawer import (
+    InvalidStatesDrawer,
+)
 from crdesigner.verification_repairing.repairing.map_repairer import MapRepairer
 from crdesigner.verification_repairing.verification.formula_ids import (
     FormulaID,
@@ -108,6 +111,8 @@ def verify_and_repair_map(
     if config.verification.formulas is None or config.verification.formulas == []:
         config.verification.formulas = extract_formula_ids()
 
+    drawer = InvalidStatesDrawer(network, scenario_id) if config.evaluation.invalid_states_draw_dir else None
+
     complete_map_name = str(scenario_id.country_id) + "_" + str(scenario_id.map_name) + "-" + str(scenario_id.map_id)
     verification_result = VerificationResult()
     map_verification = initial_map_verification(verification_result, str(complete_map_name), config)
@@ -143,6 +148,15 @@ def verify_and_repair_map(
         for formula_id, locations in invalid_states.items():
             pre_locations = initial_invalid_states[formula_id] if formula_id in initial_invalid_states.keys() else []
             initial_invalid_states[formula_id] = pre_locations + locations
+
+        if drawer is not None:
+            drawer.save_invalid_states_drawing(
+                invalid_states,
+                config.evaluation.invalid_states_draw_dir,
+                file_name=f"group_{group_i}_{complete_map_name}",
+                file_format=config.evaluation.file_format,
+            )
+
         f_id: FormulaID = GeneralFormulaID.UNIQUE_ID
         loc: Tuple[int, int] = (0, 0)
         for formula_id, locations in invalid_states.items():
@@ -174,6 +188,14 @@ def verify_and_repair_map(
                     end = time.time()
                     verification_time += end - start
 
+                    if drawer is not None:
+                        drawer.save_invalid_states_drawing(
+                            invalid_states,
+                            config.evaluation.invalid_states_draw_dir,
+                            file_name=f"group_{group_i}_iteration_{iter_i}_" f"{complete_map_name}",
+                            file_format=config.evaluation.file_format,
+                        )
+
                     if invalid_states_tmp.get(f_id) is not None and loc in invalid_states_tmp.get(f_id):
                         errors.add((f_id, loc))
 
@@ -197,6 +219,20 @@ def verify_and_repair_map(
             invalid_states[formula_id] = [location]
 
     update_map_verification(map_verification, verification_time, repairing_time, initial_invalid_states)
+
+    if drawer is not None:
+        drawer.save_invalid_states_drawing(
+            initial_invalid_states,
+            config.evaluation.invalid_states_draw_dir,
+            file_name=f"initial_result_{complete_map_name}",
+            file_format=config.evaluation.file_format,
+        )
+        drawer.save_invalid_states_drawing(
+            invalid_states,
+            config.evaluation.invalid_states_draw_dir,
+            file_name=f"final_result_{complete_map_name}",
+            file_format=config.evaluation.file_format,
+        )
 
     logging.info(f"Validating map {complete_map_name} finished with hol solver")
 

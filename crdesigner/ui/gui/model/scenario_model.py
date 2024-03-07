@@ -14,7 +14,13 @@ from commonroad.scenario.obstacle import (
     PhantomObstacle,
     StaticObstacle,
 )
-from commonroad.scenario.scenario import Scenario, ScenarioID, Tag
+from commonroad.scenario.scenario import (
+    GeoTransformation,
+    Location,
+    Scenario,
+    ScenarioID,
+    Tag,
+)
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignIDCountries
 from PyQt6.QtCore import QObject, pyqtSignal

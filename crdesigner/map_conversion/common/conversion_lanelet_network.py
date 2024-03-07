@@ -5,7 +5,7 @@ import itertools
 import logging
 import warnings
 from queue import Queue
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import shapely
@@ -56,9 +56,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         Remove a lanelets with the specific lanelet_id from the _lanelets dict.
 
         :param lanelet_id: id of lanelet to be removed.
-        :type lanelet_id: str
         :param remove_references: Also remove references which point to the removed lanelet. Default is False.
-        :type remove_references: bool
         """
         del self._lanelets[lanelet_id]
         if remove_references:
@@ -173,9 +171,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         """Update all references to the old lanelet_id with the new_lanelet_id.
 
         :param old_id: Old lanelet_id which has changed.
-        :type old_id: str
         :param new_id: New lanelet_id the old_id has changed into.
-        :type new_id: str
         """
 
         for lanelet in self.lanelets:
@@ -230,14 +226,12 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         return replacement_ids
 
-    def _concatenate_lanelet_pairs_group(self, lanelet_pairs: list) -> dict:
+    def _concatenate_lanelet_pairs_group(self, lanelet_pairs: List[Tuple[str, str]]) -> Dict[str, str]:
         """Concatenate a group of lanelet_pairs, with setting correctly the new lanelet_ids
         at neighbors.
 
         :param lanelet_pairs: List with tuples of lanelet_ids which should be concatenated.
-        :type lanelet_pairs: list
         :return: Dict with information which lanelet_id was converted to a new one.
-        :rtype: dict
         """
 
         new_lanelet_ids = dict()
@@ -269,10 +263,10 @@ class ConversionLaneletNetwork(LaneletNetwork):
         js_targets = []
         for lanelet in self.lanelets:
             lanelet_split, lanelet_join = False, False
-            if not lanelet.predecessor and np.allclose(lanelet.left_vertices[0], lanelet.right_vertices[0]):
+            if not lanelet.predecessor and np.allclose(lanelet.left_vertices[0], lanelet.right_vertices[0], rtol=0):
                 lanelet_split = True
 
-            if not lanelet.successor and np.allclose(lanelet.left_vertices[-1], lanelet.right_vertices[-1]):
+            if not lanelet.successor and np.allclose(lanelet.left_vertices[-1], lanelet.right_vertices[-1], rtol=0):
                 lanelet_join = True
 
             if lanelet_join or lanelet_split:
@@ -292,9 +286,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         of the lanelet.
 
         :param lanelet: Lanelet to check neighbor requirement for.
-        :type lanelet: :class:`ConversionLanelet`
         :return: True if this neighbor requirement is fulfilled.
-        :rtype: bool
         """
         if not self.has_unique_pred_succ_relation(-1, lanelet):
             return False
@@ -307,9 +299,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         of the successor.
 
         :param lanelet: Lanelet to add successor to.
-        :type lanelet: :class:`ConversionLanelet`
         :param successor_ids: ID of successor to add to lanelet:
-        :type successor_ids: List[str]
         """
         for successor_id in successor_ids:
             lanelet.successor.append(successor_id)
@@ -321,9 +311,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         of the predecessor.
 
         :param lanelet: Lanelet to add predecessor to.
-        :type lanelet: :class:`ConversionLanelet`
         :param predecessor_ids: ID of predecessor to add to lanelet.
-        :type predecessor_ids: List[str]
         """
         for predecessor_id in predecessor_ids:
             lanelet.predecessor.append(predecessor_id)
@@ -337,11 +325,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
         have new adjacent right.
 
         :param lanelet: Lanelet which adjacent left should be updated.
-        :type lanelet: :class:`ConversionLanelet`
         :param adj_left_id: New value for update.
-        :type adj_left_id: str
         :param same_direction: New adjacent lanelet has same direction as lanelet.
-        :type same_direction: bool
         :return: True if operation successful, else False.
         :rtype: bool
         """
@@ -365,13 +350,9 @@ class ConversionLaneletNetwork(LaneletNetwork):
         have new adjacent left.
 
         :param lanelet: Lanelet which adjacent right should be updated.
-        :type lanelet: :class:`ConversionLanelet`
         :param adj_right_id: New value for update.
-        :type adj_right_id: str
         :param same_direction: New adjacent lanelet has same direction as lanelet.
-        :type same_direction: bool
         :return: True if operation successful, else False.
-        :rtype: bool
         """
         new_adj = self.find_lanelet_by_id(adj_right_id)
         if not new_adj:
@@ -386,17 +367,32 @@ class ConversionLaneletNetwork(LaneletNetwork):
             new_adj.adj_right_same_direction = False
         return True
 
-    def check_concatenation_potential(self, lanelet: ConversionLanelet, adjacent_direction: str) -> list:
+    def check_concatenation_potential(
+        self, lanelet: ConversionLanelet, adjacent_direction: str
+    ) -> Optional[List[Tuple[str, str]]]:
         """Check if lanelet could be concatenated with its successor.
 
         :param lanelet: Lanelet to check concatenation potential with its successor.
-        :type lanelet: :class:`ConversionLanelet`
         :param adjacent_direction: "Left" or "Right", determining which lanelet.
-        :type adjacent_direction: str
         :return: A list of pairs of lanelets which can be concatenated. None if it is not possible.
-        :rtype: list
         """
         mergeable_lanelets = []
+
+        # neglect conflicting references (references pointing to each other) since this can cause errors in later processing steps when working with references
+        if (
+            lanelet.parametric_lane_group
+            and lanelet.parametric_lane_group.id_
+            and any(
+                [
+                    int(lanelet.parametric_lane_group.id_.split(".")[2])
+                    * int(self.find_lanelet_by_id(lane_id).parametric_lane_group.id_.split(".")[2])
+                    < 0
+                    for lane_id in lanelet.successor
+                ]
+            )
+        ):
+            return None
+
         neighbor_ok = self.successor_is_neighbor_of_neighbors_successor(lanelet)
         if not neighbor_ok:
             return None
@@ -435,9 +431,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         of the lanelet.
 
         :param lanelet: Lanelet to check specified relation for.
-        :type lanelet: :class:`ConversionLanelet`
         :return: True if this neighbor requirement is fulfilled.
-        :rtype: bool
         """
         if not self.has_unique_pred_succ_relation(1, lanelet):
             return False
@@ -450,11 +444,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
         it is a one-to-one relation.
 
         :param direction: 1 if the successor should be checked. -1 (or all other values) for the predecessor.
-        :type direction: int
         :param lanelet: Lanelet for which relation should be checked.
-        :type lanelet: :class:`ConversionLanelet`
         :return: True if the relation is unique, False otherwise.
-        :rtype: bool
         """
         if direction == 1:
             neighbors = lanelet.successor
@@ -483,9 +474,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         of the right adjacent neighbor of the lanelet.
 
         :param lanelet: Lanelet to check specified relation for.
-        :type lanelet: :class:`ConversionLanelet`
         :return: True if this neighbor requirement is fulfilled, else False.
-        :rtype: bool
         """
         successor = self.find_lanelet_by_id(lanelet.successor[0])
         adj_right = self.find_lanelet_by_id(lanelet.adj_right)
@@ -678,12 +667,11 @@ class ConversionLaneletNetwork(LaneletNetwork):
                             return True
         return False
 
-    def find_left_of(self, incomings):
+    def find_left_of(self, incomings: List[IntersectionIncomingElement]):
         """
         Find and add isLeftOf property for the incomings using the right before left rule.
 
         :param incomings: List of incomings to find their left of.
-        :type incomings: List[:class:`IntersectionIncomingElement`]
         """
         # Choose a reference incoming vector
         ref = (
@@ -736,7 +724,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
         :param intersection_map: Dict containing the information regarding a particular intersection.
         :type intersection_map: dict
         :return: List of tuples that are pairs of adjacent incoming lanelets and the union of their successors
-        :rtype: List[tuple]
         """
         incoming_lane_ids = intersection_map.keys()
         combined_incoming_lane_ids = []
@@ -773,12 +760,11 @@ class ConversionLaneletNetwork(LaneletNetwork):
         combined_incoming_lane_ids = list(k for k, _ in itertools.groupby(combined_incoming_lane_ids))
         return combined_incoming_lane_ids
 
-    def get_successor_directions(self, incoming_lane) -> dict:
+    def get_successor_directions(self, incoming_lane: ConversionLanelet) -> dict:
         """
         Find all directions of an incoming lane's successors
 
         :param incoming_lane: incoming lane from intersection
-        :type incoming_lane: :class:`ConversionLanelet`
         :return: Dict containing the directions "left", "right" or "through"
         :rtype: dict
         """
@@ -851,7 +837,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
         Requires a list of all the traffic lights in the entire map
 
         :param traffic_lights: List of all the traffic lights in the lanelet network.
-        :type traffic_lights: list
         """
         for traffic_light in traffic_lights:
             min_distance = float("inf")
@@ -1014,7 +999,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
         Requires a list of all the traffic signs in the entire map
 
         :param traffic_signs: List of all the traffic signs.
-        :type traffic_signs: list
         """
 
         # Assign traffic signs to lanelets
@@ -1043,7 +1027,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
         Requires a list of all the stop lines in the entire map
 
         :param stop_lines: List of all the stop lines
-        :type stop_lines: List[:class:`StopLine`
         """
         # Assign stop lines to lanelets
 
@@ -1168,9 +1151,7 @@ class _JoinSplitTarget:
         """Runs :func:`ConversionLaneletNetwork.find_lanelet_by_id`.
 
         :param lanelet_id: The lanelet id identifying the lanelet that should be found.
-        :type lanelet_id: str
         :return: Lanelet matching the lanelet_id
-        :rtype: :class:`ConversionLanelet`
         """
         return self.lanelet_network.find_lanelet_by_id(lanelet_id)
 
@@ -1190,9 +1171,8 @@ class _JoinSplitTarget:
         """Get width of adjacent lanelet at start of split or end of join.
 
         :param is_split: Whether width should be calculated at start of split or end of join
-        :type is_split: bool
         :return: Width of adjacent lanelet at start or end.
-        :rtype: float
+
         """
         if is_split:
             return self._js_pairs[0].adjacent_lanelet.calc_width_at_start()
@@ -1333,12 +1313,9 @@ class _JoinSplitTarget:
         Decide if it is advisable to add another pair to increase join/split area.
 
         :param lanelet: Lanelet to be added.
-        :type lanelet: :class:`ConversionLanelet`
         :param adjacent_lanelet: Lanelet adjacent to lanelet to be added.
-        :type adjacent_lanelet: :class:`ConversionLanelet`
         :return: Indicator whether this was the last pair to be added. False means it is advisable to add
             another lanelet pair.
-        :rtype: bool
         """
         if self.split_and_join:
             # one for split at start of lanelet
@@ -1419,9 +1396,7 @@ class _JoinSplitTarget:
         If not, add its left and right neighbor, if they exist, to the potential_adjacent_lanelets Queue.
 
         :param potential_adjacent_lanelets: Queue with dicts containing the potential lanelets.
-        :type potential_adjacent_lanelets: Queue
         :return: Lanelet which fulfills the conditions if it exists, else None.
-        :rtype: Optional[:class:`ConversionLanelet`]
         """
         adj_target = potential_adjacent_lanelets.get()
         adj_lanelet = self._find_lanelet_by_id(adj_target.get("lanelet_id"))
