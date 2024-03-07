@@ -2,7 +2,7 @@ from typing import List, Set, Tuple, Union
 
 import numpy as np
 from commonroad.common.validity import is_natural_number
-from commonroad.scenario.intersection import IncomingGroup, Intersection
+from commonroad.scenario.intersection import IncomingGroup, Intersection, OutgoingGroup
 from commonroad.scenario.lanelet import (
     Lanelet,
     LaneletNetwork,
@@ -67,6 +67,8 @@ class MapCreator:
         stop_line_at_end: bool = False,
         stop_line_at_beginning: bool = False,
         backwards: bool = False,
+        x_pos: float = 0,
+        y_pos: float = 0,
     ) -> Lanelet:
         """
         Function for creating a straight lanelet given a length, width, and number of vertices.
@@ -101,9 +103,9 @@ class MapCreator:
         center_vertices = []
         right_vertices = []
         for i in range(num_vertices):
-            left_vertices.append([length_div * i + eps, width / 2 + eps])
-            center_vertices.append([length_div * i + eps, eps])
-            right_vertices.append([length_div * i + eps, -(width / 2) + eps])
+            left_vertices.append([x_pos + length_div * i + eps, y_pos + width / 2 + eps])
+            center_vertices.append([x_pos + length_div * i + eps, y_pos + eps])
+            right_vertices.append([x_pos + length_div * i + eps, y_pos - (width / 2) + eps])
 
         left_vertices = np.array(left_vertices)
         center_vertices = np.array(center_vertices)
@@ -581,10 +583,11 @@ class MapCreator:
             TrafficSignIDUsa,
             TrafficSignIDZamunda,
         ],
+        x_pos: float = 0,
+        y_pos: float = 0,
     ) -> Tuple[Intersection, List[TrafficSign], List[TrafficLight], List[Lanelet]]:
         """
         Creates a four way intersection with predefined line markings at the origin.
-
         @param width: The width of the created lanelets.
         @param diameter_crossing: The length of the main part of the intersection.
         @param incoming_length: Length of the incoming lanelets of the intersection.
@@ -592,6 +595,8 @@ class MapCreator:
         @param add_traffic_signs: Boolean indicating whether traffic signs should be added to intersection.
         @param add_traffic_lights: Boolean indicating whether traffic lights should be added to intersection.
         @param country_signs: List of supported traffic signs.
+        @param x_pos x coordinate of the intersection
+        @param y_pos y coordinate of the intersection
         @return: New intersection element and new lanelets.
         """
         rad = (diameter_crossing + width) / 2
@@ -607,6 +612,8 @@ class MapCreator:
                 road_user_one_way={RoadUser.VEHICLE},
                 line_marking_left=LineMarking.DASHED,
                 line_marking_right=LineMarking.SOLID,
+                x_pos=x_pos,
+                y_pos=y_pos,
             )
         )
         new_lanelets.append(
@@ -892,27 +899,33 @@ class MapCreator:
         outgoing_right = [lanelet_ids[19], lanelet_ids[5], lanelet_ids[11], lanelet_ids[17]]
         outgoing_straight = [lanelet_ids[2], lanelet_ids[12], lanelet_ids[3], lanelet_ids[13]]
         outgoing_left = [lanelet_ids[4], lanelet_ids[10], lanelet_ids[16], lanelet_ids[18]]
-        incoming_ids = [scenario.generate_object_id() for i in range(len(incomings))]
-        # left_of = [incoming_ids[-1], incoming_ids[0], incoming_ids[1], incoming_ids[2]]
+        incoming_group_ids = [scenario.generate_object_id() for i in range(len(incomings))]
         map_incoming = []
+        map_outgoing = []
+        outgoing_lanelets = [lanelet_ids[1], lanelet_ids[6], lanelet_ids[8], lanelet_ids[14]]
 
         for n in range(len(incomings)):
             inc = {incomings[n]}
             right = {outgoing_right[n]}
             left = {outgoing_left[n]}
             straight = {outgoing_straight[n]}
-            incoming_id = incoming_ids[n]
-            map_incoming.append(
-                IncomingGroup(
-                    incoming_id,
-                    incoming_lanelets=inc,
-                    outgoing_right=right,
-                    outgoing_straight=straight,
-                    outgoing_left=left,
-                )
+            incoming_group_id = incoming_group_ids[n]
+            incoming_group = IncomingGroup(
+                incoming_group_id,
+                incoming_lanelets=inc,
+                outgoing_right=right,
+                outgoing_straight=straight,
+                outgoing_left=left,
             )
+
+            map_incoming.append(incoming_group)
+            outgoing_lanelet = {outgoing_lanelets[n]}
+            outgoing_group = OutgoingGroup(
+                None, outgoing_lanelets=outgoing_lanelet, incoming_group_id=incoming_group_id
+            )
+            map_outgoing.append(outgoing_group)
         intersection_id = scenario.generate_object_id()
-        intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
+        intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming, outgoings=map_outgoing)
 
         new_traffic_signs = []
         sign_ids = [set()] * 4
@@ -1020,6 +1033,10 @@ class MapCreator:
                     sign_ids[ref],
                     light_ids[ref],
                 )
+        outgoing_ids = [scenario.generate_object_id() for i in range(len(incomings))]
+        # Setting IDs here, as hard coded tests fail if Ids generated in different order
+        for i in range(len(intersection.incomings)):
+            intersection.outgoings[i].outgoing_id = outgoing_ids[i]
 
         return intersection, new_traffic_signs, new_traffic_lights, new_lanelets
 
@@ -1046,10 +1063,11 @@ class MapCreator:
             TrafficSignIDUsa,
             TrafficSignIDZamunda,
         ],
+        x_pos: float = 0,
+        y_pos: float = 0,
     ) -> Tuple[Intersection, List[TrafficSign], List[TrafficLight], List[Lanelet]]:
         """
-        Creates a four way intersection with predefined line markings at the origin.
-
+        Creates a three way intersection with predefined line markings at the origin.
         @param width: The width of the created lanelets.
         @param diameter_crossing: The length of the main part of the intersection.
         @param incoming_length: Length of the incoming lanelets of the intersection.
@@ -1057,6 +1075,8 @@ class MapCreator:
         @param add_traffic_signs: Boolean indicating whether traffic signs should be added to intersection.
         @param add_traffic_lights: Boolean indicating whether traffic lights should be added to intersection.
         @param country_signs: List of supported traffic signs.
+        @param x_pos x coordinate of the intersection
+        @param y_pos y coordinate of the intersection
         @return: New intersection element and new lanelets.
         """
         new_lanelets = []
@@ -1072,6 +1092,8 @@ class MapCreator:
                 road_user_one_way={RoadUser.VEHICLE},
                 line_marking_left=LineMarking.DASHED,
                 line_marking_right=LineMarking.SOLID,
+                x_pos=x_pos,
+                y_pos=y_pos,
             )
         )
         new_lanelets.append(
@@ -1239,8 +1261,10 @@ class MapCreator:
         outgoing_straight = [None, lanelet_ids[6], lanelet_ids[7]]
         outgoing_left = [lanelet_ids[2], None, lanelet_ids[10]]
         incoming_ids = [scenario.generate_object_id() for i in range(len(incomings))]
-        # left_of = [incoming_ids[-1], incoming_ids[0], None]
+        outgoing_ids = [scenario.generate_object_id() for i in range(len(incomings))]
         map_incoming = []
+        map_outgoing = []
+        outgoing_lanelets = [lanelet_ids[1], lanelet_ids[4], lanelet_ids[8]]
 
         for n in range(len(incomings)):
             inc = {incomings[n]}
@@ -1257,9 +1281,15 @@ class MapCreator:
                     outgoing_left=left,
                 )
             )
+            outgoing_id = outgoing_ids[n]
+            outgoing_lanelet = {outgoing_lanelets[n]}
+            map_outgoing.append(
+                OutgoingGroup(outgoing_id, outgoing_lanelets=outgoing_lanelet, incoming_group_id=incoming_id)
+            )
 
         intersection_id = scenario.generate_object_id()
-        intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
+        intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming, outgoings=map_outgoing)
+        print(intersection)
 
         new_traffic_signs = []
         new_traffic_lights = []

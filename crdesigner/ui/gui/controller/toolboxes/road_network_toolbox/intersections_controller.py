@@ -42,6 +42,18 @@ class AddIntersectionController:
         self.road_network_toolbox_ui.button_remove_incoming.clicked.connect(
             lambda: self.intersection_ui.remove_incoming()
         )
+        self.road_network_toolbox_ui.button_add_outgoing.clicked.connect(
+            lambda: self.intersection_ui.add_outgoing_to_table()
+        )
+        self.road_network_toolbox_ui.button_remove_outgoing.clicked.connect(
+            lambda: self.intersection_ui.remove_outgoing()
+        )
+        self.road_network_toolbox_ui.button_add_crossing.clicked.connect(
+            lambda: self.intersection_ui.add_crossing_to_table()
+        )
+        self.road_network_toolbox_ui.button_remove_crossing.clicked.connect(
+            lambda: self.intersection_ui.remove_crossing()
+        )
         self.road_network_toolbox_ui.button_fit_intersection.clicked.connect(lambda: self.fit_intersection())
         self.road_network_toolbox_ui.button_add_intersection.clicked.connect(lambda: self.add_intersection())
         self.road_network_toolbox_ui.button_remove_intersection.clicked.connect(lambda: self.remove_intersection())
@@ -67,10 +79,12 @@ class AddIntersectionController:
         incoming_length = int(self.road_network_toolbox_ui.intersection_incoming_length.text())
         add_traffic_signs = self.road_network_toolbox_ui.intersection_with_traffic_signs.isChecked()
         add_traffic_lights = self.road_network_toolbox_ui.intersection_with_traffic_lights.isChecked()
-
+        x_pos = float(self.road_network_toolbox_ui.intersection_start_position_x.text())
+        y_pos = float(self.road_network_toolbox_ui.intersection_start_position_y.text())
         self.scenario_model.create_four_way_intersection(
-            width, diameter, incoming_length, add_traffic_signs, add_traffic_lights
+            width, diameter, incoming_length, add_traffic_signs, add_traffic_lights, x_pos, y_pos
         )
+
         self.road_network_controller.set_default_road_network_list_information()
 
     def add_three_way_intersection(self):
@@ -90,8 +104,10 @@ class AddIntersectionController:
         add_traffic_signs = self.road_network_toolbox_ui.intersection_with_traffic_signs.isChecked()
         add_traffic_lights = self.road_network_toolbox_ui.intersection_with_traffic_lights.isChecked()
 
+        x_pos = float(self.road_network_toolbox_ui.intersection_start_position_x.text())
+        y_pos = float(self.road_network_toolbox_ui.intersection_start_position_y.text())
         self.scenario_model.create_three_way_intersection(
-            width, diameter, incoming_length, add_traffic_signs, add_traffic_lights
+            width, diameter, incoming_length, add_traffic_signs, add_traffic_lights, x_pos, y_pos
         )
         self.road_network_controller.set_default_road_network_list_information()
 

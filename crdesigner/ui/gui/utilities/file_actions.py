@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 from commonroad.common.common_scenario import FileInformation
 from commonroad.planning.planning_problem import PlanningProblemSet
@@ -50,46 +51,50 @@ def open_commonroad_file(mwindow, path=None):
         )
     if not path:
         return
-    open_path(mwindow=mwindow, path=path)
+    open_path(mwindow=mwindow, path_str=path)
 
 
-def open_path(mwindow, path):
-    """ """
+def open_path(mwindow, path_str: str):
+    """
+    Opens CommonRoad file.
+
+    mwindow: Main window controller
+    path_str: Path to CommonRoad file.
+    """
     scenario = Scenario(0.1)
     pps = PlanningProblemSet()
+    path = Path(path_str)
     try:
         # protobuf scenario
-        if "-SC.pb" in path:
+        if "-SC" in path.stem:
             # we need all 3 paths for the open_all() function
             # we assume that all 3 files are in the same folder
             filename_scenario = path
-            filename_dynamic = path[:-3]
-            # filename_map = re.match(r'([^_]+_[^_]+)', filename).group(1)
-            filename_map = path.split("_")[0] + "_" + path.split("_")[1]
+            filename_dynamic = path.parent / (path.stem[:-3] + ".pb")
+            filename_map = path.parent / (path.stem.split("-")[0] + "-" + path.stem.split("_")[2] + ".pb")
 
             commonroad_reader = CRDesignerFileReader(
                 filename_map=filename_map, filename_scenario=filename_scenario, filename_dynamic=filename_dynamic
             )
             scenario, pps, _ = commonroad_reader.open_all()
         # protobuf map
-        elif "-SC.pb" not in path and path.split("/")[-1].count("_") == 1 and ".xml" not in path:
+        elif "-SC" not in path.stem and path.stem.split("/")[-1].count("_") == 1 and ".xml" != path.suffix:
             commonroad_reader = CRDesignerFileReader(filename_map=path)
             scenario.replace_lanelet_network(commonroad_reader.open_map()[0])
         # protobuf dynamic
         elif (
-            "-SC.pb" not in path
-            and path.split("/")[-1].count("_") == 3
-            and path.split("/")[-1].count("-") == 2
-            and ".xml" not in path
+            "-SC" not in path.stem
+            and path.stem.split("/")[-1].count("_") == 3
+            and path.stem.split("/")[-1].count("-") == 2
+            and ".xml" != path.suffix
         ):
             # we need both map and dynamic path for the open_map_dynamic() function
             # we assume that both files are in the same folder
             filename_dynamic = path
-            # filename_map = re.match(r'([^_]+_[^_]+)', filename).group(1)
-            filename_map = path.split("_")[0] + "_" + path.split("_")[1]
+            filename_map = path.parent / (path.stem.split("_")[0] + "_" + path.stem.split("_")[1] + ".pb")
             commonroad_reader = CRDesignerFileReader(filename_map=filename_map, filename_dynamic=filename_dynamic)
-            scenario = commonroad_reader.open_dynamic()
-        elif ".xml" in path:
+            scenario = commonroad_reader.open_map_dynamic()
+        elif ".xml" == path.suffix:
             commonroad_reader = CRDesignerFileReader(filename_2020a=path)
             scenario, pps = commonroad_reader.open()
         else:
