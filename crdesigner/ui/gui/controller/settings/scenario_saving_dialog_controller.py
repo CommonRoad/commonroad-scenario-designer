@@ -3,17 +3,14 @@ import os
 import sys
 from typing import Optional
 
-from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import (
-    Environment,
+from commonroad.common.common_scenario import (
     GeoTransformation,
     Location,
-    Time,
     TimeOfDay,
     Underground,
     Weather,
 )
-from commonroad.common.util import FileFormat
+from commonroad.common.util import FileFormat, Time
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Environment, Scenario, Tag
 from PyQt6.QtWidgets import QFileDialog, QLineEdit, QMessageBox
@@ -235,9 +232,9 @@ class ScenarioSavingDialogController:
             writer = CRDesignerFileWriter(
                 scenario=self.current_scenario,
                 planning_problem_set=self.current_pps,
-                author=self.current_scenario.author,
-                affiliation=self.current_scenario.affiliation,
-                source=self.current_scenario.source,
+                author=self.current_scenario.file_information.author,
+                affiliation=self.current_scenario.file_information.affiliation,
+                source=self.current_scenario.file_information.source,
                 tags=set(self.current_scenario.tags),
                 file_format=FileFormat.XML,
             )
@@ -307,7 +304,7 @@ class ScenarioSavingDialogController:
             map_name = self.save_window.scenario_scene_name.text()
             obstacle_behavior = self.save_window.prediction_type.currentText()
             prediction_id = int(self.save_window.scenario_prediction_id.text())
-            if self.location_equals_default() and self.current_scenario.location is None:
+            if self.location_equals_default() and self.current_scenario.lanelet_network.location is None:
                 location = None
             elif self.environment_equals_default() and not self.location_equals_default():
                 location = Location(

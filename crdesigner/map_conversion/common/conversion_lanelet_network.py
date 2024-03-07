@@ -667,7 +667,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                             return True
         return False
 
-    def find_left_of(self, incomings: List[IntersectionIncomingElement]):
+    def find_left_of(self, incomings: List[IncomingGroup]):
         """
         Find and add isLeftOf property for the incomings using the right before left rule.
 
