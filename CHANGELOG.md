@@ -21,6 +21,8 @@
 - Option for the scenario designer file reader and writer to project the scenario
 - Possibility to change the geo reference and translate the scenario
 - Integrated map verification/repairing error visualization
+- Separate obstacle profile widget within obstacle toolbox
+- Multiple obstacle profiles visualizable
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
