@@ -445,16 +445,24 @@ class ScenarioModel(QObject):
 
     @logger.log
     def create_three_way_intersection(
-        self, width: float, diameter: int, incoming_length: int, add_traffic_signs: bool, add_traffic_lights: bool
+        self,
+        width: float,
+        diameter: int,
+        incoming_length: int,
+        add_traffic_signs: bool,
+        add_traffic_lights: bool,
+        x_pos: float,
+        y_pos: float,
     ):
         """
         Creates a three-way intersection ond adds it to the scenario.
 
         @param width: width of the lanelets of the intersection
         @param diameter: diameter of the intersection turn radius
-        @param incoming_length: length of the incoiming lanelets
+        @param incoming_length: length of the incoming lanelets
         @param add_traffic_signs: boolean if traffic signs should be added
         @param add_traffic_lights: boolean if traffic lights should be added
+        @param x_pos, y_pos coordinates of an intersection
         """
         self._update_scenario()
         country_signs = TrafficSignIDCountries[self.get_country_id()]
@@ -466,6 +474,8 @@ class ScenarioModel(QObject):
             add_traffic_signs,
             add_traffic_lights,
             country_signs,
+            x_pos,
+            y_pos,
         )
         self._current_scenario().add_objects(intersection)
         self._current_scenario().add_objects(new_lanelets)
@@ -475,16 +485,24 @@ class ScenarioModel(QObject):
 
     @logger.log
     def create_four_way_intersection(
-        self, width: float, diameter: int, incoming_length: int, add_traffic_signs: bool, add_traffic_lights: bool
+        self,
+        width: float,
+        diameter: int,
+        incoming_length: int,
+        add_traffic_signs: bool,
+        add_traffic_lights: bool,
+        x_pos: float,
+        y_pos: float,
     ):
         """
         Creates a four-way intersection ond adds it to the scenario.
 
         @param width: width of the lanelets of the intersection
         @param diameter: diameter of the intersection turn radius
-        @param incoming_length: length of the incoiming lanelets
+        @param incoming_length: length of the incoming lanelets
         @param add_traffic_signs: boolean if traffic signs should be added
         @param add_traffic_lights: boolean if traffic lights should be added
+        @param x_pos, y_pos coordinates of an intersection
         """
         self._update_scenario()
         country_signs = TrafficSignIDCountries[self.get_country_id()]
@@ -496,6 +514,8 @@ class ScenarioModel(QObject):
             add_traffic_signs,
             add_traffic_lights,
             country_signs,
+            x_pos,
+            y_pos,
         )
         self._current_scenario().add_objects(intersection)
         self._current_scenario().add_objects(new_lanelets)
