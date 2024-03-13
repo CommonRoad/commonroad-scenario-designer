@@ -149,6 +149,7 @@ class GuiConfig(BaseConfig):
         description="Verify and Repair CommonRoad Map when Loading/Storing Scenario",
     )
 
+    # Default values for obstacle types
     OBSTACLE_SPECS = {
         "car": {"width": "1.610", "length": "4.508", "shape": "Rectangle"},
         "truck": {"width": "2.550", "length": "16.50", "shape": "Rectangle"},

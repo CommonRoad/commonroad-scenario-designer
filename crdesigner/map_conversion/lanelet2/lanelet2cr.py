@@ -358,18 +358,20 @@ class Lanelet2CRConverter:
 
         # speed limit sign conversion
         for speed_limit_key in osm.speed_limit_signs.keys():
-            speed, traffic_sign_id = osm.speed_limit_signs[speed_limit_key]
-            light_id = speed_limits[speed_limit_key]
-            first_occurrence = {
-                self.lanelet_network._old_lanelet_ids[l_id] for l_id in speed_limit_lanelets[speed_limit_key]
-            }
-            position = self.lanelet_network.find_lanelet_by_id(
-                self.lanelet_network._old_lanelet_ids[speed_limit_lanelets[speed_limit_key][0]]
-            ).left_vertices[0]
-            speed_limit = TrafficSign(
-                light_id, [TrafficSignElement(traffic_sign_id, [speed])], first_occurrence, position, True
-            )
-            self.lanelet_network.add_traffic_sign(speed_limit, first_occurrence)
+            # only convert speed limit signs which are assigned to a lanelet
+            if speed_limit_lanelets[speed_limit_key]:
+                speed, traffic_sign_id = osm.speed_limit_signs[speed_limit_key]
+                light_id = speed_limits[speed_limit_key]
+                first_occurrence = {
+                    self.lanelet_network._old_lanelet_ids[l_id] for l_id in speed_limit_lanelets[speed_limit_key]
+                }
+                position = self.lanelet_network.find_lanelet_by_id(
+                    self.lanelet_network._old_lanelet_ids[speed_limit_lanelets[speed_limit_key][0]]
+                ).left_vertices[0]
+                speed_limit = TrafficSign(
+                    light_id, [TrafficSignElement(traffic_sign_id, [speed])], first_occurrence, position, True
+                )
+                self.lanelet_network.add_traffic_sign(speed_limit, first_occurrence)
 
         # traffic light conversion
         for way in osm.ways:
