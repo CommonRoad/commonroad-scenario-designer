@@ -66,17 +66,18 @@ def get_crosswalks(road: Road) -> List[ConversionLanelet]:
                     left_vertices = corners[lower_left : upper_left + 1]
                     right_vertices = np.flip(corners[0 : lower_right + 1], axis=0)
                 else:
-                    left_vertices = []
-                    right_vertices = []
                     logging.warning("odr2cr crossing computation: case not supported yet.")
+                    continue
             else:
                 if lower_left == 5:
                     left_vertices = corners[upper_left:lower_right]
                     right_vertices = np.flip(corners[lower_right : lower_left + 1], axis=0)
+                elif lower_left == 2:
+                    left_vertices = corners[lower_right : lower_left + 1]
+                    right_vertices = np.flip(corners[upper_left : lower_right - 1], axis=0)
                 else:
-                    left_vertices = []
-                    right_vertices = []
                     logging.warning("odr2cr crossing computation: case not supported yet.")
+                    continue
         center_vertices = (left_vertices + right_vertices) / 2
         # create ConversionLanelet
         lanelet = ConversionLanelet(
