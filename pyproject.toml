@@ -17,7 +17,8 @@ classifiers = [
     "Operating System :: Microsoft :: Windows"
 ]
 packages = [{include = "crdesigner"}]
-homepage = "https://commonroad.in.tum.de"
+repository = "https://github.com/CommonRoad/commonroad-scenario-designer"
+homepage = "https://commonroad.in.tum.de/tools/scenario-designer"
 
 [tool.poetry.urls]
 Documentation = "https://commonroad-scenario-designer.readthedocs.io/en/latest/"
