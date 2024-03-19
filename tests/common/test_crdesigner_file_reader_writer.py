@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 from commonroad.common.util import FileFormat
 from commonroad.common.writer.file_writer_interface import OverwriteExistingFile
+from commonroad.scenario.scenario import Tag
 
 from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.common.file_writer import CRDesignerFileWriter
@@ -36,14 +37,6 @@ class TestCRDesignerFileReader(unittest.TestCase):
         self.assertNotEqual(scenario, repaired_scenario)
         self.assertEqual(repaired_scenario, verify_and_repair_scenario(scenario)[0])
 
-        # # opening it with the same projection
-        # projected_scenario = self.crdesigner_reader.open(
-        #     target_projection=scenario.lanelet_network.location.geo_transformation.geo_reference
-        # )[0]
-        # # scenarios should be the same as the proj_string is the same
-        # # this assertion sometimes fails and sometimes passes
-        # self.assertEqual(projected_scenario, scenario)
-
         # opening it with the different projection
         projected_scenario = self.crdesigner_reader.open(target_projection="+proj=utm +zone=30 +ellps=WGS84")[0]
         # scenarios should not be the same as the projections are different
@@ -71,6 +64,13 @@ class TestCRDesignerFileReader(unittest.TestCase):
         # asserting that the verifying and repairing the lanelet network works
         self.assertEqual(map_lanelet_network_repaired, verify_and_repair_map(map_lanelet_network)[0])
 
+        # opening the map with the projection
+        projected_lanelet_network = self.crdesigner_reader.open_map(
+            target_projection="+proj=utm +zone=30 +ellps=WGS84"
+        )[0]
+        # lanelet networks should be the same as map does not have base projection string
+        self.assertEqual(projected_lanelet_network, map_lanelet_network)
+
         # test when the map is missing
         self.crdesigner_reader.filename_map = None
         with pytest.raises(NameError) as exc_info:
@@ -92,6 +92,13 @@ class TestCRDesignerFileReader(unittest.TestCase):
 
         # asserting that the verifying and repairing the scenario works
         self.assertEqual(scenario_repaired, verify_and_repair_scenario(scenario)[0])
+
+        # opening the map_dynamic with the projection
+        projected_scenario = self.crdesigner_reader.open_map_dynamic(
+            target_projection="+proj=utm +zone=30 +ellps=WGS84"
+        )
+        # scenarios should be the same as the scenario does not have base projection string
+        self.assertEqual(projected_scenario, scenario)
 
         # test when the map is missing
         self.crdesigner_reader.filename_map = None
@@ -122,6 +129,11 @@ class TestCRDesignerFileReader(unittest.TestCase):
 
         # asserting that the verifying and repairing the scenario works
         self.assertEqual(scenario_repaired, verify_and_repair_scenario(scenario)[0])
+
+        # opening all with the projection
+        projected_scenario = self.crdesigner_reader.open_all(target_projection="+proj=utm +zone=30 +ellps=WGS84")[0]
+        # scenarios should be the same as the scenario does not have base projection string
+        self.assertEqual(projected_scenario, scenario)
 
         # test when the map is missing
         self.crdesigner_reader.filename_map = None
@@ -198,9 +210,8 @@ class TestCRDesignerFileWriter(unittest.TestCase):
             Path(__file__).parent.parent / "map_verification/test_maps/CHN_Merging-1.xml"
         )
         scenario, pp = crdesigner_reader.open()
-
-        # test the 2024 cr designer map writer
         crdesigner_writer = CRDesignerFileWriter(scenario, pp, file_format=FileFormat.PROTOBUF)
+
         # write the unrepaired map
         crdesigner_writer.write_map_to_file(
             str(Path(__file__).parent / "CHN_Merging-1.pb"), overwrite_existing_file=OverwriteExistingFile.ALWAYS
@@ -235,3 +246,25 @@ class TestCRDesignerFileWriter(unittest.TestCase):
 
         # check that the 2 repaired maps are the same
         self.assertEqual(map_scenario_repaired_2023, map_scenario_flag_repaired_2024)
+
+        # read the USA peach protobuf map
+        crdesigner_reader = CRDesignerFileReader(
+            filename_map=Path(__file__).parent / "test_files_new_format/USA_Peach-1/USA_Peach-1.pb",
+            filename_dynamic=Path(__file__).parent / "test_files_new_format/USA_Peach-1/USA_Peach-1_1_T-1.pb",
+            filename_scenario=Path(__file__).parent / "test_files_new_format/USA_Peach-1/USA_Peach-1_1_T-1-SC.pb",
+        )
+        ll_peach, pps, _ = crdesigner_reader.open_all()
+        crdesigner_writer = CRDesignerFileWriter(ll_peach, pps, tags={Tag.INTERSTATE}, file_format=FileFormat.PROTOBUF)
+
+        # write the map with different projection
+        crdesigner_writer.write_map_to_file(
+            str(Path(__file__).parent / "USA_DifferentProjectionPeach-1.pb"),
+            overwrite_existing_file=OverwriteExistingFile.ALWAYS,
+            target_projection="+proj=utm +zone=30 +ellps=WGS84",
+        )
+        different_ll_peach = CRDesignerFileReader(
+            filename_map=Path(__file__).parent / "USA_DifferentProjectionPeach-1.pb"
+        ).open_map()[0]
+
+        # check that the 2 repaired lanelet networks are not the same
+        self.assertNotEqual(different_ll_peach, ll_peach)

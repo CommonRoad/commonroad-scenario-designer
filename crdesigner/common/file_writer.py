@@ -1,3 +1,4 @@
+import copy
 from typing import Set, Union
 
 from commonroad.common.common_scenario import Location
@@ -7,7 +8,11 @@ from commonroad.common.writer.file_writer_interface import OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Scenario, Tag
 
-from crdesigner.common.common_file_reader_writer import project_scenario_and_pps
+from crdesigner.common.common_file_reader_writer import (
+    project_lanelet_network,
+    project_obstacles,
+    project_scenario_and_pps,
+)
 from crdesigner.verification_repairing.map_verification_repairing import (
     verify_and_repair_map,
     verify_and_repair_scenario,
@@ -91,17 +96,45 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
         overwrite_existing_file: OverwriteExistingFile = OverwriteExistingFile.ASK_USER_INPUT,
         check_validity: bool = False,
         verify_repair_map: bool = False,
+        target_projection: str = None,
     ):
         """
         Writes 2024 CommonRoad Map to the file.
-        If the boolean is set to True, the function verifies and repairs the map.
+        If the verify_repair_map boolean is set to True, the function verifies and repairs the map.
+        If the target_projection string is given, and the source projection in the lanelet network location is defined,
+        the function projects the lanelet network and env obstacles according to those parameters.
 
         :param filename: Name of file
         :param overwrite_existing_file: Overwriting mode
         :param check_validity: Validity check or not
         :param verify_repair_map: Boolean that indicates if the function will verify and repair the map.
+        :param target_projection: Target projection that the user provides.
         :return: Map (Lanelet Network)
         """
+        # check for a projection
+        # If target projection is not provided, no projection should be applied
+        if target_projection is not None:
+            # check for geo transformation and geo reference
+            if getattr(self._file_writer.scenario.lanelet_network.location.geo_transformation, "geo_reference", None):
+                proj_string_from = self._file_writer.scenario.lanelet_network.location.geo_transformation.geo_reference
+                # If no source projection is defined in the lanelet network location, we should skip the projection
+                if proj_string_from is not None:
+
+                    # if both target & source projection are given, we project the lanelet network and env obstacles and
+                    # update the scenario accordingly
+                    projected_ll = project_lanelet_network(
+                        copy.deepcopy(self._file_writer.scenario.lanelet_network), proj_string_from, target_projection
+                    )
+
+                    self._file_writer.scenario.replace_lanelet_network(projected_ll)
+
+                    self._file_writer.scenario.add_objects(
+                        project_obstacles(
+                            self._file_writer.scenario.environment_obstacle, proj_string_from, target_projection
+                        )
+                    )
+
+        # check for verifying and repairing the lanelet network
         if verify_repair_map is True:
             self._file_writer.scenario.replace_lanelet_network(
                 verify_and_repair_map(self._file_writer.scenario.lanelet_network)[0]
