@@ -1,9 +1,17 @@
 import copy
+from typing import List, Union
 
 from commonroad.common.validity import ValidTypes
 from commonroad.geometry.shape import Circle, Polygon, Rectangle, Shape
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.scenario.obstacle import (
+    DynamicObstacle,
+    EnvironmentObstacle,
+    Obstacle,
+    PhantomObstacle,
+    StaticObstacle,
+)
 from commonroad.scenario.scenario import Scenario
 from pyproj import CRS, Transformer
 
@@ -112,17 +120,22 @@ def project_lanelet_network(
     # transform area coordinates
     for area in lanelet_network.areas:
         for border in area.border:
-            for vertex in border.border_vertices:
-                vertex[0], vertex[1] = transformer.transform(vertex[0], vertex[1])
+            if border.boundary in lanelet_network.boundaries:
+                for vertex in lanelet_network.boundaries[border.boundary].vertices:
+                    vertex[0], vertex[1] = transformer.transform(vertex[0], vertex[1])
 
     return lanelet_network
 
 
-def project_obstacles(scenario: Scenario, proj_string_from: str, proj_string_to: str) -> Scenario:
+def project_obstacles(
+    obstacles: List[Union[Obstacle, StaticObstacle, DynamicObstacle, EnvironmentObstacle, PhantomObstacle]],
+    proj_string_from: str,
+    proj_string_to: str,
+) -> List[Union[Obstacle, StaticObstacle, DynamicObstacle, EnvironmentObstacle, PhantomObstacle]]:
     """
-    Function that performs a projection onto the obstacles of a scenario.
+    Function that performs a projection onto obstacles.
 
-    :param scenario: Scenario where obstacles need to be projected (if not None)
+    :param obstacles: List of obstacles that need to be projected.
     :param proj_string_from: Source projection.
     :param proj_string_to: Target projection.
     :return: Scenario with the projected obstacles.
@@ -131,7 +144,7 @@ def project_obstacles(scenario: Scenario, proj_string_from: str, proj_string_to:
     crs_to = CRS(proj_string_to)
     transformer = Transformer.from_proj(crs_from, crs_to)
 
-    for obstacle in scenario.obstacles:
+    for obstacle in obstacles:
         if obstacle.obstacle_shape:
             obstacle.obstacle_shape = transform_shape(obstacle.obstacle_shape, transformer)
 
@@ -162,7 +175,7 @@ def project_obstacles(scenario: Scenario, proj_string_from: str, proj_string_to:
                         if isinstance(state.position, Shape):
                             state.position = transform_shape(state.position, transformer)
 
-    return scenario
+    return obstacles
 
 
 def project_scenario_and_pps(
@@ -185,7 +198,7 @@ def project_scenario_and_pps(
     project_lanelet_network(scenario_copy.lanelet_network, proj_string_from, proj_string_to)
 
     # project the obstacles
-    project_obstacles(scenario_copy, proj_string_from, proj_string_to)
+    project_obstacles(scenario_copy.obstacles, proj_string_from, proj_string_to)
 
     # project the planning problem set
     planning_problem_set = project_planning_problem_set(planning_problem_set, proj_string_from, proj_string_to)

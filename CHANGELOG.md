@@ -3,6 +3,7 @@
 ## [0.9.0]
 ### Added
 - Possibility of rotating and translating an intersection
+- Projection option for the new format scenario designer file reader and writer
 
 ## [0.8.1] - 2024-03-XX
 
