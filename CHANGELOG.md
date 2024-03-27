@@ -4,6 +4,7 @@
 ### Added
 - Possibility of rotating and translating an intersection
 - Projection option for the new format scenario designer file reader and writer
+- Direct conversion from OpenDRVIE to Lanelet2
 
 ## [0.8.1] - 2024-03-XX
 
