@@ -1256,7 +1256,11 @@ class ObstacleController(
         self.change_color = True
 
     def animate_obstacle_profile_state(self, time_stamp):
-        if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"] and not self.update_ongoing:
+        if (
+            self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]
+            and not self.update_ongoing
+            and len(self.obstacle_toolbox_ui.figure_profile.axes) > 0
+        ):
             obstacle = self.get_current_obstacle()
             state_variable_name = self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentText()
 

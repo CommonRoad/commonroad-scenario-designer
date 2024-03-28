@@ -21,12 +21,12 @@ repository = "https://github.com/CommonRoad/commonroad-scenario-designer"
 homepage = "https://commonroad.in.tum.de/tools/scenario-designer"
 
 [tool.poetry.urls]
-Documentation = "https://commonroad-scenario-designer.readthedocs.io/en/latest/"
-Forum = "https://commonroad.in.tum.de/forum/c/scenario-designer/"
-Source = "https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer"
+Documentation = "https://cps.pages.gitlab.lrz.de/commonroad/commonroad-scenario-designer/"
+Forum = "https://github.com/CommonRoad/commonroad-scenario-designer/discussions"
+Source = "https://github.com/CommonRoad/commonroad-scenario-designer"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.8,<3.12"
 commonroad-io = "^2024.1"
 commonroad-drivability-checker = "^2024.1"
 pyqt6 = ">=6.6.0"
