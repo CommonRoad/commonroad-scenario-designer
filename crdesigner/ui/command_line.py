@@ -16,6 +16,7 @@ from crdesigner.map_conversion.map_conversion_interface import (
     commonroad_to_sumo,
     lanelet_to_commonroad,
     opendrive_to_commonroad,
+    opendrive_to_lanelet,
     osm_to_commonroad,
     sumo_to_commonroad,
 )
@@ -198,6 +199,11 @@ def sumocr(ctx: typer.Context):
 @cli.command()
 def crsumo(ctx: typer.Context):
     commonroad_to_sumo(ctx.obj["input_file"], ctx.obj["output_file"])
+
+
+@cli.command()
+def odrlanelet2(ctx: typer.Context):
+    opendrive_to_lanelet(ctx.obj["input_file"], ctx.obj["output_file"])
 
 
 if __name__ == "__main__":
