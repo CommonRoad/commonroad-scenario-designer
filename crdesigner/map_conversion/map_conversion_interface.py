@@ -176,3 +176,31 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Optional[Scenario]:
         print("__Warning__: {}.".format(e))
         return None
     return opendrive_to_commonroad(Path(opendrive_file))
+
+
+def opendrive_to_lanelet(
+    input_file: Path,
+    output_file: str,
+    odr_config: open_drive_config = open_drive_config,
+    general_config=general_config,
+    lanelet2_config: lanelet2_config = lanelet2_config,
+):
+    """
+    Converts OpenDRIVE file to Lanelet2 file and stores it
+
+    :param input_file: Path to the OpenDRIVE file
+    :param output_file: Name and path of the Lanelet2 file
+    :param odr_config: OpenDRIVE config parameters
+    :param general_config: General config parameters
+    :param lanelet2_config: Lanelet2 config parameters
+    :return:
+    """
+
+    # convert a file from opendrive to commonroad
+    scenario = opendrive_to_commonroad(input_file, general_conf=general_config, odr_conf=odr_config)
+
+    # convert a file from commonroad to lanelet2
+    l2osm = CR2LaneletConverter(config=lanelet2_config)
+    osm = l2osm(scenario)
+    with open(f"{output_file}", "wb") as file_out:
+        file_out.write(etree.tostring(osm, xml_declaration=True, encoding="UTF-8", pretty_print=True))
