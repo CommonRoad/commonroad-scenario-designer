@@ -42,33 +42,27 @@ You can also use the GUI to convert an OpenDRIVE file.
 The GUI can be started from command line with ``crdesigner`` or ``crdesigner gui``.
 
 
-Python APIs
+Python API
 ==========================================
 
 .. code:: python
 
-    import os
-
-    from crdesigner.input_output.api import osm_to_commonroad
+    from crdesigner.map_conversion.map_conversion_interface import osm_to_commonroad
 
     from commonroad.scenario.scenario import Tag
-    from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+    from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
     from commonroad.planning.planning_problem import PlanningProblemSet
+    from crdesigner.map_conversion.map_conversion_interface import osm_to_commonroad_using_sumo
 
-    import crdesigner.map_conversion.osm2cr.converter_modules.converter as converter
-    import crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export as ex
-    from crdesigner.config.osm_config import osm_config as config
-    from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloader import download_around_map
+    input_path = ""
+    output_path = ""
+    # load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
+    scenario = osm_to_commonroad(input_path)
 
-    # download a map
-    download_around_map(config.BENCHMARK_ID + '_downloaded.osm', 48.140289, 11.566272)
-
-    # --------------------------------------- Option 1: General API ------------------------------------------
-    # load OSM file, parse it, and convert it to a CommonRoad scenario
-    scenario = osm_to_commonroad(config.SAVE_PATH + config.BENCHMARK_ID + ".osm")
+    # osm_to_commonroad_using_sumo is also available.
 
     # store converted file as CommonRoad scenario
-    writer = CommonRoadFileWriter(
+    writer = CRDesignerFileWriter(
         scenario=scenario,
         planning_problem_set=PlanningProblemSet(),
         author="Sebastian Maierhofer",
@@ -76,25 +70,7 @@ Python APIs
         source="CommonRoad Scenario Designer",
         tags={Tag.URBAN},
     )
-    writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_OSM-1_1-T1.xml",
-                         OverwriteExistingFile.ALWAYS)
-
-
-    # ----------------------------------- Option 2: OSM conversion APIs --------------------------------------
-
-    # open the map and convert it to a scenario
-    scenario = converter.GraphScenario(config.SAVE_PATH + config.BENCHMARK_ID + ".osm")
-
-    # draw and show the scenario
-    scenario.plot()
-
-    # save the scenario as commonroad file
-    scenario.save_as_cr(config.SAVE_PATH + config.BENCHMARK_ID + ".xml")
-    # save the scenario as a binary
-    scenario.save_to_file(config.SAVE_PATH + config.BENCHMARK_ID + ".pickle")
-
-    # view the generated
-    ex.view_xml(config.SAVE_PATH + config.BENCHMARK_ID + ".xml")
+    writer.write_to_file(output_path, OverwriteExistingFile.ALWAYS)
 
 In order to use the API calls, the save_path and Benchmark_ID has to be set in the config file. 
 The config file can be found at */crdesigner/map_conversion/osm2cr* and is described in detail at the end of this document.

@@ -1,52 +1,44 @@
-image: python:3.10
-
 stages:
-    - static_check
+    - style_check
     - test
     - deploy
 
-before_script:
-  - pip install poetry
-  - poetry config installer.modern-installation false # this should be removed in the future, required because of invalid third-party wheels (https://github.com/python-poetry/poetry/issues/7686)
-  - poetry config virtualenvs.in-project true
-  - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
-  - poetry install --with tests,docs,tutorials
-  - source .venv/bin/activate
+default:
+  image: python:3.10
+  before_script:
+    - apt-get update && apt-get install -y cmake build-essential git pkg-config ca-certificates wget libomp-dev libeigen3-dev libboost-all-dev uuid-dev libcgal-dev
+    - pip install poetry
+    - poetry config virtualenvs.in-project true
+    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
+    - poetry install --with tests,docs,tutorials
+    - source .venv/bin/activate
 
 .run-test-with-coverage: &run-test-with-coverage
-  - apt-get update && apt-get install -y ffmpeg sumo sumo-tools sumo-doc
+  - apt-get update && apt-get install -y ffmpeg libegl1
   - coverage run --source ./crdesigner -m pytest tests/
   - coverage report -m || true
 
 
 # static_check
-prospector_source:
-  stage: static_check
+formatting_check:
+  stage: style_check
   script:
-    - prospector crdesigner/
-  allow_failure: true
-  needs: []
+    - pip install "black~=24.1.1" "isort~=5.13.1"
+    - black --check .
+    - isort --check-only .
 
-prospector_test:
-  stage: static_check
+lint_flake8:
+  stage: style_check
   script:
-    - prospector tests/
-  allow_failure: true
-  needs: []
-
-prospector_tutorials:
-  stage: static_check
-  script:
-    - prospector tutorials/
-  allow_failure: true
-  needs: []
+    - pip install "flake8~=6.1.0"
+    - flake8 ./tests ./crdesigner ./docs ./tutorials
 
 build_and_test_python:
   image : python:$PYTHON_VERSIONS
   stage: test
   parallel :
     matrix :
-      - PYTHON_VERSIONS : [ "3.8", "3.9"]
+      - PYTHON_VERSIONS : [ "3.8", "3.9", "3.10"]
   variables:
     QT_QPA_PLATFORM : "offscreen"
   script:
@@ -55,6 +47,7 @@ build_and_test_python:
 
 build_and_test_with_coverage:
   stage : test
+  image: python:3.11
   variables :
     QT_QPA_PLATFORM : "offscreen"
   script :

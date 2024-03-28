@@ -3,14 +3,23 @@ from typing import Tuple
 import numpy as np
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import ScenarioID
+from commonroad.scenario.traffic_sign import (
+    TrafficSignIDBelgium,
+    TrafficSignIDChina,
+    TrafficSignIDCroatia,
+    TrafficSignIDFrance,
+    TrafficSignIDGermany,
+    TrafficSignIDGreece,
+    TrafficSignIDItaly,
+    TrafficSignIDPuertoRico,
+    TrafficSignIDRussia,
+    TrafficSignIDUsa,
+    TrafficSignIDZamunda,
+)
 from shapely.geometry import LineString, Point
 from shapely.ops import nearest_points
 
 from crdesigner.verification_repairing.repairing.repairing import ElementRepairing
-
-from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignIDZamunda, TrafficSignIDUsa, \
-    TrafficSignIDChina, TrafficSignIDRussia, TrafficSignIDBelgium, TrafficSignIDFrance, TrafficSignIDGreece, \
-    TrafficSignIDCroatia, TrafficSignIDItaly, TrafficSignIDPuertoRico
 
 TSGer = TrafficSignIDGermany
 TSZam = TrafficSignIDZamunda
@@ -45,7 +54,7 @@ class TrafficSignRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        traffic_sign_id, = location
+        (traffic_sign_id,) = location
 
         self._network.remove_traffic_sign(traffic_sign_id)
 
@@ -55,7 +64,7 @@ class TrafficSignRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        traffic_sign_id, = location
+        (traffic_sign_id,) = location
 
         self._network.remove_traffic_sign(traffic_sign_id)
 
@@ -74,13 +83,29 @@ class TrafficSignRepairing(ElementRepairing):
             if hashed_sign_id == hash(traffic_sign_element.traffic_sign_element_id.name.lower()):
                 sign = traffic_sign_element
 
-        default_values = {TSGer.TOWN_SIGN: 'Munich', TSGer.MAX_SPEED: '120', TSGer.MAX_SPEED_ZONE_START: '70',
-                          TSGer.MAX_SPEED_ZONE_END: '70', TSGer.MIN_SPEED: '60', TSGer.MAX_SPEED_END: '70',
-                          TSZam.TOWN_SIGN: 'Zamunda City', TSZam.MAX_SPEED: '120', TSZam.MAX_SPEED_ZONE_START: '70',
-                          TSZam.MAX_SPEED_ZONE_END: '70', TSZam.MIN_SPEED: '60', TSZam.MAX_SPEED_END: '70',
-                          TSUsa.MAX_SPEED: '120', TSChn.MAX_SPEED: '120', TSRus.MAX_SPEED: '120',
-                          TSBel.MAX_SPEED: '120', TSFra.MAX_SPEED: '120', TSGrc.MAX_SPEED: '120',
-                          TSHrv.MAX_SPEED: '120', TSIta.MAX_SPEED: '120', TSPri.MAX_SPEED: '120'}
+        default_values = {
+            TSGer.TOWN_SIGN: "Munich",
+            TSGer.MAX_SPEED: "120",
+            TSGer.MAX_SPEED_ZONE_START: "70",
+            TSGer.MAX_SPEED_ZONE_END: "70",
+            TSGer.MIN_SPEED: "60",
+            TSGer.MAX_SPEED_END: "70",
+            TSZam.TOWN_SIGN: "Zamunda City",
+            TSZam.MAX_SPEED: "120",
+            TSZam.MAX_SPEED_ZONE_START: "70",
+            TSZam.MAX_SPEED_ZONE_END: "70",
+            TSZam.MIN_SPEED: "60",
+            TSZam.MAX_SPEED_END: "70",
+            TSUsa.MAX_SPEED: "120",
+            TSChn.MAX_SPEED: "120",
+            TSRus.MAX_SPEED: "120",
+            TSBel.MAX_SPEED: "120",
+            TSFra.MAX_SPEED: "120",
+            TSGrc.MAX_SPEED: "120",
+            TSHrv.MAX_SPEED: "120",
+            TSIta.MAX_SPEED: "120",
+            TSPri.MAX_SPEED: "120",
+        }
 
         value = None
         for sign_id, default_value in default_values.items():
@@ -114,7 +139,7 @@ class TrafficSignRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        traffic_sign_id, = location
+        (traffic_sign_id,) = location
         traffic_sign = self._network.find_traffic_sign_by_id(traffic_sign_id)
 
         if traffic_sign is None:

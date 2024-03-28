@@ -1,4 +1,6 @@
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road_record import RoadRecord
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road_record import (
+    RoadRecord,
+)
 
 
 class ElevationProfile:

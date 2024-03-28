@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Any, Dict
+from typing import Any, Dict, List, Tuple
 
 from crdesigner.verification_repairing.config import VerificationParams
 from crdesigner.verification_repairing.verification.formula_ids import FormulaID

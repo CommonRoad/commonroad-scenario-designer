@@ -1,40 +1,38 @@
+import logging
+import os
 import subprocess
+import uuid
 from pathlib import Path
 from typing import Optional
-from lxml import etree
-import uuid
-import os
 
 from commonroad.scenario.scenario import Scenario
-from commonroad.common.file_reader import CommonRoadFileReader
+from lxml import etree
 
-from crdesigner.config.opendrive_config import open_drive_config
-from crdesigner.config.lanelet2_config import lanelet2_config
-from crdesigner.config.general_config import general_config
-from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
-from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
-
-from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
-from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
+from crdesigner.common.config.general_config import general_config
+from crdesigner.common.config.lanelet2_config import lanelet2_config
+from crdesigner.common.config.opendrive_config import open_drive_config
+from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
-
-from crdesigner.ui.gui.utilities.gui_sumo_simulation import (
-    SUMO_AVAILABLE,
-)
+from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
+from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
+from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
+from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
+from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.config import SumoConfig
     from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 
+from crdesigner.map_conversion.osm2cr.converter_modules.converter import GraphScenario
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import (
     convert_to_scenario,
 )
-from crdesigner.map_conversion.osm2cr.converter_modules.converter import GraphScenario
 
 
-def lanelet_to_commonroad(input_file: str, general_conf: general_config = general_config,
-                          lanelet2_conf: lanelet2_config = lanelet2_config) -> Scenario:
+def lanelet_to_commonroad(
+    input_file: str, general_conf: general_config = general_config, lanelet2_conf: lanelet2_config = lanelet2_config
+) -> Scenario:
     """
     Converts lanelet/lanelet2 file to CommonRoad
 
@@ -61,28 +59,23 @@ def commonroad_to_lanelet(input_file: str, output_name: str, config: lanelet2_co
     :param config: Lanelet2 config parameters.
     """
     try:
-        commonroad_reader = CommonRoadFileReader(input_file)
-        scenario, _ = commonroad_reader.open()
+        crdesigner_reader = CRDesignerFileReader(input_file)
+        scenario, _ = crdesigner_reader.open()
 
     except etree.XMLSyntaxError as xml_error:
         print(f"SyntaxError: {xml_error}")
-        print(
-            "There was an error during the loading of the selected CommonRoad file.\n"
-        )
+        print("There was an error during the loading of the selected CommonRoad file.\n")
         return
 
     l2osm = CR2LaneletConverter(config=config)
     osm = l2osm(scenario)
     with open(f"{output_name}", "wb") as file_out:
-        file_out.write(
-            etree.tostring(
-                osm, xml_declaration=True, encoding="UTF-8", pretty_print=True
-            )
-        )
+        file_out.write(etree.tostring(osm, xml_declaration=True, encoding="UTF-8", pretty_print=True))
 
 
-def opendrive_to_commonroad(input_file: Path, general_conf: general_config = general_config,
-                            odr_conf: open_drive_config = open_drive_config) -> Scenario:
+def opendrive_to_commonroad(
+    input_file: Path, general_conf: general_config = general_config, odr_conf: open_drive_config = open_drive_config
+) -> Scenario:
     """
     Converts OpenDRIVE file to CommonRoad
 
@@ -95,8 +88,9 @@ def opendrive_to_commonroad(input_file: Path, general_conf: general_config = gen
     road_network = Network()
     road_network.load_opendrive(opendrive)
     for index in range(len(road_network._traffic_lights)):
-        road_network._traffic_lights[index]._traffic_light_id = \
-            abs(road_network._traffic_lights[index].traffic_light_id)
+        road_network._traffic_lights[index]._traffic_light_id = abs(
+            road_network._traffic_lights[index].traffic_light_id
+        )
     return road_network.export_commonroad_scenario(general_conf, odr_conf)
 
 
@@ -107,7 +101,10 @@ def sumo_to_commonroad(input_file: str) -> Scenario:
     :param input_file: Path to SUMO net file
     :return: CommonRoad scenario
     """
-    return convert_net_to_cr(input_file)
+    if SUMO_AVAILABLE:
+        return convert_net_to_cr(input_file)
+    else:
+        logging.error("Cannot import SUMO. SUMO simulation cannot be offered.")
 
 
 def commonroad_to_sumo(input_file: str, output_file: str):
@@ -119,13 +116,11 @@ def commonroad_to_sumo(input_file: str, output_file: str):
     :return: CommonRoad scenario
     """
     try:
-        commonroad_reader = CommonRoadFileReader(input_file)
-        scenario, _ = commonroad_reader.open()
+        crdesigner_reader = CRDesignerFileReader(input_file)
+        scenario, _ = crdesigner_reader.open()
     except etree.XMLSyntaxError as xml_error:
         print(f"SyntaxError: {xml_error}")
-        print(
-            "There was an error during the loading of the selected CommonRoad file.\n"
-        )
+        print("There was an error during the loading of the selected CommonRoad file.\n")
         return
 
     if SUMO_AVAILABLE:
@@ -134,6 +129,8 @@ def commonroad_to_sumo(input_file: str, output_file: str):
         config.scenario_name = file_name.partition(".")[0]
         converter = CR2SumoMapConverter(scenario, config)
         converter.create_sumo_files(path)
+    else:
+        logging.error("Cannot import SUMO. SUMO simulation cannot be offered.")
 
 
 def osm_to_commonroad(input_file: str) -> Scenario:
@@ -165,17 +162,45 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Optional[Scenario]:
     # convert to OpenDRIVE file using netconvert
     try:
         subprocess.check_output(
-                [
-                    "netconvert",
-                    "--osm-files",
-                    input_file,
-                    "--opendrive-output",
-                    opendrive_file,
-                    "--junctions.scurve-stretch",
-                    "1.0",
-                ]
+            [
+                "netconvert",
+                "--osm-files",
+                input_file,
+                "--opendrive-output",
+                opendrive_file,
+                "--junctions.scurve-stretch",
+                "1.0",
+            ]
         )
     except Exception as e:
         print("__Warning__: {}.".format(e))
         return None
-    return opendrive_to_commonroad(opendrive_file)
+    return opendrive_to_commonroad(Path(opendrive_file))
+
+
+def opendrive_to_lanelet(
+    input_file: Path,
+    output_file: str,
+    odr_config: open_drive_config = open_drive_config,
+    general_config=general_config,
+    lanelet2_config: lanelet2_config = lanelet2_config,
+):
+    """
+    Converts OpenDRIVE file to Lanelet2 file and stores it
+
+    :param input_file: Path to the OpenDRIVE file
+    :param output_file: Name and path of the Lanelet2 file
+    :param odr_config: OpenDRIVE config parameters
+    :param general_config: General config parameters
+    :param lanelet2_config: Lanelet2 config parameters
+    :return:
+    """
+
+    # convert a file from opendrive to commonroad
+    scenario = opendrive_to_commonroad(input_file, general_conf=general_config, odr_conf=odr_config)
+
+    # convert a file from commonroad to lanelet2
+    l2osm = CR2LaneletConverter(config=lanelet2_config)
+    osm = l2osm(scenario)
+    with open(f"{output_file}", "wb") as file_out:
+        file_out.write(etree.tostring(osm, xml_declaration=True, encoding="UTF-8", pretty_print=True))

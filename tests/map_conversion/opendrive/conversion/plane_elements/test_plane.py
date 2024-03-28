@@ -1,8 +1,19 @@
 import unittest
-from pyproj.transformer import CRS
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import *
+
+import numpy as np
+from pyproj.transformer import CRS, Transformer
+
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import (
+    Border,
+)
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import (
+    ParametricLane,
+    ParametricLaneBorderGroup,
+)
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements import roadLanes
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import (
+    PlanView,
+)
 
 
 class TestParametricLaneBorderGroup(unittest.TestCase):
@@ -103,12 +114,12 @@ class TestParametricLaneBorderGroup(unittest.TestCase):
 
 class TestParametricLane(unittest.TestCase):
     def test_initialize_parametric_lane(self):
-        id = '1'
-        type = 'test'
+        id = "1"
+        type = "test"
         group = ParametricLaneBorderGroup()
         length = 5.0
         roadMark = roadLanes.RoadMark()
-        roadMark.__setattr__('SOffset', 5)
+        roadMark.__setattr__("SOffset", 5)
         side = "right"
         parametric_lane = ParametricLane(id, type, group, length, roadMark, side)
         self.assertEqual(group, parametric_lane.border_group)
@@ -169,7 +180,7 @@ class TestParametricLane(unittest.TestCase):
     def test_calc_width(self):
         parametric_lane = self.init_lane()
         width = parametric_lane.calc_width(10)
-        true_width = np.sqrt((33.181-40.960)**2+(33.180-39.543)**2)
+        true_width = np.sqrt((33.181 - 40.960) ** 2 + (33.180 - 39.543) ** 2)
         self.assertAlmostEqual(true_width, width, 3)
 
     def test_has_zero_width_everywhere(self):
@@ -217,8 +228,10 @@ class TestParametricLane(unittest.TestCase):
         self.assertListEqual([], right.tolist())
 
     def test_calc_vertices_transformed(self):
-        crs_from = CRS("+proj=tmerc +a=6378137 +b=6378137 +lon_0=11.663999726157273 +x_0=-0 "
-                       "+y_0=-5372577.5788830593 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs")
+        crs_from = CRS(
+            "+proj=tmerc +a=6378137 +b=6378137 +lon_0=11.663999726157273 +x_0=-0 "
+            "+y_0=-5372577.5788830593 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs"
+        )
         crs_to = CRS("+proj=utm +zone=32 +ellps=WGS84")
         transformer = Transformer.from_proj(crs_from, crs_to)
         parametric_lane = self.init_lane()
@@ -270,13 +283,16 @@ class TestParametricLane(unittest.TestCase):
         # test with real root
         lane.border_group.outer_border.width_coefficients.clear()
         lane.border_group.outer_border.width_coefficient_offsets.clear()
-        lane.border_group.outer_border.width_coefficients.append([3.65, 0.0, -0.012166666666666666,
-                                                                  0.00027037037037037036])
+        lane.border_group.outer_border.width_coefficients.append(
+            [3.65, 0.0, -0.012166666666666666, 0.00027037037037037036]
+        )
         lane.border_group.outer_border.width_coefficients.append([0, 0, 0, 0])
         lane.border_group.outer_border.width_coefficient_offsets.append(0)
         lane.border_group.outer_border.width_coefficient_offsets.append(30)
         roots = lane.zero_width_change_positions()
-        true_roots = polynomial.polyroots(polynomial.polyder(lane.border_group.outer_border.width_coefficients[0]))
+        true_roots = np.polynomial.polynomial.polyroots(
+            np.polynomial.polynomial.polyder(lane.border_group.outer_border.width_coefficients[0])
+        )
         np.testing.assert_almost_equal(true_roots, roots, 3)
         # test that reverse works
         lane.reverse = True
@@ -294,5 +310,5 @@ class TestParametricLane(unittest.TestCase):
         self.assertTupleEqual((6.0, 1.0), max_pos_and_val)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

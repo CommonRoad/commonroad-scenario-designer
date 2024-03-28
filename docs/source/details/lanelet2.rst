@@ -55,29 +55,22 @@ Python APIs
 
 .. code:: python
 
-    from lxml import etree
-    import os
-
-    from commonroad.scenario.scenario import Tag, ScenarioID
-    from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+    from commonroad.scenario.scenario import Tag
+    from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
     from commonroad.planning.planning_problem import PlanningProblemSet
 
-    from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
-    from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
-
+    from crdesigner.config.lanelet2_config import lanelet2_config
     from crdesigner.map_conversion.map_conversion_interface import lanelet_to_commonroad
 
-    input_path = ""  # replace empty string
-    config = lanelet2_config
-    config.adjacencies = True
+    input_path = ""
+    output_path = ""
+    lanelet2_config.adjacencies = True
 
-
-    # ----------------------------------------------- Option 1: General API ------------------------------------------------
     # load lanelet/lanelet2 file, parse it, and convert it to a CommonRoad scenario
-    scenario = lanelet_to_commonroad(input_path, config)
+    scenario = lanelet_to_commonroad(input_path)
 
     # store converted file as CommonRoad scenario
-    writer = CommonRoadFileWriter(
+    writer = CRDesignerFileWriter(
         scenario=scenario,
         planning_problem_set=PlanningProblemSet(),
         author="Sebastian Maierhofer",
@@ -85,32 +78,7 @@ Python APIs
         source="CommonRoad Scenario Designer",
         tags={Tag.URBAN},
     )
-    writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_Lanelet-1_1-T1.xml",
-                         OverwriteExistingFile.ALWAYS)
-
-    # ---------------------------------------- Option 2: Lanelet conversion APIs -------------------------------------------
-    # read and parse lanelet/lanelet2 file
-    parser = Lanelet2Parser(etree.parse(input_path).getroot())
-    lanelet2_content = parser.parse()
-
-    # convert lanelet/lanelet2 map to CommonRoad
-    lanelet2_converter = Lanelet2CRConverter(config)
-    scenario = lanelet2_converter(lanelet2_content, detect_adjacencies=config.adjacencies,
-                                  left_driving_system=config.left_driving)
-    scenario.scenario_id = ScenarioID(country_id="ZAM", map_name="Lanelet")
-
-    # store converted file as CommonRoad scenario
-    writer = CommonRoadFileWriter(
-        scenario=scenario,
-        planning_problem_set=PlanningProblemSet(),
-        author="Sebastian Maierhofer",
-        affiliation="Technical University of Munich",
-        source="CommonRoad Scenario Designer",
-        tags={Tag.URBAN},
-    )
-    writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_Lanelet-1_1-T1.xml",
-                         OverwriteExistingFile.ALWAYS)
-
+    writer.write_to_file(output_path, OverwriteExistingFile.ALWAYS)
 
 Implementation Details
 ======================
@@ -186,47 +154,22 @@ You can also use the GUI to convert an lanelet file.
 The GUI can be started from command line with ``crdesigner`` or ``crdesigner gui``.
 
 
-Python APIs
+Python API
 -----------
 
 .. code:: python
 
-    from lxml import etree
-    from commonroad.common.file_reader import CommonRoadFileReader
-    from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
+    from crdesigner.config.lanelet2_config import lanelet2_config
     from crdesigner.map_conversion.map_conversion_interface import commonroad_to_lanelet
 
 
-    input_path = ""  # replace empty string
-    output_name = ""  # replace empty string
+    input_path = ""
+    output_name = ""
     config = lanelet2_config
     config.autoware = False
 
-    # ----------------------------------------------- Option 1: General API ------------------------------------------------
     # load CommonRoad file and convert it to lanelet format
     commonroad_to_lanelet(input_path, output_name, config)
-
-    # ---------------------------------------- Option 2: Lanelet conversion APIs -------------------------------------------
-    try:
-        commonroad_reader = CommonRoadFileReader(input_path)
-        scenario, _ = commonroad_reader.open()
-    except etree.XMLSyntaxError as xml_error:
-        print(f"SyntaxError: {xml_error}")
-        print(
-            "There was an error during the loading of the selected CommonRoad file.\n"
-        )
-        scenario = None
-
-    if scenario:
-        l2osm = CR2LaneletConverter(config)
-        osm = l2osm(scenario)
-        with open(f"{output_name}", "wb") as file_out:
-            file_out.write(
-                etree.tostring(
-                    osm, xml_declaration=True, encoding="UTF-8", pretty_print=True
-                )
-            )
-
 
 Implementation Details
 ======================

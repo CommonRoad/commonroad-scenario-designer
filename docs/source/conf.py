@@ -12,10 +12,11 @@
 #
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../crdesigner'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../crdesigner/map_conversion'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../crdesigner/input_output'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../crdesigner"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../crdesigner/map_conversion"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../crdesigner/input_output"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../.."))
 
 
 # -- Project information -----------------------------------------------------
@@ -25,9 +26,9 @@ copyright = "2023, Technical University of Munich"
 author = "Sebastian Maierhofer"
 
 # The short X.Y version
-version = "0.8.0"
+version = "0.8.1"
 # The full version, including alpha/beta/rc tags
-release = "0.8.0"
+release = "0.8.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -40,19 +41,19 @@ release = "0.8.0"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'matplotlib.sphinxext.plot_directive',
-    'IPython.sphinxext.ipython_directive',
-    'IPython.sphinxext.ipython_console_highlighting',
-    'sphinx_autodoc_typehints',
-    'sphinx.ext.inheritance_diagram',
-    'sphinx.ext.doctest',
-    'sphinx.ext.coverage',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.ifconfig',
-    'sphinx.ext.viewcode',
+    "sphinx.ext.autodoc",
+    "matplotlib.sphinxext.plot_directive",
+    "IPython.sphinxext.ipython_directive",
+    "IPython.sphinxext.ipython_console_highlighting",
+    "sphinx_autodoc_typehints",
+    "sphinx.ext.inheritance_diagram",
+    "sphinx.ext.doctest",
+    "sphinx.ext.coverage",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.todo",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.ifconfig",
+    "sphinx.ext.viewcode",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -70,7 +71,7 @@ master_doc = "index"
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = 'en'
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -78,7 +79,7 @@ language = 'en'
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -99,20 +100,20 @@ html_theme = "sphinx_rtd_theme"
 # documentation.
 #
 html_theme_options = {
-    'canonical_url': '',
-    'analytics_id': '',
-    'logo_only': False,
-    'display_version': True,
-    'prev_next_buttons_location': 'bottom',
-    'style_external_links': False,
+    "canonical_url": "",
+    "analytics_id": "",
+    "logo_only": False,
+    "display_version": True,
+    "prev_next_buttons_location": "bottom",
+    "style_external_links": False,
     # Toc options
-    'collapse_navigation': False,
-    'sticky_navigation': True,
-    'navigation_depth': 4,
-    'includehidden': True,
-    'titles_only': False
+    "collapse_navigation": False,
+    "sticky_navigation": True,
+    "navigation_depth": 4,
+    "includehidden": True,
+    "titles_only": False,
 }
-html_logo = 'images/commonroad_white150.png'
+html_logo = "images/commonroad_white150.png"
 
 # -- Options for HTMLHelp output ---------------------------------------------
 

@@ -1,12 +1,18 @@
 """
 This module provides a method to offset roads at certain occasions to smooth the course of consecutive lanes.
 """
-from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg, lane_linker
+
+from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common import geometry
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import (
+    lane_linker,
+)
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph._graph import (
+    Graph,
+)
 
 
-def offset_graph(graph: rg.Graph) -> None:
+def offset_graph(graph: Graph) -> None:
     """
     performs an offset on roads in the graph to keep passing lanes straight
 
@@ -23,11 +29,7 @@ def offset_graph(graph: rg.Graph) -> None:
                     incoming, _ = lane_linker.get_incomings_outgoings(other, node)
                     if len(incoming) < len(outgoing):
                         # new lanes are created, outgoing edge is set off
-                        offset = (
-                                (len(outgoing) - len(incoming))
-                                / 2
-                                * config.LANEWIDTHS[edge.roadtype]
-                        )
+                        offset = (len(outgoing) - len(incoming)) / 2 * config.LANEWIDTHS[edge.roadtype]
                         if lane_linker.merge_left(incoming, outgoing):
                             offset *= -1
                         edge.interpolated_waypoints = geometry.offset_polyline(
@@ -35,11 +37,7 @@ def offset_graph(graph: rg.Graph) -> None:
                         )
                     elif len(incoming) > len(outgoing):
                         # lanes are removed, incoming edge is set off
-                        offset = (
-                                (len(incoming) - len(outgoing))
-                                / 2
-                                * config.LANEWIDTHS[edge.roadtype]
-                        )
+                        offset = (len(incoming) - len(outgoing)) / 2 * config.LANEWIDTHS[edge.roadtype]
                         if lane_linker.merge_left(incoming, outgoing):
                             offset *= -1
                         other.interpolated_waypoints = geometry.offset_polyline(
@@ -66,22 +64,14 @@ def offset_graph(graph: rg.Graph) -> None:
                     else:
                         raise ValueError("Graph is malformed")
                     if len(incoming) < len(outgoing):
-                        offset = (
-                                (len(outgoing) - len(incoming))
-                                / 2
-                                * config.LANEWIDTHS[edge.roadtype]
-                        )
+                        offset = (len(outgoing) - len(incoming)) / 2 * config.LANEWIDTHS[edge.roadtype]
                         if not to_right:
                             offset *= -1
                         edge.interpolated_waypoints = geometry.offset_polyline(
                             edge.interpolated_waypoints, offset, False
                         )
                     elif len(incoming) > len(outgoing):
-                        offset = (
-                                (len(incoming) - len(outgoing))
-                                / 2
-                                * config.LANEWIDTHS[edge.roadtype]
-                        )
+                        offset = (len(incoming) - len(outgoing)) / 2 * config.LANEWIDTHS[edge.roadtype]
                         if to_right:
                             offset *= -1
                         edge.interpolated_waypoints = geometry.offset_polyline(

@@ -1,6 +1,12 @@
-from crdesigner.verification_repairing.verification.hol.expression_tree.binary.binary import Binary
-from crdesigner.verification_repairing.verification.hol.expression_tree.expression import Expression
-from crdesigner.verification_repairing.verification.hol.expression_tree.symbols import Symbol
+from crdesigner.verification_repairing.verification.hol.expression_tree.binary.binary import (
+    Binary,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.expression import (
+    Expression,
+)
+from crdesigner.verification_repairing.verification.hol.expression_tree.symbols import (
+    Symbol,
+)
 
 
 class Equivalence(Binary):

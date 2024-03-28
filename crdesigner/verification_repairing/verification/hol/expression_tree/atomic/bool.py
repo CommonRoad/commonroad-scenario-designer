@@ -1,5 +1,7 @@
-from crdesigner.verification_repairing.verification.hol.expression_tree.expression import Expression
 from crdesigner.verification_repairing.verification.hol.context import Context
+from crdesigner.verification_repairing.verification.hol.expression_tree.expression import (
+    Expression,
+)
 
 
 class Bool(Expression):
@@ -8,7 +10,7 @@ class Bool(Expression):
     """
 
     def __init__(self, value: bool):
-        super().__init__('true' if value else 'false')
+        super().__init__("true" if value else "false")
 
         self._value = value
 

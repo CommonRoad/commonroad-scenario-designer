@@ -1,7 +1,17 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry import *
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.eulerspiral import EulerSpiral
+
 import numpy as np
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry import (
+    Arc,
+    EulerSpiral,
+    Line,
+    ParamPoly3,
+    Poly3,
+    Spiral,
+    calc_delta_s,
+    calc_next_s,
+)
 
 
 class TestGeometry(unittest.TestCase):
@@ -37,8 +47,9 @@ class TestGeometry(unittest.TestCase):
         curv_end = 2
         true_spiral = EulerSpiral.create_from_length_and_curvature(length, curv_start, curv_end)
 
-        spiral = Spiral(start_position=start_position, heading=heading, length=length, curv_start=curv_start,
-                        curv_end=curv_end)
+        spiral = Spiral(
+            start_position=start_position, heading=heading, length=length, curv_start=curv_start, curv_end=curv_end
+        )
 
         np.testing.assert_equal(start_position, spiral.start_position)
         self.assertEqual(length, spiral.length)
@@ -56,15 +67,14 @@ class TestGeometry(unittest.TestCase):
         c = 1
         d = 5
 
-        poly3 = Poly3(start_position=start_position, heading=heading, length=length,
-                      a=a, b=b, c=c, d=d)
+        poly3 = Poly3(start_position=start_position, heading=heading, length=length, a=a, b=b, c=c, d=d)
 
         np.testing.assert_equal(start_position, poly3.start_position)
         self.assertEqual(heading, poly3.heading)
         self.assertEqual(length, poly3.length)
         np.testing.assert_equal([a, b, c, d], poly3.coeffs)
-        np.testing.assert_equal([b, 2*c, 3*d], poly3.d_coeffs)
-        np.testing.assert_equal([2*c, 6*d], poly3.d2_coeffs)
+        np.testing.assert_equal([b, 2 * c, 3 * d], poly3.d_coeffs)
+        np.testing.assert_equal([2 * c, 6 * d], poly3.d2_coeffs)
 
     def test_initialize_paramPoly3(self):
         start_position = np.array([2, 5])
@@ -80,8 +90,20 @@ class TestGeometry(unittest.TestCase):
         dV = 6
         pRange = 4
 
-        param_poly3 = ParamPoly3(start_position=start_position, heading=heading, length=length,
-                                aU=aU, bU=bU, cU=cU, dU=dU, aV=aV, bV=bV, cV=cV, dV=dV, pRange=pRange)
+        param_poly3 = ParamPoly3(
+            start_position=start_position,
+            heading=heading,
+            length=length,
+            aU=aU,
+            bU=bU,
+            cU=cU,
+            dU=dU,
+            aV=aV,
+            bV=bV,
+            cV=cV,
+            dV=dV,
+            pRange=pRange,
+        )
 
         np.testing.assert_equal(start_position, param_poly3.start_position)
         self.assertEqual(dV, param_poly3.curvature_derivative_max)
@@ -90,16 +112,28 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(length, param_poly3.length)
         np.testing.assert_equal([aU, bU, cU, dU], param_poly3.coeffs_u)
         np.testing.assert_equal([aV, bV, cV, dV], param_poly3.coeffs_v)
-        np.testing.assert_equal([bU, 2*cU, 3*dU], param_poly3.d_coeffs_u)
-        np.testing.assert_equal([bV, 2*cV, 3*dV], param_poly3.d_coeffs_v)
-        np.testing.assert_equal([2*cU, 6*dU], param_poly3.d2_coeffs_u)
-        np.testing.assert_equal([2*cV, 6*dV], param_poly3.d2_coeffs_v)
+        np.testing.assert_equal([bU, 2 * cU, 3 * dU], param_poly3.d_coeffs_u)
+        np.testing.assert_equal([bV, 2 * cV, 3 * dV], param_poly3.d_coeffs_v)
+        np.testing.assert_equal([2 * cU, 6 * dU], param_poly3.d2_coeffs_u)
+        np.testing.assert_equal([2 * cV, 6 * dV], param_poly3.d2_coeffs_v)
         self.assertEqual(pRange, param_poly3._pRange)
 
         pRange = None
 
-        param_poly3 = ParamPoly3(start_position=start_position, heading=heading, length=length, aU=aU, bU=bU, cU=cU,
-                                dU=dU, aV=aV, bV=bV, cV=cV, dV=dV, pRange=pRange)
+        param_poly3 = ParamPoly3(
+            start_position=start_position,
+            heading=heading,
+            length=length,
+            aU=aU,
+            bU=bU,
+            cU=cU,
+            dU=dU,
+            aV=aV,
+            bV=bV,
+            cV=cV,
+            dV=dV,
+            pRange=pRange,
+        )
 
         self.assertEqual(1, param_poly3._pRange)
 
@@ -168,8 +202,20 @@ class TestGeometry(unittest.TestCase):
         dV = 0.1
         pRange = 4
 
-        param_poly3 = ParamPoly3(start_position=start_position, heading=heading, length=length, aU=aU, bU=bU, cU=cU,
-                                dU=dU, aV=aV, bV=bV, cV=cV, dV=dV, pRange=pRange)
+        param_poly3 = ParamPoly3(
+            start_position=start_position,
+            heading=heading,
+            length=length,
+            aU=aU,
+            bU=bU,
+            cU=cU,
+            dU=dU,
+            aV=aV,
+            bV=bV,
+            cV=cV,
+            dV=dV,
+            pRange=pRange,
+        )
         result = param_poly3.calc_position(2.5)
         self.assertAlmostEqual(2.70780194, result[0][0])
         self.assertAlmostEqual(14.58224029, result[0][1])
@@ -192,20 +238,68 @@ class TestGeometry(unittest.TestCase):
         dV = 0.1
         pRange = 4
 
-        param_poly3 = ParamPoly3(start_position=start_position, heading=heading, length=length, aU=aU, bU=bU, cU=cU,
-                                 dU=dU, aV=aV, bV=bV, cV=cV, dV=dV, pRange=pRange)
+        param_poly3 = ParamPoly3(
+            start_position=start_position,
+            heading=heading,
+            length=length,
+            aU=aU,
+            bU=bU,
+            cU=cU,
+            dU=dU,
+            aV=aV,
+            bV=bV,
+            cV=cV,
+            dV=dV,
+            pRange=pRange,
+        )
         result = param_poly3.max_abs_curvature(pos=2)
         self.assertEqual((6.2, 0.5), result)
-        param_poly3 = ParamPoly3(start_position=start_position, heading=heading, length=length, aU=aU, bU=bU, cU=cU,
-                                 dU=-dU, aV=aV, bV=bV, cV=cV, dV=-0.9, pRange=pRange)
+        param_poly3 = ParamPoly3(
+            start_position=start_position,
+            heading=heading,
+            length=length,
+            aU=aU,
+            bU=bU,
+            cU=cU,
+            dU=-dU,
+            aV=aV,
+            bV=bV,
+            cV=cV,
+            dV=-0.9,
+            pRange=pRange,
+        )
         result2 = param_poly3.max_abs_curvature(pos=2)
         self.assertEqual((-10.4, -0.9), result2)
-        param_poly3 = ParamPoly3(start_position=start_position, heading=heading, length=length, aU=aU, bU=bU, cU=cU,
-                                 dU=-0.7, aV=aV, bV=bV, cV=cV, dV=0.3, pRange=pRange)
+        param_poly3 = ParamPoly3(
+            start_position=start_position,
+            heading=heading,
+            length=length,
+            aU=aU,
+            bU=bU,
+            cU=cU,
+            dU=-0.7,
+            aV=aV,
+            bV=bV,
+            cV=cV,
+            dV=0.3,
+            pRange=pRange,
+        )
         result3 = param_poly3.max_abs_curvature(pos=2)
         self.assertEqual((-8.2, -0.7), result3)
-        param_poly3 = ParamPoly3(start_position=start_position, heading=heading, length=length, aU=aU, bU=bU, cU=cU,
-                                 dU=dU, aV=aV, bV=bV, cV=cV, dV=0.6, pRange=pRange)
+        param_poly3 = ParamPoly3(
+            start_position=start_position,
+            heading=heading,
+            length=length,
+            aU=aU,
+            bU=bU,
+            cU=cU,
+            dU=dU,
+            aV=aV,
+            bV=bV,
+            cV=cV,
+            dV=0.6,
+            pRange=pRange,
+        )
         result4 = param_poly3.max_abs_curvature(pos=2)
         self.assertEqual((7.6, 0.6), result4)
 
@@ -234,19 +328,31 @@ class TestGeometry(unittest.TestCase):
         min_delta_s = 0.8
         s_max = 4
 
-        result = calc_next_s(s_current=s_current, curvature=curvature, error_tolerance=error_tolerance_s,
-                             min_delta_s=min_delta_s, s_max=s_max)
+        result = calc_next_s(
+            s_current=s_current,
+            curvature=curvature,
+            error_tolerance=error_tolerance_s,
+            min_delta_s=min_delta_s,
+            s_max=s_max,
+        )
         self.assertEqual(2.8, result)
-        result2 = calc_next_s(s_current=s_current, curvature=curvature, error_tolerance=error_tolerance_s,
-                              min_delta_s=0.6, s_max=s_max)
+        result2 = calc_next_s(
+            s_current=s_current, curvature=curvature, error_tolerance=error_tolerance_s, min_delta_s=0.6, s_max=s_max
+        )
         self.assertAlmostEqual(2.7302967433, result2)
-        result3 = calc_next_s(s_current=s_current, curvature=curvature, error_tolerance=error_tolerance_s,
-                              min_delta_s=0.6, s_max=2.7402967433)
+        result3 = calc_next_s(
+            s_current=s_current,
+            curvature=curvature,
+            error_tolerance=error_tolerance_s,
+            min_delta_s=0.6,
+            s_max=2.7402967433,
+        )
         self.assertAlmostEqual(2.7402967433, result3)
-        result4 = calc_next_s(s_current=s_current, curvature=curvature, error_tolerance=error_tolerance_s,
-                              min_delta_s=0.6, s_max=2)
+        result4 = calc_next_s(
+            s_current=s_current, curvature=curvature, error_tolerance=error_tolerance_s, min_delta_s=0.6, s_max=2
+        )
         self.assertAlmostEqual(2, result4)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

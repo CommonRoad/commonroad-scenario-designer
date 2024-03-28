@@ -1,18 +1,19 @@
 import enum
 import itertools
+import logging
 import math
 from abc import ABC
 from functools import reduce
-from typing import Tuple, List
-import logging
-import numpy as np
+from typing import List, Tuple
 
+import numpy as np
 from commonroad.scenario.lanelet import LaneletNetwork
 
 try:
     import pymetis
+
     pymetis_imported = True
-except:
+except ImportError:
     pymetis_imported = False
 
 LaneletBlock = List[int]
@@ -51,17 +52,17 @@ class MapPartitioning(ABC):
         :param size: Size of chunk.
         """
         for i in range(0, len(ids), size):
-            yield ids[i:i + size]
+            yield ids[i : i + size]
 
 
 @enum.unique
 class EdgeType(enum.Enum):
     """Type of edges of the map graph."""
 
-    LEFT_ADJ = 'LEFT ADJACENCY'
-    RIGHT_ADJ = 'RIGHT_ADJACENCY'
-    SUCCESSOR = 'SUCCESSOR'
-    PREDECESSOR = 'PREDECESSOR'
+    LEFT_ADJ = "LEFT ADJACENCY"
+    RIGHT_ADJ = "RIGHT_ADJACENCY"
+    SUCCESSOR = "SUCCESSOR"
+    PREDECESSOR = "PREDECESSOR"
 
 
 MapGraph = List[List[Tuple[int, EdgeType]]]
@@ -92,8 +93,9 @@ class LaneletPartitioning(MapPartitioning):
         number_of_edges = len(reduce(lambda a, b: a + b, self._graph))
         e_weights = [1 for _ in range(number_of_edges)]
 
-        lanelet_partition = self._partition(max_size=ref_size, v_weights=v_weights, e_weights=e_weights,
-                                            buffered=buffered)
+        lanelet_partition = self._partition(
+            max_size=ref_size, v_weights=v_weights, e_weights=e_weights, buffered=buffered
+        )
 
         lanelet_partition = self._map_lanelet_partition(lanelet_partition)
 
@@ -120,8 +122,9 @@ class LaneletPartitioning(MapPartitioning):
                 else:
                     e_weights.append(1)
 
-        lanelet_partition = self._partition(max_size=ref_size, v_weights=v_weights, e_weights=e_weights,
-                                            buffered=buffered)
+        lanelet_partition = self._partition(
+            max_size=ref_size, v_weights=v_weights, e_weights=e_weights, buffered=buffered
+        )
 
         for block in lanelet_partition:
             for node_id in block:
@@ -138,8 +141,9 @@ class LaneletPartitioning(MapPartitioning):
 
         return partition
 
-    def _partition(self, max_size: int = 25, v_weights: List[int] = None, e_weights: List[int] = None,
-                   buffered: bool = False) -> List[LaneletBlock]:
+    def _partition(
+        self, max_size: int = 25, v_weights: List[int] = None, e_weights: List[int] = None, buffered: bool = False
+    ) -> List[LaneletBlock]:
         """
         Partitions the graph representing the map.
 
@@ -161,8 +165,9 @@ class LaneletPartitioning(MapPartitioning):
 
         adjncy = list(itertools.chain.from_iterable(graph))
 
-        _, membership = pymetis.part_graph(nparts=n_parts, xadj=xadj, adjncy=adjncy, vweights=v_weights,
-                                           eweights=e_weights)
+        _, membership = pymetis.part_graph(
+            nparts=n_parts, xadj=xadj, adjncy=adjncy, vweights=v_weights, eweights=e_weights
+        )
 
         partition: List[List[int]] = [[] for _ in range(n_parts)]
         for node_id, partition_id in enumerate(membership):
@@ -380,11 +385,11 @@ class IntersectionPartitioning(MapPartitioning):
                             continue
                         centers.append(lanelet.polygon.center)
 
-                centroid = np.array([0., 0.])
+                centroid = np.array([0.0, 0.0])
                 for center in centers:
                     centroid += center
                 centroid /= len(centers)
-                proximity_lanelets = self._network.lanelets_in_proximity(centroid, 50.)
+                proximity_lanelets = self._network.lanelets_in_proximity(centroid, 50.0)
                 lanelet_ids.extend([p_l.lanelet_id for p_l in proximity_lanelets])
             partition.append((lanelet_ids, traffic_sign_ids, traffic_light_ids, block))
 

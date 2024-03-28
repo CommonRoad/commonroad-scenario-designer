@@ -1,37 +1,19 @@
-from lxml import etree
-from commonroad.common.file_reader import CommonRoadFileReader
+import os
+from pathlib import Path
 
-from crdesigner.config.lanelet2_config import lanelet2_config
-from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
+from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.map_conversion_interface import commonroad_to_lanelet
 
-
-input_path = ""  # replace empty string
-output_name = ""  # replace empty string
+input_path = Path.cwd().parent.parent / "tests/map_conversion/test_maps/lanelet2/merging_lanelets_utm.xml"
+output_name = Path.cwd() / "example_files/lanelet2/merging_lanelets_utm.osm"
 config = lanelet2_config
 config.autoware = False
 
-# ----------------------------------------------- Option 1: General API ------------------------------------------------
+# create a folder for the example file if it does not exist
+if os.path.exists(Path.cwd() / "example_files") is False:
+    os.mkdir(Path.cwd() / "example_files")
+if os.path.exists(Path.cwd() / "example_files/lanelet2") is False:
+    os.mkdir(Path.cwd() / "example_files/lanelet2")
+
 # load CommonRoad file and convert it to lanelet format
-commonroad_to_lanelet(input_path, output_name, config)
-
-# ---------------------------------------- Option 2: Lanelet conversion APIs -------------------------------------------
-try:
-    commonroad_reader = CommonRoadFileReader(input_path)
-    scenario, _ = commonroad_reader.open()
-except etree.XMLSyntaxError as xml_error:
-    print(f"SyntaxError: {xml_error}")
-    print(
-        "There was an error during the loading of the selected CommonRoad file.\n"
-    )
-    scenario = None
-
-if scenario:
-    l2osm = CR2LaneletConverter(config)
-    osm = l2osm(scenario)
-    with open(f"{output_name}", "wb") as file_out:
-        file_out.write(
-            etree.tostring(
-                osm, xml_declaration=True, encoding="UTF-8", pretty_print=True
-            )
-        )
+commonroad_to_lanelet(str(input_path), str(output_name), config)

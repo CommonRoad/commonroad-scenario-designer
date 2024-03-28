@@ -1,20 +1,28 @@
 import logging
-from typing import Tuple, Set
-from shapely.geometry import LineString, Point
-from shapely.ops import nearest_points
-import numpy as np
+from typing import Set, Tuple
 
+import numpy as np
 from commonroad.common.common_lanelet import StopLine
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import ScenarioID
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
+from shapely.geometry import LineString, Point
+from shapely.ops import nearest_points
 
 from crdesigner.verification_repairing.repairing.repairing import ElementRepairing
-from crdesigner.verification_repairing.repairing.tools.geometry_tools import insert_vertices, \
-    check_intersected_lines, fill_number_of_vertices, average_vertices, check_line_intersection_efficient
+from crdesigner.verification_repairing.repairing.tools.geometry_tools import (
+    average_vertices,
+    check_intersected_lines,
+    check_line_intersection_efficient,
+    fill_number_of_vertices,
+    insert_vertices,
+)
 
-from commonroad_dc.geometry.util import compute_orientation_from_polyline
+try:
+    from commonroad_dc.geometry.util import compute_orientation_from_polyline
+except ModuleNotFoundError:
+    logging.error("MapVerification: Please install CommonRoad Drivability Checker manually!")
 
 
 class LaneletRepairing(ElementRepairing):
@@ -39,7 +47,7 @@ class LaneletRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        lanelet_id, = location
+        (lanelet_id,) = location
 
         lanelet_ids = [lanelet.lanelet_id for lanelet in self._network.lanelets]
 
@@ -54,7 +62,7 @@ class LaneletRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        lanelet_id, = location
+        (lanelet_id,) = location
 
         lanelet = self._network.find_lanelet_by_id(lanelet_id)
 
@@ -72,7 +80,7 @@ class LaneletRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        lanelet_id, = location
+        (lanelet_id,) = location
 
         self._network.remove_lanelet(lanelet_id)
 
@@ -307,7 +315,7 @@ class LaneletRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        lanelet_id, = location
+        (lanelet_id,) = location
 
         lanelet = self._network.find_lanelet_by_id(lanelet_id)
 
@@ -329,8 +337,9 @@ class LaneletRepairing(ElementRepairing):
                 left_start_point = left_vertices[vert_left_i]
                 left_end_point = left_vertices[vert_left_i + 1]
 
-                if not check_line_intersection_efficient([right_start_point, right_end_point],
-                                                         [left_start_point, left_end_point]):
+                if not check_line_intersection_efficient(
+                    [right_start_point, right_end_point], [left_start_point, left_end_point]
+                ):
                     continue
 
                 right_end_point_copy = right_end_point.copy()
@@ -499,12 +508,12 @@ class LaneletRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        lanelet_id_0, lanelet_id_1 = location
+        # lanelet_id_0, lanelet_id_1 = location
 
-        lanelet_0 = self._network.find_lanelet_by_id(lanelet_id_0)
-        lanelet_1 = self._network.find_lanelet_by_id(lanelet_id_1)
+        # lanelet_0 = self._network.find_lanelet_by_id(lanelet_id_0)
+        # lanelet_1 = self._network.find_lanelet_by_id(lanelet_id_1)
 
-        shapely_polygon_1 = lanelet_1.polygon.shapely_object.difference(lanelet_0.polygon.shapely_object)
+        #  shapely_polygon_1 = lanelet_1.polygon.shapely_object.difference(lanelet_0.polygon.shapely_object)
         pass  # TODO: Implement
 
     def repair_existence_traffic_signs(self, location: Tuple[int, int]):
@@ -560,9 +569,11 @@ class LaneletRepairing(ElementRepairing):
         lanelet_id, traffic_sign_id = location
 
         lanelet = self._network.find_lanelet_by_id(lanelet_id)
-        if (self._network.find_traffic_sign_by_id(traffic_sign_id) is not None and
-                self._regulatory_element_close_to_stop_line(
-                        self._network.find_traffic_sign_by_id(traffic_sign_id).position, lanelet.stop_line)):
+        if self._network.find_traffic_sign_by_id(
+            traffic_sign_id
+        ) is not None and self._regulatory_element_close_to_stop_line(
+            self._network.find_traffic_sign_by_id(traffic_sign_id).position, lanelet.stop_line
+        ):
             lanelet.traffic_signs.add(traffic_sign_id)
         else:
             relevant_traffic_signs = self._find_relevant_stop_line_signs(lanelet.stop_line)
@@ -587,7 +598,7 @@ class LaneletRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        lanelet_id, = location
+        (lanelet_id,) = location
 
         lanelet = self._network.find_lanelet_by_id(lanelet_id)
         lanelet.stop_line.start = None
@@ -599,7 +610,7 @@ class LaneletRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        lanelet_id, = location
+        (lanelet_id,) = location
 
         lanelet = self._network.find_lanelet_by_id(lanelet_id)
         stop_line = lanelet.stop_line
@@ -620,7 +631,7 @@ class LaneletRepairing(ElementRepairing):
 
         :param location: Lanelet of invalid stop line.
         """
-        lanelet_id, = location
+        (lanelet_id,) = location
         lanelet = self._network.find_lanelet_by_id(lanelet_id)
 
         relevant_traffic_signs = self._find_relevant_stop_line_signs(lanelet.stop_line)
@@ -644,8 +655,9 @@ class LaneletRepairing(ElementRepairing):
 
         :param location: IDs of the two invalid lanelets.
         """
-        logging.error("repair_conflicting_lanelet_directions: "
-                      "Cannot be repaired automatically. Please contact developers.")
+        logging.error(
+            "repair_conflicting_lanelet_directions: " "Cannot be repaired automatically. Please contact developers."
+        )
 
     def _find_relevant_stop_line_signs(self, stop_line: StopLine) -> Set[TrafficSign]:
         """
@@ -653,8 +665,11 @@ class LaneletRepairing(ElementRepairing):
 
         :param stop_line: Stop line of interest.
         """
-        return {sign.traffic_sign_id for sign in self._network.traffic_signs if
-                self._regulatory_element_close_to_stop_line(sign.position, stop_line)}
+        return {
+            sign.traffic_sign_id
+            for sign in self._network.traffic_signs
+            if self._regulatory_element_close_to_stop_line(sign.position, stop_line)
+        }
 
     def _find_relevant_stop_line_lights(self, stop_line: StopLine) -> Set[TrafficLight]:
         """
@@ -662,8 +677,11 @@ class LaneletRepairing(ElementRepairing):
 
         :param stop_line: Stop line of interest.
         """
-        return {light.traffic_light_id for light in self._network.traffic_lights if
-                self._regulatory_element_close_to_stop_line(light.position, stop_line)}
+        return {
+            light.traffic_light_id
+            for light in self._network.traffic_lights
+            if self._regulatory_element_close_to_stop_line(light.position, stop_line)
+        }
 
     def _regulatory_element_close_to_stop_line(self, position: np.ndarray, stop_line: StopLine) -> bool:
         """
@@ -675,8 +693,15 @@ class LaneletRepairing(ElementRepairing):
         """
         return min(np.linalg.norm(stop_line.start - position), np.linalg.norm(stop_line.end - position)) < 10
 
-    def _optimal_vertice(self, fst_lanelet_id: int, snd_lanelet_id: int, fst_vertices: np.ndarray,
-                         snd_vertices: np.ndarray, is_fst_start: bool, is_snd_start: bool):
+    def _optimal_vertice(
+        self,
+        fst_lanelet_id: int,
+        snd_lanelet_id: int,
+        fst_vertices: np.ndarray,
+        snd_vertices: np.ndarray,
+        is_fst_start: bool,
+        is_snd_start: bool,
+    ):
         """
         For two points from the two given polylines of two different lanelets the average are computed and
         the index of the points in their polyline are overwritten by the averaged optimal point. In the exact mode
@@ -698,8 +723,7 @@ class LaneletRepairing(ElementRepairing):
         left_vertex = fst_vertices[left_i]
         right_vertex = snd_vertices[right_i]
 
-        opt_vertex = [(left_vertex[0] + right_vertex[0]) / 2,
-                      (left_vertex[1] + right_vertex[1]) / 2]
+        opt_vertex = [(left_vertex[0] + right_vertex[0]) / 2, (left_vertex[1] + right_vertex[1]) / 2]
 
         left_vertice_tuple = (str(left_vertex[0]), str(left_vertex[1]))
         right_vertice_tuple = (str(right_vertex[0]), str(right_vertex[1]))
@@ -723,8 +747,10 @@ class LaneletRepairing(ElementRepairing):
             vert_i = 0 if is_vert_start else vert_size - 1
             vertices[vert_i] = opt_vertex
 
-        connections = connections + [(fst_lanelet_id, fst_vertices, is_fst_start),
-                                     (snd_lanelet_id, snd_vertices, is_snd_start)]
+        connections = connections + [
+            (fst_lanelet_id, fst_vertices, is_fst_start),
+            (snd_lanelet_id, snd_vertices, is_snd_start),
+        ]
 
         optimal_vertice_tuple = (str(opt_vertex[0]), str(opt_vertex[1]))
         self._connections.update({optimal_vertice_tuple: connections})
@@ -757,7 +783,7 @@ class LaneletRepairing(ElementRepairing):
         :param location: Location of invalid state.
         :param is_left: Boolean indicates whether the wrongly referenced left or right adjacency should be considered.
         """
-        lanelet_id, = location
+        (lanelet_id,) = location
 
         lanelet = self._network.find_lanelet_by_id(lanelet_id)
 
@@ -780,16 +806,33 @@ class LaneletRepairing(ElementRepairing):
         pred_suc = self._network.find_lanelet_by_id(pred_suc_id)
 
         # in case of an existing wrong predecessor/successor assignment remove reference
-        if is_pred and (min(np.linalg.norm(lanelet.left_vertices[0] - pred_suc.left_vertices[-1]),
-                            np.linalg.norm(lanelet.right_vertices[0] - pred_suc.right_vertices[-1])) > 2
-                        or (np.linalg.norm(lanelet.left_vertices[0] - pred_suc.left_vertices[-1]) +
-                            np.linalg.norm(lanelet.right_vertices[0] - pred_suc.right_vertices[-1])) / 2 > 4):
+        if is_pred and (
+            min(
+                np.linalg.norm(lanelet.left_vertices[0] - pred_suc.left_vertices[-1]),
+                np.linalg.norm(lanelet.right_vertices[0] - pred_suc.right_vertices[-1]),
+            )
+            > 2
+            or (
+                np.linalg.norm(lanelet.left_vertices[0] - pred_suc.left_vertices[-1])
+                + np.linalg.norm(lanelet.right_vertices[0] - pred_suc.right_vertices[-1])
+            )
+            / 2
+            > 4
+        ):
             lanelet.predecessor.remove(pred_suc_id)
             return
-        if not is_pred and (min(np.linalg.norm(lanelet.left_vertices[-1] - pred_suc.left_vertices[0]),
-                                np.linalg.norm(lanelet.right_vertices[-1] - pred_suc.right_vertices[0])) > 2
-                            or (np.linalg.norm(lanelet.left_vertices[-1] - pred_suc.left_vertices[0]) +
-                                np.linalg.norm(lanelet.right_vertices[-1] - pred_suc.right_vertices[0])) > 4):
+        if not is_pred and (
+            min(
+                np.linalg.norm(lanelet.left_vertices[-1] - pred_suc.left_vertices[0]),
+                np.linalg.norm(lanelet.right_vertices[-1] - pred_suc.right_vertices[0]),
+            )
+            > 2
+            or (
+                np.linalg.norm(lanelet.left_vertices[-1] - pred_suc.left_vertices[0])
+                + np.linalg.norm(lanelet.right_vertices[-1] - pred_suc.right_vertices[0])
+            )
+            > 4
+        ):
             lanelet.successor.remove(pred_suc_id)
             return
 
@@ -827,7 +870,7 @@ class LaneletRepairing(ElementRepairing):
         :param location: Location of invalid state.
         :param is_left: Boolean indicates whether the left or right polyline should be considered.
         """
-        lanelet_id, = location
+        (lanelet_id,) = location
 
         lanelet = self._network.find_lanelet_by_id(lanelet_id)
 
@@ -866,10 +909,11 @@ class LaneletRepairing(ElementRepairing):
 
         orientation = compute_orientation_from_polyline(non_intersecting_vertices)
         orientation_dif = [abs(orientation[i + 1] - orientation[i]) for i in range(len(orientation) - 1)]
-        while np.isclose(np.max(orientation_dif), np.pi):
+        while np.isclose(np.max(orientation_dif), np.pi, 0.01):
             idx = np.argmax(orientation_dif)
             non_intersecting_vertices[idx + 1] = (
-                    (non_intersecting_vertices[idx] + non_intersecting_vertices[idx + 2]) / 2)
+                non_intersecting_vertices[idx] + non_intersecting_vertices[idx + 2]
+            ) / 2
             orientation = compute_orientation_from_polyline(non_intersecting_vertices)
             orientation_dif = [orientation[i + 1] - orientation[i] for i in range(len(orientation) - 1)]
 
@@ -889,6 +933,7 @@ class LaneletRepairing(ElementRepairing):
         should be considered.
         :param is_same: Boolean indicates whether the same or opposite direction of adjacency should be considered.
         """
+
         def get_vertices():
             if is_left:
                 lan_vertices = lanelet.left_vertices

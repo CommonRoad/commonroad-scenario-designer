@@ -1,7 +1,9 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
-from crdesigner.verification_repairing.verification.hol.expression_tree.term.term import Term
 from crdesigner.verification_repairing.verification.hol.context import Context
+from crdesigner.verification_repairing.verification.hol.expression_tree.term.term import (
+    Term,
+)
 
 
 class Variable(Term):

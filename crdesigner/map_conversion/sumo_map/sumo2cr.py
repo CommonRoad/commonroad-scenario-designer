@@ -2,11 +2,11 @@ import os
 import subprocess
 
 from commonroad.scenario.scenario import Scenario
+from lxml import etree
+from PyQt6.QtWidgets import QMessageBox
+
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
-from lxml import etree
-
-from PyQt5.QtWidgets import QMessageBox
 
 
 def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
@@ -27,14 +27,14 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
 
     # filenames
     scenario_name = _get_scenario_name_from_netfile(net_file)
-    opendrive_file = os.path.join(out_folder_tmp, scenario_name + '.xodr')
+    opendrive_file = os.path.join(out_folder_tmp, scenario_name + ".xodr")
 
     # convert to OpenDRIVE file using netconvert
-    subprocess.check_output(['netconvert', '-s', net_file,
-                             '--opendrive-output', opendrive_file,
-                             '--junctions.scurve-stretch', '1.0'])
+    subprocess.check_output(
+        ["netconvert", "-s", net_file, "--opendrive-output", opendrive_file, "--junctions.scurve-stretch", "1.0"]
+    )
     if verbose:
-        print('converted to OpenDrive (.xodr)')
+        print("converted to OpenDrive (.xodr)")
 
     # convert to commonroad using opendrive2lanelet
     # import, parse and convert OpenDRIVE file
@@ -45,7 +45,7 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
     road_network.load_opendrive(open_drive)
     scenario = road_network.export_commonroad_scenario()
     if verbose:
-        print('converted to Commonroad (.cr.xml)')
+        print("converted to Commonroad (.cr.xml)")
 
     return scenario
 
@@ -57,5 +57,5 @@ def _get_scenario_name_from_netfile(filepath: str) -> str:
     :param filepath: the path of the net file
 
     """
-    scenario_name: str = (os.path.splitext(os.path.basename(filepath))[0]).split('.')[0]
+    scenario_name: str = (os.path.splitext(os.path.basename(filepath))[0]).split(".")[0]
     return scenario_name

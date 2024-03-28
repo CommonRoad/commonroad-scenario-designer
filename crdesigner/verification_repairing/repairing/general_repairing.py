@@ -1,5 +1,5 @@
 from typing import Tuple
-import copy
+
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import ScenarioID
 
@@ -31,16 +31,18 @@ class GeneralRepairing(ElementRepairing):
 
         :param location: Location of invalid state.
         """
-        element_id, = location
+        (element_id,) = location
 
-        element_ids = [lanelet.lanelet_id for lanelet in self._network.lanelets] + \
-                      [sign.traffic_sign_id for sign in self._network.traffic_signs] + \
-                      [light.traffic_light_id for light in self._network.traffic_lights] + \
-                      [intersec.intersection_id for intersec in self._network.intersections]
-                      # [incg.incoming_id for intersec in self._network.intersections for incg in intersec.incomings]+\
-                      # [outg.outgoing_id for intersec in self._network.intersections for outg in intersec.outgoings]+\
-                      # [lanelet.stop_line.stop_line_id for lanelet in self._network.lanelets
-                      #  if lanelet.stop_line is not None]
+        element_ids = (
+            [lanelet.lanelet_id for lanelet in self._network.lanelets]
+            + [sign.traffic_sign_id for sign in self._network.traffic_signs]
+            + [light.traffic_light_id for light in self._network.traffic_lights]
+            + [intersec.intersection_id for intersec in self._network.intersections]
+        )
+        # [incg.incoming_id for intersec in self._network.intersections for incg in intersec.incomings]+\
+        # [outg.outgoing_id for intersec in self._network.intersections for outg in intersec.outgoings]+\
+        # [lanelet.stop_line.stop_line_id for lanelet in self._network.lanelets
+        #  if lanelet.stop_line is not None]
 
         new_id = max(element_ids) + 1
 
@@ -50,13 +52,13 @@ class GeneralRepairing(ElementRepairing):
             self._network.add_lanelet(la)
             return
         if (tl := self._network.find_traffic_light_by_id(element_id)) is not None:
-            lanelets = filter(lambda l: element_id in l.traffic_lights, self._network.lanelets)
+            lanelets = filter(lambda la: element_id in la.traffic_lights, self._network.lanelets)
             self._network.remove_traffic_light(element_id)
             tl.traffic_light_id = new_id
             self._network.add_traffic_light(tl, set(la.lanelet_id for la in lanelets))
             return
         if (ts := self._network.find_traffic_sign_by_id(element_id)) is not None:
-            lanelets = filter(lambda l: element_id in l.traffic_signs, self._network.lanelets)
+            lanelets = filter(lambda la: element_id in la.traffic_signs, self._network.lanelets)
             self._network.remove_traffic_sign(element_id)
             ts.traffic_sign_id = new_id
             self._network.add_traffic_sign(ts, set(la.lanelet_id for la in lanelets))

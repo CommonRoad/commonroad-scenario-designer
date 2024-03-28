@@ -1,6 +1,6 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon, QIntValidator
-from PyQt5.QtWidgets import QAction, QLineEdit, QLabel, QSlider
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QAction, QIcon, QIntValidator
+from PyQt6.QtWidgets import QLabel, QLineEdit, QSlider
 
 from crdesigner.ui.gui.resources.icons import CR_Scenario_Designer
 
@@ -9,7 +9,6 @@ CR_Scenario_Designer.qInitResources()
 
 
 class ToolBarUI:
-
     def __init__(self, mwindow_ui):
         self.mwindow_ui = mwindow_ui
 
@@ -28,21 +27,23 @@ class ToolBarUI:
         self.tb1.addSeparator()
         self.tb2 = mwindow_ui.addToolBar("Toolboxes")
 
-        self.action_road_network_toolbox = QAction(QIcon(":/icons/road_network_toolbox.png"),
-                                                   "Open Road Network Toolbox", mwindow_ui)
+        self.action_road_network_toolbox = QAction(
+            QIcon(":/icons/road_network_toolbox.png"), "Open Road Network Toolbox", mwindow_ui
+        )
         self.tb2.addAction(self.action_road_network_toolbox)
 
-        self.action_obstacle_toolbox = QAction(QIcon(":/icons/obstacle_toolbox.png"), "Open Obstacle Toolbox",
-                                               mwindow_ui)
+        self.action_obstacle_toolbox = QAction(
+            QIcon(":/icons/obstacle_toolbox.png"), "Open Obstacle Toolbox", mwindow_ui
+        )
         self.tb2.addAction(self.action_obstacle_toolbox)
 
         self.action_converter_toolbox = QAction(QIcon(":/icons/tools.ico"), "Open Map Converter Toolbox", mwindow_ui)
         self.tb2.addAction(self.action_converter_toolbox)
 
-        self.action_scenario_toolbox = QAction(QIcon(":/icons/scenario_toolbox.png"), "Open Scenario Toolbox",
-                                               mwindow_ui)
+        self.action_scenario_toolbox = QAction(
+            QIcon(":/icons/scenario_toolbox.png"), "Open Scenario Toolbox", mwindow_ui
+        )
         self.tb2.addAction(self.action_scenario_toolbox)
-
 
         # Undo / Redo
         self.tb2.addSeparator()
@@ -61,7 +62,7 @@ class ToolBarUI:
         self.button_play_pause = QAction(QIcon(":/icons/play.png"), "Play the animation", mwindow_ui)
         self.tb4.addAction(self.button_play_pause)
 
-        self.slider = QSlider(Qt.Horizontal)
+        self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setMaximumWidth(300)
         self.slider.setValue(0)
         self.slider.setMinimum(0)
@@ -69,20 +70,20 @@ class ToolBarUI:
         self.slider.setTickInterval(1)
         self.tb4.addWidget(self.slider)
 
-        self.label1 = QLabel('  Time Stamp:', mwindow_ui)
+        self.label1 = QLabel("  Time Stamp:", mwindow_ui)
         self.tb4.addWidget(self.label1)
 
         self.edit = QLineEdit()
         validator = QIntValidator()
         validator.setBottom(0)
         self.edit.setValidator(validator)
-        self.edit.setText('0')
-        self.edit.setAlignment(Qt.AlignRight)
+        self.edit.setText("0")
+        self.edit.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.edit.setMaximumWidth(40)
         self.tb4.addWidget(self.edit)
 
-        self.label2 = QLabel(' / 0', mwindow_ui)
+        self.label2 = QLabel(" / 0", mwindow_ui)
         self.tb4.addWidget(self.label2)
 
         self.action_save_video = QAction(QIcon(":/icons/save_video.png"), "Save Video", mwindow_ui)
@@ -116,6 +117,10 @@ class ToolBarUI:
         self.crop_map = QAction(QIcon(":/icons/crop_map.png"), "crop map", mwindow_ui)
         self.tb5.addAction(self.crop_map)
         self.crop_map.setCheckable(True)
+
+        self.cancel_edit_vertices = QAction(QIcon(":/icons/close.png"), "Stop editing vertices", mwindow_ui)
+        self.tb5.addAction(self.cancel_edit_vertices)
+        self.cancel_edit_vertices.setVisible(False)
 
     def reset_toolbar(self):
         if self.split_lanelet.isChecked():

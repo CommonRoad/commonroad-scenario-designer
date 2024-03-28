@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "commonroad-scenario-designer"
-version = "0.8.0"
+version = "0.8.1"
 description = "Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles"
 authors = ["Cyber-Physical Systems Group, Technical University of Munich <commonroad@lists.lrz.de>"]
 license = "GPL-3.0-or-later"
@@ -10,37 +10,42 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
-#    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.11",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: POSIX :: Linux",
-    "Operating System :: MacOS",
-    "Operating System :: Microsoft :: Windows"
+#    "Operating System :: MacOS",
+#    "Operating System :: Microsoft :: Windows"
 ]
 packages = [{include = "crdesigner"}]
-homepage = "https://commonroad.in.tum.de"
+repository = "https://github.com/CommonRoad/commonroad-scenario-designer"
+homepage = "https://commonroad.in.tum.de/tools/scenario-designer"
 
 [tool.poetry.urls]
-Documentation = "https://commonroad-scenario-designer.readthedocs.io/en/latest/"
-Forum = "https://commonroad.in.tum.de/forum/c/scenario-designer/"
-Source = "https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer"
+Documentation = "https://cps.pages.gitlab.lrz.de/commonroad/commonroad-scenario-designer/"
+Forum = "https://github.com/CommonRoad/commonroad-scenario-designer/discussions"
+Source = "https://github.com/CommonRoad/commonroad-scenario-designer"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-commonroad-io = "2023.3"
-commonroad-drivability-checker = "2023.1"
-pyqt5 = ">=5.15.9"
-PyQt5-Qt5 = [
-    {version = "<5.15.11", platform = 'linux'},
-    {version = "<5.15.11", platform = 'win64'},
-    {version = "=5.15.11", platform = 'darwin'}]
+python = "^3.8,<3.12"
+commonroad-io = "^2024.1"
+commonroad-drivability-checker = "^2024.1"
+pyqt6 = ">=6.6.0"
 matplotlib = ">=3.6.0"
-numpy = "^1.24.2"
+numpy = [
+    {version = ">=1.22, <1.26", python = "3.8"},
+    {version = "^1.26", python = ">=3.9,<3.13"}
+]
+scipy = [
+    {version = ">=1.5.2,<1.11", python = "3.8"},
+    {version = "^1.11", python = ">=3.9,<3.13"}
+]
 lxml = "^4.9.2"
 pyproj = "^3.4.1"
 utm = "^0.7.0"
+mgrs = ">=1.4.5"
 shapely = ">=2.0.1"
 ordered-set = "^4.1.0"
-sumocr = "2023.2"
+sumocr = "^2024.1"
 iso3166 = "^2.1.1"
 networkx = "^3.0"
 omegaconf = "^2.3.0"
@@ -51,8 +56,25 @@ urllib3 = "^2.0.3"
 typer = "^0.9.0"
 typing-extensions = "^4.8.0"
 antlr4-python3-runtime = "4.9.3"
-pymetis = ">=2020.1"
+pymetis = [
+    {version = ">=2020.1", platform = 'linux'}
+     ]
 similaritymeasures = ">=0.4.4"
+kdtree = "^0.16"
+pandas = "2.0.2"
+requests = "^2.31.0 "
+eclipse-sumo = "^1.19.0"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.1.1"
+isort = "^5.13.1"
+flake8 = [
+    { version = "^5.0.4", python = ">=3.8,<3.8.1" },
+    { version = "^6.1.0", python = ">=3.8.1" }
+]
 
 [tool.poetry.group.docs]
 optional = true
@@ -69,7 +91,6 @@ optional = true
 [tool.poetry.group.tests.dependencies]
 pytest = "^7.2.2"
 coverage = "^7.2.2"
-prospector = {extras = ["with-mypy"], version = "^1.9.0"}
 pytest-qt = "^4.2.0"
 parameterized = "^0.8.1"
 
@@ -81,6 +102,14 @@ jupyter = "^1.0.0"
 
 [tool.poetry.scripts]
 crdesigner = 'crdesigner.ui.command_line:cli'
+
+[tool.black]
+extend-exclude = "(gen/)"
+line-length = 120
+
+[tool.isort]
+profile = "black"
+extend_skip = ["gen"]
 
 [build-system]
 requires = ["poetry-core"]

@@ -3,19 +3,22 @@ GraphEdge class
 """
 
 import math
-from typing import List, Set, Tuple, Optional
-from ordered_set import OrderedSet
-import numpy as np
+from typing import List, Optional, Set, Tuple
 
-from crdesigner.config.osm_config import osm_config as config
+import numpy as np
+from ordered_set import OrderedSet
+
+from crdesigner.common.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.custom_types import (
-    Road_info,
     Assumption_info,
+    Road_info,
 )
 
-from ._graph_node import GraphNode
 from ._graph_lane import Lane
+from ._graph_node import GraphNode
+from ._graph_traffic_light import GraphTrafficLight
+from ._graph_traffic_sign import GraphTrafficSign
 
 
 class GraphEdge:
@@ -55,9 +58,7 @@ class GraphEdge:
         :param roadtype: type of road the edge represents
         :type roadtype: str
         """
-        nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward = (
-            lane_info
-        )
+        nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward = lane_info
         lane_nr_assumed, lanes_assumed, oneway_assumed = assumptions
         self.id: int = id
         self.node1: GraphNode = node1
@@ -164,9 +165,7 @@ class GraphEdge:
         :return: orientation in radians
         """
         if len(self.waypoints) < 2:
-            raise ValueError(
-                "this edge has not enough waypoints to determine its orientation"
-            )
+            raise ValueError("this edge has not enough waypoints to determine its orientation")
         if node == self.node1:
             x = self.waypoints[1].x - self.waypoints[0].x
             y = self.waypoints[1].y - self.waypoints[0].y
@@ -327,26 +326,20 @@ class GraphEdge:
                         self.waypoints[1].get_array(),
                     )
                     p2 = p1 + (p4 - p1) * d
-                    p3 = geometry.get_inner_bezier_point(
-                        self.waypoints[2].get_array(), p4, p1, d
-                    )
+                    p3 = geometry.get_inner_bezier_point(self.waypoints[2].get_array(), p4, p1, d)
                 elif index == len(self.waypoints) - 2:
                     p1, p4 = (
                         self.waypoints[index].get_array(),
                         self.waypoints[index + 1].get_array(),
                     )
-                    p2 = geometry.get_inner_bezier_point(
-                        self.waypoints[index - 1].get_array(), p1, p4, d
-                    )
+                    p2 = geometry.get_inner_bezier_point(self.waypoints[index - 1].get_array(), p1, p4, d)
                     p3 = p4 + (p1 - p4) * d
                 else:
                     segment_points = []
                     for i in range(4):
                         segment_points.append(self.waypoints[index + i - 1])
                     segment_points = [x.get_array() for x in segment_points]
-                    p1, p2, p3, p4 = geometry.get_bezier_points_of_segment(
-                        np.array(segment_points), d
-                    )
+                    p1, p2, p3, p4 = geometry.get_bezier_points_of_segment(np.array(segment_points), d)
                 n = max(int(np.linalg.norm(p1 - p4) / point_distance), 2)
                 result += geometry.evaluate_bezier(np.array([p1, p2, p3, p4]), n)
             if save:
@@ -366,21 +359,16 @@ class GraphEdge:
         waypoints = self.get_interpolated_waypoints()
         if self.node2 == node:
             index = len(waypoints) - 1
-            while (index >= 0 and np.linalg.norm(waypoints[index] - point) < distance):
+            while index >= 0 and np.linalg.norm(waypoints[index] - point) < distance:
                 index -= 1
             return 0, index
         else:
             index = 0
-            while (
-                index < len(waypoints)
-                and np.linalg.norm(waypoints[index] - point) < distance
-            ):
+            while index < len(waypoints) and np.linalg.norm(waypoints[index] - point) < distance:
                 index += 1
             return index, len(waypoints) - 1
 
-    def crop(
-        self, index1: int, index2: int, edges_to_delete: List["GraphEdge"]
-    ) -> None:
+    def crop(self, index1: int, index2: int, edges_to_delete: List["GraphEdge"]) -> None:
         """
         crops waypoints of edge to given indices
         if remaining interval is empty, it is set to the center two elements
@@ -443,8 +431,7 @@ class GraphEdge:
         """
         return np.array([p.get_array() for p in self.waypoints])
 
-    def add_traffic_sign(self, sign: "GraphTrafficSign"):
-
+    def add_traffic_sign(self, sign: GraphTrafficSign):
         """
         adds traffic signs to all lanes of the edge
 
@@ -464,7 +451,7 @@ class GraphEdge:
         if sign_direction is not None:
             # get compass degrees of edge
             edge_orientation = self.get_compass_degrees()
-            if abs(sign_direction-edge_orientation) < 180:
+            if abs(sign_direction - edge_orientation) < 180:
                 forward = False
         for lane in self.lanes:
             # add sign to forward lanes
@@ -474,7 +461,7 @@ class GraphEdge:
             elif (not lane.forward) and (not forward):
                 lane.add_traffic_sign(sign)
 
-    def add_traffic_light(self, light: "GraphTrafficLight", forward):
+    def add_traffic_light(self, light: GraphTrafficLight, forward):
         """
         adds traffic light to all lanes of the edge
 

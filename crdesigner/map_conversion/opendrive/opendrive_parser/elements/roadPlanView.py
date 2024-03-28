@@ -1,14 +1,16 @@
-from typing import Tuple, List, Union
-import numpy as np
 import warnings
+from typing import List, Tuple, Union
+
+import numpy as np
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry import (
+    Arc,
     Geometry,
     Line,
-    Spiral,
     ParamPoly3,
-    Arc,
-    Poly3, calc_next_s,
+    Poly3,
+    Spiral,
+    calc_next_s,
 )
 
 
@@ -85,8 +87,19 @@ class PlanView:
         self._add_geometry(Arc(start_pos, heading, length, curvature), True)
 
     def add_param_poly3(
-        self, start_pos: np.ndarray, heading: float, length: float, aU: float, bU: float, cU: float, dU: float,
-            aV: float, bV: float, cV: float, dV: float, pRange: float
+        self,
+        start_pos: np.ndarray,
+        heading: float,
+        length: float,
+        aU: float,
+        bU: float,
+        cU: float,
+        dU: float,
+        aV: float,
+        bV: float,
+        cV: float,
+        dV: float,
+        pRange: float,
     ):
         """
         Calls _add_geometry for ParamPoly3 elements.
@@ -107,9 +120,7 @@ class PlanView:
             case type=normalized -> p in [0, 1]
         """
         self._add_geometry(
-            ParamPoly3(
-                start_pos, heading, length, aU, bU, cU, dU, aV, bV, cV, dV, pRange
-            ),
+            ParamPoly3(start_pos, heading, length, aU, bU, cU, dU, aV, bV, cV, dV, pRange),
             True,
         )
 
@@ -145,8 +156,9 @@ class PlanView:
         """
         return self._geo_lengths[-1]
 
-    def calc(self, s_pos: float, compute_curvature: bool = True, reverse: bool = True) \
-            -> Tuple[np.ndarray, float, float, Union[None, float]]:
+    def calc(
+        self, s_pos: float, compute_curvature: bool = True, reverse: bool = True
+    ) -> Tuple[np.ndarray, float, float, Union[None, float]]:
         """
         Calculate position, tangent, curvature and max. length of the geometry at s_pos.
         Either interpolate values if possible or delegate calculation to geometries.
@@ -176,8 +188,11 @@ class PlanView:
         :param s_pos: position on PlanView in ds
         :return: position (x,y) in cartesion coordinates and angle in radians at position s
         """
-        warnings.warn("Function interpolate_cached_calues is not used at the moment. There are some lines commented"
-                      " with # which used the function in earlier versions.", DeprecationWarning)
+        warnings.warn(
+            "Function interpolate_cached_calues is not used at the moment. There are some lines commented"
+            " with # which used the function in earlier versions.",
+            DeprecationWarning,
+        )
         # start = time.time()
         # we need idx for angle interpolation
         # so idx can be used anyway in the other np.interp function calls
@@ -185,9 +200,17 @@ class PlanView:
         if s_pos - self._precalculation[idx, 0] < 0 or idx + 1 == len(self._precalculation):
             idx -= 1
 
-        result_pos_x = np.interp(s_pos, self._precalculation[idx: idx + 2, 0], self._precalculation[idx: idx + 2, 1],)
+        result_pos_x = np.interp(
+            s_pos,
+            self._precalculation[idx : idx + 2, 0],
+            self._precalculation[idx : idx + 2, 1],
+        )
 
-        result_pos_y = np.interp(s_pos, self._precalculation[idx: idx + 2, 0], self._precalculation[idx: idx + 2, 2],)
+        result_pos_y = np.interp(
+            s_pos,
+            self._precalculation[idx : idx + 2, 0],
+            self._precalculation[idx : idx + 2, 2],
+        )
         result_tang = self.interpolate_angle(idx, s_pos)
         result_pos = np.array((result_pos_x, result_pos_y))
         # end = time.time()
@@ -203,8 +226,11 @@ class PlanView:
         :param s_pos: position at which an interpolated angle should be calculated
         :return: interpolated angle in radians
         """
-        warnings.warn("Function interpolate_cached_calues is not used at the moment. There are some lines commented"
-                      " with # which used the function in earlier versions.", DeprecationWarning)
+        warnings.warn(
+            "Function interpolate_cached_calues is not used at the moment. There are some lines commented"
+            " with # which used the function in earlier versions.",
+            DeprecationWarning,
+        )
         angle_prev = self._precalculation[idx, 3]
         angle_next = self._precalculation[idx + 1, 3]
         pos_prev = self._precalculation[idx, 0]
@@ -213,8 +239,9 @@ class PlanView:
         shortest_angle = ((angle_next - angle_prev) + np.pi) % (2 * np.pi) - np.pi
         return angle_prev + shortest_angle * (s_pos - pos_prev) / (pos_next - pos_prev)
 
-    def calc_geometry(self, s_pos: float, compute_curvature=True, reverse=False) \
-            -> Tuple[np.ndarray, float, Union[None, float], float]:
+    def calc_geometry(
+        self, s_pos: float, compute_curvature=True, reverse=False
+    ) -> Tuple[np.ndarray, float, Union[None, float], float]:
         """
         Calc position and tangent at s_pos by delegating calculation to geometry.
 
@@ -231,7 +258,7 @@ class PlanView:
             geo_idx = np.arange(self._geo_lengths.shape[0])[mask][sub_idx] - 1
         except ValueError:
             # s_pos is after last geometry because of rounding error
-            if np.isclose(s_pos, self._geo_lengths[-1], 0.001, 0.001):
+            if np.isclose(s_pos, self._geo_lengths[-1], 0.01, 0.01):  # todo parameter
                 geo_idx = self._geo_lengths.size - 2
             else:
                 raise Exception(
@@ -245,17 +272,21 @@ class PlanView:
             max_s_geometry = self._geo_lengths[geo_idx + 1]
         # geo_idx is index which geometry to use
         return self._geometries[geo_idx].calc_position(
-            s_pos - self._geo_lengths[geo_idx], compute_curvature=compute_curvature) + (max_s_geometry, )
+            s_pos - self._geo_lengths[geo_idx], compute_curvature=compute_curvature
+        ) + (max_s_geometry,)
 
     def precalculate(self):
         """
         Precalculate coordinates of planView to save computing resources and time.
         Save result in _precalculation array.
         """
-        warnings.warn("Function precalculate is called but its results are stored in the variable _precalculation "
-                      "which is not used at the moment. It is called in the interpolation functions, which are not "
-                      "called.", DeprecationWarning)
-#        print("Checking required lanelet mesh", self._geo_lengths)
+        warnings.warn(
+            "Function precalculate is called but its results are stored in the variable _precalculation "
+            "which is not used at the moment. It is called in the interpolation functions, which are not "
+            "called.",
+            DeprecationWarning,
+        )
+        #        print("Checking required lanelet mesh", self._geo_lengths)
 
         # start = time.time()
         # this threshold was determined by quick prototyping tests
