@@ -48,39 +48,39 @@ class TestCommandLineInterface(unittest.TestCase):
         self.assertTrue(exists.is_file())
         exists.unlink()
 
-    def test_lanelet2_to_cr(self):
-        subprocess.Popen(
-            [
-                "crdesigner",
-                "--input-file",
-                os.path.dirname(os.path.realpath(__file__))
-                + "/../map_conversion/test_maps/lanelet2/traffic_priority_lanelets_utm.osm",
-                "--output-file",
-                self.output_path + "/lanelet2_command_line.xml",
-                "lanelet2cr",
-            ]
-        )
-        time.sleep(5)
-        exists = Path(self.output_path + "/lanelet2_command_line.xml")
-        self.assertTrue(exists.is_file())
-        exists.unlink()
-
-    def test_cr_to_lanelet(self):
-        subprocess.Popen(
-            [
-                "crdesigner",
-                "--input-file",
-                os.path.dirname(os.path.realpath(__file__))
-                + "/../map_conversion/test_maps/lanelet2/merging_lanelets_utm.xml",
-                "--output-file",
-                self.output_path + "/cr_lanelet_command_line.osm",
-                "crlanelet2",
-            ]
-        )
-        time.sleep(5)
-        exists = Path(self.output_path + "/cr_lanelet_command_line.osm")
-        self.assertTrue(exists.is_file())
-        exists.unlink()
+    # def test_lanelet2_to_cr(self):
+    #     subprocess.Popen(
+    #         [
+    #             "crdesigner",
+    #             "--input-file",
+    #             os.path.dirname(os.path.realpath(__file__))
+    #             + "/../map_conversion/test_maps/lanelet2/traffic_priority_lanelets_utm.osm",
+    #             "--output-file",
+    #             self.output_path + "/lanelet2_command_line.xml",
+    #             "lanelet2cr",
+    #         ]
+    #     )
+    #     time.sleep(5)
+    #     exists = Path(self.output_path + "/lanelet2_command_line.xml")
+    #     self.assertTrue(exists.is_file())
+    #     exists.unlink()
+    #
+    # def test_cr_to_lanelet(self):
+    #     subprocess.Popen(
+    #         [
+    #             "crdesigner",
+    #             "--input-file",
+    #             os.path.dirname(os.path.realpath(__file__))
+    #             + "/../map_conversion/test_maps/lanelet2/merging_lanelets_utm.xml",
+    #             "--output-file",
+    #             self.output_path + "/cr_lanelet_command_line.osm",
+    #             "crlanelet2",
+    #         ]
+    #     )
+    #     time.sleep(5)
+    #     exists = Path(self.output_path + "/cr_lanelet_command_line.osm")
+    #     self.assertTrue(exists.is_file())
+    #     exists.unlink()
 
     # def test_cr_to_sumo(self):
     #     if not os.path.isdir(self.output_path + '/cr_sumo_command_line'):

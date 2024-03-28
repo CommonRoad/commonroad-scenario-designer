@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.8.1] - 2024-03-XX
+## [0.8.1] - 2024-03-28
 
 ### Added
 - Test cases for GUI
