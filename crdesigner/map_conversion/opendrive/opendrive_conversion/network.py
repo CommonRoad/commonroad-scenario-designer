@@ -318,6 +318,18 @@ class Network:
 
         self.relate_crosswalks_to_intersection(lanelet_network)
 
+        # Apply the transformer to traffic controls
+        # TODO: copy objects instead of modifying them in place
+        for xs in [
+            self._traffic_lights,
+            self._traffic_signs,
+        ]:
+            for x in xs:
+                x.position = np.array(transformer.transform(*x.position))
+        for x in self._stop_lines:
+            x.start = np.array(transformer.transform(*x.start))
+            x.end = np.array(transformer.transform(*x.end))
+
         # Assign traffic signals, lights and stop lines to lanelet network
         lanelet_network.add_traffic_lights_to_network(self._traffic_lights)
         lanelet_network.add_traffic_signs_to_network(self._traffic_signs)
