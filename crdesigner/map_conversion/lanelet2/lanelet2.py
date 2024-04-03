@@ -171,6 +171,24 @@ class WayRelation:
         return rel
 
 
+class Multipolygon:
+    """
+    OSM Multipolygon
+    """
+
+    def __init__(self, id_, outer_list: List[str], tag_dict: Optional[Dict[str, str]]):
+        """
+        Initialization of a Multipolygon
+
+        :param id_: ID of the Multipolygon
+        :param outer_list: List of ways that make the Multipolygon
+        :param tag_dict: tag dictionary of the Multipolygon
+        """
+        self.id_ = str(id_)
+        self.outer_list = outer_list
+        self.tag_dict = tag_dict if tag_dict is not None else {}
+
+
 # Class that as a subtype contains TrafficLight, TrafficSign and SpeedLimit
 class RegulatoryElement:
     """Relation for a regulatory element (traffic light, traffic sign, speed limit)"""
@@ -247,6 +265,7 @@ class OSMLanelet:
         self.nodes = {}
         self.ways = {}
         self.way_relations = {}
+        self.multipolygons = {}
         self.regulatory_elements = {}
         self.right_of_way_relations = {}
         self.speed_limit_relations = {}
@@ -278,6 +297,14 @@ class OSMLanelet:
         :param way_relation: WayRelation that will be added to the OSM object
         """
         self.way_relations[way_relation.id_] = way_relation
+
+    def add_multipolygon(self, multipolygon: Multipolygon):
+        """
+        Maps a multipolygon id with the multipolygon object and inserts it into the OSM object.
+
+        :param multipolygon: Multipolygon that will be added to the OSM object
+        """
+        self.multipolygons[multipolygon.id_] = multipolygon
 
     def add_regulatory_element(self, regulatory_element: RegulatoryElement):
         """
