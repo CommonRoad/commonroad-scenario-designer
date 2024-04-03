@@ -265,7 +265,7 @@ class Network:
                     self._stop_lines.append(stop_line)
 
     def export_lanelet_network(
-        self, transformer: Transformer, filter_types: Optional[List[str]] = None
+        self, transformer: Optional[Transformer], filter_types: Optional[List[str]] = None
     ) -> LaneletNetwork:
         """Export network as lanelet network.
 
