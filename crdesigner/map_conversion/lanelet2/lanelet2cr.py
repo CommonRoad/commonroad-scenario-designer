@@ -3,6 +3,7 @@ from collections import defaultdict
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
+from commonroad.scenario.area import Area, AreaBorder
 from commonroad.scenario.lanelet import (
     Lanelet,
     LaneletNetwork,
@@ -355,6 +356,23 @@ class Lanelet2CRConverter:
                     self.lanelet_network.add_traffic_sign(s, set())
             except NotImplementedError as e:
                 logging.error("Lanelet2CRConverter: " + str(e))
+
+        # multipolygon to area conversion
+        for multipolygon in osm.multipolygons.values():
+            area_id = generate_unique_id()
+            area_border_list = list()
+            for outer in multipolygon.outer_list:
+                area_border_list.append(
+                    AreaBorder(
+                        area_border_id=generate_unique_id(),
+                        border_vertices=self._convert_way_to_vertices(osm.ways[str(outer)]),
+                        adjacent=None,
+                        line_marking=None,
+                    )
+                )
+            area_types = set()
+            area_types.add(multipolygon.tag_dict.get("subtype"))  # can subtype have multiple values?
+            self.lanelet_network.add_area(Area(area_id=area_id, border=area_border_list, area_types=area_types), set())
 
         # speed limit sign conversion
         for speed_limit_key in osm.speed_limit_signs.keys():
