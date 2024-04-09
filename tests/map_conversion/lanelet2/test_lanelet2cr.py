@@ -688,6 +688,15 @@ class TestLanelet2CRConverter(unittest.TestCase):
         area = l2cr.lanelet_network.areas[0]
         self.assertEqual(area.area_types, {"walkway"})
 
+        # testing the border conversion
+        self.assertEqual(len(area.border), 1)
+        # testing the border vertices conversion
+        (
+            self.assertEqual(
+                area.border[0].border_vertices.tolist(), l2cr._convert_way_to_vertices(osm.ways[way_id]).tolist()
+            )
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
