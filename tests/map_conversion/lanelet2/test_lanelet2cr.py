@@ -20,6 +20,7 @@ from crdesigner.common.config.general_config import general_config
 from crdesigner.common.config.gui_config import lanelet2_default
 from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.lanelet2 import (
+    Multipolygon,
     Node,
     RegulatoryElement,
     Way,
@@ -662,6 +663,30 @@ class TestLanelet2CRConverter(unittest.TestCase):
         l2cr(osm)
         traffic_signs_after = len(l2cr.lanelet_network.traffic_signs)
         self.assertEqual(traffic_signs_before, traffic_signs_after)
+
+    def test_multipolygon_to_area_conversion(self):
+        l2cr = Lanelet2CRConverter()
+        l2cr(osm)
+
+        # getting the way id for the reference
+        way_id = list(osm.ways)[0]
+        # creating a multipolygon
+        multipolygon = Multipolygon(1, [way_id], {"region": "de", "subtype": "walkway"})
+        # adding it to the osm
+        osm.add_multipolygon(multipolygon)
+
+        # areas before
+        areas_before = len(l2cr.lanelet_network.areas)
+        # conversion
+        l2cr(osm)
+        # areas after
+        areas_after = len(l2cr.lanelet_network.areas)
+        # testing the conversion
+        self.assertEqual(areas_before + 1, areas_after)
+
+        # testing the subtype
+        area = l2cr.lanelet_network.areas[0]
+        self.assertEqual(area.area_types, {"walkway"})
 
 
 if __name__ == "__main__":

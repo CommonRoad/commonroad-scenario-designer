@@ -365,7 +365,7 @@ class Lanelet2CRConverter:
                 area_border_list.append(
                     AreaBorder(
                         area_border_id=generate_unique_id(),
-                        border_vertices=self._convert_way_to_vertices(osm.ways[str(outer)]),
+                        border_vertices=self._convert_way_to_vertices(osm.find_way_by_id(outer)),
                         adjacent=None,
                         line_marking=None,
                     )
