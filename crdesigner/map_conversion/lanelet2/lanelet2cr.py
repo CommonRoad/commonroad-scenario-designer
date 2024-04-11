@@ -62,6 +62,35 @@ message_format = "%(asctime)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.INFO, format=message_format, datefmt=date_strftime_format)
 
 
+def convert_type_subtype_to_line_marking_lanelet(tag_dict: dict) -> LineMarking:
+    """
+    Function that takes the tag dictionary of a L2 way and converts it to a cr linemarking
+    """
+    type = tag_dict.get("type")
+    subtype = tag_dict.get("subtype")
+    linemarking = LineMarking.UNKNOWN  # default
+
+    if type == "line_thin":
+        if subtype == "solid":
+            linemarking = LineMarking.SOLID
+        elif subtype == "dashed":
+            linemarking = LineMarking.DASHED
+
+    elif type == "line_thick":
+        if subtype == "solid":
+            linemarking = LineMarking.BROAD_SOLID
+        elif subtype == "dashed":
+            linemarking = LineMarking.BROAD_DASHED
+
+    elif type == "curbstone":
+        if subtype == "low":
+            linemarking = LineMarking.LOWERED_CURB
+        else:
+            linemarking = LineMarking.CURB
+
+    return linemarking
+
+
 def _add_closest_traffic_sign_to_lanelet(lanelets: List[Lanelet], traffic_signs: List[TrafficSign]) -> set:
     """
     Assumes that it is given traffic signs and lanelets that should get matched (all to each)
@@ -362,14 +391,17 @@ class Lanelet2CRConverter:
             area_id = generate_unique_id()
             area_border_list = list()
             for outer in multipolygon.outer_list:
-                area_border_list.append(
-                    AreaBorder(
-                        area_border_id=generate_unique_id(),
-                        border_vertices=self._convert_way_to_vertices(osm.find_way_by_id(outer)),
-                        adjacent=None,
-                        line_marking=None,
-                    )
+                way = osm.find_way_by_id(outer)
+                area_border = AreaBorder(
+                    area_border_id=generate_unique_id(),
+                    border_vertices=self._convert_way_to_vertices(way),
+                    adjacent=None,
+                    line_marking=None,
                 )
+                area_border_list.append(area_border)
+                # line_marking
+                area_border.line_marking = convert_type_subtype_to_line_marking_lanelet(way.tag_dict)
+
             area_types = set()
             area_types.add(multipolygon.tag_dict.get("subtype"))  # can subtype have multiple values?
             self.lanelet_network.add_area(Area(area_id=area_id, border=area_border_list, area_types=area_types), set())
@@ -733,6 +765,9 @@ class Lanelet2CRConverter:
         else:
             traffic_signs = set(traffic_signs)
 
+        left_linemarking = convert_type_subtype_to_line_marking_lanelet(left_way.tag_dict)
+        right_linemarking = convert_type_subtype_to_line_marking_lanelet(right_way.tag_dict)
+
         lanelet = ConversionLanelet(
             left_vertices=left_vertices,
             center_vertices=center_vertices,
@@ -743,6 +778,8 @@ class Lanelet2CRConverter:
             user_bidirectional=users_bidirectional,
             lanelet_type=lanelet_type,
             traffic_signs=traffic_signs,
+            line_marking_left_vertices=left_linemarking,
+            line_marking_right_vertices=right_linemarking,
         )
 
         self._check_right_and_left_neighbors(way_rel, lanelet)

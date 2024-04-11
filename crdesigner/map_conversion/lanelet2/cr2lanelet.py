@@ -70,6 +70,12 @@ def _line_marking_to_type_subtype_vertices(line_marking: LineMarking) -> [str, s
     if line_marking is LineMarking.BROAD_SOLID:
         lanelet2_type = "line_thick"
         subtype = "solid"
+    if line_marking is LineMarking.CURB:
+        lanelet2_type = "curbstone"
+        subtype = "high"
+    if line_marking is LineMarking.LOWERED_CURB:
+        lanelet2_type = "curbstone"
+        subtype = "low"
 
     return lanelet2_type, subtype
 
