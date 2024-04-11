@@ -261,6 +261,14 @@ class TestCR2LaneletConverter(unittest.TestCase):
         cr1(scenario)
         self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {})
 
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.CURB
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {"type": "curbstone", "subtype": "high"})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.LOWERED_CURB
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {"type": "curbstone", "subtype": "low"})
+
         # lanelet[1] is adjacent left to lanelet[0] and in same direction
         scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.SOLID
         scenario.lanelet_network.lanelets[1].line_marking_right_vertices = LineMarking.SOLID
