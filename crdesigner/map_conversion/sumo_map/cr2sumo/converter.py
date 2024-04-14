@@ -63,7 +63,7 @@ from commonroad.scenario.traffic_light import (
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficSign
 from commonroad.scenario.traffic_sign_interpreter import TrafficSignInterpreter
 from commonroad.scenario.trajectory import State
-from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
+from sumocr.scenario.abstract_scenario_wrapper import AbstractScenarioWrapper
 
 from crdesigner.common.file_reader import CRDesignerFileReader
 from crdesigner.map_conversion.sumo_map.config import SumoConfig

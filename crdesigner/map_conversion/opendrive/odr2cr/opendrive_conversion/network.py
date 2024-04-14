@@ -267,7 +267,7 @@ class Network:
                     self._stop_lines.append(stop_line)
 
     def export_lanelet_network(
-        self, transformer: Transformer, filter_types: Optional[List[str]] = None
+        self, transformer: Optional[Transformer], filter_types: Optional[List[str]] = None
     ) -> LaneletNetwork:
         """Export network as lanelet network.
 
@@ -319,6 +319,18 @@ class Network:
             lanelet_network.create_intersection(intersection_map, intersection_id_counter)
 
         self.relate_crosswalks_to_intersection(lanelet_network)
+
+        if transformer is not None:
+            # Apply the transformer to traffic controls
+            for xs in [
+                self._traffic_lights,
+                self._traffic_signs,
+            ]:
+                for x in xs:
+                    x.position = np.array(transformer.transform(*x.position))
+            for x in self._stop_lines:
+                x.start = np.array(transformer.transform(*x.start))
+                x.end = np.array(transformer.transform(*x.end))
 
         # Assign traffic signals, lights and stop lines to lanelet network
         lanelet_network.add_traffic_lights_to_network(self._traffic_lights)

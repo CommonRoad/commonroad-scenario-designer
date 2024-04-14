@@ -81,6 +81,20 @@ class MapConversionExampleTests(unittest.TestCase):
         # check if the file has been created
         self.assertTrue(Path.exists(Path("./example_files/osm/test_ped_crossing.xml")))
 
+    def test_example_opendrive_to_lanelet2(self):
+        # remove the file if it has already been created
+        if Path.exists(Path("./example_files/lanelet2/l2_opendrive-1.osm")):
+            Path.unlink(Path("./example_files/lanelet2/l2_opendrive-1.osm"))
+
+        # check if there is no file
+        self.assertFalse(Path.exists(Path("./example_files/lanelet2/l2_opendrive-1.osm")))
+
+        # call the execution of the example script
+        exec(open("example_opendrive_to_lanelet2.py").read())
+
+        # check if the file has been created
+        self.assertTrue(Path.exists(Path("./example_files/lanelet2/l2_opendrive-1.osm")))
+
     def test_example_commonroad_to_opendrive(self):
         # remove the file if it has already been created
         if Path.exists(Path("./example_files/opendrive/ARG_Carcarana-1_1_T-1.xodr")):

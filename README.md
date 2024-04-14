@@ -1,8 +1,6 @@
 # CommonRoad Scenario Designer
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)  
-![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
-![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
-![macOS](https://img.shields.io/badge/mac%20os-000000?style=for-the-badge&logo=macos&logoColor=F0F0F0)    
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)  
 [![PyPI version fury.io](https://badge.fury.io/py/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
 [![PyPI download week](https://img.shields.io/pypi/dw/commonroad-scenario-designer.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/commonroad-scenario-designer/) 
 [![PyPI download month](https://img.shields.io/pypi/dm/commonroad-scenario-designer.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/commonroad-scenario-designer/)  
@@ -15,14 +13,15 @@ This toolbox provides map converters for [OpenStreetMap](https://www.openstreetm
 Additionally, a graphical user interface (GUI) is included, which allows one to efficiently create and manipulate 
 CommonRoad maps and scenarios.
 
-|              Tool              |                    Path                     |                                Functionality                                 |
-|:------------------------------:|:-------------------------------------------:|:----------------------------------------------------------------------------:|
-|        OpenDRIVE => CR         |    `crdesigner/map_conversion/opendrive`    |                   Conversion from OpenDRIVE to CommonRoad.                   |
-|    Lanelet/Lanelet2 <=> CR     |    `crdesigner/map_conversion/lanelet2`     | Conversion from Lanelet2 to CommonRoad <br /> and from CommonRoad to Lanelet |
-|           OSM => CR            |     `crdesigner/map_conversion/osm2cr`      |                      Conversion from OSM to CommonRoad.                      |
-|          SUMO <=> CR           |    `crdesigner/map_conversion/sumo_map`     |              Conversion from SUMO to CommonRoad and vice versa.              |
-| Map Verification and Repairing |     `crdesigner/verification_repairing`     |                Verification and Repairing of CommonRoad maps.                |
-|    CR Scenario Designer GUI    |             `crdesigner/ui/gui`             |    Multi-functional GUI for map conversion and scenario creation/editing.    |
+|              Tool              |                         Path                         |                                Functionality                                 |
+|:------------------------------:|:----------------------------------------------------:|:----------------------------------------------------------------------------:|
+|        OpenDRIVE => CR         |        `crdesigner/map_conversion/opendrive`         |                   Conversion from OpenDRIVE to CommonRoad.                   |
+|    Lanelet/Lanelet2 <=> CR     |         `crdesigner/map_conversion/lanelet2`         | Conversion from Lanelet2 to CommonRoad <br /> and from CommonRoad to Lanelet |
+|           OSM => CR            |          `crdesigner/map_conversion/osm2cr`          |                      Conversion from OSM to CommonRoad.                      |
+|          SUMO <=> CR           |         `crdesigner/map_conversion/sumo_map`         |              Conversion from SUMO to CommonRoad and vice versa.              |
+| OpenDRIVE => Lanelet/Lanelet2  | `crdesigner/map_conversion/map_conversion_interface` |                    Conversion from OpenDRIVE to Lanelet2                     |
+| Map Verification and Repairing |         `crdesigner/verification_repairing`          |                Verification and Repairing of CommonRoad maps.                |
+|    CR Scenario Designer GUI    |                 `crdesigner/ui/gui`                  |    Multi-functional GUI for map conversion and scenario creation/editing.    |
 
 ## Prerequisites and Installation
 We have tested the toolbox with Python 3.8, 3.9, and 3.10.
@@ -117,7 +116,8 @@ Commands:
   lanelet2cr
   odrcr
   osmcr
-  sumocr`
+  sumocr
+  odrlanelet2`
 ```
 
 ### Map Converters
@@ -160,7 +160,7 @@ cd docs/source && sphinx-build -b html . ../../public
 
 The documentation can be accessed by opening `public/index.html`.  
 The titles of module pages have to be set manually!  
-The full documentation of the API and introducing examples can also be found [here](https://commonroad-scenario-designer.readthedocs.io/en/latest/).
+The full documentation of the API and introducing examples can also be found [here](https://cps.pages.gitlab.lrz.de/commonroad/commonroad-scenario-designer/).
 
 ## Changelog
 A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).

@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.8.1] - 2024-03-XX
+## [0.8.1] - 2024-03-28
 
 ### Added
 - Test cases for GUI
@@ -23,6 +23,8 @@
 - Integrated map verification/repairing error visualization
 - Separate obstacle profile widget within obstacle toolbox
 - Multiple obstacle profiles visualizable
+- Direct conversion from OpenDRIVE to Lanelet2
+
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
