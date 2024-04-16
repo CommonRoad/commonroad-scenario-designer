@@ -697,6 +697,43 @@ class TestLanelet2CRConverter(unittest.TestCase):
             )
         )
 
+    def test_linemarking_conversion(self):
+        l2cr = Lanelet2CRConverter()
+        l2cr(osm)
+
+        # l2 way that gets converted to the right vertices of the first cr lanelet
+        right_way = list(osm.ways.values())[0]
+        self.assertEqual(right_way.tag_dict, {})
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.UNKNOWN)
+
+        right_way.tag_dict = {"type": "line_thin", "subtype": "dashed"}
+        l2cr(osm)
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.DASHED)
+
+        right_way.tag_dict = {"type": "line_thick", "subtype": "dashed"}
+        l2cr(osm)
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.BROAD_DASHED)
+
+        right_way.tag_dict = {"type": "line_thin", "subtype": "solid"}
+        l2cr(osm)
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.SOLID)
+
+        right_way.tag_dict = {"type": "line_thick", "subtype": "solid"}
+        l2cr(osm)
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.BROAD_SOLID)
+
+        right_way.tag_dict = {"type": "curbstone", "subtype": "low"}
+        l2cr(osm)
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.LOWERED_CURB)
+
+        right_way.tag_dict = {"type": "curbstone", "subtype": "high"}
+        l2cr(osm)
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.CURB)
+
+        right_way.tag_dict = {"type": "virtual"}
+        l2cr(osm)
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.UNKNOWN)
+
 
 if __name__ == "__main__":
     unittest.main()
