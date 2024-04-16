@@ -62,25 +62,54 @@ message_format = "%(asctime)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.INFO, format=message_format, datefmt=date_strftime_format)
 
 
-def convert_type_subtype_to_line_marking_lanelet(tag_dict: dict) -> LineMarking:
+def convert_type_subtype_to_line_marking_lanelet(tag_dict: dict) -> Tuple[LineMarking, Optional[LineMarking]]:
     """
-    Function that takes the tag dictionary of a L2 way and converts it to a cr linemarking
+    Function that takes a type and a subtype of a L2 way's tag dictionary and converts it to a CR lanelet linemarking
+
+    :param tag_dict: tag dictionary of a L2 way with a type and a subtype that that need to be converted.
+    :return: Tuple with the converted & the optional line marking.
+    The optional linemarking is due to different styles of road marking between CR and L2.
     """
     type = tag_dict.get("type")
     subtype = tag_dict.get("subtype")
     linemarking = LineMarking.UNKNOWN  # default
+    second_linemarking = None  # used to 'transfer' the second line marking to the adjacent lanelet
 
     if type == "line_thin":
         if subtype == "solid":
             linemarking = LineMarking.SOLID
         elif subtype == "dashed":
             linemarking = LineMarking.DASHED
+        elif subtype == "solid_solid":
+            linemarking = LineMarking.SOLID
+            second_linemarking = LineMarking.SOLID
+        elif subtype == "solid_dashed":
+            linemarking = LineMarking.SOLID
+            second_linemarking = LineMarking.DASHED
+        elif subtype == "dashed_solid":
+            linemarking = LineMarking.DASHED
+            second_linemarking = LineMarking.SOLID
+        elif subtype == "dashed_dashed":
+            linemarking = LineMarking.DASHED
+            second_linemarking = LineMarking.DASHED
 
     elif type == "line_thick":
         if subtype == "solid":
             linemarking = LineMarking.BROAD_SOLID
         elif subtype == "dashed":
             linemarking = LineMarking.BROAD_DASHED
+        elif subtype == "solid_solid":
+            linemarking = LineMarking.BROAD_SOLID
+            second_linemarking = LineMarking.BROAD_SOLID
+        elif subtype == "solid_dashed":
+            linemarking = LineMarking.BROAD_SOLID
+            second_linemarking = LineMarking.BROAD_DASHED
+        elif subtype == "dashed_solid":
+            linemarking = LineMarking.BROAD_DASHED
+            second_linemarking = LineMarking.BROAD_SOLID
+        elif subtype == "dashed_dashed":
+            linemarking = LineMarking.BROAD_DASHED
+            second_linemarking = LineMarking.BROAD_DASHED
 
     elif type == "curbstone":
         if subtype == "low":
@@ -88,7 +117,7 @@ def convert_type_subtype_to_line_marking_lanelet(tag_dict: dict) -> LineMarking:
         else:
             linemarking = LineMarking.CURB
 
-    return linemarking
+    return linemarking, second_linemarking
 
 
 def _add_closest_traffic_sign_to_lanelet(lanelets: List[Lanelet], traffic_signs: List[TrafficSign]) -> set:
@@ -400,7 +429,7 @@ class Lanelet2CRConverter:
                 )
                 area_border_list.append(area_border)
                 # line_marking
-                area_border.line_marking = convert_type_subtype_to_line_marking_lanelet(way.tag_dict)
+                area_border.line_marking = convert_type_subtype_to_line_marking_lanelet(way.tag_dict)[0]
 
             area_types = set()
             area_types.add(multipolygon.tag_dict.get("subtype"))  # can subtype have multiple values?
@@ -765,8 +794,8 @@ class Lanelet2CRConverter:
         else:
             traffic_signs = set(traffic_signs)
 
-        left_linemarking = convert_type_subtype_to_line_marking_lanelet(left_way.tag_dict)
-        right_linemarking = convert_type_subtype_to_line_marking_lanelet(right_way.tag_dict)
+        left_linemarking, second_left_linemarking = convert_type_subtype_to_line_marking_lanelet(left_way.tag_dict)
+        right_linemarking, second_right_linemarking = convert_type_subtype_to_line_marking_lanelet(right_way.tag_dict)
 
         lanelet = ConversionLanelet(
             left_vertices=left_vertices,
@@ -810,6 +839,23 @@ class Lanelet2CRConverter:
                 last_left_node,
                 last_right_node,
             )
+
+        # adjusting the l2 line marking style to the cr line marking style
+        if second_left_linemarking:
+            if self.lanelet_network.find_lanelet_by_id(lanelet.adj_left):
+                adjacent_left = self.lanelet_network.find_lanelet_by_id(lanelet.adj_left)
+                if lanelet.adj_left_same_direction:
+                    adjacent_left.line_marking_right_vertices = second_left_linemarking
+                else:
+                    adjacent_left.line_marking_left_vertices = second_left_linemarking
+
+        if second_right_linemarking:
+            if self.lanelet_network.find_lanelet_by_id(lanelet.adj_right):
+                adjacent_right = self.lanelet_network.find_lanelet_by_id(lanelet.adj_right)
+                if lanelet.adj_right_same_direction:
+                    adjacent_right.left_marking_left_vertices = second_right_linemarking
+                else:
+                    adjacent_right.right_marking_right_vertices = second_right_linemarking
 
         return lanelet
 
