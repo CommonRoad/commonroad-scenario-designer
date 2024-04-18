@@ -428,8 +428,16 @@ class Lanelet2CRConverter:
                     line_marking=None,
                 )
                 area_border_list.append(area_border)
+
                 # line_marking
                 area_border.line_marking = convert_type_subtype_to_line_marking_lanelet(way.tag_dict)[0]
+
+                # an area is adjacent to a lanelet if they share at least one point
+                for lanelet in self.lanelet_network.lanelets:
+                    left = [np.isin(x, area_border.border_vertices).all() for x in lanelet.left_vertices]
+                    right = [np.isin(x, area_border.border_vertices).all() for x in lanelet.right_vertices]
+                    if (True in left) or (True in right):
+                        area_border.adjacent = lanelet.lanelet_id
 
             area_types = set()
             area_types.add(multipolygon.tag_dict.get("subtype"))  # can subtype have multiple values?
