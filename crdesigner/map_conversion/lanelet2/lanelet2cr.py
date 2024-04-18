@@ -424,7 +424,7 @@ class Lanelet2CRConverter:
                 area_border = AreaBorder(
                     area_border_id=generate_unique_id(),
                     border_vertices=self._convert_way_to_vertices(way),
-                    adjacent=None,
+                    adjacent=[],
                     line_marking=None,
                 )
                 area_border_list.append(area_border)
@@ -437,7 +437,7 @@ class Lanelet2CRConverter:
                     left = [np.isin(x, area_border.border_vertices).all() for x in lanelet.left_vertices]
                     right = [np.isin(x, area_border.border_vertices).all() for x in lanelet.right_vertices]
                     if (True in left) or (True in right):
-                        area_border.adjacent = lanelet.lanelet_id
+                        area_border.adjacent.append(lanelet.lanelet_id)
 
             area_types = set()
             area_types.add(multipolygon.tag_dict.get("subtype"))  # can subtype have multiple values?

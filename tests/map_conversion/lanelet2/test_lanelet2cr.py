@@ -697,6 +697,8 @@ class TestLanelet2CRConverter(unittest.TestCase):
             )
         )
 
+        self.assertEqual(len(area.border[0].adjacent), 4)
+
     def test_linemarking_conversion(self):
         l2cr = Lanelet2CRConverter()
         l2cr(osm)
