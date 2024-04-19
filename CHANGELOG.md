@@ -24,6 +24,7 @@
 - Separate obstacle profile widget within obstacle toolbox
 - Multiple obstacle profiles visualizable
 - Direct conversion from OpenDRIVE to Lanelet2
+- lanelet2cr: Multipolygon and line marking conversion
 
 
 ### Changed
