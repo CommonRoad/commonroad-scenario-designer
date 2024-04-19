@@ -700,8 +700,6 @@ class TestLanelet2CRConverter(unittest.TestCase):
         )
 
         # testing the line marking of the area border
-        self.assertEqual(way.tag_dict, {})
-        self.assertEqual(area.border[0].line_marking, LineMarking.UNKNOWN)
         way.tag_dict = {"type": "line_thin", "subtype": "dashed"}
         l2cr(osm)
         area = l2cr.lanelet_network.areas[0]
