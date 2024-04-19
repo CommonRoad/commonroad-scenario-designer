@@ -669,7 +669,9 @@ class TestLanelet2CRConverter(unittest.TestCase):
         l2cr(osm)
 
         # getting the way id for the reference
-        way_id = list(osm.ways)[0]
+        way = list(osm.ways.values())[0]
+        way_id = way.id_
+
         # creating a multipolygon
         multipolygon = Multipolygon(1, [way_id], {"region": "de", "subtype": "walkway"})
         # adding it to the osm
@@ -697,6 +699,27 @@ class TestLanelet2CRConverter(unittest.TestCase):
             )
         )
 
+        # testing the line marking of the area border
+        self.assertEqual(way.tag_dict, {})
+        self.assertEqual(area.border[0].line_marking, LineMarking.UNKNOWN)
+        way.tag_dict = {"type": "line_thin", "subtype": "dashed"}
+        l2cr(osm)
+        area = l2cr.lanelet_network.areas[0]
+        self.assertEqual(area.border[0].line_marking, LineMarking.DASHED)
+        way.tag_dict = {"type": "line_thick", "subtype": "solid"}
+        l2cr(osm)
+        area = l2cr.lanelet_network.areas[0]
+        self.assertEqual(area.border[0].line_marking, LineMarking.BROAD_SOLID)
+        way.tag_dict = {"type": "curbstone", "subtype": "low"}
+        l2cr(osm)
+        area = l2cr.lanelet_network.areas[0]
+        self.assertEqual(area.border[0].line_marking, LineMarking.LOWERED_CURB)
+        way.tag_dict = {"type": "curbstone", "subtype": "high"}
+        l2cr(osm)
+        area = l2cr.lanelet_network.areas[0]
+        self.assertEqual(area.border[0].line_marking, LineMarking.CURB)
+
+        # testing the adjacent lanelets to the area border
         self.assertEqual(len(area.border[0].adjacent), 4)
 
     def test_linemarking_conversion(self):
