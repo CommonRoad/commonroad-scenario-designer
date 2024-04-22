@@ -62,13 +62,17 @@ message_format = "%(asctime)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.INFO, format=message_format, datefmt=date_strftime_format)
 
 
-def convert_type_subtype_to_line_marking_lanelet(tag_dict: dict) -> Tuple[LineMarking, Optional[LineMarking]]:
+def convert_type_subtype_to_line_marking_lanelet(
+    tag_dict: dict, multipolygon: bool = False
+) -> Tuple[LineMarking, Optional[LineMarking]]:
     """
     Function that takes a type and a subtype of a L2 way's tag dictionary and converts it to a CR lanelet linemarking
 
     :param tag_dict: tag dictionary of a L2 way with a type and a subtype that that need to be converted.
-    :return: Tuple with the converted & the optional line marking.
-    The optional linemarking is due to different styles of road marking between CR and L2.
+    :param multipolygon: boolean that indicates whether we are converting a line marking of a way that is a part of a multipolygon,
+    as there is no need to separate the linemarkings of a multipolygon.
+    :return: Tuple with the converted & the optional line marking that will be copied to the relevant adjacent lanelet.
+    The optional linemarking is due to different styles of road marking notation between CR and L2.
     """
     type = tag_dict.get("type")
     subtype = tag_dict.get("subtype")
@@ -83,15 +87,23 @@ def convert_type_subtype_to_line_marking_lanelet(tag_dict: dict) -> Tuple[LineMa
         elif subtype == "solid_solid":
             linemarking = LineMarking.SOLID
             second_linemarking = LineMarking.SOLID
+            if multipolygon:
+                return LineMarking.SOLID_SOLID, None
         elif subtype == "solid_dashed":
             linemarking = LineMarking.SOLID
             second_linemarking = LineMarking.DASHED
+            if multipolygon:
+                return LineMarking.SOLID_DASHED, None
         elif subtype == "dashed_solid":
             linemarking = LineMarking.DASHED
             second_linemarking = LineMarking.SOLID
+            if multipolygon:
+                return LineMarking.DASHED_SOLID, None
         elif subtype == "dashed_dashed":
             linemarking = LineMarking.DASHED
             second_linemarking = LineMarking.DASHED
+            if multipolygon:
+                return LineMarking.DASHED_DASHED, None
 
     elif type == "line_thick":
         if subtype == "solid":
@@ -101,15 +113,23 @@ def convert_type_subtype_to_line_marking_lanelet(tag_dict: dict) -> Tuple[LineMa
         elif subtype == "solid_solid":
             linemarking = LineMarking.BROAD_SOLID
             second_linemarking = LineMarking.BROAD_SOLID
+            if multipolygon:
+                return LineMarking.SOLID_SOLID, None
         elif subtype == "solid_dashed":
             linemarking = LineMarking.BROAD_SOLID
             second_linemarking = LineMarking.BROAD_DASHED
+            if multipolygon:
+                return LineMarking.SOLID_DASHED, None
         elif subtype == "dashed_solid":
             linemarking = LineMarking.BROAD_DASHED
             second_linemarking = LineMarking.BROAD_SOLID
+            if multipolygon:
+                return LineMarking.DASHED_SOLID, None
         elif subtype == "dashed_dashed":
             linemarking = LineMarking.BROAD_DASHED
             second_linemarking = LineMarking.BROAD_DASHED
+            if multipolygon:
+                return LineMarking.DASHED_DASHED, None
 
     elif type == "curbstone":
         if subtype == "low":
@@ -430,7 +450,9 @@ class Lanelet2CRConverter:
                 area_border_list.append(area_border)
 
                 # line_marking
-                area_border.line_marking = convert_type_subtype_to_line_marking_lanelet(way.tag_dict)[0]
+                area_border.line_marking = convert_type_subtype_to_line_marking_lanelet(
+                    way.tag_dict, multipolygon=True
+                )[0]
 
                 # an area border is adjacent to a lanelet if they share at least one point
                 for lanelet in self.lanelet_network.lanelets:

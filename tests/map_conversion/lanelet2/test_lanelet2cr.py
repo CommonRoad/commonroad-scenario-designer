@@ -716,6 +716,14 @@ class TestLanelet2CRConverter(unittest.TestCase):
         l2cr(osm)
         area = l2cr.lanelet_network.areas[0]
         self.assertEqual(area.border[0].line_marking, LineMarking.CURB)
+        way.tag_dict = {"type": "line_thin", "subtype": "dashed_dashed"}
+        l2cr(osm)
+        area = l2cr.lanelet_network.areas[0]
+        self.assertEqual(area.border[0].line_marking, LineMarking.DASHED_DASHED)
+        way.tag_dict = {"type": "line_thin", "subtype": "dashed_solid"}
+        l2cr(osm)
+        area = l2cr.lanelet_network.areas[0]
+        self.assertEqual(area.border[0].line_marking, LineMarking.DASHED_SOLID)
 
         # testing the adjacent lanelets to the area border
         self.assertEqual(len(area.border[0].adjacent), 4)
