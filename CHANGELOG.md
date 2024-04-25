@@ -25,6 +25,7 @@
 - Multiple obstacle profiles visualizable
 - Direct conversion from OpenDRIVE to Lanelet2
 - lanelet2cr: Multipolygon and line marking conversion
+- cr2lanelet: Area conversion
 
 
 ### Changed
