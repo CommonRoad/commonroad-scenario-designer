@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 from commonroad.common.common_lanelet import LaneletType, RoadUser
 from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.scenario.area import Area, AreaBorder
+from commonroad.scenario.area import Area, AreaBorder, AreaType
 from commonroad.scenario.lanelet import Lanelet, LineMarking, StopLine
 from commonroad.scenario.traffic_light import (
     TrafficLight,
@@ -516,17 +516,17 @@ class TestCR2LaneletConverter(unittest.TestCase):
         cr1(scenario)
         # multipolygons before
         self.assertEqual(0, len(cr1.osm.multipolygons))
-
         # creating an area border
         area_border = AreaBorder(1, np.array([[0, 1], [1, 1]]), line_marking=LineMarking.SOLID)
         # adding an area to the lanelet network
-        scenario.lanelet_network.add_area(Area(1, [area_border]), set())
+        scenario.lanelet_network.add_area(Area(1, [area_border], {AreaType.PARKING}), set())
         cr1(scenario)
         # multipolygons after
         self.assertEqual(1, len(cr1.osm.multipolygons))
+        # testing the multipolygon attributes
         multipolygon = list(cr1.osm.multipolygons.values())[0]
         self.assertEqual(len(multipolygon.outer_list), 1)
-        self.assertEqual(multipolygon.tag_dict, {})
+        self.assertEqual(multipolygon.tag_dict, {"subtype": "parking"})
         self.assertEqual(cr1.osm.ways[multipolygon.outer_list[0]].tag_dict, {"subtype": "solid", "type": "line_thin"})
 
     def test_convert_traffic_sign_with_z_coordinate(self):

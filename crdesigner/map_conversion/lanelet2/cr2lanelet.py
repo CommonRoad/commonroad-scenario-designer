@@ -323,7 +323,7 @@ class CR2LaneletConverter:
         tag_dict = {}
         if area.area_types:
             for area_type in area.area_types:
-                tag_dict["subtype"] = str(area_type)
+                tag_dict["subtype"] = str(area_type.value)
         multipolygon = Multipolygon(self.id_count, outer_list, tag_dict)
         self.osm.add_multipolygon(multipolygon)
 

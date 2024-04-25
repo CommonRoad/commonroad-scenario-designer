@@ -188,6 +188,29 @@ class Multipolygon:
         self.outer_list = outer_list
         self.tag_dict = tag_dict if tag_dict is not None else {}
 
+    def serialize_to_xml(self) -> etree.Element:
+        """
+        Serializes the Multipolygon object to the xml format
+        """
+        multipolygon = etree.Element("relation")
+        multipolygon.set("id", self.id_)
+        multipolygon.set("action", "modify")
+        multipolygon.set("visible", "true")
+        for outer in self.outer_list:
+            way = etree.SubElement(multipolygon, "member")
+            way.set("type", "way")
+            way.set("ref", outer)
+            way.set("role", "outer")
+        for tag_key, tag_value in self.tag_dict.items():
+            xml_node = etree.SubElement(multipolygon, "tag")
+            xml_node.set("k", tag_key)
+            xml_node.set("v", tag_value)
+        xml_node = etree.SubElement(multipolygon, "tag")
+        xml_node.set("k", "type")
+        xml_node.set("v", "multipolygon")
+
+        return multipolygon
+
 
 # Class that as a subtype contains TrafficLight, TrafficSign and SpeedLimit
 class RegulatoryElement:
@@ -395,6 +418,9 @@ class OSMLanelet:
 
         for way_relation in self.way_relations.values():
             osm.append(way_relation.serialize_to_xml())
+
+        for multipolygon in self.multipolygons.values():
+            osm.append(multipolygon.serialize_to_xml())
 
         for regulatory_element in self.regulatory_elements.values():
             osm.append(regulatory_element.serialize_to_xml())
