@@ -82,6 +82,8 @@ class Object:
             "vegetation",
             "wind",
             "Guidepost",
+            "Areas",
+            "portal",
         ]
         customs = [
             "permanentDelineator",
