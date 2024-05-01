@@ -1,6 +1,7 @@
 import warnings
 
 import mgrs
+from crdesigner.common.config.lanelet2_config import lanelet2_config
 from commonroad.scenario.traffic_light import (
     TrafficLightCycle,
     TrafficLightCycleElement,
@@ -17,7 +18,12 @@ def generate_unique_id(set_id: int = None) -> int:
 
     """
     if not hasattr(generate_unique_id, "counter"):
-        generate_unique_id.counter = 0  # it doesn't exist yet, so initialize it
+        # for autoware, the traffic light ID is retained, therefore the first 10000 IDs are reserved for traffic lights
+        autoware = lanelet2_config.autoware
+        if autoware:
+            generate_unique_id.counter = 10000  # it doesn't exist yet, so initialize it
+        else:
+            generate_unique_id.counter = 0  # it doesn't exist yet, so initialize it
     if set_id is not None:
         generate_unique_id.counter = set_id
         return generate_unique_id.counter

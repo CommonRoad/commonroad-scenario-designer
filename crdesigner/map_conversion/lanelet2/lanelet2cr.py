@@ -510,7 +510,11 @@ class Lanelet2CRConverter:
         """
         # create a TrafficLight element (CR format) from the traffic light way (L2 format\<)
         # id,cycle,position,offset,direction,active
-        new_id = generate_unique_id()
+        # for autoware, the traffic light id is retained
+        if self._config.autoware:
+            new_id = traffic_light_way.id_
+        else:
+            new_id = generate_unique_id()
 
         cycle_list = _append_traffic_light_cycles(traffic_light_way)
 
