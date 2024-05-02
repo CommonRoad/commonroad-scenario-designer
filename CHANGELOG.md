@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.2] - 2024-06-XX
+
+### Added
+- lanelet2cr: Multipolygon and line marking conversion
+- cr2lanelet: Area conversion
+
 ## [0.8.1] - 2024-03-28
 
 ### Added
@@ -24,9 +30,6 @@
 - Separate obstacle profile widget within obstacle toolbox
 - Multiple obstacle profiles visualizable
 - Direct conversion from OpenDRIVE to Lanelet2
-- lanelet2cr: Multipolygon and line marking conversion
-- cr2lanelet: Area conversion
-
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
