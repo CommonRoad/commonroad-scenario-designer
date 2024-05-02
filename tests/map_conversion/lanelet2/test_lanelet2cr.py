@@ -20,6 +20,7 @@ from crdesigner.common.config.general_config import general_config
 from crdesigner.common.config.gui_config import lanelet2_default
 from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.lanelet2 import (
+    Multipolygon,
     Node,
     RegulatoryElement,
     Way,
@@ -662,6 +663,107 @@ class TestLanelet2CRConverter(unittest.TestCase):
         l2cr(osm)
         traffic_signs_after = len(l2cr.lanelet_network.traffic_signs)
         self.assertEqual(traffic_signs_before, traffic_signs_after)
+
+    def test_multipolygon_to_area_conversion(self):
+        l2cr = Lanelet2CRConverter()
+        l2cr(osm)
+
+        # getting the way id for the reference
+        way = list(osm.ways.values())[0]
+        way_id = way.id_
+
+        # creating a multipolygon
+        multipolygon = Multipolygon(1, [way_id], {"region": "de", "subtype": "walkway"})
+        # adding it to the osm
+        osm.add_multipolygon(multipolygon)
+
+        # areas before
+        areas_before = len(l2cr.lanelet_network.areas)
+        # conversion
+        l2cr(osm)
+        # areas after
+        areas_after = len(l2cr.lanelet_network.areas)
+        # testing the conversion
+        self.assertEqual(areas_before + 1, areas_after)
+
+        # testing the subtype
+        area = l2cr.lanelet_network.areas[0]
+        self.assertEqual(area.area_types, {"walkway"})
+
+        # testing the border conversion
+        self.assertEqual(len(area.border), 1)
+        # testing the border vertices conversion
+        (
+            self.assertEqual(
+                area.border[0].border_vertices.tolist(), l2cr._convert_way_to_vertices(osm.ways[way_id]).tolist()
+            )
+        )
+
+        # testing the line marking of the area border
+        way.tag_dict = {"type": "line_thin", "subtype": "dashed"}
+        l2cr(osm)
+        area = l2cr.lanelet_network.areas[0]
+        self.assertEqual(area.border[0].line_marking, LineMarking.DASHED)
+        way.tag_dict = {"type": "line_thick", "subtype": "solid"}
+        l2cr(osm)
+        area = l2cr.lanelet_network.areas[0]
+        self.assertEqual(area.border[0].line_marking, LineMarking.BROAD_SOLID)
+        way.tag_dict = {"type": "curbstone", "subtype": "low"}
+        l2cr(osm)
+        area = l2cr.lanelet_network.areas[0]
+        self.assertEqual(area.border[0].line_marking, LineMarking.LOWERED_CURB)
+        way.tag_dict = {"type": "curbstone", "subtype": "high"}
+        l2cr(osm)
+        area = l2cr.lanelet_network.areas[0]
+        self.assertEqual(area.border[0].line_marking, LineMarking.CURB)
+        way.tag_dict = {"type": "line_thin", "subtype": "dashed_dashed"}
+        l2cr(osm)
+        area = l2cr.lanelet_network.areas[0]
+        self.assertEqual(area.border[0].line_marking, LineMarking.DASHED_DASHED)
+        way.tag_dict = {"type": "line_thin", "subtype": "dashed_solid"}
+        l2cr(osm)
+        area = l2cr.lanelet_network.areas[0]
+        self.assertEqual(area.border[0].line_marking, LineMarking.DASHED_SOLID)
+
+        # testing the adjacent lanelets to the area border
+        self.assertEqual(len(area.border[0].adjacent), 4)
+
+    def test_linemarking_conversion(self):
+        l2cr = Lanelet2CRConverter()
+        l2cr(osm)
+
+        # l2 way that gets converted to the right vertices of the first cr lanelet
+        right_way = list(osm.ways.values())[0]
+        self.assertEqual(right_way.tag_dict, {})
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.UNKNOWN)
+
+        right_way.tag_dict = {"type": "line_thin", "subtype": "dashed"}
+        l2cr(osm)
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.DASHED)
+
+        right_way.tag_dict = {"type": "line_thick", "subtype": "dashed"}
+        l2cr(osm)
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.BROAD_DASHED)
+
+        right_way.tag_dict = {"type": "line_thin", "subtype": "solid"}
+        l2cr(osm)
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.SOLID)
+
+        right_way.tag_dict = {"type": "line_thick", "subtype": "solid"}
+        l2cr(osm)
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.BROAD_SOLID)
+
+        right_way.tag_dict = {"type": "curbstone", "subtype": "low"}
+        l2cr(osm)
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.LOWERED_CURB)
+
+        right_way.tag_dict = {"type": "curbstone", "subtype": "high"}
+        l2cr(osm)
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.CURB)
+
+        right_way.tag_dict = {"type": "virtual"}
+        l2cr(osm)
+        self.assertEqual(l2cr.lanelet_network.lanelets[0].line_marking_right_vertices, LineMarking.UNKNOWN)
 
 
 if __name__ == "__main__":
