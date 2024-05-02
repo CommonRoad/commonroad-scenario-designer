@@ -3,6 +3,7 @@ from collections import defaultdict
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
+from commonroad.scenario.area import Area, AreaBorder
 from commonroad.scenario.lanelet import (
     Lanelet,
     LaneletNetwork,
@@ -59,6 +60,84 @@ from crdesigner.verification_repairing.verification.hol.functions.predicates.lan
 date_strftime_format = "%d-%b-%y %H:%M:%S"
 message_format = "%(asctime)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.INFO, format=message_format, datefmt=date_strftime_format)
+
+
+def convert_type_subtype_to_line_marking_lanelet(
+    tag_dict: Dict[str, str], multipolygon: bool = False
+) -> Tuple[LineMarking, Optional[LineMarking]]:
+    """
+    Function that takes a type and a subtype of a L2 way's tag dictionary and converts it to a CR lanelet linemarking
+
+    :param tag_dict: tag dictionary of a L2 way with a type and a subtype that that need to be converted.
+    :param multipolygon: boolean that indicates whether we are converting a line marking of a way that is a part of a
+    multipolygon, as there is no need to separate the linemarkings of a multipolygon.
+    :return: Tuple with the converted & the optional line marking that will be copied to the relevant adjacent lanelet.
+    The optional linemarking is due to different styles of road marking notation between CR and L2.
+    """
+    l2_type = tag_dict.get("type")
+    l2_subtype = tag_dict.get("subtype")
+    linemarking = LineMarking.UNKNOWN  # default
+    second_linemarking = None  # used to 'transfer' the second line marking to the adjacent lanelet
+
+    if l2_type == "line_thin":
+        if l2_subtype == "solid":
+            linemarking = LineMarking.SOLID
+        elif l2_subtype == "dashed":
+            linemarking = LineMarking.DASHED
+        elif l2_subtype == "solid_solid":
+            linemarking = LineMarking.SOLID
+            second_linemarking = LineMarking.SOLID
+            if multipolygon:
+                return LineMarking.SOLID_SOLID, None
+        elif l2_subtype == "solid_dashed":
+            linemarking = LineMarking.SOLID
+            second_linemarking = LineMarking.DASHED
+            if multipolygon:
+                return LineMarking.SOLID_DASHED, None
+        elif l2_subtype == "dashed_solid":
+            linemarking = LineMarking.DASHED
+            second_linemarking = LineMarking.SOLID
+            if multipolygon:
+                return LineMarking.DASHED_SOLID, None
+        elif l2_subtype == "dashed_dashed":
+            linemarking = LineMarking.DASHED
+            second_linemarking = LineMarking.DASHED
+            if multipolygon:
+                return LineMarking.DASHED_DASHED, None
+
+    elif l2_type == "line_thick":
+        if l2_subtype == "solid":
+            linemarking = LineMarking.BROAD_SOLID
+        elif l2_subtype == "dashed":
+            linemarking = LineMarking.BROAD_DASHED
+        elif l2_subtype == "solid_solid":
+            linemarking = LineMarking.BROAD_SOLID
+            second_linemarking = LineMarking.BROAD_SOLID
+            if multipolygon:
+                return LineMarking.SOLID_SOLID, None
+        elif l2_subtype == "solid_dashed":
+            linemarking = LineMarking.BROAD_SOLID
+            second_linemarking = LineMarking.BROAD_DASHED
+            if multipolygon:
+                return LineMarking.SOLID_DASHED, None
+        elif l2_subtype == "dashed_solid":
+            linemarking = LineMarking.BROAD_DASHED
+            second_linemarking = LineMarking.BROAD_SOLID
+            if multipolygon:
+                return LineMarking.DASHED_SOLID, None
+        elif l2_subtype == "dashed_dashed":
+            linemarking = LineMarking.BROAD_DASHED
+            second_linemarking = LineMarking.BROAD_DASHED
+            if multipolygon:
+                return LineMarking.DASHED_DASHED, None
+
+    elif l2_type == "curbstone":
+        if l2_subtype == "low":
+            linemarking = LineMarking.LOWERED_CURB
+        else:
+            linemarking = LineMarking.CURB
+
+    return linemarking, second_linemarking
 
 
 def _add_closest_traffic_sign_to_lanelet(lanelets: List[Lanelet], traffic_signs: List[TrafficSign]) -> set:
@@ -355,6 +434,36 @@ class Lanelet2CRConverter:
                     self.lanelet_network.add_traffic_sign(s, set())
             except NotImplementedError as e:
                 logging.error("Lanelet2CRConverter: " + str(e))
+
+        # multipolygon to area conversion
+        for multipolygon in osm.multipolygons.values():
+            area_id = generate_unique_id()
+            area_border_list = list()
+            for outer in multipolygon.outer_list:
+                way = osm.find_way_by_id(outer)
+                area_border = AreaBorder(
+                    area_border_id=generate_unique_id(),
+                    border_vertices=self._convert_way_to_vertices(way),
+                    adjacent=[],
+                    line_marking=None,
+                )
+                area_border_list.append(area_border)
+
+                # line_marking
+                area_border.line_marking = convert_type_subtype_to_line_marking_lanelet(
+                    way.tag_dict, multipolygon=True
+                )[0]
+
+                # an area border is adjacent to a lanelet if they share at least one point
+                for lanelet in self.lanelet_network.lanelets:
+                    left = [np.isin(x, area_border.border_vertices).all() for x in lanelet.left_vertices]
+                    right = [np.isin(x, area_border.border_vertices).all() for x in lanelet.right_vertices]
+                    if (True in left) or (True in right):
+                        area_border.adjacent.append(lanelet.lanelet_id)
+
+            area_types = set()
+            area_types.add(multipolygon.tag_dict.get("subtype"))  # can subtype have multiple values?
+            self.lanelet_network.add_area(Area(area_id=area_id, border=area_border_list, area_types=area_types), set())
 
         # speed limit sign conversion
         for speed_limit_key in osm.speed_limit_signs.keys():
@@ -715,6 +824,9 @@ class Lanelet2CRConverter:
         else:
             traffic_signs = set(traffic_signs)
 
+        left_linemarking, second_left_linemarking = convert_type_subtype_to_line_marking_lanelet(left_way.tag_dict)
+        right_linemarking, second_right_linemarking = convert_type_subtype_to_line_marking_lanelet(right_way.tag_dict)
+
         lanelet = ConversionLanelet(
             left_vertices=left_vertices,
             center_vertices=center_vertices,
@@ -725,6 +837,8 @@ class Lanelet2CRConverter:
             user_bidirectional=users_bidirectional,
             lanelet_type=lanelet_type,
             traffic_signs=traffic_signs,
+            line_marking_left_vertices=left_linemarking,
+            line_marking_right_vertices=right_linemarking,
         )
 
         self._check_right_and_left_neighbors(way_rel, lanelet)
@@ -755,6 +869,23 @@ class Lanelet2CRConverter:
                 last_left_node,
                 last_right_node,
             )
+
+        # adjusting the l2 line marking style to the cr line marking style
+        if second_left_linemarking:
+            if self.lanelet_network.find_lanelet_by_id(lanelet.adj_left):
+                adjacent_left = self.lanelet_network.find_lanelet_by_id(lanelet.adj_left)
+                if lanelet.adj_left_same_direction:
+                    adjacent_left.line_marking_right_vertices = second_left_linemarking
+                else:
+                    adjacent_left.line_marking_left_vertices = second_left_linemarking
+
+        if second_right_linemarking:
+            if self.lanelet_network.find_lanelet_by_id(lanelet.adj_right):
+                adjacent_right = self.lanelet_network.find_lanelet_by_id(lanelet.adj_right)
+                if lanelet.adj_right_same_direction:
+                    adjacent_right.left_marking_left_vertices = second_right_linemarking
+                else:
+                    adjacent_right.right_marking_right_vertices = second_right_linemarking
 
         return lanelet
 
