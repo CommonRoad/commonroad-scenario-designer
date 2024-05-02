@@ -63,76 +63,76 @@ logging.basicConfig(level=logging.INFO, format=message_format, datefmt=date_strf
 
 
 def convert_type_subtype_to_line_marking_lanelet(
-    tag_dict: dict, multipolygon: bool = False
+    tag_dict: Dict[str, str], multipolygon: bool = False
 ) -> Tuple[LineMarking, Optional[LineMarking]]:
     """
     Function that takes a type and a subtype of a L2 way's tag dictionary and converts it to a CR lanelet linemarking
 
     :param tag_dict: tag dictionary of a L2 way with a type and a subtype that that need to be converted.
-    :param multipolygon: boolean that indicates whether we are converting a line marking of a way that is a part of a multipolygon,
-    as there is no need to separate the linemarkings of a multipolygon.
+    :param multipolygon: boolean that indicates whether we are converting a line marking of a way that is a part of a
+    multipolygon, as there is no need to separate the linemarkings of a multipolygon.
     :return: Tuple with the converted & the optional line marking that will be copied to the relevant adjacent lanelet.
     The optional linemarking is due to different styles of road marking notation between CR and L2.
     """
-    type = tag_dict.get("type")
-    subtype = tag_dict.get("subtype")
+    l2_type = tag_dict.get("type")
+    l2_subtype = tag_dict.get("subtype")
     linemarking = LineMarking.UNKNOWN  # default
     second_linemarking = None  # used to 'transfer' the second line marking to the adjacent lanelet
 
-    if type == "line_thin":
-        if subtype == "solid":
+    if l2_type == "line_thin":
+        if l2_subtype == "solid":
             linemarking = LineMarking.SOLID
-        elif subtype == "dashed":
+        elif l2_subtype == "dashed":
             linemarking = LineMarking.DASHED
-        elif subtype == "solid_solid":
+        elif l2_subtype == "solid_solid":
             linemarking = LineMarking.SOLID
             second_linemarking = LineMarking.SOLID
             if multipolygon:
                 return LineMarking.SOLID_SOLID, None
-        elif subtype == "solid_dashed":
+        elif l2_subtype == "solid_dashed":
             linemarking = LineMarking.SOLID
             second_linemarking = LineMarking.DASHED
             if multipolygon:
                 return LineMarking.SOLID_DASHED, None
-        elif subtype == "dashed_solid":
+        elif l2_subtype == "dashed_solid":
             linemarking = LineMarking.DASHED
             second_linemarking = LineMarking.SOLID
             if multipolygon:
                 return LineMarking.DASHED_SOLID, None
-        elif subtype == "dashed_dashed":
+        elif l2_subtype == "dashed_dashed":
             linemarking = LineMarking.DASHED
             second_linemarking = LineMarking.DASHED
             if multipolygon:
                 return LineMarking.DASHED_DASHED, None
 
-    elif type == "line_thick":
-        if subtype == "solid":
+    elif l2_type == "line_thick":
+        if l2_subtype == "solid":
             linemarking = LineMarking.BROAD_SOLID
-        elif subtype == "dashed":
+        elif l2_subtype == "dashed":
             linemarking = LineMarking.BROAD_DASHED
-        elif subtype == "solid_solid":
+        elif l2_subtype == "solid_solid":
             linemarking = LineMarking.BROAD_SOLID
             second_linemarking = LineMarking.BROAD_SOLID
             if multipolygon:
                 return LineMarking.SOLID_SOLID, None
-        elif subtype == "solid_dashed":
+        elif l2_subtype == "solid_dashed":
             linemarking = LineMarking.BROAD_SOLID
             second_linemarking = LineMarking.BROAD_DASHED
             if multipolygon:
                 return LineMarking.SOLID_DASHED, None
-        elif subtype == "dashed_solid":
+        elif l2_subtype == "dashed_solid":
             linemarking = LineMarking.BROAD_DASHED
             second_linemarking = LineMarking.BROAD_SOLID
             if multipolygon:
                 return LineMarking.DASHED_SOLID, None
-        elif subtype == "dashed_dashed":
+        elif l2_subtype == "dashed_dashed":
             linemarking = LineMarking.BROAD_DASHED
             second_linemarking = LineMarking.BROAD_DASHED
             if multipolygon:
                 return LineMarking.DASHED_DASHED, None
 
-    elif type == "curbstone":
-        if subtype == "low":
+    elif l2_type == "curbstone":
+        if l2_subtype == "low":
             linemarking = LineMarking.LOWERED_CURB
         else:
             linemarking = LineMarking.CURB
