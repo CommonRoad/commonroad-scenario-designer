@@ -4,6 +4,7 @@
 
 ### Added
 - lanelet2cr: Multipolygon and line marking conversion
+- lanelet2cr: Retain traffic light IDs for Autoware
 - cr2lanelet: Area conversion
 - cr2lanelet: Lane change property tags
 
