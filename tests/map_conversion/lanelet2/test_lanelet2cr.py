@@ -623,6 +623,29 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertEqual(third_color, "green")
         self.assertEqual(third_duration, 5)
 
+    def test_traffic_light_conversion_autoware(self):
+        # set autoware flag
+        self._config.autoware = True
+
+        l2cr = Lanelet2CRConverter()
+        l2cr(osm)
+        tl_way = Way(1, list(osm.nodes)[0:3], {"type": "traffic_light", "subtype": "red_yellow_green"})
+        tl_way_relation = RegulatoryElement(
+            2, refers=list("1"), tag_dict={"subtype": "traffic_light", "type": "regulatory_element"}
+        )
+        osm.add_way(tl_way)
+        osm.add_regulatory_element(tl_way_relation)
+
+        l2cr.traffic_light_conversion(tl_way, map)
+
+        # test that the id of the traffic light is retained after conversion
+        traffic_light: TrafficLight = l2cr.lanelet_network.traffic_lights[0]
+        tl_after_id = int(traffic_light.traffic_light_id)
+        self.assertEqual(tl_after_id, 1)
+
+        # reset autoware flag
+        self._config.autoware = False
+
     def test_speed_limit_conversion(self):
         l2cr = Lanelet2CRConverter()
         l2cr(osm)
