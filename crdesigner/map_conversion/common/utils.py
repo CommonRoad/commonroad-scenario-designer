@@ -1,12 +1,12 @@
 import warnings
 
 import mgrs
-from crdesigner.common.config.lanelet2_config import lanelet2_config
 from commonroad.scenario.traffic_light import (
     TrafficLightCycle,
     TrafficLightCycleElement,
     TrafficLightState,
 )
+from crdesigner.common.config.lanelet2_config import lanelet2_config
 
 
 def generate_unique_id(set_id: int = None) -> int:
