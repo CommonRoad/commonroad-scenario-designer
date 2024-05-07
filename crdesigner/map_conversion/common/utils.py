@@ -6,6 +6,7 @@ from commonroad.scenario.traffic_light import (
     TrafficLightCycleElement,
     TrafficLightState,
 )
+
 from crdesigner.common.config.lanelet2_config import lanelet2_config
 
 
