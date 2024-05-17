@@ -7,8 +7,6 @@ from commonroad.scenario.traffic_light import (
     TrafficLightState,
 )
 
-from crdesigner.common.config.lanelet2_config import lanelet2_config
-
 
 def generate_unique_id(set_id: int = None) -> int:
     """
