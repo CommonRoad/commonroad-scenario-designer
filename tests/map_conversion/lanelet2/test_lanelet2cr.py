@@ -643,6 +643,10 @@ class TestLanelet2CRConverter(unittest.TestCase):
         tl_after_id = int(traffic_light.traffic_light_id)
         self.assertEqual(tl_after_id, 1)
 
+        # testing the active state of the traffic light
+        tl_active_state = traffic_light.active
+        self.assertEqual(tl_active_state, False)
+
         # reset autoware flag
         self._config.autoware = False
 
