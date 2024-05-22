@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from commonroad.common.common_lanelet import LaneletType, LineMarking
+from commonroad.scenario.area import Area
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.scenario import Location, Scenario
 from commonroad.scenario.traffic_light import TrafficLight
@@ -15,6 +16,7 @@ from crdesigner.common.config.gui_config import lanelet2_default
 from crdesigner.common.config.lanelet2_config import Lanelet2Config, lanelet2_config
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.lanelet2 import (
+    Multipolygon,
     Node,
     OSMLanelet,
     RegulatoryElement,
@@ -70,6 +72,24 @@ def _line_marking_to_type_subtype_vertices(line_marking: LineMarking) -> [str, s
     if line_marking is LineMarking.BROAD_SOLID:
         lanelet2_type = "line_thick"
         subtype = "solid"
+    if line_marking is LineMarking.CURB:
+        lanelet2_type = "curbstone"
+        subtype = "high"
+    if line_marking is LineMarking.LOWERED_CURB:
+        lanelet2_type = "curbstone"
+        subtype = "low"
+    if line_marking is LineMarking.DASHED_SOLID:
+        lanelet2_type = "line_thick"
+        subtype = "dashed_solid"
+    if line_marking is LineMarking.SOLID_DASHED:
+        lanelet2_type = "line_thick"
+        subtype = "solid_dashed"
+    if line_marking is LineMarking.SOLID_SOLID:
+        lanelet2_type = "line_thick"
+        subtype = "solid_solid"
+    if line_marking is LineMarking.DASHED_DASHED:
+        lanelet2_type = "line_thick"
+        subtype = "dashed_dashed"
 
     return lanelet2_type, subtype
 
@@ -218,6 +238,10 @@ class CR2LaneletConverter:
         for traffic_light in scenario.lanelet_network.traffic_lights:
             self._convert_traffic_light(traffic_light)
 
+        # convert areas
+        for area in scenario.lanelet_network.areas:
+            self._convert_area(area)
+
         # map the traffic signs and the referred lanelets (yield+right_of_way) to a 'right_of_way_relation' object
         self._add_right_of_way_relation()
 
@@ -282,6 +306,26 @@ class CR2LaneletConverter:
                     regulatory_elements=reg_elements_arr,
                 )
                 self.osm.add_way_relation(new_way_rel)
+
+    def _convert_area(self, area: Area):
+        """
+        Converts a CommonRoad area to the Lanelet2 multipolygon.
+
+        :param area: area to be converted.
+        """
+        outer_list = list()
+        for border in area.border:
+            nodes = self._create_nodes_from_vertices(border.border_vertices)
+            type, subtype = _line_marking_to_type_subtype_vertices(border.line_marking)
+            way = Way(self.id_count, nodes, {"subtype": subtype, "type": type})
+            self.osm.add_way(way)
+            outer_list.append(way.id_)
+        tag_dict = {}
+        if area.area_types:
+            for area_type in area.area_types:
+                tag_dict["subtype"] = str(area_type.value)
+        multipolygon = Multipolygon(self.id_count, outer_list, tag_dict)
+        self.osm.add_multipolygon(multipolygon)
 
     def _convert_traffic_light(self, light: TrafficLight):
         """
