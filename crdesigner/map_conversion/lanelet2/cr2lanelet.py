@@ -248,6 +248,10 @@ class CR2LaneletConverter:
         # map the traffic lights and the referred lanelets to a 'right_of_way_relation' object
         self._add_regulatory_element_for_traffic_lights()
 
+        # append the lane_change flag to osm ways if the autoware flag is set to True
+        if self._config.autoware is True:
+            self._append_lane_change_tags()
+
         return self.osm.serialize_to_xml()
 
     def _add_regulatory_element_for_traffic_lights(self):
@@ -940,3 +944,22 @@ class CR2LaneletConverter:
                         )
         for speed_sign_id in speed_sign_ids:
             way_rel.regulatory_elements.append(str(speed_sign_id))
+
+    def _append_lane_change_tags(self):
+        """
+        Function that appends the lane change tags to osm ways based on the linemarking of the way.
+        Possibility of a lane change has been copied from the Lanelet2 documentation.
+        The lane change tags are being used by Autoware.
+        """
+        ways = list(self.osm.ways.values())
+        for way in ways:
+            if way.tag_dict:
+                subtype = way.tag_dict["subtype"]
+                if subtype == "dashed" or subtype == "dashed_dashed":
+                    way.tag_dict["lane_change"] = "yes"
+                elif subtype == "dashed_solid":
+                    way.tag_dict["lane_change"] = "left->right: yes"
+                elif subtype == "solid_dashed":
+                    way.tag_dict["lane_change"] = "right->left: yes"
+                elif way.tag_dict["type"] != "traffic_light" and way.tag_dict["type"] != "traffic_sign":
+                    way.tag_dict["lane_change"] = "no"
