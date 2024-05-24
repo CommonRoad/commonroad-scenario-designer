@@ -5,6 +5,7 @@
 ### Added
 - lanelet2cr: Multipolygon and line marking conversion
 - cr2lanelet: Area conversion
+- CommonRoad to OpenDRIVE conversion
 
 ## [0.8.1] - 2024-03-28
 
@@ -22,13 +23,13 @@
 - cr2lanelet: Static height for traffic lights (1.2m) until official height support in CommonRoad
 - cr2lanelet: Regulatory element to corresponding way relation for lanes (required by autoware)
 - Option to display the aerial image of the current position
-- By default, if no lbdv creditials are stored, the open source credentials are used
+- By default, if no lbdv credentials are stored, the open source credentials are used
 - File reader that optionally verifies and repairs the road network
 - Option for the scenario designer file reader and writer to project the scenario
 - Possibility to change the geo reference and translate the scenario
 - Integrated map verification/repairing error visualization
 - Separate obstacle profile widget within obstacle toolbox
-- Multiple obstacle profiles visualizable
+- Multiple obstacle profiles can be visualized
 - Direct conversion from OpenDRIVE to Lanelet2
 
 ### Changed
