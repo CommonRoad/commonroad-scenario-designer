@@ -281,6 +281,11 @@ class TestCR2LaneletConverter(unittest.TestCase):
         cr1(scenario)
         self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {"type": "line_thin", "subtype": "solid_dashed"})
 
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.DASHED
+        scenario.lanelet_network.lanelets[1].line_marking_right_vertices = LineMarking.DASHED
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {"type": "line_thin", "subtype": "dashed"})
+
         scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.UNKNOWN
         scenario.lanelet_network.lanelets[1].line_marking_right_vertices = LineMarking.SOLID
         cr1(scenario)
