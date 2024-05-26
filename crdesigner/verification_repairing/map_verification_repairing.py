@@ -117,7 +117,7 @@ def verify_and_repair_map(
     map_verification = initial_map_verification(verification_result, str(complete_map_name), config)
 
     verification_time, repairing_time = 0.0, 0.0
-    logging.info(f"Validating map {complete_map_name} with hol solver")
+    logging.info(f"Validating map {complete_map_name}.")
 
     groups_handler = GroupsHandler()
 
@@ -233,7 +233,7 @@ def verify_and_repair_map(
             file_format=config.evaluation.file_format,
         )
 
-    logging.info(f"Validating map {complete_map_name} finished with hol solver")
+    logging.info(f"Validating map {complete_map_name} finished.")
 
     return network, verification_result
 
