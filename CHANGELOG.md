@@ -5,6 +5,7 @@
 ### Added
 - lanelet2cr: Multipolygon and line marking conversion
 - cr2lanelet: Area conversion
+- cr2lanelet: Lane change property tags
 
 ## [0.8.1] - 2024-03-28
 
