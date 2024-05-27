@@ -960,12 +960,19 @@ class CR2LaneletConverter:
         ways = list(self.osm.ways.values())
         for way in ways:
             if way.tag_dict:
-                subtype = way.tag_dict["subtype"]
-                if subtype == "dashed" or subtype == "dashed_dashed":
-                    way.tag_dict["lane_change"] = "yes"
-                elif subtype == "dashed_solid":
-                    way.tag_dict["lane_change"] = "left->right: yes"
-                elif subtype == "solid_dashed":
-                    way.tag_dict["lane_change"] = "right->left: yes"
-                elif way.tag_dict["type"] != "traffic_light" and way.tag_dict["type"] != "traffic_sign":
-                    way.tag_dict["lane_change"] = "no"
+                if "subtype" in way.tag_dict:
+                    subtype = way.tag_dict["subtype"]
+                    if subtype == "dashed" or subtype == "dashed_dashed":
+                        way.tag_dict["lane_change"] = "yes"
+                    elif subtype == "dashed_solid":
+                        way.tag_dict["lane_change"] = "left->right: yes"
+                    elif subtype == "solid_dashed":
+                        way.tag_dict["lane_change"] = "right->left: yes"
+                    elif way.tag_dict["type"] != "traffic_light" and way.tag_dict["type"] != "traffic_sign":
+                        way.tag_dict["lane_change"] = "no"
+                    else:
+                        # if the line marking does not exist, lane change is not possible
+                        way.tag_dict["lane_change"] = "no"
+            else:
+                # if the line marking does not exist, lane change is not possible
+                way.tag_dict["lane_change"] = "no"
