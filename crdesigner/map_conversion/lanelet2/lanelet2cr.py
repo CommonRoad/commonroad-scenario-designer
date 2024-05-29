@@ -744,6 +744,9 @@ class Lanelet2CRConverter:
 
         left_way = self.osm.find_way_by_id(way_rel.left_way)
         right_way = self.osm.find_way_by_id(way_rel.right_way)
+
+        # a conversion bug happens if the outer ways of adjacent lanelets don't have the same number of nodes
+        # it is solved in 'repair_normal_adjacency' function of the LaneletRepairing class.
         if len(left_way.nodes) != len(right_way.nodes):
             logging.info("Lanelet2CRConverter::_way_rel_to_lanelet: Trying to fix relation {}...".format(way_rel.id_))
 
