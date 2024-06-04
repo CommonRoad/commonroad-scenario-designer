@@ -40,10 +40,10 @@ def check_intersected_lines(line1: np.ndarray, line2: np.ndarray = None, exclude
     """
     if excluded_points is None:
         excluded_points = []
-    line_string1 = LineString([(x, y) for x, y in line1])
+    line_string1 = LineString([(x, y, z[0]) if z else (x, y) for x, y, *z in line1])
     if line2 is None:
         return not line_string1.is_simple
-    line_string2 = LineString([(x, y) for x, y in line2])
+    line_string2 = LineString([(x, y, z[0]) if z else (x, y) for x, y, *z in line2])
     intersection = line_string1.intersection(line_string2)
 
     if isinstance(intersection, LineString):
