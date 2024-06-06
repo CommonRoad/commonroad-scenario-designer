@@ -3,6 +3,7 @@ import math
 from typing import List
 
 import numpy as np
+import shapely
 from commonroad.scenario.lanelet import Lanelet
 from shapely.geometry import LineString, Point, Polygon
 
@@ -90,11 +91,21 @@ def fill_number_of_vertices(vertices: np.ndarray, number: int) -> np.ndarray:
     :param number: Number of points
     :return: Modified polyline with the specified number of points
     """
-    coords = [[adj_vert[0], adj_vert[1]] for adj_vert in vertices]
+    coords = [[adj_vert[i] for i in range(len(adj_vert))] for adj_vert in vertices]
     line = LineString(coords)
     distances = np.linspace(0, line.length, number)
     points = [line.interpolate(distance) for distance in distances]
-    suited_coords = [[point.x, point.y] for point in points]
+    suited_coords = list()
+    for point in points:
+        # check if the point is 3d
+        try:
+            has_z = hasattr(point, "z")
+        except shapely.errors.DimensionError:
+            has_z = False
+        if has_z:
+            suited_coords.append([point.x, point.y, point.z])
+        else:
+            suited_coords.append([point.x, point.y])
     suited_vertices = np.array(suited_coords)
     return suited_vertices
 
@@ -107,7 +118,12 @@ def average_vertices(left_vertices: np.ndarray, right_vertices: np.ndarray, reve
     for index in range(size):
         avg_x = (left_vertices[index][0] + right_vertices[index][0]) / 2
         avg_y = (left_vertices[index][1] + right_vertices[index][1]) / 2
-        avg_vertices.append([avg_x, avg_y])
+        # check if the vertex is 3d
+        if len(left_vertices[index]) == 3:
+            avg_z = (left_vertices[index][2] + right_vertices[index][2]) / 2
+            avg_vertices.append([avg_x, avg_y, avg_z])
+        else:
+            avg_vertices.append([avg_x, avg_y])
 
     return np.array(avg_vertices)
 
