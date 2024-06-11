@@ -488,6 +488,10 @@ class TestLaneletFormulaPool(TestFormulaPool):
 
         self.check_sat(formula_id, self.network, expected=True)
 
+        self.lanelet_1.left_vertices = np.array([[0.0, 1.0, 0.0], [0.5, 0.0, 0.0], [1.0, -1.0, 0.0]])
+
+        self.check_sat(formula_id, self.network, expected=True)
+
     def test_left_self_intersection(self):
         formula_id = LaneletFormulaID.LEFT_SELF_INTERSECTION
 
