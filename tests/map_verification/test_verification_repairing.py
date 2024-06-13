@@ -45,7 +45,7 @@ class TestAll(unittest.TestCase):
             "paper_test_maps/DEU_Reutlingen-1_1_T-1",
             "DEU_AachenBendplatz-1",
             "DEU_TrafficLightTest-1",  # traffic light cycle has no ID-> unique ID check fails if cycle in overall set
-            "Garching_bakery_round_3D",
+            "merging_lanelets_utm_3d",
         ]
         self.network_path = Path(__file__).parent
         self.base_formula_ids = []
