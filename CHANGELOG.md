@@ -7,6 +7,9 @@
 - cr2lanelet: Area conversion
 - cr2lanelet: Lane change property tags
 
+### Changed
+- odr2cr: Warning instead of failure in case of not supported road object type
+
 ## [0.8.1] - 2024-03-28
 
 ### Added
