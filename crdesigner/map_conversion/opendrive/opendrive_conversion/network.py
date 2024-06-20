@@ -195,7 +195,7 @@ class Network:
             if road.types:
                 if road.types[0].speed:
                     max_speed = road.types[0].speed.max  # possible values: "no limit", "undefined", int
-                    unit_speed = road.types[0].speed.unit  # possible values: "km/h", "m/s", "mph"
+                    # unit_speed = road.types[0].speed.unit  # possible values: "km/h", "m/s", "mph"
                     if max_speed is int:
                         for section in road.lanes.lane_sections:
                             for rightLane in section.rightLanes:
