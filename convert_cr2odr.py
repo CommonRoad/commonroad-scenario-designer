@@ -50,8 +50,9 @@ def render_maps_before_after(sc_before: Scenario, sc_after: Scenario, scenario_p
     sc_before.lanelet_network.draw(rnd)
     rnd.render(filename=str(scenario_path / Path(f"{sc_before.scenario_id}_before.png")))
 
-    sc_after.lanelet_network.draw(rnd)
-    rnd.render(filename=str(scenario_path / Path(f"{sc_after.scenario_id}_after.png")))
+    if sc_after is not None:
+        sc_after.lanelet_network.draw(rnd)
+        rnd.render(filename=str(scenario_path / Path(f"{sc_after.scenario_id}_after.png")))
 
 
 def map_conversion_scenario(file_path: Path) -> bool:
@@ -74,7 +75,9 @@ map_conversion_scenario.map_ids = set()  # static variable of corresponding func
 # which should be converted
 
 
-def convert_scenarios(cr_scenarios_path: Path, odr_path: Path, num_threads: int = 1) -> None:
+def convert_scenarios(
+    cr_scenarios_path: Path, odr_path: Path, num_threads: int = 1, convert_back: bool = False
+) -> None:
     """Converts 2020a maps to OpenDRIVE maps."""
 
     convert_single_scenario = ""
@@ -109,17 +112,18 @@ def convert_scenarios(cr_scenarios_path: Path, odr_path: Path, num_threads: int 
         filter(lambda sc_path: any([dir_dupl in str(sc_path) for dir_dupl in duplicated_dirs]), scenarios_paths)
     )
 
-    func = partial(convert_single_map, odr_path)
+    func = partial(convert_single_map, odr_path, convert_back)
     with Pool(processes=num_cores) as pool:
         pool.map(func, scenarios_paths)
 
 
-def convert_single_map(conversion_path_odr: Path, path_cr: Path):
+def convert_single_map(conversion_path_odr: Path, convert_back: bool, path_cr: Path):
     """
     Converts single CommonRoad map to new format.
 
     :param conversion_path_odr: Path where new scenario files without figures should be stored.
     :param path_cr: Path of old format scenario.
+    :param convert_back: Boolean indicating whether map should be converted.
     """
     scenario, planning_problem_set = CommonRoadFileReader(path_cr).open()
     scenario_id = scenario.scenario_id
@@ -149,7 +153,7 @@ def convert_single_map(conversion_path_odr: Path, path_cr: Path):
         ]
         config = MapVerParams()
         config.verification.formulas = formulas
-        scenario.replace_lanelet_network(verify_and_repair_map(scenario.lanelet_network, config)[0])
+        scenario.replace_lanelet_network(verify_and_repair_map(scenario.lanelet_network, config, scenario_id)[0])
 
         output_name = conversion_path_odr / f"{network_id}.odr"
         if not conversion_path_odr.exists():
@@ -158,11 +162,14 @@ def convert_single_map(conversion_path_odr: Path, path_cr: Path):
         converter.convert(str(output_name))
         logging.info(f"Conversion of {path_cr} was successful.")
 
-        scenario_new = opendrive_to_commonroad(output_name)
-        for obs in scenario.obstacles:
-            obs.obstacle_id = scenario_new.generate_object_id()
-            scenario_new.add_objects(obs)
-        scenario_new.scenario_id = scenario.scenario_id
+        if convert_back:
+            scenario_new = opendrive_to_commonroad(output_name)
+            for obs in scenario.obstacles:
+                obs.obstacle_id = scenario_new.generate_object_id()
+                scenario_new.add_objects(obs)
+            scenario_new.scenario_id = scenario.scenario_id
+        else:
+            scenario_new = None
 
         render_maps_before_after(scenario, scenario_new, conversion_path_odr)
     except Exception as e:
@@ -186,6 +193,13 @@ if __name__ == "__main__":
         default=Path("/home/sebastian/Downloads/odr"),
         required=False,
     )
+    parser.add_argument(
+        "--convert_back",
+        type=bool,
+        help="Boolean indicating whether OpenDRIVE to CommonRoad conversion should be applied.",
+        default=False,
+        required=False,
+    )
 
     args = parser.parse_args()
-    convert_scenarios(args.input_path, args.output_path, args.num_threads)
+    convert_scenarios(args.input_path, args.output_path, args.num_threads, args.convert_back)
