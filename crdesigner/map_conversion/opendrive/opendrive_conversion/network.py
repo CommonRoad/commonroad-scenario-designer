@@ -191,6 +191,20 @@ class Network:
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
             road.planView.precalculate()
+
+            if road.types:
+                if road.types[0].speed:
+                    max_speed = road.types[0].speed.max  # possible values: "no limit", "undefined", int
+                    unit_speed = road.types[0].speed.unit  # possible values: "km/h", "m/s", "mph"
+                    if max_speed is int:
+                        for section in road.lanes.lane_sections:
+                            for rightLane in section.rightLanes:
+                                rightLane.speed = max_speed
+                            for leftLane in section.leftLanes:
+                                leftLane.speed = max_speed
+                            for centerLane in section.centerLanes:
+                                centerLane.speed = max_speed
+
             # The reference border is the baseline for the whole road
             reference_border = OpenDriveConverter.create_reference_border(road.planView, road.lanes.laneOffsets)
             # Extracting signals, signs and stop lines from each road
