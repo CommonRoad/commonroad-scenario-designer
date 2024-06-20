@@ -1,3 +1,6 @@
+import logging
+
+
 class Object:
     """
     Describes items that influence a road by expanding, delimiting and supplementing its course.
@@ -103,7 +106,7 @@ class Object:
         if value == "-1":
             value = "none"
         if value not in road_types and value not in customs:
-            raise AttributeError("Value is not a supported object type!")
+            logging.warning(f"Value {value} is not a supported road object type!")
         self._type = str(value)
 
     @property
