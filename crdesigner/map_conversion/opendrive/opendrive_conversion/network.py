@@ -195,15 +195,31 @@ class Network:
             if road.types:
                 if road.types[0].speed:
                     max_speed = road.types[0].speed.max  # possible values: "no limit", "undefined", int
-                    # unit_speed = road.types[0].speed.unit  # possible values: "km/h", "m/s", "mph"
-                    if max_speed is int:
+                    unit_speed = road.types[0].speed.unit  # possible values: "km/h", "m/s", "mph"
+
+                    if max_speed == "no limit" or max_speed == "undefined":
+                        break
+
+                    else:
+                        max_speed = float(max_speed)
+
+                        # convert km/h or mph to m/s
+                        if unit_speed == "km/h":
+                            max_speed = max_speed * 0.277
+                        elif unit_speed == "mph":
+                            max_speed = max_speed * 0.447
+
+                        # assign the road speed limit to all road sections that don't have a speed limit
                         for section in road.lanes.lane_sections:
                             for rightLane in section.rightLanes:
-                                rightLane.speed = max_speed
+                                if rightLane.speed is None:
+                                    rightLane.speed = max_speed
                             for leftLane in section.leftLanes:
-                                leftLane.speed = max_speed
+                                if leftLane.speed is None:
+                                    leftLane.speed = max_speed
                             for centerLane in section.centerLanes:
-                                centerLane.speed = max_speed
+                                if centerLane.speed is None:
+                                    centerLane.speed = max_speed
 
             # The reference border is the baseline for the whole road
             reference_border = OpenDriveConverter.create_reference_border(road.planView, road.lanes.laneOffsets)
