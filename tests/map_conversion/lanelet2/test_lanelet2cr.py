@@ -652,7 +652,6 @@ class TestLanelet2CRConverter(unittest.TestCase):
         autoware_tl_cycle = [TrafficLightCycleElement(TrafficLightState.INACTIVE, 5)]
         self.assertEqual(tl_cycle, autoware_tl_cycle)
 
-
         # reset autoware flag
         self._config.autoware = False
 
