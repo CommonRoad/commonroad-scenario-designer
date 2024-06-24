@@ -523,11 +523,14 @@ class Lanelet2CRConverter:
         if self._config.autoware:
             new_id = traffic_light_way.id_
             active = False
+            cycle_list = [TrafficLightCycleElement(TrafficLightState.INACTIVE, 5)]
+
         else:
             new_id = generate_unique_id()
             active = True
+            cycle_list = _append_traffic_light_cycles(traffic_light_way)
 
-        cycle_list = _append_traffic_light_cycles(traffic_light_way)
+        logging.info("cycle_list: " + str(cycle_list) + " active: " + str(active) + " new_id: " + str(new_id))
 
         # TL in L2 format is represented with 3 nodes, we will take the one in the middle
         node = self.osm.nodes[traffic_light_way.nodes[1]]

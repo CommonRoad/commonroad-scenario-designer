@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork, LineMarking, StopLine
 from commonroad.scenario.scenario import GeoTransformation, Location
-from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.scenario.traffic_light import TrafficLight, TrafficLightCycleElement, TrafficLightState
 from commonroad.scenario.traffic_sign import (
     TrafficSign,
     TrafficSignIDGermany,
@@ -646,6 +646,12 @@ class TestLanelet2CRConverter(unittest.TestCase):
         # testing the active state of the traffic light
         tl_active_state = traffic_light.active
         self.assertEqual(tl_active_state, False)
+
+        # testing the traffic light cycle
+        tl_cycle = traffic_light.traffic_light_cycle.cycle_elements
+        autoware_tl_cycle = [TrafficLightCycleElement(TrafficLightState.INACTIVE, 5)]
+        self.assertEqual(tl_cycle, autoware_tl_cycle)
+
 
         # reset autoware flag
         self._config.autoware = False

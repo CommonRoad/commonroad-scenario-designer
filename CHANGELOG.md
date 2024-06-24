@@ -4,7 +4,7 @@
 
 ### Added
 - lanelet2cr: Multipolygon and line marking conversion
-- lanelet2cr: Retain traffic light IDs for Autoware
+- lanelet2cr: Traffic light conversion for Autoware (retain traffic light ids, set own Autoware default cycle, and set traffic light active status to false)
 - cr2lanelet: Area conversion
 - cr2lanelet: Lane change property tags
 
