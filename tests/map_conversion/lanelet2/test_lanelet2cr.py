@@ -6,7 +6,11 @@ import unittest
 import numpy as np
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork, LineMarking, StopLine
 from commonroad.scenario.scenario import GeoTransformation, Location
-from commonroad.scenario.traffic_light import TrafficLight, TrafficLightCycleElement, TrafficLightState
+from commonroad.scenario.traffic_light import (
+    TrafficLight,
+    TrafficLightCycleElement,
+    TrafficLightState,
+)
 from commonroad.scenario.traffic_sign import (
     TrafficSign,
     TrafficSignIDGermany,
