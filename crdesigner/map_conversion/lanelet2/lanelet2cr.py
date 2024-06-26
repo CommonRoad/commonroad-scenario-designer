@@ -383,6 +383,15 @@ class Lanelet2CRConverter:
 
         self.lanelet_network = ConversionLaneletNetwork()
 
+        # Retain traffic light IDs for Autoware
+        if self._config.autoware:
+            _highest_traffic_light_id = str(0)
+            for way in osm.ways:
+                if osm.ways[way].tag_dict.get("type") == "traffic_light":
+                    if way > _highest_traffic_light_id:
+                        _highest_traffic_light_id = way
+            generate_unique_id(int(_highest_traffic_light_id))
+
         speed_limits = {}
         speed_limit_lanelets = {}  # type: ignore
         for speed_limit_key in osm.speed_limit_signs.keys():
@@ -510,9 +519,18 @@ class Lanelet2CRConverter:
         """
         # create a TrafficLight element (CR format) from the traffic light way (L2 format\<)
         # id,cycle,position,offset,direction,active
-        new_id = generate_unique_id()
+        # for autoware, the traffic light id is retained
+        if self._config.autoware:
+            new_id = traffic_light_way.id_
+            active = False
+            cycle_list = [TrafficLightCycleElement(TrafficLightState.INACTIVE, 5)]
 
-        cycle_list = _append_traffic_light_cycles(traffic_light_way)
+        else:
+            new_id = generate_unique_id()
+            active = True
+            cycle_list = _append_traffic_light_cycles(traffic_light_way)
+
+        logging.info("cycle_list: " + str(cycle_list) + " active: " + str(active) + " new_id: " + str(new_id))
 
         # TL in L2 format is represented with 3 nodes, we will take the one in the middle
         node = self.osm.nodes[traffic_light_way.nodes[1]]
@@ -543,7 +561,7 @@ class Lanelet2CRConverter:
 
         # create the traffic light
         traffic_light = TrafficLight(
-            new_id, position, TrafficLightCycle(cycle_list, 1), active=True, direction=TrafficLightDirection.STRAIGHT
+            new_id, position, TrafficLightCycle(cycle_list, 1), active=active, direction=TrafficLightDirection.STRAIGHT
         )
 
         # add the traffic light to our lanelet network
