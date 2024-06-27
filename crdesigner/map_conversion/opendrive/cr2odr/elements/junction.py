@@ -23,7 +23,7 @@ class Junction:
         self,
         incoming: List[IntersectionIncomingElement],
         id_to_road: Dict[int, int],
-        lane_to_lane: Dict[int, int],
+        lanelet_to_lane: Dict[int, int],
         root: Element,
         lane_network: LaneletNetwork,
         junction_id: int,
@@ -34,7 +34,7 @@ class Junction:
 
         :param incoming: list of incoming intersection
         :param id_to_road: dictionary with lanelet id as key and OpenDRIVE road id as value
-        :param lane_to_lane: dictionary with lanelet id as key and lane id as value
+        :param lanelet_to_lane: dictionary with lanelet id as key and lane id as value
         :param root: OpenDRIVE etree element
         :param lane_network: collection of lanelet network
         :param junction_id: counting of junction
@@ -71,16 +71,19 @@ class Junction:
                 inc_suc.add(road_id)
                 map_road_to_lane_link[road_id] = []
 
-            # look if all incoming lanes are on the same road in opendrive
+            # look if all incoming lanes are on the same road in OpenDRIVE
             road_number = id_to_road[all_incomings[0]]
             for num in all_incomings:
                 if road_number != id_to_road[num]:
                     print("ERROR, lanes not on the same road")
                     return
                 inc_lane = lane_network.find_lanelet_by_id(num)
-                lane_offset = lane_to_lane[num]
+                lane_offset = lanelet_to_lane[num]
                 for lane_suc in inc_lane.successor:
-                    map_road_to_lane_link[id_to_road[lane_suc]].append((lane_offset, lane_to_lane[lane_suc]))
+                    if map_road_to_lane_link.get(id_to_road[lane_suc]) is None:
+                        map_road_to_lane_link[id_to_road[lane_suc]] = [(lane_offset, lanelet_to_lane[lane_suc])]
+                    else:
+                        map_road_to_lane_link[id_to_road[lane_suc]].append((lane_offset, lanelet_to_lane[lane_suc]))
 
             # create connection element for every successor road
             for connect in inc_suc:
