@@ -5,6 +5,7 @@ import warnings
 from functools import partial
 from multiprocessing import Pool
 from pathlib import Path
+from typing import Optional
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.scenario import Scenario
@@ -128,7 +129,7 @@ def convert_single_map(conversion_path_odr: Path, convert_back: bool, path_cr: P
     scenario, planning_problem_set = CommonRoadFileReader(path_cr).open()
     scenario_id = scenario.scenario_id
     network_id = str(scenario_id.country_id) + "_" + str(scenario_id.map_name) + "-" + str(scenario_id.map_id)
-
+    converter: Optional[Converter] = None
     try:
         formulas = [
             LaneletFormulaID.EXISTENCE_RIGHT_ADJ,
@@ -173,6 +174,7 @@ def convert_single_map(conversion_path_odr: Path, convert_back: bool, path_cr: P
 
         render_maps_before_after(scenario, scenario_new, conversion_path_odr)
     except Exception as e:
+        converter.reset_converter()
         logging.error(f"Conversion of {path_cr} was unsuccessful: {str(e)}\n{traceback.format_exc()}")
 
 

@@ -301,6 +301,12 @@ class Converter:
         which makes it possible to convert multiple files queued up.
         """
         self.writer.save()
+        self.reset_converter()
+
+    def reset_converter(self):
+        """
+        Resets class values.
+        """
         Road.cr_id_to_od.clear()
         Road.link_map.clear()
         Road.lane_2_lane_link.clear()
