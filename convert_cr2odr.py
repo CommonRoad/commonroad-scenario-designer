@@ -130,6 +130,9 @@ def convert_single_map(conversion_path_odr: Path, convert_back: bool, path_cr: P
     scenario_id = scenario.scenario_id
     network_id = str(scenario_id.country_id) + "_" + str(scenario_id.map_name) + "-" + str(scenario_id.map_id)
     converter: Optional[Converter] = None
+    output_name = conversion_path_odr / f"{network_id}.odr"
+    if not conversion_path_odr.exists():
+        conversion_path_odr.mkdir(parents=True, exist_ok=True)
     try:
         formulas = [
             LaneletFormulaID.EXISTENCE_RIGHT_ADJ,
@@ -156,13 +159,14 @@ def convert_single_map(conversion_path_odr: Path, convert_back: bool, path_cr: P
         config.verification.formulas = formulas
         scenario.replace_lanelet_network(verify_and_repair_map(scenario.lanelet_network, config, scenario_id)[0])
 
-        output_name = conversion_path_odr / f"{network_id}.odr"
-        if not conversion_path_odr.exists():
-            conversion_path_odr.mkdir(parents=True, exist_ok=True)
         converter = Converter(scenario)
         converter.convert(str(output_name))
         logging.info(f"Conversion of {path_cr} was successful.")
-
+    except Exception as e:
+        if converter is not None:
+            converter.reset_converter()
+        logging.error(f"cr2odr conversion of {path_cr} was unsuccessful: {str(e)}\n{traceback.format_exc()}")
+    try:
         if convert_back:
             scenario_new = opendrive_to_commonroad(output_name)
             for obs in scenario.obstacles:
@@ -176,7 +180,7 @@ def convert_single_map(conversion_path_odr: Path, convert_back: bool, path_cr: P
     except Exception as e:
         if converter is not None:
             converter.reset_converter()
-        logging.error(f"Conversion of {path_cr} was unsuccessful: {str(e)}\n{traceback.format_exc()}")
+        logging.error(f"odr2cr conversion of {path_cr} was unsuccessful: {str(e)}\n{traceback.format_exc()}")
 
 
 if __name__ == "__main__":
