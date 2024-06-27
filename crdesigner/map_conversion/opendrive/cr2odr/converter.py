@@ -312,7 +312,7 @@ class Converter:
 
     def populate_traffic_elements(self, link_map: Dict[int, int]) -> None:
         """
-        This function is responsible for populating traffic elements.
+        This function is responsible for populating regulatory elements.
 
         :param link_map: Dictionary with keys as lanelet id of CommonRoad lanelets and
         values as road id of OpenDrive roads
@@ -345,7 +345,7 @@ class Converter:
                 ]
 
             if non_empty:
-                if len(data["stop_lines"]) == 0:
+                if len(data["stop_lines"]) > 0:
                     if self.traffic_elements.get(link_map[lanelet.lanelet_id]):
                         data["stop_lines"] = self.traffic_elements[link_map[lanelet.lanelet_id]]["stop_lines"]
 
