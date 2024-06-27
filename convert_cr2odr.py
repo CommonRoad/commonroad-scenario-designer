@@ -174,7 +174,8 @@ def convert_single_map(conversion_path_odr: Path, convert_back: bool, path_cr: P
 
         render_maps_before_after(scenario, scenario_new, conversion_path_odr)
     except Exception as e:
-        converter.reset_converter()
+        if converter is not None:
+            converter.reset_converter()
         logging.error(f"Conversion of {path_cr} was unsuccessful: {str(e)}\n{traceback.format_exc()}")
 
 
