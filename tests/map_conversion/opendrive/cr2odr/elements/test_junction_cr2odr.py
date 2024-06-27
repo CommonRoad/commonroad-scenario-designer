@@ -21,7 +21,7 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
     def setUp(self):
         Road.counting = 20
         Road.cr_id_to_od = {}
-        Road.lane_to_lane = {}
+        Road.lanelet_to_lane = {}
         Road.lane_2_lane_link = {}
         Road.link_map = {}
 
@@ -41,7 +41,7 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
         junction = Junction(
             intersection.incomings,
             Road.cr_id_to_od,
-            Road.lane_to_lane,
+            Road.lanelet_to_lane,
             self.converter.writer.root,
             self.converter.scenario.lanelet_network,
             intersection.intersection_id,

@@ -56,7 +56,7 @@ class Road:
     counting = open_drive_config.initial_road_counting
     roads: Dict = {}
     cr_id_to_od: Dict = {}
-    lane_to_lane: Dict = {}
+    lanelet_to_lane: Dict = {}
 
     lane_2_lane_link: Dict[int, Dict[str, Dict[int, List[int]]]] = {}
 
@@ -471,13 +471,13 @@ class Road:
             # lanelets to the right should get a negative id
             if lane_id <= 0:
                 self.lane_help(lane_id - 1, config.LANE_SECTION_DRIVING_TAG, 0, right, width_list, dist_list)
-                Road.lane_to_lane[self.lane_list[i].lanelet_id] = lane_id - 1
+                Road.lanelet_to_lane[self.lane_list[i].lanelet_id] = lane_id - 1
                 self.inner_links[self.lane_list[i].lanelet_id] = lane_id - 1
 
             # lanelets to the left should get a positive id -> opposite driving direction
             else:
                 self.lane_help(lane_id, config.LANE_SECTION_DRIVING_TAG, 0, left, width_list, dist_list)
-                Road.lane_to_lane[self.lane_list[i].lanelet_id] = lane_id
+                Road.lanelet_to_lane[self.lane_list[i].lanelet_id] = lane_id
                 self.inner_links[self.lane_list[i].lanelet_id] = lane_id
 
     # nice idea to reuse the subelement generation for left center and right

@@ -43,7 +43,7 @@ class TestRoad(unittest.TestCase):
     def setUp(self):
         Road.counting = 20
         Road.cr_id_to_od = dict()
-        Road.lane_to_lane = dict()
+        Road.lanelet_to_lane = dict()
         Road.lane_2_lane_link = dict()
         Road.link_map = dict()
 

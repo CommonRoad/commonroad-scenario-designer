@@ -79,7 +79,7 @@ def process_link_map(link_map: LinkMap_T, lane_2_lane: Dict[int, Dict[str, Dict]
         for lanelet, lanelet_val in road_val.items():
             if lanelet == config.LANE_INDICES_TAG:
                 continue
-            lane_id = Road.lane_to_lane[lanelet]
+            lane_id = Road.lanelet_to_lane[lanelet]
             lane_2_lane[road_id]["succ"][lane_id] = []
             lane_2_lane[road_id]["pred"][lane_id] = []
             for links, links_val in lanelet_val.items():
@@ -90,22 +90,22 @@ def process_link_map(link_map: LinkMap_T, lane_2_lane: Dict[int, Dict[str, Dict]
                 if links == "succ" and not invert:
                     for link in links_val:
                         road_succ_pred["succ"].append(link)
-                        lane_2_lane[road_id]["succ"][lane_id].append(Road.lane_to_lane[link])
+                        lane_2_lane[road_id]["succ"][lane_id].append(Road.lanelet_to_lane[link])
 
                 if links == "pred" and not invert:
                     for link in links_val:
                         road_succ_pred["pred"].append(link)
-                        lane_2_lane[road_id]["pred"][lane_id].append(Road.lane_to_lane[link])
+                        lane_2_lane[road_id]["pred"][lane_id].append(Road.lanelet_to_lane[link])
 
                 if links == "succ" and invert:
                     for link in links_val:
                         road_succ_pred["pred"].append(link)
-                        lane_2_lane[road_id]["pred"][lane_id].append(Road.lane_to_lane[link])
+                        lane_2_lane[road_id]["pred"][lane_id].append(Road.lanelet_to_lane[link])
 
                 if links == "pred" and invert:
                     for link in links_val:
                         road_succ_pred["succ"].append(link)
-                        lane_2_lane[road_id]["succ"][lane_id].append(Road.lane_to_lane[link])
+                        lane_2_lane[road_id]["succ"][lane_id].append(Road.lanelet_to_lane[link])
 
         link_map[road_id]["mergeLinkage"] = road_succ_pred
         for key, values in road_succ_pred.items():
@@ -305,7 +305,7 @@ class Converter:
         Road.link_map.clear()
         Road.lane_2_lane_link.clear()
         Road.roads.clear()
-        Road.lane_to_lane.clear()
+        Road.lanelet_to_lane.clear()
         Road.counting = 20
         Junction.counting = 0
         OpenDRIVEObstacle.counting = 0
@@ -436,7 +436,7 @@ class Converter:
             Junction(
                 intersection.incomings,
                 Road.cr_id_to_od,
-                Road.lane_to_lane,
+                Road.lanelet_to_lane,
                 self.writer.root,
                 self.scenario.lanelet_network,
                 intersection.intersection_id,
@@ -494,7 +494,7 @@ class Converter:
                     Junction(
                         [incoming],
                         Road.cr_id_to_od,
-                        Road.lane_to_lane,
+                        Road.lanelet_to_lane,
                         self.writer.root,
                         self.lane_net,
                         Junction.counting,
