@@ -192,10 +192,10 @@ class Network:
         for road in opendrive.roads:
             road.planView.precalculate()
             if road.types:
-                for type in road.types:
-                    if type.speed:
-                        max_speed = type.speed.max  # possible values: "no limit", "undefined", int
-                        unit_speed = type.speed.unit  # possible values: "km/h", "m/s", "mph"
+                for road_type in road.types:
+                    if road_type.speed:
+                        max_speed = road_type.speed.max  # possible values: "no limit", "undefined", int
+                        unit_speed = road_type.speed.unit  # possible values: "km/h", "m/s", "mph"
 
                         if max_speed == "no limit" or max_speed == "undefined":
                             break
@@ -212,7 +212,7 @@ class Network:
                             # assign the road speed limit to all road sections that don't have a speed limit
                             for section in road.lanes.lane_sections:
                                 # check the position of the road section and the starting position of a road type
-                                if section.sPos >= type.start_pos:
+                                if section.sPos >= road_type.start_pos:
                                     for rightLane in section.rightLanes:
                                         if rightLane.speed is None:
                                             rightLane.speed = max_speed
