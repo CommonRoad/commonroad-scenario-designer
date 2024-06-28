@@ -6,6 +6,7 @@
 - lanelet2cr: Multipolygon and line marking conversion
 - cr2lanelet: Area conversion
 - cr2lanelet: Lane change property tags
+- odr2cr: Road speed limit conversion
 
 ## [0.8.1] - 2024-03-28
 
