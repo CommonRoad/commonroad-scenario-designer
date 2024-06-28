@@ -7,6 +7,7 @@
 - lanelet2cr: Traffic light conversion for Autoware (retain traffic light ids, set own Autoware default cycle, and set traffic light active status to false)
 - cr2lanelet: Area conversion
 - cr2lanelet: Lane change property tags
+- odr2cr: Road speed limit conversion
 
 ### Changed
 - odr2cr: Warning instead of failure in case of not supported road object type
