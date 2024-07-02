@@ -22,7 +22,7 @@ class TestConverter(unittest.TestCase):
     def test_create_reference_border(self):
         # create road with lanesection and lane
         road = Road()
-        road.planView.add_line([0, 0], 1.0, 100)
+        road.plan_view.add_line([0, 0], 1.0, 100)
 
         # test border with no laneOffsets
         # create ground truth
@@ -32,7 +32,7 @@ class TestConverter(unittest.TestCase):
 
         self.width_coefficient_offsets = []
         self.width_coefficients = []
-        border = OpenDriveConverter.create_reference_border(road.planView, road.lanes.laneOffsets)
+        border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.laneOffsets)
 
         self.assertListEqual(true_border.width_coefficients, border.width_coefficients)
         self.assertListEqual(true_border.width_coefficient_offsets, border.width_coefficient_offsets)
@@ -55,7 +55,7 @@ class TestConverter(unittest.TestCase):
         road.lanes.laneOffsets.append(lane_offset1)
         lane_offset2 = RoadRecord(*[3.27, 0, 0, 0], start_pos=0)
         road.lanes.laneOffsets.append(lane_offset2)
-        border = OpenDriveConverter.create_reference_border(road.planView, road.lanes.laneOffsets)
+        border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.laneOffsets)
 
         true_border.width_coefficients.clear()
         true_border.width_coefficient_offsets.clear()
@@ -79,14 +79,14 @@ class TestConverter(unittest.TestCase):
         true_border.width_coefficients = [[0.0, 4.123, -0.15, 0.12], [1.25, 0.0, -0.15, 0.1]]
         true_border.width_coefficient_offsets = [0.0, 10]
 
-        border = OpenDriveConverter.create_reference_border(road.planView, road.lanes.laneOffsets)
+        border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.laneOffsets)
 
         self.assertListEqual(true_border.width_coefficients, border.width_coefficients)
         self.assertListEqual(true_border.width_coefficient_offsets, border.width_coefficient_offsets)
 
     def test_lane_section_to_parametric_lanes(self):
         road = Road()
-        road.planView.add_line([0.0, 0.0], 0, 100)
+        road.plan_view.add_line([0.0, 0.0], 0, 100)
         road.id = 100
 
         section = LaneSection(road)
@@ -209,13 +209,13 @@ class TestConverter(unittest.TestCase):
         lane_borders = []
 
         lane_border1 = Border(0.0)
-        lane_border1.reference = road.planView
+        lane_border1.reference = road.plan_view
         lane_border1.width_coefficient_offsets.append(0.0)
         lane_border1.width_coefficients.append([0.0])
         lane_borders.append(lane_border1)
 
         lane_border2 = Border(0.0)
-        lane_border2.reference = road.planView
+        lane_border2.reference = road.plan_view
         lane_border2.width_coefficient_offsets.append(0.0)
         lane_border2.width_coefficients.append([-1.0, 0.0, 0.0, 0.0])
         lane_borders.append(lane_border2)
@@ -242,7 +242,7 @@ class TestConverter(unittest.TestCase):
 
     def test_create_outer_lane_border(self):
         road = Road()
-        road.planView.add_line([0, 0], 1.0, 100)
+        road.plan_view.add_line([0, 0], 1.0, 100)
         lane_section = LaneSection(road)
         lane_section.sPos = 10
 
@@ -258,7 +258,7 @@ class TestConverter(unittest.TestCase):
 
         # test with a given lane border and a lane width one width
         lane_border1 = Border(0.0)
-        lane_border1.reference = road.planView
+        lane_border1.reference = road.plan_view
         lane_border1.width_coefficient_offsets = [0.0, 3.78]
         lane_border1.width_coefficients.append([2.682, 0.103, -0.01, 1.075])
         lane_border1.width_coefficients.append([2.88, 0.0, -0.08, 0.0162])
@@ -289,7 +289,7 @@ class TestConverter(unittest.TestCase):
 
     def test_determine_neighbors(self):
         road = Road()
-        road.planView.add_poly3([0, 0], 1.0, 100, 3.27, 0, 0.2, 0.01)
+        road.plan_view.add_poly3([0, 0], 1.0, 100, 3.27, 0, 0.2, 0.01)
         road.id = 100
         lane_section = LaneSection(road)
         lane_section.sPos = 10

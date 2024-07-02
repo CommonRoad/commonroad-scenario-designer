@@ -75,21 +75,21 @@ class TestTrafficSignals(unittest.TestCase):
         self.roadStraightLine = Road()
         self.roadStraightLine.id = 1
         self.roadStraightLine._length = 50
-        self.roadStraightLine.planView.add_line([0, 0], 0.785398, 100)
+        self.roadStraightLine.plan_view.add_line([0, 0], 0.785398, 100)
 
-        self.roadStraightLine.addSignal(s1)
-        self.roadStraightLine.addSignal(s2)
-        self.roadStraightLine.addSignal(s3)
-        self.roadStraightLine.addSignal(s4)
+        self.roadStraightLine.add_signal(s1)
+        self.roadStraightLine.add_signal(s2)
+        self.roadStraightLine.add_signal(s3)
+        self.roadStraightLine.add_signal(s4)
 
         self.roadMultipleLaneSections = Road()
         self.roadMultipleLaneSections.id = 2
         self.roadMultipleLaneSections._length = 100
-        self.roadMultipleLaneSections.planView.add_line([0, 0], 0.523599, 100)
-        self.roadMultipleLaneSections.addSignal(s1)
-        self.roadMultipleLaneSections.addSignal(s2)
-        self.roadMultipleLaneSections.addSignal(s3)
-        self.roadMultipleLaneSections.addSignal(s4)
+        self.roadMultipleLaneSections.plan_view.add_line([0, 0], 0.523599, 100)
+        self.roadMultipleLaneSections.add_signal(s1)
+        self.roadMultipleLaneSections.add_signal(s2)
+        self.roadMultipleLaneSections.add_signal(s3)
+        self.roadMultipleLaneSections.add_signal(s4)
 
     def test_extract_traffic_element_id(self):
         # test with signal_type and signal_subtype
@@ -146,14 +146,14 @@ class TestTrafficSignals(unittest.TestCase):
         road.id = 1
         road.junction = None
         road._length = 50
-        road.planView.add_line(0, 6.5, 100)
+        road.plan_view.add_line(0, 6.5, 100)
 
         signal = Signal()
         signal.country = "DEU"
         signal.type = "294"
         signal.s = 5
         signal.t = 2.5
-        pos_calc, tangent, _, _ = road.planView.calc(signal.s, compute_curvature=False)
+        pos_calc, tangent, _, _ = road.plan_view.calc(signal.s, compute_curvature=False)
         position = np.array(
             [pos_calc[0] + signal.t * np.cos(tangent + np.pi / 2), pos_calc[1] + signal.t * np.sin(tangent + np.pi / 2)]
         )
@@ -194,7 +194,7 @@ class TestTrafficSignals(unittest.TestCase):
         self.roadMultipleLaneSections.lanes.lane_sections.append(lane_section2)
 
         # construct ground truth / expected value
-        pos_at_s, tangent, _, _ = self.roadMultipleLaneSections.planView.calc(self.signals[0].s, False, False)
+        pos_at_s, tangent, _, _ = self.roadMultipleLaneSections.plan_view.calc(self.signals[0].s, False, False)
         true_first_pos = np.array(
             [
                 pos_at_s[0] + self.signals[0].t * np.cos(tangent + np.pi / 2),

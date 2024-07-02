@@ -1,6 +1,6 @@
 import copy
 from collections import deque
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import iso3166
 import numpy as np
@@ -190,7 +190,7 @@ class Network:
         # start_coord = np.array([transformed_start_coord[0], transformed_start_coord[1]])
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
-            road.planView.precalculate()
+            road.plan_view.precalculate()
             if road.types:
                 for road_type in road.types:
                     if road_type.speed:
@@ -224,7 +224,7 @@ class Network:
                                             centerLane.speed = max_speed
 
             # The reference border is the baseline for the whole road
-            reference_border = OpenDriveConverter.create_reference_border(road.planView, road.lanes.laneOffsets)
+            reference_border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.laneOffsets)
             # Extracting signals, signs and stop lines from each road
 
             # signal_references = get_traffic_signal_references(road)
@@ -253,7 +253,7 @@ class Network:
             # stop lines from road objects
             for road_object in road.objects:
                 if road_object.name == "StopLine":
-                    position, tangent, _, _ = road.planView.calc(road_object.s, compute_curvature=False)
+                    position, tangent, _, _ = road.plan_view.calc(road_object.s, compute_curvature=False)
                     position = np.array(
                         [
                             position[0] + road_object.t * np.cos(tangent + np.pi / 2),
@@ -846,16 +846,14 @@ class LinkIndex:
         for intersection in self._intersections:
             if parametric_lane_id in intersection.keys():
                 del intersection[parametric_lane_id]
-        return
 
-    def concatenate_lanes_in_intersection_map(self, replacement_id_map):
+    def concatenate_lanes_in_intersection_map(self, replacement_id_map: Dict):
         """
         Lanelets are concatenated if possible, hence some lanelets ids that exist in intersections
         are no longer valid and also need to be replaced with the lanelet id they are concatenated with.
 
         :param replacement_id_map: Dict that maps lanelets to their new IDs as per the concatenation results from
             lanelet_network.concatenate_possible_lanelets
-        :type replacement_id_map: dict
         """
         updated_intersection_maps = []
         for intersection_map in self.intersection_maps():

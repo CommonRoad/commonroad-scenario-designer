@@ -1,4 +1,4 @@
-from typing import Union
+from typing import List, Union
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import (
     Junction,
@@ -65,13 +65,7 @@ class Road:
 
     @property
     def id(self) -> int:
-        """
-        ID of the road.
-
-        :getter: returns road ID
-        :setter: sets road ID
-        :type: int
-        """
+        """ID of the road."""
         return self._id
 
     @id.setter
@@ -80,13 +74,7 @@ class Road:
 
     @property
     def name(self) -> str:
-        """
-        Name of the road.
-
-        :getter: returns name of the road
-        :setter: sets name of the road
-        :type: string
-        """
+        """Name of the road."""
         return self._name
 
     @name.setter
@@ -95,13 +83,7 @@ class Road:
 
     @property
     def junction(self) -> Union[None, Junction]:
-        """
-        Junction the road belongs to, if the road is a connecting road.
-
-        :getter: returns junction
-        :setter: sets junction
-        :type: None or instance of class Junction()
-        """
+        """Junction the road belongs to, if the road is a connecting road."""
         return self._junction
 
     @junction.setter
@@ -112,116 +94,65 @@ class Road:
 
     @property
     def link(self) -> Link:
-        """
-        Road linkage.
-
-        :getter: returns linkage
-        :type: instance of class Link()
-        """
+        """Road linkage."""
         return self._link
 
     @property
     def types(self) -> list:
-        """
-        Road types.
-
-        :getter: returns road types
-        :type: list of instances of class RoadType()
-        """
+        """Road types."""
         return self._types
 
     @property
-    def planView(self) -> PlanView:
-        """
-        Geometry of road reference line.
-
-        :getter: returns reference line geometry
-        :type: instance of PlanView()
-        """
+    def plan_view(self) -> PlanView:
+        """Geometry of road reference line."""
         return self._planView
 
     @property
-    def elevationProfile(self) -> ElevationProfile:
-        """
-        Road elevation.
-
-        :getter: returns elevation of the road
-        :type: instance of ElevationProfile()
-        """
+    def elevation_profile(self) -> ElevationProfile:
+        """Road elevation."""
         return self._elevationProfile
 
     @property
-    def lateralProfile(self) -> LateralProfile:
-        """
-        Superelevation and crossfalls of the road.
-
-        :getter: returns superelevation and crossfalls of the road
-        :type: instance of LateralProfile()
-        """
+    def lateral_profile(self) -> LateralProfile:
+        """Superelevation and crossfalls of the road."""
         return self._lateralProfile
 
     @property
     def lanes(self) -> Lanes:
-        """
-        Lanes of the road.
-
-        :getter: returns lanes of the road
-        :type: instance of Lanes()
-        """
+        """Lanes of the road."""
         return self._lanes
 
     @property
     def objects(self) -> list:
-        """
-        Objects on the road.
-
-        :getter: returns road's objects
-        :type: list of instances of Object()
-        """
+        """Objects on the road."""
         return self._objects
 
-    def addObject(self, object: Object):
-        """
-        Adds objects to the list.
-        """
+    def add_object(self, object: Object):
+        """Adds objects to the list."""
         if not isinstance(object, Object):
             raise TypeError("Has to be of instance Object")
 
         self._objects.append(object)
 
     @property
-    def signals(self) -> list:
-        """
-        Signal elements on the road.
-
-        :getter: returns signal elements
-        :type: list of instances of Signal()
-        """
+    def signals(self) -> List[Signal]:
+        """Signal elements on the road."""
         return self._signals
 
-    def addSignal(self, signal: Signal):
-        """
-        Adds signals to list.
-        """
+    def add_signal(self, signal: Signal):
+        """Adds signals to list."""
         if not isinstance(signal, Signal):
             raise TypeError("Has to be of instance Signal")
 
         self._signals.append(signal)
 
     @property
-    def signalReference(self) -> list:
-        """
-        Signal elements on the road.
-
-        :getter: returns signal elements
-        :type: list of instances of SignalReference()
-        """
+    def signal_reference(self) -> list:
+        """Signal elements on the road."""
         return self._signalReferences
 
-    def addSignalReference(self, signal_reference: SignalReference):
-        """
-        Adds signal reference to list.
-        """
+    def add_signal_reference(self, signal_reference: SignalReference):
+        """Adds signal reference to list."""
         if not isinstance(signal_reference, SignalReference):
             raise TypeError("Has to be of instance Signal Reference")
 

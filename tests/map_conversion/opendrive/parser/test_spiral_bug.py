@@ -23,7 +23,7 @@ class TestSamplingForSpirals(unittest.TestCase):
         test the sampling as it fails for some scenarios containing spirals
         """
         road = Road()
-        road.planView.add_spiral([650, 175], 1.7, 200, 0.007, 0)
+        road.plan_view.add_spiral([650, 175], 1.7, 200, 0.007, 0)
         road.id = 1
 
         section = LaneSection(road)
@@ -42,7 +42,7 @@ class TestSamplingForSpirals(unittest.TestCase):
         reference_border.ref_offset = 0.0
         reference_border.width_coefficient_offsets.append(0.0)
         reference_border.width_coefficients.append([0.0])
-        reference_border = OpenDriveConverter.create_reference_border(road.planView, road.lanes.laneOffsets)
+        reference_border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.laneOffsets)
 
         plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
 

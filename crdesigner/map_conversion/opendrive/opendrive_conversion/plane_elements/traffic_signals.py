@@ -75,7 +75,7 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
     # This has been replicated for other countries but has not been tested with a test case
     # Stop lines have a signal type of 294 and are handled differently in the commonroad format
     for signal in road.signals:
-        position, tangent, _, _ = road.planView.calc(signal.s, compute_curvature=False)
+        position, tangent, _, _ = road.plan_view.calc(signal.s, compute_curvature=False)
         position = np.array(
             [position[0] + signal.t * np.cos(tangent + np.pi / 2), position[1] + signal.t * np.sin(tangent + np.pi / 2)]
         )
@@ -197,6 +197,8 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
                 traffic_lights.append(traffic_light)
             else:
                 continue
+        else:
+            print(signal.dynamic, signal.name)
 
     return traffic_lights, traffic_signs, stop_lines
 
@@ -248,6 +250,6 @@ def get_traffic_signal_references(road: Road) -> list:
     #  lights signals and stoplines. However, it needs to be verified if signal references are required elsewhere.
     #  If not this function can safely be deleted.
     signal_references = []
-    for signal_reference in road.signalReference:
+    for signal_reference in road.signal_reference:
         signal_references.append(signal_reference)
     return signal_references
