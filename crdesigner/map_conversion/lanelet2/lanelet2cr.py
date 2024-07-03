@@ -530,8 +530,6 @@ class Lanelet2CRConverter:
             active = True
             cycle_list = _append_traffic_light_cycles(traffic_light_way)
 
-        logging.info("cycle_list: " + str(cycle_list) + " active: " + str(active) + " new_id: " + str(new_id))
-
         # TL in L2 format is represented with 3 nodes, we will take the one in the middle
         node = self.osm.nodes[traffic_light_way.nodes[1]]
 
