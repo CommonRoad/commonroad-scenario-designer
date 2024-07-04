@@ -521,7 +521,7 @@ class Lanelet2CRConverter:
         # id,cycle,position,offset,direction,active
         # for autoware, the traffic light id is retained
         if self._config.autoware:
-            new_id = traffic_light_way.id_
+            new_id = int(traffic_light_way.id_)
             active = False
             cycle_list = [TrafficLightCycleElement(TrafficLightState.INACTIVE, 5)]
 
