@@ -170,25 +170,25 @@ class TestTrafficSignals(unittest.TestCase):
         lane_section1 = LaneSection(self.roadMultipleLaneSections)
         lane_section1.idx = 0
         lane_section1.sPos = 0
-        lane_section1.singleSide = "false"
+        lane_section1.single_side = "false"
         lane1 = Lane(self.roadMultipleLaneSections, lane_section1)
         lane1.id = 1
         lane1.type = "driving"
         lane_width1 = LaneWidth(*[5.0, 0, 0, 0], 0, 0)
         lane1.widths = list([lane_width1])
-        lane_section1.centerLanes.append(lane1)
+        lane_section1.center_lanes.append(lane1)
 
         lane_section2 = LaneSection(self.roadMultipleLaneSections)
         lane_section2.idx = 1
         lane_section2.sPos = 0
-        lane_section2.singleSide = "false"
+        lane_section2.single_side = "false"
         lane2 = Lane(self.roadMultipleLaneSections, lane_section2)
         lane2.id = 2
         lane2.type = "driving"
         lane_width2 = LaneWidth(*[0, 0, 0.09822, -0.0051843], idx=None, start_offset=0)
         lane_width3 = LaneWidth(*[5.22, 0, 0, 0], idx=None, start_offset=1.263)
         lane2.widths = list([lane_width2, lane_width3])
-        lane_section2.centerLanes.append(lane2)
+        lane_section2.center_lanes.append(lane2)
 
         self.roadMultipleLaneSections.lanes.lane_sections.append(lane_section1)
         self.roadMultipleLaneSections.lanes.lane_sections.append(lane_section2)

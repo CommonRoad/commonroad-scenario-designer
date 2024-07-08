@@ -147,7 +147,7 @@ class Road:
         self._signals.append(signal)
 
     @property
-    def signal_reference(self) -> list:
+    def signal_reference(self) -> List[SignalReference]:
         """Signal elements on the road."""
         return self._signalReferences
 

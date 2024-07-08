@@ -32,7 +32,7 @@ class TestConverter(unittest.TestCase):
 
         self.width_coefficient_offsets = []
         self.width_coefficients = []
-        border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.laneOffsets)
+        border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.lane_offsets)
 
         self.assertListEqual(true_border.width_coefficients, border.width_coefficients)
         self.assertListEqual(true_border.width_coefficient_offsets, border.width_coefficient_offsets)
@@ -52,10 +52,10 @@ class TestConverter(unittest.TestCase):
 
         # test with two lane offsets with same start pos --> only last LaneOffset matters
         lane_offset1 = RoadRecord(*[0.0, 4.851, -0.239, 0.145], start_pos=0)
-        road.lanes.laneOffsets.append(lane_offset1)
+        road.lanes.lane_offsets.append(lane_offset1)
         lane_offset2 = RoadRecord(*[3.27, 0, 0, 0], start_pos=0)
-        road.lanes.laneOffsets.append(lane_offset2)
-        border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.laneOffsets)
+        road.lanes.lane_offsets.append(lane_offset2)
+        border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.lane_offsets)
 
         true_border.width_coefficients.clear()
         true_border.width_coefficient_offsets.clear()
@@ -67,11 +67,11 @@ class TestConverter(unittest.TestCase):
         self.assertListEqual(true_border.width_coefficient_offsets, border.width_coefficient_offsets)
 
         # test with two offsets with different start pos
-        road.lanes.laneOffsets.clear()
+        road.lanes.lane_offsets.clear()
         lane_offset1 = RoadRecord(*[0.0, 4.123, -0.15, 0.12], start_pos=0.0)
         lane_offset2 = RoadRecord(*[1.25, 0.0, -0.15, 0.1], start_pos=10.0)
-        road.lanes.laneOffsets.append(lane_offset1)
-        road.lanes.laneOffsets.append(lane_offset2)
+        road.lanes.lane_offsets.append(lane_offset1)
+        road.lanes.lane_offsets.append(lane_offset2)
 
         true_border.width_coefficients.clear()
         true_border.width_coefficient_offsets.clear()
@@ -79,7 +79,7 @@ class TestConverter(unittest.TestCase):
         true_border.width_coefficients = [[0.0, 4.123, -0.15, 0.12], [1.25, 0.0, -0.15, 0.1]]
         true_border.width_coefficient_offsets = [0.0, 10]
 
-        border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.laneOffsets)
+        border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.lane_offsets)
 
         self.assertListEqual(true_border.width_coefficients, border.width_coefficients)
         self.assertListEqual(true_border.width_coefficient_offsets, border.width_coefficient_offsets)
@@ -120,12 +120,12 @@ class TestConverter(unittest.TestCase):
         left_lane3.id = 3
         left_lane3.widths.append(common_lane_width)
 
-        section.leftLanes.append(left_lane1)
-        section.leftLanes.append(left_lane2)
-        section.leftLanes.append(left_lane3)
-        section.centerLanes.append(center_lane)
-        section.rightLanes.append(right_lane1)
-        section.rightLanes.append(right_lane2)
+        section.left_lanes.append(left_lane1)
+        section.left_lanes.append(left_lane2)
+        section.left_lanes.append(left_lane3)
+        section.center_lanes.append(center_lane)
+        section.right_lanes.append(right_lane1)
+        section.right_lanes.append(right_lane2)
 
         reference_border = Border()
         reference_border.ref_offset = 0.0
@@ -140,7 +140,7 @@ class TestConverter(unittest.TestCase):
         mark2.SOffset = 3.0
         mark3 = RoadMark()
         mark3.SOffset = 5.4
-        section.leftLanes[0].road_mark = [mark1, mark2, mark3]
+        section.left_lanes[0].road_mark = [mark1, mark2, mark3]
         plane_groups_mark = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
 
         # check if correct number of plane_groups is returned
@@ -249,7 +249,7 @@ class TestConverter(unittest.TestCase):
         lane = Lane(road, lane_section)
         lane_width = LaneWidth(*[5.0, 0, 0, 0], idx=0, start_offset=0)
         lane.widths = list([lane_width])
-        lane_section.rightLanes.append(lane)
+        lane_section.right_lanes.append(lane)
 
         # test with empty lane_borders: this should fail
         lane_borders = []
@@ -297,28 +297,28 @@ class TestConverter(unittest.TestCase):
 
         lane0 = Lane(road, lane_section)
         lane0.id = 0
-        lane_section.centerLanes.append(lane0)
+        lane_section.center_lanes.append(lane0)
 
         lane1 = Lane(road, lane_section)
         lane1.id = -1
         lane_width = LaneWidth(*[5.0, 0, 0, 0], idx=0, start_offset=0)
         lane1.widths = list([lane_width])
-        lane_section.rightLanes.append(lane1)
+        lane_section.right_lanes.append(lane1)
 
         lane2 = Lane(road, lane_section)
         lane2.id = -2
         lane2.widths = list([lane_width])
-        lane_section.rightLanes.append(lane2)
+        lane_section.right_lanes.append(lane2)
 
         lane3 = Lane(road, lane_section)
         lane3.id = 1
         lane3.widths = list([lane_width])
-        lane_section.leftLanes.append(lane3)
+        lane_section.left_lanes.append(lane3)
 
         lane4 = Lane(road, lane_section)
         lane4.id = 2
         lane4.widths = list([lane_width])
-        lane_section.leftLanes.append(lane4)
+        lane_section.left_lanes.append(lane4)
 
         inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir = OpenDriveConverter.determine_neighbours(
             lane0

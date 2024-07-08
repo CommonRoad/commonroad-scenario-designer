@@ -1,6 +1,6 @@
 import enum
 import logging
-from typing import List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 from commonroad.scenario.lanelet import LineMarking, StopLine
@@ -79,7 +79,10 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
         position = np.array(
             [position[0] + signal.t * np.cos(tangent + np.pi / 2), position[1] + signal.t * np.sin(tangent + np.pi / 2)]
         )
+        if signal.signal_id is not None and signal.dynamic is None:
+            print(signal.signal_id)
         if signal.dynamic == "no":
+            print(signal.signal_id)
             if (
                 signal.signal_value == "-1"
                 or signal.signal_value == "-1.0000000000000000e+00"
@@ -190,15 +193,14 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
             # the three listed here are hard to interpret in commonroad.
             # we ignore such signals in order not cause trouble in traffic simulation
             if signal.type != ("1000002" or "1000007" or "1000013"):
+                trid = signal.signal_id if signal.signal_id is not None else generate_unique_id()
                 traffic_light = TrafficLight(
-                    traffic_light_id=generate_unique_id(), position=position, traffic_light_cycle=get_default_cycle()
+                    traffic_light_id=trid, position=position, traffic_light_cycle=get_default_cycle()
                 )  # TODO remove for new CR-Format
 
                 traffic_lights.append(traffic_light)
             else:
                 continue
-        else:
-            print(signal.dynamic, signal.name)
 
     return traffic_lights, traffic_signs, stop_lines
 
@@ -217,7 +219,7 @@ def calculate_stop_line_position(
     """
     total_width = 0
     for lane_section in lane_sections:
-        for lane in lane_section.allLanes:
+        for lane in lane_section.all_lanes:
             # Stop line width only depends on drivable lanes
             if lane.id != 0 and lane.type in ["driving", "onRamp", "offRamp", "exit", "entry"]:
                 for width in lane.widths:
@@ -242,14 +244,11 @@ def calculate_stop_line_position(
     return position_1, position_2
 
 
-def get_traffic_signal_references(road: Road) -> list:
-    """Function to extract all the traffic sign references that are stored in the road object in order to avoid
-    duplication by redefiniing predefined signals/lights and stoplines.
-    """
-    # TODO: This function was ultimately not used as signal references were not required to define all traffic
-    #  lights signals and stoplines. However, it needs to be verified if signal references are required elsewhere.
-    #  If not this function can safely be deleted.
-    signal_references = []
-    for signal_reference in road.signal_reference:
-        signal_references.append(signal_reference)
-    return signal_references
+def get_traffic_signal_references(
+    road: Road, traffic_light_dirs: Dict[str, List[str]], traffic_light_lanes: Dict[str, List[Tuple[int, int]]]
+):
+    """Function to extract relevant information from sign references."""
+    for signal in road.signal_reference:
+        if traffic_light_dirs.get(signal.signal_id) is not None:
+            traffic_light_dirs[signal.signal_id].append(signal.turn_relation)
+            traffic_light_lanes[signal.signal_id].append((signal.validity_to, signal.validity_from))

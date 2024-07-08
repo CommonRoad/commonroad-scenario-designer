@@ -82,7 +82,7 @@ class OpenDriveConverter:
         for side in ["right", "left"]:
             # lanes loaded by opendriveparser are aleady sorted by id
             # coeff_factor decides if border is left or right of the reference line
-            lanes = lane_section.rightLanes if side == "right" else lane_section.leftLanes
+            lanes = lane_section.right_lanes if side == "right" else lane_section.left_lanes
             coeff_factor = -1.0 if side == "right" else 1.0
 
             # Most inner border gets added first
@@ -106,28 +106,28 @@ class OpenDriveConverter:
                 inner_linemarking = None
                 # lanes around the center line have an id of 1 and -1.
                 if lane.id == 1 or lane.id == -1:
-                    for parent_lane_section in lane.parentRoad.lanes.lane_sections:
+                    for parent_lane_section in lane.parent_road.lanes.lane_sections:
                         # check for the center line
-                        if len(parent_lane_section.centerLanes) > 0:
+                        if len(parent_lane_section.center_lanes) > 0:
                             # check if the center lane has a road mark
-                            if len(parent_lane_section.centerLanes[0].road_mark) > 0:
+                            if len(parent_lane_section.center_lanes[0].road_mark) > 0:
                                 # assign the road mark to the inner linemarking
-                                inner_linemarking = copy.deepcopy(parent_lane_section.centerLanes[0].road_mark[0])
+                                inner_linemarking = copy.deepcopy(parent_lane_section.center_lanes[0].road_mark[0])
                                 # check if the road mark type is made up of 2 different markings,
                                 # assume right hand drive
-                                if parent_lane_section.centerLanes[0].road_mark[0].type == "solid broken":
+                                if parent_lane_section.center_lanes[0].road_mark[0].type == "solid broken":
                                     if lane.id == 1:
                                         inner_linemarking.type = "solid"
                                     if lane.id == -1:
                                         inner_linemarking.type = "broken"
-                                if parent_lane_section.centerLanes[0].road_mark[0].type == "broken solid":
+                                if parent_lane_section.center_lanes[0].road_mark[0].type == "broken solid":
                                     if lane.id == 1:
                                         inner_linemarking.type = "broken"
                                     if lane.id == -1:
                                         inner_linemarking.type = "solid"
 
                 plane_group = ParametricLaneGroup(
-                    id_=encode_road_section_lane_width_id(lane_section.parentRoad.id, lane_section.idx, lane.id, -1),
+                    id_=encode_road_section_lane_width_id(lane_section.parent_road.id, lane_section.idx, lane.id, -1),
                     inner_neighbour=inner_neighbour_id,
                     inner_neighbour_same_direction=inner_neighbour_same_dir,
                     outer_neighbour=outer_neighbour_id,
@@ -181,7 +181,7 @@ class OpenDriveConverter:
         )
         parametric_lane = ParametricLane(
             id_=encode_mark_lane_width_id(
-                lane.lane_section.parentRoad.id,
+                lane.lane_section.parent_road.id,
                 lane.lane_section.idx,
                 lane.id,
                 width.idx,
@@ -258,11 +258,11 @@ class OpenDriveConverter:
             inner_neighbour_same_dir = False
 
         inner_neighbour_id = encode_road_section_lane_width_id(
-            lane.lane_section.parentRoad.id, lane.lane_section.idx, inner_lane_id, -1
+            lane.lane_section.parent_road.id, lane.lane_section.idx, inner_lane_id, -1
         )
 
         outer_neighbour_id = encode_road_section_lane_width_id(
-            lane.lane_section.parentRoad.id, lane.lane_section.idx, outer_lane_id, -1
+            lane.lane_section.parent_road.id, lane.lane_section.idx, outer_lane_id, -1
         )
 
         return inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir

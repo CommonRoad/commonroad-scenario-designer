@@ -342,7 +342,7 @@ def parse_opendrive_road_lane_offset(new_road: Road, lane_offset: etree.ElementT
         start_pos=float(defaultval(lane_offset.get("s"), "lane_offset.s")),
     )
 
-    new_road.lanes.laneOffsets.append(new_lane_offset)
+    new_road.lanes.lane_offsets.append(new_lane_offset)
 
 
 def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane_section: etree.ElementTree):
@@ -360,12 +360,12 @@ def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane
     new_lane_section.idx = lane_section_id
 
     new_lane_section.sPos = float(lane_section.get("s"))
-    new_lane_section.singleSide = lane_section.get("singleSide")
+    new_lane_section.single_side = lane_section.get("singleSide")
 
     sides = dict(
-        left=new_lane_section.leftLanes,
-        center=new_lane_section.centerLanes,
-        right=new_lane_section.rightLanes,
+        left=new_lane_section.left_lanes,
+        center=new_lane_section.center_lanes,
+        right=new_lane_section.right_lanes,
     )
 
     for sideTag, newSideLanes in sides.items():
@@ -691,7 +691,7 @@ def calculate_lane_section_lengths(new_road: Road):
 
     # OpenDRIVE does not provide lane width lengths by itself, calculate them by ourselves
     for lane_section in new_road.lanes.lane_sections:
-        for lane in lane_section.allLanes:
+        for lane in lane_section.all_lanes:
             widths_poses = np.array([x.start_offset for x in lane.widths] + [lane_section.length])
             widths_lengths = widths_poses[1:] - widths_poses[:-1]
 

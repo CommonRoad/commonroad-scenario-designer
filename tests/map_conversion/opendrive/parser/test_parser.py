@@ -179,10 +179,10 @@ class TestParser(unittest.TestCase):
             l_off_xml.append(lane_offset)
         parse_opendrive_road_lane_offset(new_road=road, lane_offset=l_off_xml[1])
 
-        self.assertEqual(2.5000000000000000e01, road.lanes.laneOffsets[0].start_pos)
+        self.assertEqual(2.5000000000000000e01, road.lanes.lane_offsets[0].start_pos)
         np.testing.assert_equal(
             [-1.8750000000000000e00, 0, 2.5464010864644634e-03, -3.6119164347013670e-05],
-            road.lanes.laneOffsets[0].polynomial_coefficients,
+            road.lanes.lane_offsets[0].polynomial_coefficients,
         )
 
     def test_parse_opendrive_road_lane_section(self):
@@ -204,30 +204,30 @@ class TestParser(unittest.TestCase):
         )
 
         self.assertEqual(0, road.lanes.lane_sections[0].sPos)
-        self.assertEqual(False, road.lanes.lane_sections[0].singleSide)
-        self.assertEqual(0, road.lanes.lane_sections[0].centerLanes[0].id)
-        self.assertEqual("driving", road.lanes.lane_sections[0].centerLanes[0].type)
-        self.assertEqual(False, road.lanes.lane_sections[0].centerLanes[0].level)
-        self.assertEqual(-1, road.lanes.lane_sections[0].rightLanes[0].id)
-        self.assertEqual("driving", road.lanes.lane_sections[0].rightLanes[0].type)
-        self.assertEqual(False, road.lanes.lane_sections[0].rightLanes[0].level)
-        self.assertEqual([], road.lanes.lane_sections[0].leftLanes)
-        self.assertEqual(None, road.lanes.lane_sections[0].centerLanes[0].link.predecessorId)
-        self.assertEqual(None, road.lanes.lane_sections[0].centerLanes[0].link.successorId)
-        self.assertEqual(2, road.lanes.lane_sections[0].rightLanes[0].link.predecessorId)
-        self.assertEqual(1, road.lanes.lane_sections[0].rightLanes[0].link.successorId)
-        self.assertEqual([], road.lanes.lane_sections[0].centerLanes[0].widths)
-        self.assertEqual(0, road.lanes.lane_sections[0].rightLanes[0].widths[0].start_offset)
+        self.assertEqual(False, road.lanes.lane_sections[0].single_side)
+        self.assertEqual(0, road.lanes.lane_sections[0].center_lanes[0].id)
+        self.assertEqual("driving", road.lanes.lane_sections[0].center_lanes[0].type)
+        self.assertEqual(False, road.lanes.lane_sections[0].center_lanes[0].level)
+        self.assertEqual(-1, road.lanes.lane_sections[0].right_lanes[0].id)
+        self.assertEqual("driving", road.lanes.lane_sections[0].right_lanes[0].type)
+        self.assertEqual(False, road.lanes.lane_sections[0].right_lanes[0].level)
+        self.assertEqual([], road.lanes.lane_sections[0].left_lanes)
+        self.assertEqual(None, road.lanes.lane_sections[0].center_lanes[0].link.predecessorId)
+        self.assertEqual(None, road.lanes.lane_sections[0].center_lanes[0].link.successorId)
+        self.assertEqual(2, road.lanes.lane_sections[0].right_lanes[0].link.predecessorId)
+        self.assertEqual(1, road.lanes.lane_sections[0].right_lanes[0].link.successorId)
+        self.assertEqual([], road.lanes.lane_sections[0].center_lanes[0].widths)
+        self.assertEqual(0, road.lanes.lane_sections[0].right_lanes[0].widths[0].start_offset)
         np.testing.assert_equal(
-            [3.75, 0, 0, 0], road.lanes.lane_sections[0].rightLanes[0].widths[0].polynomial_coefficients
+            [3.75, 0, 0, 0], road.lanes.lane_sections[0].right_lanes[0].widths[0].polynomial_coefficients
         )
         # roadmarks
-        self.assertEqual(0, road.lanes.lane_sections[0].centerLanes[0].road_mark[0].SOffset)
-        self.assertEqual("solid", road.lanes.lane_sections[0].centerLanes[0].road_mark[0].type)
-        self.assertEqual("standard", road.lanes.lane_sections[0].centerLanes[0].road_mark[0].weight)
-        self.assertEqual(0.5, road.lanes.lane_sections[0].centerLanes[0].road_mark[1].SOffset)
-        self.assertEqual("none", road.lanes.lane_sections[0].centerLanes[0].road_mark[1].type)
-        self.assertEqual("standard", road.lanes.lane_sections[0].centerLanes[0].road_mark[1].weight)
+        self.assertEqual(0, road.lanes.lane_sections[0].center_lanes[0].road_mark[0].SOffset)
+        self.assertEqual("solid", road.lanes.lane_sections[0].center_lanes[0].road_mark[0].type)
+        self.assertEqual("standard", road.lanes.lane_sections[0].center_lanes[0].road_mark[0].weight)
+        self.assertEqual(0.5, road.lanes.lane_sections[0].center_lanes[0].road_mark[1].SOffset)
+        self.assertEqual("none", road.lanes.lane_sections[0].center_lanes[0].road_mark[1].type)
+        self.assertEqual("standard", road.lanes.lane_sections[0].center_lanes[0].road_mark[1].weight)
 
     def test_parse_opendrive_road_signal(self):
         file_path = (
@@ -330,7 +330,7 @@ class TestParser(unittest.TestCase):
 
         road = Road()
         parse_opendrive_road_lane_section(new_road=road, lane_section=laneSection, lane_section_id=1)
-        self.assertEqual([["pedestrian", "allow", 0.0]], road.lanes.lane_sections[0].leftLanes[0].access)
+        self.assertEqual([["pedestrian", "allow", 0.0]], road.lanes.lane_sections[0].left_lanes[0].access)
 
     def test_default_vals(self):
         """
@@ -378,11 +378,11 @@ class TestParser(unittest.TestCase):
         ]:
             self.assertEqual(0, x)
         self.assertEqual(0, road.lateral_profile.shapes[0].start_pos)
-        offs = road.lanes.laneOffsets[0]
+        offs = road.lanes.lane_offsets[0]
         for x in offs.polynomial_coefficients + [offs.start_pos]:
             self.assertEqual(0, x)
-        self.assertEqual(0, road.lanes.lane_sections[0].leftLanes[1].road_mark[0].SOffset)
-        self.assertEqual("standard", road.lanes.lane_sections[0].leftLanes[1].road_mark[0].weight)
+        self.assertEqual(0, road.lanes.lane_sections[0].left_lanes[1].road_mark[0].SOffset)
+        self.assertEqual("standard", road.lanes.lane_sections[0].left_lanes[1].road_mark[0].weight)
         test = RoadMark()
         test.SOffset = None
         self.assertEqual(0, test.SOffset)

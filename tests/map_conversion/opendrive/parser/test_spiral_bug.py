@@ -36,13 +36,13 @@ class TestSamplingForSpirals(unittest.TestCase):
         lane_width.length = 200
         lane.widths.append(lane_width)
 
-        section.leftLanes.append(lane)
+        section.left_lanes.append(lane)
 
         reference_border = Border()
         reference_border.ref_offset = 0.0
         reference_border.width_coefficient_offsets.append(0.0)
         reference_border.width_coefficients.append([0.0])
-        reference_border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.laneOffsets)
+        reference_border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.lane_offsets)
 
         plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
 
