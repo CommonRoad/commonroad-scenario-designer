@@ -265,8 +265,8 @@ class Signal:
         self._validity_to = int(value)
 
     @property
-    def signal_id(self) -> int:
-        """Indicates starting lane of road for which signal is valid."""
+    def signal_id(self) -> str:
+        """ID of related dynamic signal."""
         return self._signal_id
 
     @signal_id.setter

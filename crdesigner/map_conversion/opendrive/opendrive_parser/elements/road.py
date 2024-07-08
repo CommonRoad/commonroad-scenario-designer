@@ -1,4 +1,8 @@
-from typing import List, Union
+from typing import List, Union, Tuple
+
+from commonroad.common.common_lanelet import StopLine
+from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.scenario.traffic_sign import TrafficSign
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import (
     Junction,
@@ -58,6 +62,9 @@ class Road:
         self._objects = []
         self._signals = []
         self._signalReferences = []
+        self._cr_traffic_lights: List[Tuple[TrafficLight, Tuple[int, int]]] = []
+        self._cr_traffic_signs: List[TrafficSign] = []
+        self._cr_stop_lines: List[StopLine] = []
 
     # check if objects have equal instance dictionaries
     def __eq__(self, other):
@@ -157,3 +164,15 @@ class Road:
             raise TypeError("Has to be of instance Signal Reference")
 
         self._signalReferences.append(signal_reference)
+
+    def add_traffic_light(self, traffic_light: Tuple[TrafficLight, Tuple[int, int]]):
+        """Adds CommonRoad traffic light to road for further processing."""
+        self._cr_traffic_lights.append(traffic_light)
+
+    def add_traffic_sign(self, traffic_sign: TrafficSign):
+        """Adds CommonRoad traffic sign to road for further processing."""
+        self._cr_traffic_signs.append(traffic_sign)
+
+    def add_stop_line(self, stop_line: StopLine):
+        """Adds CommonRoad stop line to road for further processing."""
+        self._cr_stop_lines.append(stop_line)

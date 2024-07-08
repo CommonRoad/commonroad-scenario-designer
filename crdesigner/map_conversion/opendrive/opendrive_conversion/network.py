@@ -195,6 +195,10 @@ class Network:
         # Get country ID form signal data in openDrive and set it as attribute of the network object
         self.assign_country_id(Network.get_country_id_from_opendrive(opendrive.roads))
 
+        # extract signal references beforehand to be able to assign them correctly
+        for road in opendrive.roads:
+            get_traffic_signal_references(road, traffic_light_dirs, traffic_light_lanes)
+
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
             road.plan_view.precalculate()
@@ -205,7 +209,6 @@ class Network:
             # Extracting signals, signs and stop lines from each road
 
             traffic_lights, traffic_signs, stop_lines = get_traffic_signals(road)
-            get_traffic_signal_references(road, traffic_light_dirs, traffic_light_lanes)
 
             self._crosswalks.extend(get_crosswalks(road))
 
@@ -229,24 +232,6 @@ class Network:
                 )
 
                 self._planes.extend(parametric_lane_groups)
-
-        traffic_light_dirs_merged: Dict[str, TrafficLightDirection] = {}
-        traffic_light_lanes_merged: Dict[str, TrafficLightDirection] = {}
-        for tid, t_light in traffic_light_dirs.items():
-            if "Right" in t_light and "Straight" in t_light and "Left" in t_light:
-                traffic_light_dirs_merged[tid] = TrafficLightDirection.ALL
-            elif "Left" in t_light and "Straight" in t_light:
-                traffic_light_lanes_merged[tid] = TrafficLightDirection.LEFT_STRAIGHT
-            elif "Right" in t_light and "Straight" in t_light:
-                traffic_light_dirs_merged[tid] = TrafficLightDirection.STRAIGHT_RIGHT
-            elif "Left" in t_light and "Right" in t_light:
-                traffic_light_dirs_merged[tid] = TrafficLightDirection.LEFT_RIGHT
-            elif "Left" in t_light:
-                traffic_light_dirs_merged[tid] = TrafficLightDirection.LEFT
-            elif "Right" in t_light:
-                traffic_light_dirs_merged[tid] = TrafficLightDirection.RIGHT
-            elif "Straight" in t_light:
-                traffic_light_dirs_merged[tid] = TrafficLightDirection.STRAIGHT
 
     def _extract_road_speed_limit(self, road: Road):
         """

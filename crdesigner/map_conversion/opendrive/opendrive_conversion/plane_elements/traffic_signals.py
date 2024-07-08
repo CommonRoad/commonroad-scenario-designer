@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple, Union
 
 import numpy as np
 from commonroad.scenario.lanelet import LineMarking, StopLine
-from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.scenario.traffic_light import TrafficLight, TrafficLightDirection
 from commonroad.scenario.traffic_sign import (
     TrafficSign,
     TrafficSignElement,
@@ -61,16 +61,12 @@ def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_si
     return element_id
 
 
-def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSign], List[StopLine]]:
+def get_traffic_signals(road: Road, traffic_light_dirs: Dict[str, List[str]],
+                        traffic_light_lanes: Dict[str, List[Tuple[int, int]]]):
     """Extracts traffic_lights, traffic_signs, stop_lines from a road.
 
     :param road: The road object from which to extract signals.
-    :return: lists of traffic_lights, traffic_signs, stop_lines
     """
-    traffic_signs = []
-    traffic_lights = []
-    stop_lines = []
-
     # TODO: Stop lines are created and appended to the list for DEU and OpenDrive format.
     # This has been replicated for other countries but has not been tested with a test case
     # Stop lines have a signal type of 294 and are handled differently in the commonroad format
@@ -79,10 +75,7 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
         position = np.array(
             [position[0] + signal.t * np.cos(tangent + np.pi / 2), position[1] + signal.t * np.sin(tangent + np.pi / 2)]
         )
-        if signal.signal_id is not None and signal.dynamic is None:
-            print(signal.signal_id)
         if signal.dynamic == "no":
-            print(signal.signal_id)
             if (
                 signal.signal_value == "-1"
                 or signal.signal_value == "-1.0000000000000000e+00"
@@ -109,7 +102,7 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
                         road.lanes.lane_sections, signal, position, tangent
                     )
                     stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-                    stop_lines.append(stop_line)
+                    road.add_stop_line(stop_line)
                     continue
 
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDGermany)
@@ -122,7 +115,7 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
                         road.lanes.lane_sections, signal, position, tangent
                     )
                     stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-                    stop_lines.append(stop_line)
+                    road.add_stop_line(stop_line)
                     continue
 
             elif signal_country == "CHN":
@@ -134,7 +127,7 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
                         road.lanes.lane_sections, signal, position, tangent
                     )
                     stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-                    stop_lines.append(stop_line)
+                    road.add_stop_line(stop_line)
                     continue
 
             elif signal_country == "ESP":
@@ -146,7 +139,7 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
                         road.lanes.lane_sections, signal, position, tangent
                     )
                     stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-                    stop_lines.append(stop_line)
+                    road.add_stop_line(stop_line)
                     continue
 
             elif signal_country == "RUS":
@@ -158,7 +151,7 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
                         road.lanes.lane_sections, signal, position, tangent
                     )
                     stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-                    stop_lines.append(stop_line)
+                    road.add_stop_line(stop_line)
                     continue
             else:
                 if signal.type == "1000003" or signal.type == "1000004":
@@ -169,7 +162,7 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
                         road.lanes.lane_sections, signal, position, tangent
                     )
                     stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-                    stop_lines.append(stop_line)
+                    road.add_stop_line(stop_line)
                     continue
 
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDZamunda)
@@ -187,22 +180,38 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
                 virtual=False,
             )
 
-            traffic_signs.append(traffic_sign)
+            road.add_traffic_sign(traffic_sign)
 
         elif signal.dynamic == "yes":
             # the three listed here are hard to interpret in commonroad.
             # we ignore such signals in order not cause trouble in traffic simulation
+            tdir = TrafficLightDirection.ALL
+            if traffic_light_dirs[signal.signal_id] is not None:
+                for tid, t_light in traffic_light_dirs.items():
+                    if "Right" in t_light and "Straight" in t_light and "Left" in t_light:
+                        tdir = TrafficLightDirection.ALL
+                    elif "Left" in t_light and "Straight" in t_light:
+                        tdir = TrafficLightDirection.LEFT_STRAIGHT
+                    elif "Right" in t_light and "Straight" in t_light:
+                        tdir = TrafficLightDirection.STRAIGHT_RIGHT
+                    elif "Left" in t_light and "Right" in t_light:
+                        tdir = TrafficLightDirection.LEFT_RIGHT
+                    elif "Left" in t_light:
+                        tdir = TrafficLightDirection.LEFT
+                    elif "Right" in t_light:
+                        tdir = TrafficLightDirection.RIGHT
+                    elif "Straight" in t_light:
+                        tdir = TrafficLightDirection.STRAIGHT
+                    else:
+                        tdir = TrafficLightDirection.ALL
+            lanes = (0, 0) if traffic_light_lanes[signal.signal_id] is None else traffic_light_lanes[signal.signal_id]
             if signal.type != ("1000002" or "1000007" or "1000013"):
-                trid = signal.signal_id if signal.signal_id is not None else generate_unique_id()
                 traffic_light = TrafficLight(
-                    traffic_light_id=trid, position=position, traffic_light_cycle=get_default_cycle()
-                )  # TODO remove for new CR-Format
-
-                traffic_lights.append(traffic_light)
+                    traffic_light_id=generate_unique_id(), position=position, traffic_light_cycle=get_default_cycle(),
+                        direction=tdir)  # TODO remove for new CR-Format
+                road.add_traffic_light((traffic_light, lanes))
             else:
                 continue
-
-    return traffic_lights, traffic_signs, stop_lines
 
 
 def calculate_stop_line_position(
@@ -244,7 +253,7 @@ def calculate_stop_line_position(
     return position_1, position_2
 
 
-def get_traffic_signal_references(
+def  get_traffic_signal_references(
     road: Road, traffic_light_dirs: Dict[str, List[str]], traffic_light_lanes: Dict[str, List[Tuple[int, int]]]
 ):
     """Function to extract relevant information from sign references."""
