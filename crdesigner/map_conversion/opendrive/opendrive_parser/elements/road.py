@@ -63,8 +63,8 @@ class Road:
         self._signals = []
         self._signalReferences = []
         self._cr_traffic_lights: List[Tuple[TrafficLight, Tuple[int, int]]] = []
-        self._cr_traffic_signs: List[TrafficSign] = []
-        self._cr_stop_lines: List[StopLine] = []
+        self._cr_traffic_signs: List[Tuple[TrafficSign, Tuple[int, int]]] = []
+        self._cr_stop_lines: List[Tuple[StopLine, Tuple[int, int]]] = []
 
     # check if objects have equal instance dictionaries
     def __eq__(self, other):
@@ -165,14 +165,26 @@ class Road:
 
         self._signalReferences.append(signal_reference)
 
+    @property
+    def cr_traffic_lights(self) -> List[Tuple[TrafficLight, Tuple[int, int]]]:
+        return self._cr_traffic_lights
+
+    @property
+    def cr_traffic_signs(self) -> List[TrafficSign]:
+        return self._cr_traffic_signs
+
+    @property
+    def cr_stop_lines(self) -> List[StopLine]:
+        return self._cr_stop_lines
+
     def add_traffic_light(self, traffic_light: Tuple[TrafficLight, Tuple[int, int]]):
         """Adds CommonRoad traffic light to road for further processing."""
         self._cr_traffic_lights.append(traffic_light)
 
-    def add_traffic_sign(self, traffic_sign: TrafficSign):
+    def add_traffic_sign(self, traffic_sign: Tuple[TrafficSign, Tuple[int, int]]):
         """Adds CommonRoad traffic sign to road for further processing."""
         self._cr_traffic_signs.append(traffic_sign)
 
-    def add_stop_line(self, stop_line: StopLine):
+    def add_stop_line(self, stop_line:  Tuple[StopLine, Tuple[int, int]]):
         """Adds CommonRoad stop line to road for further processing."""
         self._cr_stop_lines.append(stop_line)

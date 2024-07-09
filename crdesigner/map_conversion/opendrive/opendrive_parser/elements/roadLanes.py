@@ -25,7 +25,7 @@ class Lanes:
         self._lane_sections = []
 
     @property
-    def lane_offsets(self) -> List[float]:
+    def lane_offsets(self) -> List[LaneOffset]:
         """
         Offset of the lane from road reference line. Offsets are defined in ascending order according to their
         s-coordinate. A new offset starts when the underlying polynomial function changes.
@@ -327,7 +327,7 @@ class Lane:
         return self._borders
 
     @property
-    def road_mark(self) -> Optional[RoadMark]:
+    def road_mark(self) -> List[RoadMark]:
         """
         Describes the road/lane markings. It defines the style of the line at the lane's outer border.
 
@@ -338,7 +338,7 @@ class Lane:
         return self._road_mark
 
     @road_mark.setter
-    def road_mark(self, value):
+    def road_mark(self, value: List[RoadMark]):
         self._road_mark = value
 
 

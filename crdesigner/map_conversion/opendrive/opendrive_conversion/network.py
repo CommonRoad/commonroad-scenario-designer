@@ -52,7 +52,7 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.pla
 )
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import (
     get_traffic_signal_references,
-    get_traffic_signals,
+    assign_traffic_signals_to_road,
 )
 from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import (
     encode_road_section_lane_width_id,
@@ -189,13 +189,12 @@ class Network:
         self._geo_ref = opendrive.header.geo_reference
         self._offset = opendrive.header.offset
 
-        traffic_light_dirs: Dict[str, List[str]] = {}
-        traffic_light_lanes: Dict[str, List[Tuple[int, int]]] = {}
-
         # Get country ID form signal data in openDrive and set it as attribute of the network object
         self.assign_country_id(Network.get_country_id_from_opendrive(opendrive.roads))
 
         # extract signal references beforehand to be able to assign them correctly
+        traffic_light_dirs: Dict[str, List[str]] = {}
+        traffic_light_lanes: Dict[str, List[Tuple[int, int]]] = {}
         for road in opendrive.roads:
             get_traffic_signal_references(road, traffic_light_dirs, traffic_light_lanes)
 
@@ -206,32 +205,26 @@ class Network:
 
             # The reference border is the baseline for the whole road
             reference_border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.lane_offsets)
+
             # Extracting signals, signs and stop lines from each road
+            assign_traffic_signals_to_road(road, traffic_light_dirs, traffic_light_lanes)
 
-            traffic_lights, traffic_signs, stop_lines = get_traffic_signals(road)
-
+            # Get crosswalks
             self._crosswalks.extend(get_crosswalks(road))
-
-            # stop lines from traffic signals (legacy)
-            stop_lines_final = []
-            self._traffic_lights.extend(traffic_lights)
-            for stop_line in stop_lines:
-                for traffic_light in traffic_lights:
-                    if np.linalg.norm(stop_line.start - traffic_light.position) < 10:
-                        stop_lines_final.append(stop_line)  # hard-coded 10 could be adjusted later as a threshold
-            self._traffic_signs.extend(traffic_signs)
-            self._stop_lines.extend(stop_lines_final)
 
             # stop lines from road objects
             self._stop_lines_from_road(road)
 
             # A lane section is the smallest part that can be converted at once
             for lane_section in road.lanes.lane_sections:
+                # TODO assign signals to lanes
                 parametric_lane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(
-                    lane_section, reference_border
+                        lane_section, reference_border, road.cr_traffic_lights, road.cr_traffic_signs, road.cr_stop_lines
                 )
 
                 self._planes.extend(parametric_lane_groups)
+
+        # todo store road signals
 
     def _extract_road_speed_limit(self, road: Road):
         """

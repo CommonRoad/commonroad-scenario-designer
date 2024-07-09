@@ -1,6 +1,10 @@
 import copy
 from typing import List, Tuple
 
+from commonroad.common.common_lanelet import StopLine
+from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.scenario.traffic_sign import TrafficSign
+
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import (
     Border,
 )
@@ -15,11 +19,8 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import (
     encode_mark_lane_width_id,
     encode_road_section_lane_width_id,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
-    Lane,
-    LaneSection,
-    LaneWidth,
-)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (Lane, LaneSection, LaneWidth,
+                                                                                     LaneOffset)
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import (
     PlanView,
 )
@@ -29,7 +30,7 @@ class OpenDriveConverter:
     """Class for static methods to convert lane_sections to parametric_lanes."""
 
     @staticmethod
-    def create_reference_border(plan_view: PlanView, lane_offsets: List[float]) -> Border:
+    def create_reference_border(plan_view: PlanView, lane_offsets: List[LaneOffset]) -> Border:
         """Create the most inner border from a PlanView.
         This border is used as a reference for other
         borders which rely on the PlanView.
@@ -68,7 +69,7 @@ class OpenDriveConverter:
 
     @staticmethod
     def lane_section_to_parametric_lanes(
-        lane_section: LaneSection, reference_border: Border
+        lane_section: LaneSection, reference_border: Border, cr_traffic_lights: List[Tuple[TrafficLight, Tuple[int, int]]], cr_traffic_signs: List[TrafficSign], cr_stop_lines: List[StopLine]
     ) -> List[ParametricLaneGroup]:
         """Convert a whole lane section into a list of ParametricLane objects.
 
@@ -80,7 +81,7 @@ class OpenDriveConverter:
         plane_groups = []
 
         for side in ["right", "left"]:
-            # lanes loaded by opendriveparser are aleady sorted by id
+            # lanes loaded by opendrive parser are already sorted by id
             # coeff_factor decides if border is left or right of the reference line
             lanes = lane_section.right_lanes if side == "right" else lane_section.left_lanes
             coeff_factor = -1.0 if side == "right" else 1.0
@@ -97,41 +98,19 @@ class OpenDriveConverter:
                     inner_neighbour_same_dir,
                 ) = OpenDriveConverter.determine_neighbours(lane)
 
-                # Create outer lane border
-                # outer_parametric_lane_border =
+                # assign regulatory elements
+                # TODO
 
                 lane_borders.append(OpenDriveConverter._create_outer_lane_border(lane_borders, lane, coeff_factor))
 
-                # check the center line to save the inner linemarkings of the lanes around the center line
-                inner_linemarking = None
-                # lanes around the center line have an id of 1 and -1.
-                if lane.id == 1 or lane.id == -1:
-                    for parent_lane_section in lane.parent_road.lanes.lane_sections:
-                        # check for the center line
-                        if len(parent_lane_section.center_lanes) > 0:
-                            # check if the center lane has a road mark
-                            if len(parent_lane_section.center_lanes[0].road_mark) > 0:
-                                # assign the road mark to the inner linemarking
-                                inner_linemarking = copy.deepcopy(parent_lane_section.center_lanes[0].road_mark[0])
-                                # check if the road mark type is made up of 2 different markings,
-                                # assume right hand drive
-                                if parent_lane_section.center_lanes[0].road_mark[0].type == "solid broken":
-                                    if lane.id == 1:
-                                        inner_linemarking.type = "solid"
-                                    if lane.id == -1:
-                                        inner_linemarking.type = "broken"
-                                if parent_lane_section.center_lanes[0].road_mark[0].type == "broken solid":
-                                    if lane.id == 1:
-                                        inner_linemarking.type = "broken"
-                                    if lane.id == -1:
-                                        inner_linemarking.type = "solid"
+                inner_line_marking = OpenDriveConverter.extract_inner_line_marking(lane)
 
                 plane_group = ParametricLaneGroup(
                     id_=encode_road_section_lane_width_id(lane_section.parent_road.id, lane_section.idx, lane.id, -1),
                     inner_neighbour=inner_neighbour_id,
                     inner_neighbour_same_direction=inner_neighbour_same_dir,
                     outer_neighbour=outer_neighbour_id,
-                    inner_linemarking=inner_linemarking,
+                    inner_linemarking=inner_line_marking,
                 )
 
                 # Create new lane for each width segment
@@ -154,6 +133,33 @@ class OpenDriveConverter:
                 if plane_group.length > 0:
                     plane_groups.append(plane_group)
         return plane_groups
+
+    @staticmethod
+    def extract_inner_line_marking(lane):
+        # check the center line to save the inner line markings of the lanes around the center line
+        inner_line_marking = None
+        # lanes around the center line have an id of 1 and -1.
+        if lane.id == 1 or lane.id == -1:
+            for parent_lane_section in lane.parent_road.lanes.lane_sections:
+                # check for the center line
+                if len(parent_lane_section.center_lanes) > 0:
+                    # check if the center lane has a road mark
+                    if len(parent_lane_section.center_lanes[0].road_mark) > 0:
+                        # assign the road mark to the inner line marking
+                        inner_line_marking = copy.deepcopy(parent_lane_section.center_lanes[0].road_mark[0])
+                        # check if the road mark type is made up of 2 different markings,
+                        # assume right hand drive
+                        if parent_lane_section.center_lanes[0].road_mark[0].type == "solid broken":
+                            if lane.id == 1:
+                                inner_line_marking.type = "solid"
+                            if lane.id == -1:
+                                inner_line_marking.type = "broken"
+                        if parent_lane_section.center_lanes[0].road_mark[0].type == "broken solid":
+                            if lane.id == 1:
+                                inner_line_marking.type = "broken"
+                            if lane.id == -1:
+                                inner_line_marking.type = "solid"
+        return inner_line_marking
 
     @staticmethod
     def create_parametric_lane(
@@ -198,7 +204,7 @@ class OpenDriveConverter:
         return parametric_lane
 
     @staticmethod
-    def _create_outer_lane_border(lane_borders: List[Border], lane: Lane, coeff_factor: int) -> Border:
+    def _create_outer_lane_border(lane_borders: List[Border], lane: Lane, coeff_factor: float) -> Border:
         """Create an outer lane border of a lane.
         InnerBorder is already saved in lane_borders, as it is
         the outer border of the inner neighbour of the lane.
