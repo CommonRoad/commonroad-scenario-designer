@@ -10,7 +10,8 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import R
 
 
 def get_crosswalks(road: Road) -> List[ConversionLanelet]:
-    """Identify and converts crossing lanelets (represented as OpenDRIVE objects)
+    """Identify and converts crossing lanelets (represented as OpenDRIVE objects).
+    Projection/Transformation will be applied later.
 
     :param road: The road object from which to extract signals.
     :return: list of ConversionLanelets with lanelet_type='crosswalk'

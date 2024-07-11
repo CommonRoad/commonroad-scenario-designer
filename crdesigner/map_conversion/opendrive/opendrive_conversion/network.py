@@ -339,6 +339,20 @@ class Network:
         # self.traffic_signal_elements.update_traffic_signs_map_lane_id(lanelet_network.old_lanelet_ids())
 
         for crosswalk in self._crosswalks:
+            for left_vertex in crosswalk.left_vertices:
+                left_vertex[0], left_vertex[1] = transformer.transform(left_vertex[0], left_vertex[1])
+            for right_vertex in crosswalk.right_vertices:
+                right_vertex[0], right_vertex[1] = transformer.transform(right_vertex[0], right_vertex[1])
+            for center_vertex in crosswalk.center_vertices:
+                center_vertex[0], center_vertex[1] = transformer.transform(center_vertex[0], center_vertex[1])
+            # transform stop line coordinates
+            if crosswalk.stop_line is not None:
+                crosswalk.stop_line.start[0], crosswalk.stop_line.start[1] = transformer.transform(
+                    crosswalk.stop_line.start[0], crosswalk.stop_line.start[1]
+                )
+                crosswalk.stop_line.end[0], crosswalk.stop_line.end[1] = transformer.transform(
+                    crosswalk.stop_line.end[0], crosswalk.stop_line.end[1]
+                )
             lanelet_network.add_lanelet(crosswalk)
 
         # generating intersections

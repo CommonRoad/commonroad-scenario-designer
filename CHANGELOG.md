@@ -12,6 +12,9 @@
 ### Changed
 - odr2cr: Warning instead of failure in case of not supported road object type
 
+### Fixed
+- odr2cr: Missing crosswalk projection
+
 ## [0.8.1] - 2024-03-28
 
 ### Added
