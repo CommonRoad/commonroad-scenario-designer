@@ -521,7 +521,7 @@ class Lanelet2CRConverter:
         # id,cycle,position,offset,direction,active
         # for autoware, the traffic light id is retained
         if self._config.autoware:
-            new_id = traffic_light_way.id_
+            new_id = int(traffic_light_way.id_)
             active = False
             cycle_list = [TrafficLightCycleElement(TrafficLightState.INACTIVE, 5)]
 
@@ -529,8 +529,6 @@ class Lanelet2CRConverter:
             new_id = generate_unique_id()
             active = True
             cycle_list = _append_traffic_light_cycles(traffic_light_way)
-
-        logging.info("cycle_list: " + str(cycle_list) + " active: " + str(active) + " new_id: " + str(new_id))
 
         # TL in L2 format is represented with 3 nodes, we will take the one in the middle
         node = self.osm.nodes[traffic_light_way.nodes[1]]

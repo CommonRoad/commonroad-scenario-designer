@@ -8,9 +8,13 @@
 - cr2lanelet: Area conversion
 - cr2lanelet: Lane change property tags
 - odr2cr: Road speed limit conversion
+- odr2cr: Option to neglect projection by setting `config.proj_string_odr = None`
 
 ### Changed
 - odr2cr: Warning instead of failure in case of not supported road object type
+
+### Fixed
+- odr2cr: Missing crosswalk projection
 
 ## [0.8.1] - 2024-03-28
 
