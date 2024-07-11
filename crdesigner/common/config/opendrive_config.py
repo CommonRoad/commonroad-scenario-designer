@@ -62,7 +62,7 @@ class OpenDriveConfig(BaseConfig):
             "exit",
             "entry",
             "sidewalk",
-            "shoulder",
+            # "shoulder",
             "crosswalk",
             "bidirectional",
         ],

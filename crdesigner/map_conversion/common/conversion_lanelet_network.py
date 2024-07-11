@@ -1,6 +1,3 @@
-"""Module to enhance LaneletNetwork class,
-so it can be used for conversion from the opendrive format."""
-
 import itertools
 import logging
 import warnings
@@ -835,21 +832,26 @@ class ConversionLaneletNetwork(LaneletNetwork):
         :param traffic_lights: List of all the traffic lights in the lanelet network.
         """
         for traffic_light in traffic_lights:
-            min_distance = float("inf")
-            id_for_adding = None
-            for intersection in self.intersections:
-                for incoming in intersection.incomings:
-                    for lanelet in incoming.incoming_lanelets:
-                        lane = self.find_lanelet_by_id(lanelet)
-                        # Lanelet cannot have more traffic lights than number of successors
-                        if len(lane.successor) > len(lane.traffic_lights):
-                            pos_1 = traffic_light.position
-                            pos_2 = lane.center_vertices[-1]
-                            dist = np.linalg.norm(pos_1 - pos_2)
-                            if dist < min_distance:
-                                min_distance = dist
-                                id_for_adding = lanelet
-            if id_for_adding is None:
+            id_for_adding = set()
+            for lanelet in self.lanelets:
+                if traffic_light.traffic_light_id in lanelet.traffic_lights:
+                    id_for_adding.add(lanelet.lanelet_id)
+            if len(id_for_adding) == 0:
+                min_distance = float("inf")
+
+                for intersection in self.intersections:
+                    for incoming in intersection.incomings:
+                        for lanelet in incoming.incoming_lanelets:
+                            lane = self.find_lanelet_by_id(lanelet)
+                            # Lanelet cannot have more traffic lights than number of successors
+                            if len(lane.successor) > len(lane.traffic_lights):
+                                pos_1 = traffic_light.position
+                                pos_2 = lane.center_vertices[-1]
+                                dist = np.linalg.norm(pos_1 - pos_2)
+                                if dist < min_distance:
+                                    min_distance = dist
+                                    id_for_adding.add(lanelet)
+            if len(id_for_adding) == 0:
                 warnings.warn(
                     "For traffic light with ID {} no referencing lanelet was found!".format(
                         traffic_light.traffic_light_id
@@ -857,12 +859,12 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 )
                 self.add_traffic_light(traffic_light, set())
             else:
-                self.add_traffic_light(traffic_light, {id_for_adding})
+                self.add_traffic_light(traffic_light, id_for_adding)
 
         # Traffic light directions are assigned once all traffic lights are assigned to lanelets so that it can be
         # determined how directions need to be divided (i.e. the decision between left to one light and straight to
         # one light instead of left-straight)
-        self.add_traffic_light_directions()
+        # self.add_traffic_light_directions()
 
     def add_traffic_light_directions(self):
         """

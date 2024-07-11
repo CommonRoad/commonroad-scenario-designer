@@ -1,6 +1,6 @@
 import copy
 from collections import deque
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import iso3166
 import numpy as np
@@ -51,8 +51,8 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.pla
     ParametricLaneGroup,
 )
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import (
-    get_traffic_signal_references,
     assign_traffic_signals_to_road,
+    get_traffic_signal_references,
 )
 from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import (
     encode_road_section_lane_width_id,
@@ -193,8 +193,8 @@ class Network:
         self.assign_country_id(Network.get_country_id_from_opendrive(opendrive.roads))
 
         # extract signal references beforehand to be able to assign them correctly
-        traffic_light_dirs: Dict[str, List[str]] = {}
-        traffic_light_lanes: Dict[str, List[Tuple[int, int]]] = {}
+        traffic_light_dirs: Dict[str, Set[str]] = {}
+        traffic_light_lanes: Dict[str, Tuple[int, int]] = {}
         for road in opendrive.roads:
             get_traffic_signal_references(road, traffic_light_dirs, traffic_light_lanes)
 
@@ -207,7 +207,12 @@ class Network:
             reference_border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.lane_offsets)
 
             # Extracting signals, signs and stop lines from each road
-            assign_traffic_signals_to_road(road, traffic_light_dirs, traffic_light_lanes)
+            traffic_lights, traffic_signs, stop_lines = assign_traffic_signals_to_road(
+                road, traffic_light_dirs, traffic_light_lanes
+            )
+            self._traffic_lights.extend(traffic_lights)
+            self._traffic_signs.extend(traffic_signs)
+            self._stop_lines.extend(stop_lines)
 
             # Get crosswalks
             self._crosswalks.extend(get_crosswalks(road))
@@ -217,14 +222,13 @@ class Network:
 
             # A lane section is the smallest part that can be converted at once
             for lane_section in road.lanes.lane_sections:
-                # TODO assign signals to lanes
                 parametric_lane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(
-                        lane_section, reference_border, road.cr_traffic_lights, road.cr_traffic_signs, road.cr_stop_lines
+                    lane_section, reference_border, road.cr_traffic_lights, road.cr_traffic_signs, road.cr_stop_lines
                 )
 
                 self._planes.extend(parametric_lane_groups)
 
-        # todo store road signals
+        self._traffic_lights
 
     def _extract_road_speed_limit(self, road: Road):
         """
@@ -383,8 +387,8 @@ class Network:
 
         # Assign traffic signals, lights and stop lines to lanelet network
         lanelet_network.add_traffic_lights_to_network(self._traffic_lights)
-        lanelet_network.add_traffic_signs_to_network(self._traffic_signs)
-        lanelet_network.add_stop_lines_to_network(self._stop_lines)
+        #        lanelet_network.add_traffic_signs_to_network(self._traffic_signs)
+        #        lanelet_network.add_stop_lines_to_network(self._stop_lines)
 
         # create virtual traffic signs for individual lane speed limits
         drivable_lanelets = [

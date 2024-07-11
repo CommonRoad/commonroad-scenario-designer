@@ -12,9 +12,9 @@ from commonroad.scenario.traffic_sign import (
 
 from crdesigner.map_conversion.common.utils import generate_unique_id, get_default_cycle
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import (
+    assign_traffic_signals_to_road,
     calculate_stop_line_position,
     extract_traffic_element_id,
-    assign_traffic_signals_to_road,
 )
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (

@@ -266,6 +266,9 @@ class ParametricLaneGroup:
                 line_marking_right_vertices=line_marking_right_vertices,
                 speed=self.parametric_lanes[0].speed,
                 user_bidirectional=users,
+                traffic_signs=set(sign.traffic_sign_id for sign in self.traffic_signs),
+                traffic_lights=set(light.traffic_light_id for light in self.traffic_lights),
+                #               stop_line=self.stop_lines[0]
             )
         else:
             lanelet = ConversionLanelet(
@@ -279,6 +282,9 @@ class ParametricLaneGroup:
                 line_marking_right_vertices=line_marking_right_vertices,
                 speed=self.parametric_lanes[0].speed,
                 user_one_way=users,
+                traffic_signs=set(sign.traffic_sign_id for sign in self.traffic_signs),
+                traffic_lights=set(light.traffic_light_id for light in self.traffic_lights),
+                #              stop_line=self.stop_lines[0]
             )
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)

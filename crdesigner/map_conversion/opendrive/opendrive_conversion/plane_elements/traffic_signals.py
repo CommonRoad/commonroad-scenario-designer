@@ -1,6 +1,6 @@
 import enum
 import logging
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Set, Tuple, Union
 
 import numpy as np
 from commonroad.scenario.lanelet import LineMarking, StopLine
@@ -61,12 +61,16 @@ def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_si
     return element_id
 
 
-def assign_traffic_signals_to_road(road: Road, traffic_light_dirs: Dict[str, List[str]],
-                                   traffic_light_lanes: Dict[str, List[Tuple[int, int]]]):
+def assign_traffic_signals_to_road(
+    road: Road, traffic_light_dirs: Dict[str, Set[str]], traffic_light_lanes: Dict[str, Tuple[int, int]]
+) -> Tuple[List[TrafficLight], List[TrafficSign], List[StopLine]]:
     """Extracts traffic_lights, traffic_signs, stop_lines from a road.
 
     :param road: The road object from which to extract signals.
     """
+    traffic_signs = []
+    traffic_lights = []
+    stop_lines = []
     # TODO: Stop lines are created and appended to the list for DEU and OpenDrive format.
     # This has been replicated for other countries but has not been tested with a test case
     # Stop lines have a signal type of 294 and are handled differently in the commonroad format
@@ -114,7 +118,7 @@ def assign_traffic_signals_to_road(road: Road, traffic_light_dirs: Dict[str, Lis
                     continue
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDZamunda)
                 extract_stop_line("294", signal, road, position, tangent, lanes)  # TODO has another ID than 294
-
+            stop_lines.append(road.cr_stop_lines[-1][0])
             if element_id.value == "":
                 continue
             traffic_sign_element = TrafficSignElement(
@@ -128,13 +132,14 @@ def assign_traffic_signals_to_road(road: Road, traffic_light_dirs: Dict[str, Lis
                 virtual=False,
             )
 
-            road.add_traffic_sign((traffic_sign, lanes))
+            road.add_traffic_sign((traffic_sign, lanes, signal.s))
+            traffic_signs.append(traffic_sign)
 
         elif signal.dynamic == "yes":
             # the three listed here are hard to interpret in commonroad.
             # we ignore such signals in order not cause trouble in traffic simulation
             tdir = TrafficLightDirection.ALL
-            if traffic_light_dirs[signal.signal_id] is not None:
+            if traffic_light_dirs.get(signal.signal_id) is not None:
                 for tid, t_light in traffic_light_dirs.items():
                     if "Right" in t_light and "Straight" in t_light and "Left" in t_light:
                         tdir = TrafficLightDirection.ALL
@@ -152,23 +157,32 @@ def assign_traffic_signals_to_road(road: Road, traffic_light_dirs: Dict[str, Lis
                         tdir = TrafficLightDirection.STRAIGHT
                     else:
                         tdir = TrafficLightDirection.ALL
-            lanes = lanes if traffic_light_lanes[signal.signal_id] is None else traffic_light_lanes[signal.signal_id]
+            lanes = (
+                lanes if traffic_light_lanes.get(signal.signal_id) is None else traffic_light_lanes[signal.signal_id]
+            )
             if signal.type != ("1000002" or "1000007" or "1000013"):
                 traffic_light = TrafficLight(
-                    traffic_light_id=generate_unique_id(), position=position, traffic_light_cycle=get_default_cycle(),
-                        direction=tdir)  # TODO remove for new CR-Format
-                road.add_traffic_light((traffic_light, lanes))
+                    traffic_light_id=generate_unique_id(),
+                    position=position,
+                    traffic_light_cycle=get_default_cycle(),
+                    direction=tdir,
+                )  # TODO remove for new CR-Format
+                road.add_traffic_light((traffic_light, lanes, signal.s))
+                traffic_lights.append(traffic_light)
             else:
                 continue
+    return traffic_lights, traffic_signs, stop_lines
 
 
-def extract_stop_line(signal_id: str, signal: Signal, road: Road, position: np.ndarray, tangent: float, lanes: Tuple[int, int]):
+def extract_stop_line(
+    signal_id: str, signal: Signal, road: Road, position: np.ndarray, tangent: float, lanes: Tuple[int, int]
+):
     if signal.type == signal_id:  # TODO has another ID
         # Creating stop line object by first calculating the position of the two end points that define the
         # straight stop line
         position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal, position, tangent)
         stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-        road.add_stop_line((stop_line, lanes))
+        road.add_stop_line((stop_line, lanes, signal.s))
 
 
 def calculate_stop_line_position(
@@ -210,11 +224,20 @@ def calculate_stop_line_position(
     return position_1, position_2
 
 
-def  get_traffic_signal_references(
-    road: Road, traffic_light_dirs: Dict[str, List[str]], traffic_light_lanes: Dict[str, List[Tuple[int, int]]]
+def get_traffic_signal_references(
+    road: Road, traffic_light_dirs: Dict[str, Set[str]], traffic_light_lanes: Dict[str, Tuple[int, int]]
 ):
     """Function to extract relevant information from sign references."""
     for signal in road.signal_reference:
-        if traffic_light_dirs.get(signal.signal_id) is not None:
-            traffic_light_dirs[signal.signal_id].append(signal.turn_relation)
-            traffic_light_lanes[signal.signal_id].append((signal.validity_to, signal.validity_from))
+        if signal.turn_relation is not None:
+            if traffic_light_dirs.get(signal.signal_id) is None:
+                traffic_light_dirs[signal.signal_id] = set()
+            traffic_light_dirs[signal.signal_id].add(signal.turn_relation)
+        if signal.validity_to is not None:
+            if traffic_light_lanes.get(signal.signal_id) is not None:
+                traffic_light_lanes[signal.signal_id] = (
+                    min(traffic_light_lanes[signal.signal_id][0], signal.validity_from),
+                    max(traffic_light_lanes[signal.signal_id][0], signal.validity_to),
+                )
+            else:
+                traffic_light_lanes[signal.signal_id] = (signal.validity_to, signal.validity_from)

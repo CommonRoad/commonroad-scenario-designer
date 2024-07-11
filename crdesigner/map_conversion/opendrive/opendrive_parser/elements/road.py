@@ -1,4 +1,4 @@
-from typing import List, Union, Tuple
+from typing import List, Tuple, Union
 
 from commonroad.common.common_lanelet import StopLine
 from commonroad.scenario.traffic_light import TrafficLight
@@ -62,9 +62,9 @@ class Road:
         self._objects = []
         self._signals = []
         self._signalReferences = []
-        self._cr_traffic_lights: List[Tuple[TrafficLight, Tuple[int, int]]] = []
-        self._cr_traffic_signs: List[Tuple[TrafficSign, Tuple[int, int]]] = []
-        self._cr_stop_lines: List[Tuple[StopLine, Tuple[int, int]]] = []
+        self._cr_traffic_lights: List[Tuple[TrafficLight, Tuple[int, int], float]] = []
+        self._cr_traffic_signs: List[Tuple[TrafficSign, Tuple[int, int], float]] = []
+        self._cr_stop_lines: List[Tuple[StopLine, Tuple[int, int], float]] = []
 
     # check if objects have equal instance dictionaries
     def __eq__(self, other):
@@ -166,25 +166,25 @@ class Road:
         self._signalReferences.append(signal_reference)
 
     @property
-    def cr_traffic_lights(self) -> List[Tuple[TrafficLight, Tuple[int, int]]]:
+    def cr_traffic_lights(self) -> List[Tuple[TrafficLight, Tuple[int, int], float]]:
         return self._cr_traffic_lights
 
     @property
-    def cr_traffic_signs(self) -> List[TrafficSign]:
+    def cr_traffic_signs(self) -> List[Tuple[TrafficSign, Tuple[int, int], float]]:
         return self._cr_traffic_signs
 
     @property
-    def cr_stop_lines(self) -> List[StopLine]:
+    def cr_stop_lines(self) -> List[Tuple[StopLine, Tuple[int, int], float]]:
         return self._cr_stop_lines
 
-    def add_traffic_light(self, traffic_light: Tuple[TrafficLight, Tuple[int, int]]):
+    def add_traffic_light(self, traffic_light: Tuple[TrafficLight, Tuple[int, int], float]):
         """Adds CommonRoad traffic light to road for further processing."""
         self._cr_traffic_lights.append(traffic_light)
 
-    def add_traffic_sign(self, traffic_sign: Tuple[TrafficSign, Tuple[int, int]]):
+    def add_traffic_sign(self, traffic_sign: Tuple[TrafficSign, Tuple[int, int], float]):
         """Adds CommonRoad traffic sign to road for further processing."""
         self._cr_traffic_signs.append(traffic_sign)
 
-    def add_stop_line(self, stop_line:  Tuple[StopLine, Tuple[int, int]]):
+    def add_stop_line(self, stop_line: Tuple[StopLine, Tuple[int, int], float]):
         """Adds CommonRoad stop line to road for further processing."""
         self._cr_stop_lines.append(stop_line)

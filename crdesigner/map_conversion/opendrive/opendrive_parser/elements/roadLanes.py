@@ -196,8 +196,9 @@ class Lane:
         self._road_mark = []
         self.speed = None
         self.access = []
-        self._traffic_signs = []
-        self._traffic_lights = []
+        self._cr_traffic_signs = []
+        self._cr_traffic_lights = []
+        self._cr_stop_lines = []
         # TODO material -> see parser.py
         # TODO speed limit -> see parser.py
         # TODO height -> see parser.py
@@ -275,7 +276,7 @@ class Lane:
         return self._link
 
     @property
-    def widths(self) -> list:
+    def widths(self) -> List[LaneWidth]:
         """
         Describes the widths of a lane.
 
@@ -442,7 +443,7 @@ class LaneSection:
         self._single_side = value == "true"
 
     @property
-    def left_lanes(self) -> list[Lane]:
+    def left_lanes(self) -> List[Lane]:
         """
         Get list of sorted lanes always starting in the middle (lane id -1).
 
@@ -452,7 +453,7 @@ class LaneSection:
         return self._left_lanes.lanes
 
     @property
-    def center_lanes(self) -> list[Lane]:
+    def center_lanes(self) -> List[Lane]:
         """
         Get list of the one center lane element.
 
@@ -462,7 +463,7 @@ class LaneSection:
         return self._center_lanes.lanes
 
     @property
-    def right_lanes(self) -> list[Lane]:
+    def right_lanes(self) -> List[Lane]:
         """
         Get list of sorted lanes always starting in the middle (lane id 1).
 
@@ -472,7 +473,7 @@ class LaneSection:
         return self._right_lanes.lanes
 
     @property
-    def all_lanes(self) -> list[Lane]:
+    def all_lanes(self) -> List[Lane]:
         """
         Attention! lanes are not sorted by id.
         Get list of all lanes in the lane section.

@@ -19,8 +19,12 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import (
     encode_mark_lane_width_id,
     encode_road_section_lane_width_id,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (Lane, LaneSection, LaneWidth,
-                                                                                     LaneOffset)
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
+    Lane,
+    LaneOffset,
+    LaneSection,
+    LaneWidth,
+)
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import (
     PlanView,
 )
@@ -69,7 +73,11 @@ class OpenDriveConverter:
 
     @staticmethod
     def lane_section_to_parametric_lanes(
-        lane_section: LaneSection, reference_border: Border, cr_traffic_lights: List[Tuple[TrafficLight, Tuple[int, int]]], cr_traffic_signs: List[TrafficSign], cr_stop_lines: List[StopLine]
+        lane_section: LaneSection,
+        reference_border: Border,
+        cr_traffic_lights: List[Tuple[TrafficLight, Tuple[int, int], float]],
+        cr_traffic_signs: List[Tuple[TrafficSign, Tuple[int, int], float]],
+        cr_stop_lines: List[Tuple[StopLine, Tuple[int, int], float]],
     ) -> List[ParametricLaneGroup]:
         """Convert a whole lane section into a list of ParametricLane objects.
 
@@ -98,9 +106,6 @@ class OpenDriveConverter:
                     inner_neighbour_same_dir,
                 ) = OpenDriveConverter.determine_neighbours(lane)
 
-                # assign regulatory elements
-                # TODO
-
                 lane_borders.append(OpenDriveConverter._create_outer_lane_border(lane_borders, lane, coeff_factor))
 
                 inner_line_marking = OpenDriveConverter.extract_inner_line_marking(lane)
@@ -125,13 +130,25 @@ class OpenDriveConverter:
                         lane_borders, width, lane, side, mark_idx
                     )
                     parametric_lane.reverse = bool(lane.id > 0)
+
                     plane_group.append(parametric_lane)
+
+                    # assign regulatory elements
+                    for light in cr_traffic_lights:
+                        if light[1][0] <= lane.id and lane.id <= light[1][1] and width.start_offset < light[2]:
+                            plane_group.traffic_lights.append(light[0])
+                    for sign in cr_traffic_signs:
+                        if sign[1][0] <= lane.id and lane.id <= sign[1][1] and width.start_offset < sign[2]:
+                            plane_group.traffic_signs.append(sign[0])
+                    for line in cr_stop_lines:
+                        if line[1][0] <= lane.id and lane.id <= line[1][1] and width.start_offset < line[2]:
+                            plane_group.stop_lines.append(line[0])
 
                 # if lane borders are specified by offsets instead of widths
                 # for borders in lane.borders:
-
                 if plane_group.length > 0:
                     plane_groups.append(plane_group)
+
         return plane_groups
 
     @staticmethod
