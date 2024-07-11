@@ -29,6 +29,7 @@ from commonroad.scenario.traffic_sign import (
 )
 from pyproj import CRS, Transformer
 
+from crdesigner.common.common_file_reader_writer import project_lanelet
 from crdesigner.common.config.general_config import GeneralConfig, general_config
 from crdesigner.common.config.opendrive_config import OpenDriveConfig, open_drive_config
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
@@ -339,20 +340,8 @@ class Network:
         # self.traffic_signal_elements.update_traffic_signs_map_lane_id(lanelet_network.old_lanelet_ids())
 
         for crosswalk in self._crosswalks:
-            for left_vertex in crosswalk.left_vertices:
-                left_vertex[0], left_vertex[1] = transformer.transform(left_vertex[0], left_vertex[1])
-            for right_vertex in crosswalk.right_vertices:
-                right_vertex[0], right_vertex[1] = transformer.transform(right_vertex[0], right_vertex[1])
-            for center_vertex in crosswalk.center_vertices:
-                center_vertex[0], center_vertex[1] = transformer.transform(center_vertex[0], center_vertex[1])
-            # transform stop line coordinates
-            if crosswalk.stop_line is not None:
-                crosswalk.stop_line.start[0], crosswalk.stop_line.start[1] = transformer.transform(
-                    crosswalk.stop_line.start[0], crosswalk.stop_line.start[1]
-                )
-                crosswalk.stop_line.end[0], crosswalk.stop_line.end[1] = transformer.transform(
-                    crosswalk.stop_line.end[0], crosswalk.stop_line.end[1]
-                )
+            if transformer is not None:
+                project_lanelet(crosswalk, transformer)
             lanelet_network.add_lanelet(crosswalk)
 
         # generating intersections
@@ -600,7 +589,7 @@ class Network:
         """
         transformer = None
         location_kwargs = {}
-        if self._geo_ref is not None:
+        if self._geo_ref is not None and self._config.proj_string_odr is not None:
             longitude, latitude = get_geo_reference(self._geo_ref)
             if longitude is not None and latitude is not None:
                 location_kwargs = dict(gps_latitude=latitude, gps_longitude=longitude)
@@ -610,7 +599,12 @@ class Network:
             transformer = Transformer.from_proj(crs_from, crs_to)
 
         location = Location(
-            geo_transformation=GeoTransformation(geo_reference=self._config.proj_string_odr), **location_kwargs
+            geo_transformation=(
+                GeoTransformation(geo_reference=self._config.proj_string_odr)
+                if self._config.proj_string_odr is not None
+                else None
+            ),
+            **location_kwargs
         )
 
         scenario_id = ScenarioID(
