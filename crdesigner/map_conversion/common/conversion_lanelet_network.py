@@ -516,14 +516,11 @@ class ConversionLaneletNetwork(LaneletNetwork):
             return successor.adj_left is None
         return True
 
-    def create_intersection(self, intersection_map, intersection_id):
+    def create_intersection(self, intersection_map: Dict[int, List[int]]):
         """
         Creates an intersection inside the lanelet network object
 
         :param intersection_map: Information about the successors of a lanelet in a junction.
-        :type intersection_map: dict
-        :param intersection_id: The unique id used to reference the intersection.
-        :type intersection_id: int
         """
         # If different incoming lanelets have same successors, combine into set
         incoming_lanelet_ids = self.combine_common_incoming_lanelets(intersection_map)
@@ -710,12 +707,11 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 else:
                     prev -= 1
 
-    def combine_common_incoming_lanelets(self, intersection_map: dict) -> List[Tuple]:
+    def combine_common_incoming_lanelets(self, intersection_map: Dict[int, List[int]]) -> List[List[int]]:
         """
         Returns a list of tuples which are pairs of adj incoming lanelets and the union of their successors
 
         :param intersection_map: Dict containing the information regarding a particular intersection.
-        :type intersection_map: dict
         :return: List of tuples that are pairs of adjacent incoming lanelets and the union of their successors
         """
         incoming_lane_ids = intersection_map.keys()
@@ -831,26 +827,35 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         :param traffic_lights: List of all the traffic lights in the lanelet network.
         """
+        incoming_lanelet_ids = self.map_inc_lanelets_to_intersections.keys()
         for traffic_light in traffic_lights:
             id_for_adding = set()
             for lanelet in self.lanelets:
-                if traffic_light.traffic_light_id in lanelet.traffic_lights:
+                if (
+                    traffic_light.traffic_light_id in lanelet.traffic_lights
+                    and lanelet.lanelet_id in incoming_lanelet_ids
+                ):
                     id_for_adding.add(lanelet.lanelet_id)
+                elif (
+                    traffic_light.traffic_light_id in lanelet.traffic_lights
+                    and lanelet.lanelet_id not in incoming_lanelet_ids
+                ):
+                    lanelet.traffic_lights = set()
+                    for pre in lanelet.predecessor:
+                        if pre in incoming_lanelet_ids:
+                            id_for_adding.add(pre)
             if len(id_for_adding) == 0:
                 min_distance = float("inf")
-
-                for intersection in self.intersections:
-                    for incoming in intersection.incomings:
-                        for lanelet in incoming.incoming_lanelets:
-                            lane = self.find_lanelet_by_id(lanelet)
-                            # Lanelet cannot have more traffic lights than number of successors
-                            if len(lane.successor) > len(lane.traffic_lights):
-                                pos_1 = traffic_light.position
-                                pos_2 = lane.center_vertices[-1]
-                                dist = np.linalg.norm(pos_1 - pos_2)
-                                if dist < min_distance:
-                                    min_distance = dist
-                                    id_for_adding.add(lanelet)
+                for lanelet in incoming_lanelet_ids:
+                    lane = self.find_lanelet_by_id(lanelet)
+                    # Lanelet cannot have more traffic lights than number of successors
+                    if len(lane.successor) > len(lane.traffic_lights):
+                        pos_1 = traffic_light.position
+                        pos_2 = lane.center_vertices[-1]
+                        dist = np.linalg.norm(pos_1 - pos_2)
+                        if dist < min_distance:
+                            min_distance = dist
+                            id_for_adding.add(lanelet)
             if len(id_for_adding) == 0:
                 warnings.warn(
                     "For traffic light with ID {} no referencing lanelet was found!".format(

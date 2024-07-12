@@ -229,7 +229,18 @@ class Network:
 
                 self._planes.extend(parametric_lane_groups)
 
-        self._traffic_lights
+                # check if parametric lane group is not part of intersection
+
+                for intersection in self._link_index.intersection_maps():
+                    incomings_to_remove = []
+                    for incoming_lane_id, successors in intersection.items():
+                        for lane_group in parametric_lane_groups:
+                            if (
+                                lane_group.id_ == incoming_lane_id or lane_group.id_ in successors
+                            ) and lane_group.type != "driving":
+                                incomings_to_remove.append(incoming_lane_id)
+                    for incoming in incomings_to_remove:
+                        del intersection[incoming]
 
     def _extract_road_speed_limit(self, road: Road):
         """
@@ -337,7 +348,6 @@ class Network:
             if filter_types is not None and parametric_lane.type not in filter_types:
                 # Remove lanelets from intersections dictionary that do not fit the filtered type criterion
                 self._link_index.clean_intersections(parametric_lane.id_)
-                continue
             lanelet = parametric_lane.to_lanelet(self._config.error_tolerance, self._config.min_delta_s, transformer)
             lanelet.predecessor = self._link_index.get_predecessors(parametric_lane.id_)
             lanelet.successor = self._link_index.get_successors(parametric_lane.id_)
@@ -372,7 +382,7 @@ class Network:
             # Remove lanelets that are not part of the network (as they are of a different type)
             intersection_id_counter = generate_unique_id()
             lanelet_network._old_lanelet_ids[intersection_id_counter] = intersection_id_counter
-            lanelet_network.create_intersection(intersection_map, intersection_id_counter)
+            lanelet_network.create_intersection(intersection_map)
 
         self.relate_crosswalks_to_intersection(lanelet_network)
 
@@ -662,10 +672,10 @@ class LinkIndex:
 
     def __init__(self):
         self._successors = {}
-        self._intersections = list()
-        self._intersection_dict = dict()
+        self._intersections = []
+        self._intersection_dict = {}
 
-    def intersection_maps(self):
+    def intersection_maps(self) -> List[Dict[str, List[str]]]:
         return self._intersections
 
     def create_from_opendrive(self, opendrive: OpenDrive):

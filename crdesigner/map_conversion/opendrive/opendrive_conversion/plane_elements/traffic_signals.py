@@ -1,3 +1,4 @@
+import dataclasses
 import enum
 import logging
 from typing import Dict, List, Set, Tuple, Union
@@ -117,8 +118,11 @@ def assign_traffic_signals_to_road(
                 if signal.type == "1000003" or signal.type == "1000004":
                     continue
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDZamunda)
-                extract_stop_line("294", signal, road, position, tangent, lanes)  # TODO has another ID than 294
-            stop_lines.append(road.cr_stop_lines[-1][0])
+                stop_line = extract_stop_line(
+                    "294", signal, road, position, tangent, lanes
+                )  # TODO has another ID than 294
+                road.add_stop_line((stop_line, lanes, signal.s))
+                stop_lines.append(stop_line)
             if element_id.value == "":
                 continue
             traffic_sign_element = TrafficSignElement(
@@ -176,13 +180,12 @@ def assign_traffic_signals_to_road(
 
 def extract_stop_line(
     signal_id: str, signal: Signal, road: Road, position: np.ndarray, tangent: float, lanes: Tuple[int, int]
-):
+) -> StopLine:
     if signal.type == signal_id:  # TODO has another ID
         # Creating stop line object by first calculating the position of the two end points that define the
         # straight stop line
         position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal, position, tangent)
-        stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-        road.add_stop_line((stop_line, lanes, signal.s))
+        return StopLine(position_1, position_2, LineMarking.SOLID)
 
 
 def calculate_stop_line_position(
