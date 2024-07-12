@@ -132,7 +132,7 @@ class TestConverter(unittest.TestCase):
         reference_border.width_coefficient_offsets.append(0.0)
         reference_border.width_coefficients.append([0.0])
         road.lanes.lane_sections.append(section)
-        plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
+        plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border, [], [], [])
 
         mark1 = RoadMark()
         mark1.SOffset = 0.0

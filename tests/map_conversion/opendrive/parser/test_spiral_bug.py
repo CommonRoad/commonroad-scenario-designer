@@ -44,7 +44,7 @@ class TestSamplingForSpirals(unittest.TestCase):
         reference_border.width_coefficients.append([0.0])
         reference_border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.lane_offsets)
 
-        plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
+        plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border, [], [], [])
 
         lv, rv = plane_groups[0].parametric_lanes[0].calc_vertices(error_tolerance=0.15, min_delta_s=0.5)
         for i in range(1, len(lv)):
