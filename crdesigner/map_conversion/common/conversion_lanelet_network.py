@@ -135,8 +135,10 @@ class ConversionLaneletNetwork(LaneletNetwork):
             lanelet.successor[:] = [succ for succ in lanelet.successor if succ in lanelet_ids]
             if lanelet.adj_left not in lanelet_ids:
                 lanelet.adj_left = None
+                lanelet.adj_left_same_direction = False
             if lanelet.adj_right not in lanelet_ids:
                 lanelet.adj_right = None
+                lanelet.adj_right_same_direction = False
 
     def delete_zero_width_parametric_lanes(self):
         """Remove all ParametricLaneGroup which have zero width at every point from this network."""
@@ -182,14 +184,13 @@ class ConversionLaneletNetwork(LaneletNetwork):
             if lanelet.adj_left == old_id:
                 lanelet.adj_left = new_id
 
-    def concatenate_possible_lanelets(self) -> dict:
+    def concatenate_possible_lanelets(self) -> Dict[str, str]:
         """Iterate trough lanelets in network and concatenate possible lanelets together.
 
         Check for each lanelet if it can be concatenated with its successor and if its neighbors can be concatenated
         as well. If yes, do the concatenation.
 
         :return: A dictionary containing the replacement IDs.
-        :rtype: dict
         """
         concatenate_lanelets = []
         for lanelet in self.lanelets:
@@ -390,9 +391,17 @@ class ConversionLaneletNetwork(LaneletNetwork):
         ):
             return None
 
-        neighbor_ok = self.successor_is_neighbor_of_neighbors_successor(lanelet)
-        if not neighbor_ok:
+        if not self.successor_is_neighbor_of_neighbors_successor(lanelet):
             return None
+
+        # in some CARLA maps sidewalk lanelets point together
+        # (lanelets have completely wrong successors) -> skip merging
+        for suc in lanelet.successor:
+            if np.linalg.norm(lanelet.left_vertices[-1] - self.find_lanelet_by_id(suc).left_vertices[0]) > 1:
+                return None
+        for pre in lanelet.predecessor:
+            if np.linalg.norm(lanelet.left_vertices[0] - self.find_lanelet_by_id(pre).left_vertices[-1]) > 1:
+                return None
 
         if adjacent_direction == "left":
             mergeable_lanelets.append((lanelet.lanelet_id, lanelet.successor[0]))

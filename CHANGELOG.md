@@ -15,6 +15,8 @@
 
 ### Fixed
 - odr2cr: Missing crosswalk projection
+- odr2cr: Traffic light assignment
+- odr2cr: Self-intersecting lanelets in case of wrong predecessor/successor relationships in OpenDRIVE file
 
 ## [0.8.1] - 2024-03-28
 
