@@ -83,6 +83,9 @@ class OpenDriveConverter:
 
         :param lane_section: LaneSection from which to create the list of ParametricLane Objects
         :param reference_border: The reference border of the lane section, created from create_reference_border()
+        :param cr_traffic_lights: CommonRoad traffic lights assigned to road.
+        :param cr_traffic_signs: CommonRoad traffic signs assigned to road.
+        :param cr_stop_lines: CommonRoad stop lines assigned to road.
         :return: The converted ParametricLane objects.
         """
 

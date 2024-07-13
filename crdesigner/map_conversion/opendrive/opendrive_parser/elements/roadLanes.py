@@ -193,9 +193,6 @@ class Lane:
         self._road_mark = []
         self.speed = None
         self.access = []
-        self._cr_traffic_signs = []
-        self._cr_traffic_lights = []
-        self._cr_stop_lines = []
         # TODO material -> see parser.py
         # TODO speed limit -> see parser.py
         # TODO height -> see parser.py
