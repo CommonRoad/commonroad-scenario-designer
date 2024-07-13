@@ -31,7 +31,6 @@ class Lanes:
         s-coordinate. A new offset starts when the underlying polynomial function changes.
 
         :getter: returns lane offsets
-        :type: list of instances of the class LaneOffset
         """
         self._lane_offsets.sort(key=lambda x: x.start_pos)
         return self._lane_offsets
@@ -42,7 +41,6 @@ class Lanes:
         Lane sections of the lane. Lane sections are defined in ascending order according to their s-coordinate.
 
         :getter: returns lane sections
-        :type: list of instances of the class LaneSection
         """
         self._lane_sections.sort(key=lambda x: x.sPos)
         return self._lane_sections
@@ -105,7 +103,6 @@ class LeftLanes:
         Describes the lane elements of the left/center/right lane of the lane section.
 
         :getter: returns lane elements of left/center/right lane
-        :type: class instance
         """
         self._lanes.sort(key=lambda x: x.id, reverse=self.sort_direction)
         return self._lanes
@@ -210,7 +207,6 @@ class Lane:
         Road including the lane.
 
         :getter: returns the road which has includes the lane
-        :type: instance of Road class
         """
         return self._parent_road
 
@@ -221,7 +217,6 @@ class Lane:
 
         :getter: returns the ID
         :setter: sets the lane ID
-        :type: int
         """
         return self._id
 
@@ -236,7 +231,6 @@ class Lane:
 
         :getter: returns the type of the lane
         :setter: sets the type of the lane
-        :type: string
         """
         return self._type
 
@@ -254,7 +248,6 @@ class Lane:
 
         :getter: returns level attribute
         :setter: sets level attribute
-        :type: boolean
         """
         return self._level
 
@@ -271,7 +264,6 @@ class Lane:
         Describes linkage information of the lane.
 
         :getter: returns the instance of class LaneLink
-        :type: class instance
         """
         return self._link
 
@@ -282,7 +274,6 @@ class Lane:
 
         :getter: returns the width element
         :setter: sets the width of the lane
-        :type: list of LaneWidth() instances, optional
         """
         self._widths.sort(key=lambda x: x.start_offset)
         return self._widths
@@ -322,7 +313,6 @@ class Lane:
         if there is no width attribute given.
 
         :getter: returns instance of class border
-        :type: class instance
         """
         self._borders.sort(key=lambda x: x.start_offset)
         return self._borders
@@ -334,7 +324,6 @@ class Lane:
 
         :getter: returns instance of class RoadMark
         :setter: sets the attribute _road_mark
-        :type: class instance
         """
         return self._road_mark
 
@@ -365,7 +354,6 @@ class LaneLink:
 
         :getter: returns preceding lane ID
         :setter: sets preceding lane ID
-        :type: int
         """
         return self._predecessor
 
@@ -380,7 +368,6 @@ class LaneLink:
 
         :getter: returns succeeding lane ID
         :setter: sets succeeding lane ID
-        :type: int
         """
         return self._successor
 
@@ -431,7 +418,6 @@ class LaneSection:
 
         :getter: Returns whether singleSide value
         :setter: sets singleSide value
-        :type: boolean
         """
         return self._single_side
 
@@ -448,7 +434,6 @@ class LaneSection:
         Get list of sorted lanes always starting in the middle (lane id -1).
 
         :getter: Returns the left lanes of the lane section
-        :type: class instance(s) of class Lane() in form of a list
         """
         return self._left_lanes.lanes
 
@@ -458,7 +443,6 @@ class LaneSection:
         Get list of the one center lane element.
 
         :getter: Returns the center lane of the lane section
-        :type: class instance of class Lane() in form of a list
         """
         return self._center_lanes.lanes
 
@@ -468,7 +452,6 @@ class LaneSection:
         Get list of sorted lanes always starting in the middle (lane id 1).
 
         :getter: Returns the right lanes of the lane section
-        :type: class instance(s) of class Lane() in form of a list
         """
         return self._right_lanes.lanes
 
@@ -479,7 +462,6 @@ class LaneSection:
         Get list of all lanes in the lane section.
 
         :getter: Returns all lanes in the lane section
-        :type: list of class instances of class Lane()
         """
         return self._left_lanes.lanes + self._center_lanes.lanes + self._right_lanes.lanes
 
@@ -502,7 +484,6 @@ class LaneSection:
         Road the lane section belongs to.
 
         :getter: returns road which the lane section is a part of
-        :type: class instance of Road()
         """
         return self._parent_road
 
@@ -536,7 +517,6 @@ class LaneWidth(RoadRecord):
         Return start_offset, which is the offset of the entry to the start of the lane section.
 
         :getter: returns start_offset
-        :type: float
         """
         return self.start_pos
 
@@ -594,7 +574,6 @@ class RoadMark:
 
         :getter: returns sOffset
         :setter: sets sOffset
-        :type: float
         """
         return self._SOffset
 
@@ -617,7 +596,6 @@ class RoadMark:
 
         :getter: returns road mark type
         :setter: sets road mark type
-        :type: string
         """
         return self._type
 
@@ -632,7 +610,6 @@ class RoadMark:
 
         :getter: returns road mark weight
         :setter: sets road mark weight
-        :type: string
         """
         return self._weight
 
@@ -656,7 +633,6 @@ class RoadMark:
 
         :getter: returns the color of the road mark
         :setter: sets the color of the road mark
-        :type: string
         """
         logging.warning("RoadMark::color: Attribute color is not used for conversion!", DeprecationWarning)
         return self._color
@@ -671,7 +647,6 @@ class RoadMark:
         Material of the road mark.
 
         :getter: returns material of the road mark
-        :type: string
         """
         logging.warning("RoadMark::material: Attribute material is not used for conversion!", DeprecationWarning)
         return self._material
@@ -682,7 +657,6 @@ class RoadMark:
         Width of the road mark.
 
         :getter: returns the width of the road mark
-        :type:
         """
         logging.warning("RoadMark::width: Attribute width is not used for conversion!", DeprecationWarning)
         return self._width
@@ -694,7 +668,6 @@ class RoadMark:
 
         :getter: returns allowed lane change
         :setter: sets lane_change
-        :type: string
         """
         logging.warning("RoadMark::lane_change: Attribute lane_change is not used for conversion", DeprecationWarning)
         return self._lane_change
@@ -709,7 +682,6 @@ class RoadMark:
         Height of the road mark.
 
         :getter: returns the height of the road mark
-        :type:
         """
         logging.warning("RoadMark::height: Attribute height is not used for conversion!", DeprecationWarning)
         return self._height

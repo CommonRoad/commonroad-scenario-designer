@@ -95,11 +95,8 @@ def get_incomings_outgoings(edge: Union[GraphEdge, CombinedEdge], node: GraphNod
     returns the incoming and outgoing lanes of an edge at a node
 
     :param edge: edge
-    :type edge: GraphEdge
     :param node: node
-    :type node: GraphNode
     :return: incoming, outgoing: lists of lanes
-    :rtype: Tuple[List[Lane], List[Lane]]
     """
     if isinstance(edge, CombinedEdge):
         if edge.node1 == node:
@@ -138,10 +135,7 @@ def link_two_lanes(lane1: Lane, lane2: Lane):
     links two lanes
 
     :param lane1: lane object, predecessor
-    :type lane1: Lane
     :param lane2: lane object, successor
-    :type lane2: Lane
-    :return: None
     """
     lane1.successors.add(lane2)
     lane2.predecessors.add(lane1)
@@ -159,16 +153,10 @@ def link_interval(
     links incoming and outgoing lanes in given interval
 
     :param incoming: list of incoming lanes
-    :type incoming: List[Lane]
     :param outgoing: list of outgoing lanes
-    :type outgoing: List[Lane]
     :param start_incoming: index of first incoming lane to link
-    :type start_incoming: int
     :param start_outgoing: index of first outgoing lane to ling
-    :type start_outgoing: int
     :param length: nr of links to create
-    :type: length: int
-    :return: None
     """
     if length > min(len(incoming) - start_incoming, len(outgoing) - start_outgoing):
         raise ValueError("interval is larger than set of lanes")
@@ -185,12 +173,8 @@ def link_incoming_outgoing(incoming: List[Lane], outgoing: List[Lane], start_lef
     links incoming and outgoing lanes, if one list is larger the additional lanes are not linked
 
     :param incoming: list of incoming lanes
-    :type incoming: List[Lane]
     :param outgoing: list of outgoing lanes
-    :type outgoing: List[Lane]
     :param start_left: if true linking is started from the beginning of the list, else from the end
-    :type start_left: bool
-    :return: None
     """
     nr_of_links = min(len(incoming), len(outgoing))
     for index in range(nr_of_links):
@@ -207,11 +191,8 @@ def link_full_incoming_outgoing(incoming: List[Lane], outgoing: List[Lane], merg
     if one list is larger the additional lanes are linked to the first or last lane of the other list
 
     :param incoming: list of incoming lanes
-    :type incoming: List[Lane]
     :param outgoing: list of outgoing lanes
-    :type: outgoing: List[Lane]
     :param merge_at_left: if true additional lanes are linked to the first lane of the other list, else to the last
-    :type merge_at_left: bool
     :return: None
     """
     link_incoming_outgoing(incoming, outgoing, not merge_at_left)
@@ -262,28 +243,17 @@ def get_turnlane_usefull(
     gives back rotation of turnlanes for 3way intersections
 
     :param turnlanes: list of turnlanes
-    :type turnlanes: List[str]
     :param incoming: list of incoming lanes
-    :type incoming: List[Lane]
     :param outgoing_left: list of outgoing lanes at the left
-    :type outgoing_left: List[Lane]
     :param outgoing_through: list of outgoing lanes at the opposite side
-    :type outgoing_through: List[Lane]
     :param outgoing_right: list of outgoing lanes at the right
-    :type outgoing_right: List[Lane]
     :param fourway: if true the intersection is a 4way intersection, else 3way
-    :type fourway: bool
     :param edge: the edge the incoming lanes belong to
-    :type edge: GraphEdge
     :param edge_left: the edge the outgoing lanes at the left belong to
-    :type edge_left: GraphEdge
     :param edge_right: the edge the outgoing lanes at the right belong to
-    :type edge_right: GraphEdge
     :param node: the node of the intersection
-    :type node: GraphNode
     :return: turnlane_useful: true if the turnlanes can be used for linking,
              threeway_rotate: states if 'through' tags should be switched with 'left' or 'right'
-    :rtype: Tuple[bool, str]
     """
     turnlane_useful = True
     left_turnlanes = 0
@@ -397,29 +367,17 @@ def set_turnlane_borders(
     these sections can intersect at at most one lane
 
     :param turnlanes: list of turnlanes
-    :type turnlanes: List[str]
     :param incoming: list of incoming lanes
-    :type incoming: List[Lane]
     :param outgoing_left: list of outgoing lanes at the left
-    :type outgoing_left: List[Lane]
     :param outgoing_through: list of outgoing lanes at the opposite side
-    :type outgoing_through: List[Lane]
     :param outgoing_right: list of outgoing lanes at the right
-    :type outgoing_right: List[Lane]
     :param turnlane_useful: if true turnlanes can be used
-    :type turnlane_useful: bool
     :param edge: the edge the incoming lanes belong to
-    :type edge: GraphEdge
     :param edge_through: the edge the outgoing lanes in the middle belong to
-    :type edge_through: GraphEdge
     :param edge_left: the edge the outgoing lanes at the left belong to
-    :type edge_left: GraphEdge
     :param edge_right: the edge the outgoing lanes at the right belong to
-    :type edge_right: GraphEdge
     :param node: the node of the intersection
-    :type node: GraphNode
     :return: borders of groups: last_left, first_through, last_through, first_right
-    :rtype: Tuple[int, int, int, int]
     """
     last_left, first_through, last_through, first_right = None, None, None, None
     upper_bound_left = min(len(incoming) - 1, len(outgoing_left) - 1)
@@ -561,13 +519,9 @@ def find_next_linked_lane(lanes: List[Lane], index: int, predecessor: bool) -> i
     finds the nearest lane in a list which has a predecessor or successer
 
     :param lanes: list of lanes
-    :type lanes: List[Lane]
     :param index: index of the lane
-    :type index: int
     :param predecessor: if true a neighbor with a predecessor is searched, otherwise a neighbor with a successor
-    :type predecessor: bool
     :return: index of the nearest linked neighbor
-    :rtype: int
     """
     assert len(lanes) > 0
     assert index in range(0, len(lanes))
@@ -592,7 +546,6 @@ def link_skipped_lanes(node: GraphNode):
     links lanes that do not have predecessors or successors
 
     :param node: respective node
-    :type node: GraphNode
     :return: None
     """
     for index, edge in enumerate(node.edges):
@@ -622,11 +575,8 @@ def merge_left(incoming: List[Lane], outgoing: List[Lane]) -> bool:
     - left lane has tag merge_to_left
 
     :param incoming: incoming lanes
-    :type incoming: List[Lane]
     :param outgoing: outgoing lanes
-    :type outgoing: List[Lane]
     :return: True if merge at left, False else
-    :rtype: bool
     """
     merge_at_left = True
     if (
@@ -648,12 +598,8 @@ def linkleft_interval(last_left: int, incoming: List[Lane], outgoing_left: List[
     links all incoming lanes at an intersection to the lanes outgoing left
 
     :param last_left: index of the last lane turning to the left
-    :type last_left: int
     :param incoming: lanes coming to the intersection
-    :type incoming: List[Lane]
     :param outgoing_left: lanes leaving the intersection at the left
-    :type outgoing_left: List[Lane]
-    :return: None
     """
     if last_left + 1 > 0:
         start_at = 0
@@ -672,12 +618,8 @@ def link_right_interval(first_right: int, incoming: List[Lane], outgoing_right: 
     links all incoming lanes at an intersection to the lanes outgoing right
 
     :param first_right: index of the first lane turning right
-    :type first_right: int
     :param incoming: lanes coming to the intersection
-    :type incoming: List[Lane]
     :param outgoing_right: lanes leaving the intersection at the left
-    :type outgoing_right: List[Lane]
-    :return: None
     """
     outgoing_right_nr = len(incoming) - first_right
     if outgoing_right_nr > 0:
@@ -695,14 +637,9 @@ def link_through_interval(
     links a incoming lanes at an intersection to through lanes
 
     :param last_through: index of the first incoming lane to link
-    :type last_through: int
     :param first_through: index of the last incoming lane to link
-    :type first_through: int
     :param incoming: coming to the intersection
-    :type incoming: List[Lane]
     :param outgoing_through: lanes leaving the intersection across
-    :type outgoing_through: List[Lane]
-    :return: None
     """
     outgoing_through_nr = last_through - (first_through - 1)
     if outgoing_through_nr > 0:
@@ -721,8 +658,6 @@ def link_second_degree(node: GraphNode):
     links two roads at a node with a 2way intersection
 
     :param node: the node of the intersection
-    :type node: GraphNode
-    :return: None
     """
     # assert node.get_degree() == 2
     edge1 = list(node.edges)[0]
@@ -739,9 +674,7 @@ def link_third_degree(node: GraphNode, edges: List[Union[GraphEdge, CombinedEdge
     links three roads at a node with a 3way intersection
 
     :param node: the node of the intersection
-    :type node: GraphNode
     :param edges: edges to link
-    :return: None
     """
     assert node.get_degree() == 3
     for index, edge in enumerate(edges):
@@ -802,9 +735,7 @@ def link_fourth_degree(node: GraphNode, edges: List[Union[GraphEdge, CombinedEdg
     links four roads at a node with a 4way intersection
 
     :param node: the node of the intersection
-    :type node: GraphNode
     :param edges: the edges to link
-    :return: None
     """
     assert len(edges) == 4
     for index, edge in enumerate(edges):
@@ -869,9 +800,7 @@ def link_high_degree(node: GraphNode, edges: List[Union[GraphEdge, CombinedEdge]
     this method only provides a simple procedure
 
     :param node: the node of the intersection
-    :type node: GraphNode
     :param edges: the edges to link
-    :return: None
     """
     for index, edge in enumerate(edges):
         incoming, outgoing = get_incomings_outgoings(edge, node)
@@ -946,8 +875,6 @@ def link_graph(graph: Graph):
     links all lanes in a graph
 
     :param graph: the graph to link
-    :type graph: Graph
-    :return: None
     """
     for node in graph.nodes:
         # edges are sorted counterclockwise

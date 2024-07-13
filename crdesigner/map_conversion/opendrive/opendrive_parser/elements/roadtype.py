@@ -48,7 +48,6 @@ class RoadType:
 
         :getter: returns s-coordinate
         :setter: sets s-coordinate
-        :type: float
         """
         return self._sPos
 
@@ -64,7 +63,6 @@ class RoadType:
 
         :getter: returns road type
         :setter: sets road type
-        :type: string
         """
         return self._use_type
 
@@ -82,7 +80,6 @@ class RoadType:
 
         :getter: returns speed value
         :setter: sets speed value
-        :type: instance of class Speed
         """
         return self._speed
 
@@ -116,7 +113,6 @@ class Speed:
 
         :getter: returns max. allowed speed
         :setter: sets max. allowed speed
-        :type: string
         """
         return self._max
 
@@ -138,7 +134,6 @@ class Speed:
 
         :getter: returns unit
         :setter: sets unit
-        :type: string
         """
         return self._unit
 

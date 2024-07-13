@@ -68,6 +68,8 @@ def assign_traffic_signals_to_road(
     """Extracts traffic_lights, traffic_signs, stop_lines from a road.
 
     :param road: The road object from which to extract signals.
+    :param traffic_light_dirs: Dictionary of traffic light IDs to directions.
+    :param traffic_light_lanes: Dictionary of traffic light IDs to lane validity.
     """
     traffic_signs = []
     traffic_lights = []
@@ -177,7 +179,7 @@ def calculate_stop_line_position(
     """Function to calculate the 2 points that define the stop line which
     is a straight line from one edge of the road to the other.
 
-    :param lane_sections: Opendrive lane_sections list containing the lane_section parsed lane_section class
+    :param lane_sections: OpenDRIVE lane_sections list containing the lane_section parsed lane_section class
     :param signal: Signal object, in this case the stop line.
     :param position: initial position as calculated in the get_traffic_signals function
     :param tangent: tangent value as calculated in the get_traffic_signals function
@@ -213,7 +215,12 @@ def calculate_stop_line_position(
 def get_traffic_signal_references(
     road: Road, traffic_light_dirs: Dict[str, Set[str]], traffic_light_lanes: Dict[str, Tuple[int, int]]
 ):
-    """Function to extract relevant information from sign references."""
+    """Function to extract relevant information from sign references.
+
+    :param road: The road object from which to extract signals.
+    :param traffic_light_dirs: Dictionary, where signal directions should be stored.
+    :param traffic_light_lanes: Dictionary, where signal lanes should be stored.
+    """
     for signal in road.signal_reference:
         if signal.turn_relation is not None:
             if traffic_light_dirs.get(signal.signal_id) is None:

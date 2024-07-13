@@ -178,7 +178,6 @@ def defaultval(val: Optional[str], name: str, default: str = "0") -> str:
     :param val: Value that is inspected to be None
     :param name: Name of the variable inspected
     :param default: Alternative value given a val is None
-    :type: str
     """
     default = str(default)
     if val is None:
@@ -606,10 +605,7 @@ def parse_opendrive_road_object(new_road: Road, obj: etree.ElementTree):
     """Parses opendrive road object, creates roadObject from it and adds it to the road.
 
     :param new_road: The road to add the object to.
-    :type new_road: :class:`Road`
     :param obj: XML road element which is parsed.
-    :type obj: :class:`etree.ElementTree`
-
     """
     corners = []
     if obj.find("outlines") is not None:

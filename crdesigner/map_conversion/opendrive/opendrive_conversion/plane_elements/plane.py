@@ -115,9 +115,6 @@ class ParametricLane:
         self.side = side
         self.speed = speed
         self.access = access if access is not None else []
-        self.stop_lines = []
-        self.traffic_signs = []
-        self.traffic_lights = []
 
     def calc_border(
         self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature: bool = True

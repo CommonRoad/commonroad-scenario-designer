@@ -53,7 +53,6 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
         Get the map verification parameters of the file writer.
 
         :return: map verification parameter
-        :rtype: map verification parameters
         """
         return self._mapver_params
 

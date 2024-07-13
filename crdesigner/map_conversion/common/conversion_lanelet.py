@@ -95,9 +95,7 @@ class ConversionLanelet(Lanelet):
         """Lanelets are equal if their id_ is equal.
 
         :param lanelet: Lanelet to be compared to equality
-        :type lanelet: :class:`Lanelet`
         :return: True if id_ is equal
-        :rtype: bool
         """
         if lanelet is None:
             return False
@@ -113,7 +111,6 @@ class ConversionLanelet(Lanelet):
         """Get the lanelet type
 
         :return: The lanelet type.
-        :rtype: LaneletType
         """
         return self._lanelet_type
 
@@ -162,7 +159,6 @@ class ConversionLanelet(Lanelet):
         """Get or set id of this lanelet.
 
         :return: The ID of the lanelet.
-        :rtype: int
         """
         return self._lanelet_id
 
@@ -176,7 +172,6 @@ class ConversionLanelet(Lanelet):
         """Get or set right vertices of this lanelet.
 
         :return: The left vertices of the lanelet.
-        :rtype: np.ndarray
         """
         return self._left_vertices
 
@@ -190,7 +185,6 @@ class ConversionLanelet(Lanelet):
         """Get or set right vertices of this lanelet.
 
         :return: The right vertices of the lanelet.
-        :rtype: np.ndarray
         """
         return self._right_vertices
 
@@ -204,7 +198,6 @@ class ConversionLanelet(Lanelet):
         """Get or set center vertices of this lanelet.
 
         :return: The center vertices of the lanelet.
-        :rtype: np.ndarray
         """
         return self._center_vertices
 
@@ -218,7 +211,6 @@ class ConversionLanelet(Lanelet):
         """Set or get the predecessor.
 
         :return: A list with IDs of the predecessors.
-        :rtype: list
         """
         return self._predecessor
 
@@ -232,7 +224,6 @@ class ConversionLanelet(Lanelet):
         """Set or get the successor.
 
         :return: A list with IDs of the successors.
-        :rtype: list
         """
         return self._successor
 
@@ -246,7 +237,6 @@ class ConversionLanelet(Lanelet):
         """Set or get adjacent left lanelet.
 
         :return: The ID of the left adjacent lanelet.
-        :rtype: int
         """
         return self._adj_left
 
@@ -261,7 +251,6 @@ class ConversionLanelet(Lanelet):
         as this lanelet.
 
         :return: Whether the left adjacent lanelet has the same direction.
-        :rtype: bool
         """
         return self._adj_left_same_direction
 
@@ -275,7 +264,6 @@ class ConversionLanelet(Lanelet):
         """Set or get adjacent right lanelet.
 
         :return: The ID of the right adjacent lanelet.
-        :rtype: int
         """
         return self._adj_right
 
@@ -289,7 +277,6 @@ class ConversionLanelet(Lanelet):
         as this lanelet.
 
         :return: Whether the right adjacent lanelet has the same direction.
-        :rtype: bool
         """
         return self._adj_right_same_direction
 
@@ -311,10 +298,8 @@ class ConversionLanelet(Lanelet):
         new lanelet_id to the resulting lanelet.
 
         :param lanelet_conc: Lanelet which will be included.
-        :type lanelet_conc: :class:`ConversionLanelet`
         :param extend_plane_group: Whether to extend the parametric_lane_group of this lanelet with the parametric lanes
             of the lanelet_conc.parametric_lane_group. Default is True.
-        :type extend_plane_group: bool
         """
         # check connectedness
         if np.isclose(self.left_vertices[-1], lanelet_conc.left_vertices[0]).all():
@@ -333,7 +318,6 @@ class ConversionLanelet(Lanelet):
         """Calc width of lanelet at its end.
 
         :return: Width at end of lanelet
-        :rtype: float
         """
         return self.calc_width(self.length)
 
@@ -341,7 +325,6 @@ class ConversionLanelet(Lanelet):
         """Calc width of lanelet at its start.
 
         :return: Width at start of lanelet
-        :rtype: float
         """
         return self.calc_width(0)
 
@@ -349,9 +332,7 @@ class ConversionLanelet(Lanelet):
         """Calc width at position s_pos.
 
         :param s_pos: Position in curve parameter ds
-        :type s_pos: float
         :return: Width at position s_pos
-        :rtype: float
         """
         inner_pos = self.calc_border("inner", s_pos)[0]
         outer_pos = self.calc_border("outer", s_pos)[0]
@@ -362,7 +343,6 @@ class ConversionLanelet(Lanelet):
         """Get length of lanelet by calculating length of ParametricLaneGroup.
 
         :return: Length of lanelet
-        :rtype: float
         """
         return self.parametric_lane_group.length
 
@@ -370,7 +350,6 @@ class ConversionLanelet(Lanelet):
         """Checks if width is zero at every point of its ParametricLaneGroup.
 
         :return: True if every ParametricLane has width_coefficients equal to only zero.
-        :rtype: bool
         """
         return self.parametric_lane_group.has_zero_width_everywhere()
 
@@ -380,11 +359,8 @@ class ConversionLanelet(Lanelet):
         """Get the earliest point of the lanelet where the width change is zero.
 
         :param reverse: True if checking start from the end of the lanelet
-        :type reverse: bool
         :param reference_width: Width for which width at zero width change position has to be greater as
-        :type reference_width: float
         :return: Position of lanelet (in curve parameter ds) where width change is zero.
-        :rtype: Tuple[Optional[float], Optional[float]]
         """
         return self.parametric_lane_group.first_zero_width_change_position(reverse, reference_width)
 
@@ -392,7 +368,6 @@ class ConversionLanelet(Lanelet):
         """Get width by calculating maximum width of parametric lane group.
 
         :return: Maximum width of lanelet
-        :rtype: float
         """
         return self.parametric_lane_group.maximum_width()
 
@@ -402,13 +377,9 @@ class ConversionLanelet(Lanelet):
         """Calculate an optimal value, where the lanelet split or join starts or ends, respectively.
 
         :param is_split: True if lanelet splits from another lanelet, otherwise False if it is a join
-        :type is_split: bool
         :param split_and_join: True if lanelet has a split at the start and join at the end.
-        :type split_and_join: bool
         :param reference_width: Width for which width at zero width change position has to be greater as
-        :type reference_width: float
         :return: The merge position and merge width.
-        :rtype: Tuple[Union[float, int], float]
         """
 
         merge_pos, merge_width = self.first_zero_width_change_position(
@@ -473,13 +444,9 @@ class ConversionLanelet(Lanelet):
         moved due to joining / splitting.
 
         :param border: Which border to calculate (inner or outer):
-        :type border: str
         :param s_pos: Position of parameter ds where to calc the cartesian coordinates
-        :type s_pos: float
         :param width_offset: Offset to add to calculated width in reference to the reference border, default is 0.0.
-        :type width_offset: float
         :param compute_curvature: Boolean indicating whether curvature should be computed
         :return: Cartesian coordinates of point on inner border and tangential direction.
-        :rtype: Tuple[Tuple[float, float], float, float, float]
         """
         return self.parametric_lane_group.calc_border(border, s_pos, width_offset, compute_curvature=compute_curvature)

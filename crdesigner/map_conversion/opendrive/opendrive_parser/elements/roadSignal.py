@@ -56,7 +56,6 @@ class Signal:
 
         :getter: returns s-coordinate
         :setter: sets s-coordinate
-        :type: float
         """
         return self._s
 
@@ -71,7 +70,6 @@ class Signal:
 
         :getter: returns t-coordinate
         :setter: sets t-coordinate
-        :type: float
         """
         return self._t
 
@@ -86,7 +84,6 @@ class Signal:
 
         :getter: returns ID
         :setter: sets ID
-        :type: int
         """
         return self._id
 
@@ -101,7 +98,6 @@ class Signal:
 
         :getter: returns name of the signal
         :setter: sets name
-        :type: string
         """
         return self._name
 
@@ -116,7 +112,6 @@ class Signal:
 
         :getter: returns whether signal is dynamic
         :setter: sets whether signal is dynamic
-        :type: string
         """
         return self._dynamic
 
@@ -134,7 +129,6 @@ class Signal:
 
         :getter: returns orientation
         :setter: sets orientation
-        :type: string
         """
         return self._orientation
 
@@ -151,7 +145,6 @@ class Signal:
 
         :getter: returns country code
         :setter: sets country code
-        :type: string
         """
         return self._country
 
@@ -166,7 +159,6 @@ class Signal:
 
         :getter: returns value of the signal
         :setter: sets value of the signal
-        :type: float
         """
         return self._signal_value
 
@@ -184,7 +176,6 @@ class Signal:
 
         :getter: returns unit
         :setter: sets unit
-        :type: string
         """
         return self._unit
 
@@ -202,7 +193,6 @@ class Signal:
 
         :getter: returns text
         :setter: sets text
-        :type: string
         """
         return self._text
 
@@ -220,7 +210,6 @@ class Signal:
 
         :getter: returns type ID
         :setter: sets type ID
-        :type: string
         """
         return self._type
 
@@ -238,7 +227,6 @@ class Signal:
 
         :getter: returns subtype ID
         :setter: sets subtype ID
-        :type: string
         """
         return self._subtype
 
