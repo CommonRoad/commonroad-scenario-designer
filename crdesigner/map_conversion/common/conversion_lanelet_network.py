@@ -40,11 +40,10 @@ class ConversionLaneletNetwork(LaneletNetwork):
         self._old_lanelet_ids = {}
         self._transformer = transformer
 
-    def old_lanelet_ids(self) -> dict:
+    def old_lanelet_ids(self) -> Dict[str, int]:
         """Get the old lanelet ids.
 
         :return: Dict containing all old lanelet IDs.
-        :rtype: dict
         """
         return self._old_lanelet_ids
 
@@ -326,7 +325,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
         :param adj_left_id: New value for update.
         :param same_direction: New adjacent lanelet has same direction as lanelet.
         :return: True if operation successful, else False.
-        :rtype: bool
         """
         new_adj = self.find_lanelet_by_id(adj_left_id)
         if not new_adj:
@@ -504,9 +502,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         left adjacent neighbor of the lanelet.
 
         :param lanelet: Lanelet to check specified relation for.
-        :type lanelet: :class:`ConversionLanelet`
         :return: True if this neighbor requirement is fulfilled.
-        :rtype: bool
         """
         successor = self.find_lanelet_by_id(lanelet.successor[0])
         adj_left = self.find_lanelet_by_id(lanelet.adj_left)
@@ -572,13 +568,11 @@ class ConversionLaneletNetwork(LaneletNetwork):
             self.find_left_of(intersection.incomings)
             self.add_intersection(intersection)
 
-    def set_intersection_lanelet_type(self, incoming_lane, intersection_map):
+    def set_intersection_lanelet_type(self, incoming_lane: int, intersection_map: Dict[int, List[int]]):
         """Set the lanelet type of all the lanelets inside an intersection to Intersection from the enum class
 
         :param incoming_lane: ID of incoming lanelet
-        :type incoming_lane: int
         :param intersection_map: Dictionary that contains all the incomings of a particular intersection.
-        :type intersection_map: dict
         """
         for successor_incoming in self.find_lanelet_by_id(incoming_lane).successor:
             successor_incoming_lanelet = self.find_lanelet_by_id(successor_incoming)
@@ -589,7 +583,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             self.check_lanelet_type_for_successor_of_successor(successor_incoming_lanelet, intersection_map)
 
     def check_lanelet_type_for_successor_of_successor(
-        self, successor_incoming_lanelet: ConversionLanelet, intersection_map: dict
+        self, successor_incoming_lanelet: ConversionLanelet, intersection_map: Dict[int, List[int]]
     ):
         """
         Check if the successor of an incoming successor in an intersection is also a part of the lanelet.
@@ -598,26 +592,23 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         :param successor_incoming_lanelet: Lanelet for which we require to test if it is a part of a particular
             intersection
-        :type successor_incoming_lanelet: :class:`ConversionLanelet`
         :param intersection_map: Dict of the particular intersection for which the test is being conducted.
-        :type intersection_map: dict
         """
         for successor_successor_incoming in successor_incoming_lanelet.successor:
             successor_successor_incoming_lanelet = self.find_lanelet_by_id(successor_successor_incoming)
             if self.check_if_lanelet_in_intersection(successor_successor_incoming_lanelet, intersection_map):
                 successor_successor_incoming_lanelet.lanelet_type = "intersection"
 
-    def check_if_lanelet_in_intersection(self, lanelet: ConversionLanelet, intersection_map: dict) -> bool:
+    def check_if_lanelet_in_intersection(
+        self, lanelet: ConversionLanelet, intersection_map: Dict[int, List[int]]
+    ) -> bool:
         """
         Check if a particular lanelet intersects any of the lanelets that are part of a particular intersection
         using the shapely crosses method.
 
         :param lanelet: Lanelet which is being tested for being part of the intersection.
-        :type lanelet: :class:`ConversionLanelet`
         :param intersection_map: Dict of the particular intersection for which the test is being conducted.
-        :type intersection_map: dict
         :return: True if any intersection found, otherwise False.
-        :rtype: bool
         """
         for incoming_lane in intersection_map.keys():
             for successor in self.find_lanelet_by_id(incoming_lane).successor:
@@ -641,18 +632,17 @@ class ConversionLaneletNetwork(LaneletNetwork):
                         continue
         return False
 
-    def check_if_successor_is_intersecting(self, intersection_map, successors_list) -> bool:
+    def check_if_successor_is_intersecting(
+        self, intersection_map: Dict[int, List[int]], successors_list: List[int]
+    ) -> bool:
         """
         Check if successors of an incoming intersect with successors of other incoming of the intersection
         using the shapely crosses method.
 
         :param intersection_map: Dict of the particular intersection for which the test is being conducted.
-        :type intersection_map: dict
         :param successors_list: List of all the successors of an intersection
-        :type successors_list: list
         :return: True if successors of an incoming intersect with successors of other incoming of the intersection,
             otherwise False.
-        :rtype: bool
         """
         for incoming_lane in intersection_map.keys():
             for incoming_successor in self.find_lanelet_by_id(incoming_lane).successor:
@@ -758,13 +748,12 @@ class ConversionLaneletNetwork(LaneletNetwork):
         combined_incoming_lane_ids = list(k for k, _ in itertools.groupby(combined_incoming_lane_ids))
         return combined_incoming_lane_ids
 
-    def get_successor_directions(self, incoming_lane: ConversionLanelet) -> dict:
+    def get_successor_directions(self, incoming_lane: ConversionLanelet) -> Dict[int, str]:
         """
         Find all directions of an incoming lane's successors
 
         :param incoming_lane: incoming lane from intersection
         :return: Dict containing the directions "left", "right" or "through"
-        :rtype: dict
         """
         straight_threshold_angel = self._config.intersection_straight_threshold
         assert 0 < straight_threshold_angel < 90
@@ -999,7 +988,6 @@ class _JoinSplitTarget:
         """Lanelet splits at start.
 
         :return: True if lanelet splits from other lanelet at start.
-        :rtype: bool
         """
         return self._mode >= 1
 
@@ -1008,7 +996,6 @@ class _JoinSplitTarget:
         """Lanelet joins at end.
 
         :return: True if lanelet joins to other lanelet at end.
-        :rtype: bool
         """
         return self._mode != 1
 
@@ -1017,7 +1004,6 @@ class _JoinSplitTarget:
         """Lanelet splits at start and joins at end.
 
         :return: True if it has a join and a split
-        :rtype: bool
         """
         return self.split and self.join
 
@@ -1025,7 +1011,6 @@ class _JoinSplitTarget:
         """Only single lanelet can be used for join/split.
 
         :return: True if only one can be used.
-        :rtype: bool
         """
         return self._single_lanelet_operation and self.split_and_join
 
@@ -1041,7 +1026,6 @@ class _JoinSplitTarget:
         """Calculate length of interval where join/split changes the border.
 
         :return: Length of interval.
-        :rtype: float
         """
         length = 0
         for js_pair in self._js_pairs:
@@ -1246,7 +1230,6 @@ class _JoinSplitTarget:
         """Determine which is the adjacent lanelet to the main lanelet.
 
         :return: The corresponding adjacent lanelet
-        :rtype: :class:`ConversionLanelet`
         """
         lanelet = self.main_lanelet
         potential_adjacent_lanelets = Queue()
