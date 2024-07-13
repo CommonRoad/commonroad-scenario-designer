@@ -487,13 +487,9 @@ def intersect_lanelets_line(
     Optionally the ends of the intersection can be pushed back along the
     direction of the intersection.
     :param lanelets: List of Lanelets
-    :type lanelets:
     :param line: line as numpy array
-    :type line:
     :param push_back_factor: units to push back the ends of the intersection
-    :type push_back_factor:
     :return: intersection
-    :rtype:
     """
     # intersect line with convex hull of lanelets
     convex_hull = unary_union([lanelet.polygon.shapely_object for lanelet in lanelets]).convex_hull
@@ -529,11 +525,8 @@ def orthogonal_ccw_vector(start: np.ndarray, end: np.ndarray) -> np.ndarray:
     """
     computes the counter clock wise orthogonal vector to the vector spanned by (centre -> point)
     :param start:
-    :type start:
     :param end:
-    :type end:
     :return: counter clockwise orthogonal vector
-    :rtype:
     """
     # this only works in 2D
     assert start.shape == (2,) and end.shape == (2,)

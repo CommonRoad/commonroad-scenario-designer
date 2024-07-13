@@ -27,7 +27,6 @@ class LateralProfile:
 
         :getter: returns superelevations of the road
         :setter: sets superelevations of the road
-        :type: instance of class Superelevations()
         """
         self._superelevations.sort(key=lambda x: x.start_pos)
         return self._superelevations
@@ -46,7 +45,6 @@ class LateralProfile:
 
         :getter: returns crossfalls of the road
         :setter: sets crossfalls of the road
-        :type: instance of class Crossfalls()
         """
         self._crossfalls.sort(key=lambda x: x.start_pos)
         return self._crossfalls
@@ -67,7 +65,6 @@ class LateralProfile:
 
         :getter: returns shape of the road
         :getter: sets shape of the road
-        :type: instance of class Shape()
         """
         self._shapes.sort(key=lambda x: (x.start_pos, x.start_pos_t))
         return self._shapes
@@ -112,7 +109,6 @@ class Crossfall(RoadRecord):
 
         :getter: returns the side as a string
         :setter: sets the side, only allows to set the side for 'left', 'right' or 'both'
-        :type: string
         """
         return self._side
 

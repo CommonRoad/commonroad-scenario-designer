@@ -35,7 +35,6 @@ class CRDesignerFileReader(CommonRoadFileReader):
         Get the map verification parameters of the file reader.
 
         :return: map verification parameter
-        :rtype: map verification parameters
         """
         return self._mapver_params
 

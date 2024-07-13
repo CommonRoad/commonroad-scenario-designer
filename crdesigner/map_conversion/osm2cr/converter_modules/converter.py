@@ -93,7 +93,6 @@ class GraphScenario:
         loads an OSM file and converts it to a graph
 
         :param file: OSM file to be loaded
-        :type file: str
         """
         logging.info("reading File and creating graph")
 
