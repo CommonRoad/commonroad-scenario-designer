@@ -401,8 +401,8 @@ class Network:
 
         # Assign traffic signals, lights and stop lines to lanelet network
         lanelet_network.add_traffic_lights_to_network(self._traffic_lights)
-        #        lanelet_network.add_traffic_signs_to_network(self._traffic_signs)
-        #        lanelet_network.add_stop_lines_to_network(self._stop_lines)
+        lanelet_network.add_traffic_signs_to_network(self._traffic_signs)
+        lanelet_network.add_stop_lines_to_network(self._stop_lines)
 
         # create virtual traffic signs for individual lane speed limits
         drivable_lanelets = [
@@ -446,37 +446,26 @@ class Network:
         :param lanelet_network: ConversionLaneletNetwork
         """
 
-        def generate_line(vertices: np.ndarray) -> (float, float):
+        def is_relevant_intersection() -> bool:
             """
-            generate a line from start to end of vertex
-            :param vertices:
-            :return: slope m, intersect c
-            """
-            m = (vertices[0][1] - vertices[-1][1]) / (vertices[0][0] - vertices[-1][0])
-            c = vertices[0][1] - m * vertices[0][0]
-            return m, c
-
-        def find_intersect_point() -> Union[int, None]:
-            """
-            find an intersection between a lane and a crosswalk. We can conclude that a crosswalk belongs to the same
-            intersection as the lanelet it is crossing.
-            :return: lanelet id
+            checks whether a lanelet intersect an intersection
+            :return: Boolean indicating satisfaction
             """
             for incoming in intersection.incomings:
-                for la_id in incoming.incoming_lanelets:
-                    vertices = lanelet_network.find_lanelet_by_id(la_id).left_vertices
-                    lanelet_m, lanelet_c = generate_line(vertices)
-                    x_intersect = (lanelet_c - crosswalk_c) / (crosswalk_m - lanelet_m)
-
-                    if x_intersect * lanelet_m + lanelet_c == x_intersect * crosswalk_m + crosswalk_c:
-                        return la_id
-            return None
+                rel_lanelets = (
+                    incoming.incoming_lanelets.union(incoming.successors_left)
+                    .union(incoming.successors_right)
+                    .union(incoming.successors_left)
+                )
+                for la_id in rel_lanelets:
+                    la = lanelet_network.find_lanelet_by_id(la_id)
+                    if la.polygon.shapely_object.intersects(crosswalk.polygon.shapely_object):
+                        return True
+            return False
 
         for crosswalk in self._crosswalks:
-            crosswalk_m, crosswalk_c = generate_line(crosswalk.left_vertices)
             for intersection in lanelet_network.intersections:
-                lanelet = find_intersect_point()
-                if lanelet is not None:
+                if is_relevant_intersection():
                     intersection.crossings.add(crosswalk.lanelet_id)
                     break
 

@@ -151,7 +151,7 @@ class MyTestCase(unittest.TestCase):
             lanelet_12.center_vertices, [[4.52374715, 4.81936857], [-4.24610876, 4.80957293]]
         )
 
-        self.assertSetEqual(scenario.lanelet_network.find_intersection_by_id(84).crossings, {6, 7, 11, 12})
+        self.assertSetEqual(scenario.lanelet_network.find_intersection_by_id(78).crossings, {6, 7, 11, 12})
 
 
 if __name__ == "__main__":

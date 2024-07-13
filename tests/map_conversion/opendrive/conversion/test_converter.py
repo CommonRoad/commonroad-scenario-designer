@@ -141,7 +141,7 @@ class TestConverter(unittest.TestCase):
         mark3 = RoadMark()
         mark3.SOffset = 5.4
         section.left_lanes[0].road_mark = [mark1, mark2, mark3]
-        plane_groups_mark = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
+        plane_groups_mark = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border, [], [], [])
 
         # check if correct number of plane_groups is returned
         # check if correct neighbour ids are generated (this is somewhat redundant because of the other tests)
@@ -154,7 +154,7 @@ class TestConverter(unittest.TestCase):
         # check if lane section with no lanes returns empty list
         lane_section_empty = LaneSection(road)
         self.assertListEqual(
-            [], OpenDriveConverter.lane_section_to_parametric_lanes(lane_section_empty, reference_border)
+            [], OpenDriveConverter.lane_section_to_parametric_lanes(lane_section_empty, reference_border, [], [], [])
         )
 
         self.assertEquals(5.4, plane_groups_mark[2].parametric_lanes[0].line_marking.SOffset)
@@ -167,7 +167,7 @@ class TestConverter(unittest.TestCase):
         self.assertEqual(plane_groups[4].inner_linemarking.type, "unknown")  # id 3
 
         center_lane.road_mark[0].type = "broken solid"
-        plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
+        plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border, [], [], [])
         self.assertEqual(plane_groups[0].inner_linemarking.type, "solid")  # id -1
         self.assertEqual(plane_groups[1].inner_linemarking.type, "unknown")  # id -2
         self.assertEqual(plane_groups[2].inner_linemarking.type, "broken")  # id 1
@@ -175,7 +175,7 @@ class TestConverter(unittest.TestCase):
         self.assertEqual(plane_groups[4].inner_linemarking.type, "unknown")  # id 3
 
         center_lane.road_mark[0].type = "solid broken"
-        plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
+        plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border, [], [], [])
         self.assertEqual(plane_groups[0].inner_linemarking.type, "broken")  # id -1
         self.assertEqual(plane_groups[1].inner_linemarking.type, "unknown")  # id -2
         self.assertEqual(plane_groups[2].inner_linemarking.type, "solid")  # id 1
@@ -183,7 +183,7 @@ class TestConverter(unittest.TestCase):
         self.assertEqual(plane_groups[4].inner_linemarking.type, "unknown")  # id 3
 
         center_lane.road_mark[0].type = "broken"
-        plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
+        plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border, [], [], [])
         self.assertEqual(plane_groups[0].inner_linemarking.type, "broken")  # id -1
         self.assertEqual(plane_groups[1].inner_linemarking.type, "unknown")  # id -2
         self.assertEqual(plane_groups[2].inner_linemarking.type, "broken")  # id 1

@@ -133,7 +133,7 @@ class TestTrafficSignals(unittest.TestCase):
         # noinspection PyTypeChecker
         sign = TrafficSign(1, list([element]), None, position, virtual=False)
         # get the traffic lights, signs and stop lines from the road
-        traffic_lights, traffic_signs, stop_lines = assign_traffic_signals_to_road(self.roadStraightLine)
+        traffic_lights, traffic_signs, stop_lines = assign_traffic_signals_to_road(self.roadStraightLine, {}, {})
         # check if the extracted traffic elements are equal to the true objects
         self.assertTrue(stop_lines[0].__eq__(line))
         self.assertTrue(traffic_lights[0].__eq__(traffic_light))
