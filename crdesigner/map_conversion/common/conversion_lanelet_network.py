@@ -8,7 +8,7 @@ import numpy as np
 import shapely
 from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
 from commonroad.scenario.lanelet import LaneletNetwork, StopLine
-from commonroad.scenario.traffic_light import TrafficLight, TrafficLightDirection
+from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
 from pyproj import Transformer
 from shapely.validation import make_valid
