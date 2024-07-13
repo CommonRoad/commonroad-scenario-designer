@@ -1,4 +1,3 @@
-import dataclasses
 import enum
 import logging
 from typing import Dict, List, Set, Tuple, Union
@@ -10,6 +9,7 @@ from commonroad.scenario.traffic_sign import (
     TrafficSign,
     TrafficSignElement,
     TrafficSignIDChina,
+    TrafficSignIDCountries,
     TrafficSignIDGermany,
     TrafficSignIDRussia,
     TrafficSignIDSpain,
@@ -96,31 +96,24 @@ def assign_traffic_signals_to_road(
                     additional_values = [str(signal.signal_value)]
 
             signal_country = utils.get_signal_country(signal.country)
+            country_stop_line_id = {"DEU": "294", "ZAM": "294", "USA": "294", "CHN": "294", "ESP": "294"}
 
-            if signal_country == "DEU":
-                if signal.type == "1000003" or signal.type == "1000004":
-                    continue
-                element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDGermany)
-                extract_stop_line("294", signal, road, position, tangent, lanes)
-            elif signal_country == "USA":
-                element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDUsa)
-                extract_stop_line("294", signal, road, position, tangent, lanes)  # TODO has another ID than 294
-            elif signal_country == "CHN":
-                element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDChina)
-                extract_stop_line("294", signal, road, position, tangent, lanes)  # TODO has another ID than 294
-            elif signal_country == "ESP":
-                element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDSpain)
-                extract_stop_line("294", signal, road, position, tangent, lanes)  # TODO has another ID than 294
-            elif signal_country == "RUS":
-                element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDRussia)
-                extract_stop_line("294", signal, road, position, tangent, lanes)  # TODO has another ID than 294
-            else:
-                if signal.type == "1000003" or signal.type == "1000004":
-                    continue
-                element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDZamunda)
-                stop_line = extract_stop_line(
-                    "294", signal, road, position, tangent, lanes
-                )  # TODO has another ID than 294
+            if (
+                (signal_country == "DEU" or signal_country not in TrafficSignIDCountries.keys())
+                and signal.type == "1000003"
+                or signal.type == "1000004"
+            ):
+                continue
+            element_id = extract_traffic_element_id(
+                signal.type, str(signal.subtype), TrafficSignIDCountries[signal_country]
+            )
+            if signal.type == country_stop_line_id[signal_country]:
+                # Creating stop line object by first calculating the position of the two end points that define the
+                # straight stop line
+                position_1, position_2 = calculate_stop_line_position(
+                    road.lanes.lane_sections, signal, position, tangent
+                )
+                stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
                 road.add_stop_line((stop_line, lanes, signal.s))
                 stop_lines.append(stop_line)
             if element_id.value == "":
@@ -176,16 +169,6 @@ def assign_traffic_signals_to_road(
             else:
                 continue
     return traffic_lights, traffic_signs, stop_lines
-
-
-def extract_stop_line(
-    signal_id: str, signal: Signal, road: Road, position: np.ndarray, tangent: float, lanes: Tuple[int, int]
-) -> StopLine:
-    if signal.type == signal_id:  # TODO has another ID
-        # Creating stop line object by first calculating the position of the two end points that define the
-        # straight stop line
-        position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal, position, tangent)
-        return StopLine(position_1, position_2, LineMarking.SOLID)
 
 
 def calculate_stop_line_position(

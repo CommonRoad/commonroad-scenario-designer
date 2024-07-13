@@ -1,6 +1,6 @@
 import copy
 from collections import deque
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple
 
 import iso3166
 import numpy as np
@@ -17,7 +17,6 @@ from commonroad.scenario.scenario import (
     Scenario,
     ScenarioID,
 )
-from commonroad.scenario.traffic_light import TrafficLightDirection
 from commonroad.scenario.traffic_sign import (
     TrafficSign,
     TrafficSignElement,
