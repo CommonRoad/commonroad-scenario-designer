@@ -24,17 +24,17 @@ class MyTestCase(unittest.TestCase):
         """
         road = Road()
         road.id = 1
-        road.planView.add_line([8.3403508337802787e-2, -9.6810741424560440], 1.5673435784035967, 2.3086208844004261)
-        road.planView.add_line([9.1375475641369830e-2, -7.3722074887383080], 1.5673435784035967, 1.1876406667659012e-1)
-        road.planView.add_arc(
+        road.plan_view.add_line([8.3403508337802787e-2, -9.6810741424560440], 1.5673435784035967, 2.3086208844004261)
+        road.plan_view.add_line([9.1375475641369830e-2, -7.3722074887383080], 1.5673435784035967, 1.1876406667659012e-1)
+        road.plan_view.add_arc(
             [9.1785537266776185e-2, -7.2534441299822312],
             1.5673435784035969,
             1.0385725110755295e1,
             -1.5091325804710767e-1,
         )
-        road.planView.add_line([6.7180692975847407, -6.4999997615814209e-1], 0.0000000000000000, 1.1902359860622713e-1)
-        road.planView.add_line([6.8370928961909669, -6.4999997615814187e-1], 6.2831853071795862, 2.2464710503781191)
-        road.planView.add_line([9.0835639465690861, -6.4999997615814209e-1], 6.2831853071795862, 6.2149880108918865e-2)
+        road.plan_view.add_line([6.7180692975847407, -6.4999997615814209e-1], 0.0000000000000000, 1.1902359860622713e-1)
+        road.plan_view.add_line([6.8370928961909669, -6.4999997615814187e-1], 6.2831853071795862, 2.2464710503781191)
+        road.plan_view.add_line([9.0835639465690861, -6.4999997615814209e-1], 6.2831853071795862, 6.2149880108918865e-2)
 
         odr_crosswalk1 = RoadObject()
         odr_crosswalk1.id = 1
@@ -55,7 +55,7 @@ class MyTestCase(unittest.TestCase):
             corner.v = o[1]
             corners.append(corner)
         odr_crosswalk1.outline = corners
-        road.addObject(odr_crosswalk1)
+        road.add_object(odr_crosswalk1)
 
         odr_crosswalk2 = RoadObject()
         odr_crosswalk2.id = 2
@@ -76,7 +76,7 @@ class MyTestCase(unittest.TestCase):
             corner.v = o[1]
             corners.append(corner)
         odr_crosswalk2.outline = corners
-        road.addObject(odr_crosswalk2)
+        road.add_object(odr_crosswalk2)
 
         cr_crosswalks = get_crosswalks(road)
 
@@ -151,7 +151,7 @@ class MyTestCase(unittest.TestCase):
             lanelet_12.center_vertices, [[4.52374715, 4.81936857], [-4.24610876, 4.80957293]]
         )
 
-        self.assertSetEqual(scenario.lanelet_network.find_intersection_by_id(84).crossings, {6, 7, 11, 12})
+        self.assertSetEqual(scenario.lanelet_network.find_intersection_by_id(78).crossings, {6, 7, 11, 12})
 
 
 if __name__ == "__main__":

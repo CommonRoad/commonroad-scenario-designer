@@ -20,11 +20,8 @@ class Point:
         creates a point
 
         :param id: unique id
-        :type id: Optional[int]
         :param x: x coordinate
-        :type x: float
         :param y: y coordinate
-        :type y: float
         """
         self.id = id
         self.x = x
@@ -38,7 +35,6 @@ class Point:
         converts point to numpy array
 
         :return: numpy array
-        :rtype: np.ndarray
         """
         return np.array([self.x, self.y])
 
@@ -93,9 +89,7 @@ def get_orthogonal(vector: np.ndarray) -> np.ndarray:
     creates an orthogonal vector to a given vector
 
     :param vector: original vector
-    :type vector: np.ndarray
     :return: orthogonal vector
-    :rtype: np.ndarray
     """
     orthogonal_vector = np.array([vector[1], -vector[0]])
     magnitude = np.linalg.norm(orthogonal_vector)
@@ -109,13 +103,9 @@ def offset_polyline(waypoints: List[np.ndarray], size: float, at_first: bool) ->
     intermediate points are offset by a linearly declining distance
 
     :param waypoints: list of way points specifying polyline
-    :type waypoints: List[np.ndarray]
     :param size: distance of full offset
-    :type size: float
     :param at_first: True if full offset is performed at the first waypoints, else False
-    :type at_first: bool
     :return: list of offset waypoints
-    :rtype: List[np.ndarray]
     """
     assert len(waypoints) > 1
     new_line = []
@@ -145,13 +135,9 @@ def create_parallels(
     creates left and right parallels to a given polygonal chain
 
     :param waypoints: list waypoints
-    :type waypoints: List[np.ndarray]
     :param width: distance between the created parallels
-    :type width: float
     :param points: if true waypoints are point objects else waypoints are arrays
-    :type points: bool
     :return: left_bound, right_bound
-    :rtype: Tuple[List[np.ndarray], List[np.ndarray]]
     """
     right_bound = []
     left_bound = []
@@ -200,15 +186,10 @@ def create_tilted_parallels(
     intermediate points are offset by a linearly changing distance
 
     :param waypoints: list of way points
-    :type waypoints: List[np.ndarray]
     :param width1: distance between the created parallels at the start
-    :type width1: float
     :param width2: distance between the created parallels at the end
-    :type width2: float
     :param points: if true waypoints are point objects else waypoints are arrays
-    :type points: bool
     :return: left_bound, right_bound
-    :rtype: Tuple[List[np.ndarray], List[np.ndarray]]
     """
     right_bound = []
     left_bound = []
@@ -256,13 +237,9 @@ def bernstein(n: int, i: int, t: float) -> float:
     computes the bernstein polynomial B_{i,n}(t)
 
     :param n: degree of the polynomial
-    :type n: int
     :param i: parameter of the polynomial
-    :type i: int
     :param t: point at which polynomial is evaluated, should be in [0,1]
-    :type t: float
-    :return: result of the polynomial
-    :rtype: float
+    :return: result of the polynomialt
     """
     return scipy.special.binom(n, i) * t**i * (1 - t) ** (n - i)
 
@@ -272,11 +249,8 @@ def bezier(points: np.ndarray, t: float) -> np.ndarray:
     evaluates a bezier curve at a certain point
 
     :param points: array of control points
-    :type points: np.ndarray
     :param t: point at which the curve is evaluated, should be in [0,1]
-    :type t: float
     :return: coordinates of the resulting point
-    :rtype: np.ndarray
     """
     sum = np.array([0.0, 0.0])
     n = len(points) - 1
@@ -290,11 +264,8 @@ def evaluate_bezier(points: np.ndarray, n: int) -> List[np.ndarray]:
     evaluates a bezier curve at n equidistant points
 
     :param points: control points of the bezier curve
-    :type points: np.ndarray
     :param n: number of resulting points
-    :type n: int
     :return: points on curve
-    :rtype: List[np.ndarray]
     """
     curve_points = []
     for i in range(n):
@@ -310,15 +281,10 @@ def get_inner_bezier_point(p1: np.ndarray, p2: np.ndarray, p3: np.ndarray, d: fl
     it leads orthogonal to the bisector between the vectors from p2 to the other points
 
     :param p1: predecessor of p2
-    :type p1: np.ndarray
     :param p2: current way point and start of curve
-    :type p2: np.ndarray
     :param p3: successor of p2 and target of curve
-    :type p3: np.ndarray
     :param d: ration of distance between new point and p2, should be within [0, 1]. Values in [0, 0.5] are advised
-    :type d: float
     :return: the new control point
-    :rtype: np.ndarray
     """
     vector1 = p1 - p2
     vector1 /= np.linalg.norm(vector1)
@@ -346,12 +312,9 @@ def get_bezier_points_of_segment(
 
     :param segment_points: four way points. The first is the predecessor of the current interval,
         the last is the successor of the current interval
-    :type segment_points: np.ndarray
     :param d: ratio of distance between inner control points and outer control points,
         should be within [0, 1]. Values in [0, 0.5] are advised
-    :type d: float
     :return: tuple of all four control points
-    :rtype: Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
     """
     p1 = segment_points[1]
     p4 = segment_points[2]
@@ -367,11 +330,8 @@ def distance(point: np.ndarray, polyline: Iterable[np.ndarray]) -> float:
     calculates the distance of a point to a polyline
 
     :param point: location of the point
-    :type point: np.ndarray
     :param polyline: way points of the polyline
-    :type polyline: List[np.ndarray]
-    :return: distance between point and polyline
-    :rtype: float
+    :return: distance between point and polylinet
     """
     distances = []
     for linepoint in polyline:
@@ -385,11 +345,8 @@ def create_middle_line(polyline1: List[np.ndarray], polyline2: List[np.ndarray])
     the lines should have the same amount of way points for good results
 
     :param polyline1: first polyline
-    :type polyline1: List[np.ndarray]
     :param polyline2: second polyline
-    :type polyline2: List[np.ndarray]
     :return: new polyline
-    :rtype: List[np.ndarray]
     """
     result = []
     if len(polyline1) <= len(polyline2):
@@ -413,11 +370,8 @@ def offset_over_line(polyline1: List[np.ndarray], polyline2: List[np.ndarray]) -
     the lines should have the same amount of way points for good results
 
     :param polyline1: the line to sett off
-    :type polyline1: List[np.ndarray]
     :param polyline2: the line to set polyline1 over
-    :type polyline2: List[np.ndarray]
     :return: the offset polyline
-    :rtype: List[np.ndarray]
     """
     result = []
     differential = len(polyline2) / len(polyline1)
@@ -433,11 +387,8 @@ def angle_to(v1: np.ndarray, v2: np.ndarray) -> float:
     calculates angle between vectors in degrees
 
     :param v1: one vector
-    :type v1: np.ndarray
     :param v2: another vector
-    :type v2: np.ndarray
     :return: angle between vectors in degrees
-    :rtype: float
     """
     x = [v1[0], v2[0]]
     y = [v1[1], v2[1]]
@@ -452,12 +403,10 @@ def angle_to(v1: np.ndarray, v2: np.ndarray) -> float:
 def get_angle(v1: np.ndarray, v2: np.ndarray) -> float:
     """
     Get clockwise angle between vectors
+
     :param v1: one vector
-    :type v1: np.ndarray
     :param v2: another vector
-    :type v2: np.ndarray
     :return: clockwise angle between vectors in degrees
-    :rtype: float
     """
     x = [v1[0], v2[0]]
     y = [v1[1], v2[1]]
@@ -472,9 +421,7 @@ def curvature(polyline: List[np.ndarray]) -> float:
     calculates the angle between start and end of a polyline in degrees
 
     :param polyline: a polyline
-    :type polyline: List[np.ndarray]
     :return: angle in degrees
-    :rtype: float
     """
     if len(polyline) < 3:
         return False
@@ -492,15 +439,10 @@ def intersection(
     calculates the intersection point of two lines
 
     :param point1: starting point of the first line
-    :type point1: np.ndarray
     :param point2: starting point of the second line
-    :type point2: np.ndarray
     :param vector1: direction of the first line
-    :type vector1: np.ndarray
     :param vector2: direction of the second line
-    :type vector2: np.ndarray
     :return: length of vector1 and vector2 to the intersection point and the intersection point
-    :rtype: Tuple[float, float, Optional[np.ndarray]]
     """
     denom = vector1[1] * vector2[0] - vector1[0] * vector2[1]
     if denom == 0:
@@ -517,9 +459,7 @@ def line_length(line: List[np.ndarray]) -> float:
     calculates the length of a polyline
 
     :param line: a polyline
-    :type line: List[np.ndarray]
     :return: length of the line
-    :rtype: float
     """
     if len(line) < 2:
         raise ValueError("line has not enough points")
@@ -554,13 +494,9 @@ def evaluate_line(line: List[np.ndarray], length: float, start_point: int = 0) -
     returns the point after a given length on a polyline
 
     :param start_point: the point to start at
-    :type start_point: int
     :param line: polyline to find the point on
-    :type line: List[np.ndarray]
     :param length: the distance on the polyline from the start to the point
-    :type length: float
     :return: point on line after length, index of the last point on line before the resulting point
-    :rtype: Tuple[np.ndarray, int]
     """
     current_point, remaining_length = get_evaluation_point(line, start_point, length)
     if remaining_length > 0:
@@ -576,11 +512,8 @@ def set_line_points(line: List[np.ndarray], n: int) -> List[np.ndarray]:
     sets n new equidistant way points for a polyline
 
     :param line: a polyline
-    :type line: List[np.ndarray]
     :param n: number of new way points
-    :type n: int
     :return: new list of way points
-    :rtype: List[np.ndarray]
     """
     assert n > 1
     total_length = line_length(line)
@@ -600,11 +533,8 @@ def intersection_polylines(pline1: List[np.ndarray], pline2: List[np.ndarray]) -
     calculates the intersection point of two polylines
 
     :param pline1: a polyline
-    :type pline1: List[np.ndarray]
     :param pline2: another polyline
-    :type pline2: List[np.ndarray]
     :return: the intersection point
-    :rtype: np.ndarray
     """
     for index1, point1 in enumerate(pline1[:-1]):
         vector1 = pline1[index1 + 1] - point1
@@ -624,13 +554,9 @@ def find_point(line: List[np.ndarray], point: int, overhang: float) -> np.ndarra
     finds a point on a polyline between point at index point and its successor
 
     :param line: a polyline
-    :type line: List[np.ndarray]
     :param point: index of the point after which is searched
-    :type point: int
     :param overhang: ratio of distance between points
-    :type overhang: float
     :return: point on the line
-    :rtype: np.ndarray
     """
     assert 0 < overhang < 1
     assert point + 1 < len(line)
@@ -645,12 +571,9 @@ def split_line(
     splits a polyline at a point on the line in two parts, line1 and line2
 
     :param line: a polyline to split
-    :type line: List[np.ndarray]
     :param index: index of the last element of line1
     :param split_point: optional point both lines share
-    :type split_point: Optional[np.ndarray]
-    :return: line1, line2: two lines
-    :rtype: Tuple[List[np.ndarray], List[np.ndarray]]
+    :return: line1, line2: two lines]]
     """
     line1 = line[: index + 1]
     line2 = line[index + 1 :]
@@ -807,9 +730,7 @@ def is_clockwise(polyline: List[np.ndarray]):
     Source: https://stackoverflow.com/a/61991493/13700747
 
     :param polyline: a polyline
-    :type polyline: List[np.ndarray]
     :return: s
-    :rtype: float
     """
 
     assert len(polyline) > 0

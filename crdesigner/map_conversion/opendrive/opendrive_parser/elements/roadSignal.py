@@ -32,6 +32,9 @@ class Signal:
         self._signal_value = None
         self._unit = None
         self._text = None
+        self._validity_from = None
+        self._validity_to = None
+        self._signal_id = None
 
         """
         ###not supported in CommonRoad Signs/Lights###
@@ -53,7 +56,6 @@ class Signal:
 
         :getter: returns s-coordinate
         :setter: sets s-coordinate
-        :type: float
         """
         return self._s
 
@@ -68,7 +70,6 @@ class Signal:
 
         :getter: returns t-coordinate
         :setter: sets t-coordinate
-        :type: float
         """
         return self._t
 
@@ -83,7 +84,6 @@ class Signal:
 
         :getter: returns ID
         :setter: sets ID
-        :type: int
         """
         return self._id
 
@@ -98,7 +98,6 @@ class Signal:
 
         :getter: returns name of the signal
         :setter: sets name
-        :type: string
         """
         return self._name
 
@@ -113,7 +112,6 @@ class Signal:
 
         :getter: returns whether signal is dynamic
         :setter: sets whether signal is dynamic
-        :type: string
         """
         return self._dynamic
 
@@ -131,7 +129,6 @@ class Signal:
 
         :getter: returns orientation
         :setter: sets orientation
-        :type: string
         """
         return self._orientation
 
@@ -148,7 +145,6 @@ class Signal:
 
         :getter: returns country code
         :setter: sets country code
-        :type: string
         """
         return self._country
 
@@ -163,7 +159,6 @@ class Signal:
 
         :getter: returns value of the signal
         :setter: sets value of the signal
-        :type: float
         """
         return self._signal_value
 
@@ -181,7 +176,6 @@ class Signal:
 
         :getter: returns unit
         :setter: sets unit
-        :type: string
         """
         return self._unit
 
@@ -199,7 +193,6 @@ class Signal:
 
         :getter: returns text
         :setter: sets text
-        :type: string
         """
         return self._text
 
@@ -217,7 +210,6 @@ class Signal:
 
         :getter: returns type ID
         :setter: sets type ID
-        :type: string
         """
         return self._type
 
@@ -235,13 +227,39 @@ class Signal:
 
         :getter: returns subtype ID
         :setter: sets subtype ID
-        :type: string
         """
         return self._subtype
 
     @subtype.setter
     def subtype(self, value):
         self._subtype = value
+
+    @property
+    def validity_from(self) -> int:
+        """Indicates starting lane of road for which signal is valid."""
+        return self._validity_from
+
+    @validity_from.setter
+    def validity_from(self, value: int):
+        self._validity_from = int(value)
+
+    @property
+    def validity_to(self) -> int:
+        """Indicates starting lane of road for which signal is valid."""
+        return self._validity_to
+
+    @validity_to.setter
+    def validity_to(self, value: int):
+        self._validity_to = int(value)
+
+    @property
+    def signal_id(self) -> str:
+        """ID of related dynamic signal."""
+        return self._signal_id
+
+    @signal_id.setter
+    def signal_id(self, value: str):
+        self._signal_id = str(value)
 
 
 class SignalReference:
@@ -267,16 +285,14 @@ class SignalReference:
         self._t = None
         self._id = None
         self._orientation = None
+        self._validity_from = None
+        self._validity_to = None
+        self._signal_id = None
+        self._turn_relation = None
 
     @property
     def s(self) -> float:
-        """
-        s-coordinate of the signal.
-
-        :getter: returns s-coordinate
-        :setter: sets s-coordinate
-        :type: float
-        """
+        """s-coordinate of the signal."""
         return self._s
 
     @s.setter
@@ -285,13 +301,7 @@ class SignalReference:
 
     @property
     def t(self) -> float:
-        """
-        t-coordinate of the signal.
-
-        :getter: returns t-coordinate
-        :setter: sets t-coordinate
-        :type: float
-        """
+        """t-coordinate of the signal."""
         return self._t
 
     @t.setter
@@ -300,13 +310,7 @@ class SignalReference:
 
     @property
     def id(self) -> int:
-        """
-        ID of the signal.
-
-        :getter: returns ID
-        :setter: sets ID
-        :type: int
-        """
+        """ID of the signal."""
         return self._id
 
     @id.setter
@@ -318,10 +322,6 @@ class SignalReference:
         """
         Indicates direction in which signal is enforced. ("+" = valid in positive s-direction, "-" = valid
         in negative s-direction, "none" = valid in both directions)
-
-        :getter: returns orientation
-        :setter: sets orientation
-        :type: string
         """
         return self._orientation
 
@@ -330,3 +330,37 @@ class SignalReference:
         if value not in ["+", "-", "none"]:
             raise AttributeError("Invalid input!")
         self._orientation = str(value)
+
+    @property
+    def validity_from(self) -> int:
+        """Indicates starting lane of road for which signal is valid."""
+        return self._validity_from
+
+    @validity_from.setter
+    def validity_from(self, value: int):
+        self._validity_from = int(value)
+
+    @property
+    def validity_to(self) -> int:
+        """Indicates starting lane of road for which signal is valid."""
+        return self._validity_to
+
+    @validity_to.setter
+    def validity_to(self, value: int):
+        self._validity_to = int(value)
+
+    @property
+    def signal_id(self) -> str:
+        return self._signal_id
+
+    @signal_id.setter
+    def signal_id(self, value: str):
+        self._signal_id = str(value)
+
+    @property
+    def turn_relation(self) -> str:
+        return self._turn_relation
+
+    @turn_relation.setter
+    def turn_relation(self, value: str):
+        self._turn_relation = str(value)

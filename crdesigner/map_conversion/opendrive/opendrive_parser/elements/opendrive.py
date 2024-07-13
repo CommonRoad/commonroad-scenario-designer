@@ -35,7 +35,6 @@ class OpenDrive:
 
         :getter: returns the header element
         :setter: sets the header
-        :type: object instance of class Header
         """
         return self._header
 
@@ -48,8 +47,7 @@ class OpenDrive:
         """
         Roads in the OpenDRIVE file.
 
-        :getter: returns the road instances in the form of a list [road1, road2, ...]
-        :type: list of road IDs
+        :getter: returns the road instances in the form of a list [road1, road2, ...]s
         """
         return self._roads
 
@@ -73,7 +71,6 @@ class OpenDrive:
         Not used yet, since controllers are not existent yet in the conversion.
 
         :getter: returns the controller instances in the form of a list [controller1, controller2, ...]
-        :type: list of controller instances
         """
         return self._controllers
 
@@ -83,7 +80,6 @@ class OpenDrive:
         Junctions in the OpenDrive file.
 
         :getter: returns the junction instances in the form of a list [junction1, junction2, ...]
-        :type: list of junction instances
         """
         return self._junctions
 
@@ -106,7 +102,6 @@ class OpenDrive:
         Not used yet, since junction groups are not existent yet in the conversion.
 
         :getter: returns the junction group instances in the form of a list [junctionGroup1, junctionGroup2, ...]
-        :type: list of junction group elements
         """
         return self._junctionGroups
 
@@ -117,7 +112,6 @@ class OpenDrive:
         Not used yet, since stations are not existent yet in the conversion.
 
         :getter: returns the stations in the form of a list [station1, station2, ...]
-        :type: list of station elements
         """
         return self._stations
 
