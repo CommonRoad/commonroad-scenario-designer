@@ -261,7 +261,7 @@ class ParametricLaneGroup:
                 user_bidirectional=users,
                 traffic_signs=set(sign.traffic_sign_id for sign in self.traffic_signs),
                 traffic_lights=set(light.traffic_light_id for light in self.traffic_lights),
-                stop_line=self.stop_lines[0],
+                stop_line=self.stop_lines[0] if len(self.stop_lines) > 0 else None,
             )
         else:
             lanelet = ConversionLanelet(
@@ -277,7 +277,7 @@ class ParametricLaneGroup:
                 user_one_way=users,
                 traffic_signs=set(sign.traffic_sign_id for sign in self.traffic_signs),
                 traffic_lights=set(light.traffic_light_id for light in self.traffic_lights),
-                stop_line=self.stop_lines[0],
+                stop_line=self.stop_lines[0] if len(self.stop_lines) > 0 else None,
             )
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
