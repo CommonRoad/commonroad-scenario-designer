@@ -29,7 +29,7 @@ python = "^3.9,<3.12"
 commonroad-io = {git = "https://github.com/CommonRoad/commonroad-io", rev = "develop"}
 commonroad-drivability-checker = "^2024.1"
 pyqt6 = ">=6.6.0"
-matplotlib = ">=3.9.0"
+matplotlib = ">=3.6.0"
 numpy = "^1.26.4,<2.0"
 scipy = "^1.11.3"
 lxml = "^4.9.2"
