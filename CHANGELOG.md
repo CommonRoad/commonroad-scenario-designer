@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.8.2] - 2024-06-XX
+## [0.8.2] - 2024-07-XX
 
 ### Added
 - lanelet2cr: Multipolygon and line marking conversion
@@ -17,6 +17,9 @@
 - odr2cr: Missing crosswalk projection
 - odr2cr: Traffic light assignment
 - odr2cr: Self-intersecting lanelets in case of wrong predecessor/successor relationships in OpenDRIVE file
+
+### Removed
+- Support of Python 3.8
 
 ## [0.8.1] - 2024-03-28
 
