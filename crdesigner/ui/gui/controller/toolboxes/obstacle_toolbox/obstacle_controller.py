@@ -17,18 +17,14 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QColorDialog, QDockWidget
 
 from crdesigner.common.logging import logger
+from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import (
+    DynamicCanvasController,
+)
 
 # TODO to change the call
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.view.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import (
     ObstacleToolboxUI,
-)
-
-if SUMO_AVAILABLE:
-    from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMOSimulation
-
-from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import (
-    DynamicCanvasController,
 )
 
 
@@ -58,11 +54,6 @@ class ObstacleController(
         self.xyova = []
         self.pos = []
         self.temp_obstacle = None
-
-        if SUMO_AVAILABLE:
-            self.sumo_simulation = SUMOSimulation(tmp_folder=self.tmp_folder)
-        else:
-            self.sumo_simulation = None
 
     def init_canvas(self):
         """
@@ -127,9 +118,6 @@ class ObstacleController(
         self.obstacle_toolbox_ui.expand_selected_obstacle.clicked.connect(
             lambda: self.show_hide_selected_obstacle_list()
         )
-
-        if SUMO_AVAILABLE:
-            self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(lambda: self.start_sumo_simulation())
 
     def show_hide_selected_obstacle_list(self):
         if self.obstacle_toolbox_ui.selected_obstacle_profile.isVisible():
