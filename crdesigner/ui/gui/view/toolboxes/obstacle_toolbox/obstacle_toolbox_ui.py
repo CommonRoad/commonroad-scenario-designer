@@ -25,7 +25,6 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QListWidget,
     QPushButton,
-    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
@@ -35,11 +34,7 @@ from crdesigner.common.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 
 # try to import sumo functionality
-from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.toolbox_ui import Toolbox
-
-if SUMO_AVAILABLE:
-    from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMOSimulation
 
 
 class ObstacleToolboxUI(Toolbox):
@@ -183,23 +178,6 @@ class ObstacleToolboxUI(Toolbox):
 
         title_obstacle_profile = "Obstacle Profiles"
         self.sections.append((title_obstacle_profile, widget_obstacle_profiles))
-
-        # --Section SUMO Simulation-
-        if SUMO_AVAILABLE:
-            widget_sumo = SUMOSimulation(self.tree)
-            layout_sumo = QFormLayout(widget_sumo)
-
-            self.button_start_simulation = QPushButton("Simulate")
-            self.sumo_simulation_length = QSpinBox()
-            self.sumo_simulation_length.setMinimum(10)
-            self.sumo_simulation_length.setMaximum(10000)
-            self.sumo_simulation_length.setValue(200)
-
-            layout_sumo.addRow("Number Time Steps:", self.sumo_simulation_length)
-            layout_sumo.addRow(self.button_start_simulation)
-
-            title_sumo = "Sumo Simulation"
-            self.sections.append((title_sumo, widget_sumo))
 
     def initialize_obstacle_information(self):
         """
