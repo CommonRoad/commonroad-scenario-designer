@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.8.2] - 2024-07-XX
+## [0.8.2] - 2024-07-22
 
 ### Added
 - lanelet2cr: Multipolygon and line marking conversion
@@ -20,6 +20,7 @@
 
 ### Removed
 - Support of Python 3.8
+- GUI simulation from GUI (the complete SUMO conversion/interface will be moved to another repository in the future)
 
 ## [0.8.1] - 2024-03-28
 
