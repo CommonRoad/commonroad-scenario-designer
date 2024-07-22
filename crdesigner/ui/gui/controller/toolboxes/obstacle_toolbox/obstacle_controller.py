@@ -20,9 +20,6 @@ from crdesigner.common.logging import logger
 from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import (
     DynamicCanvasController,
 )
-
-# TODO to change the call
-from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.view.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import (
     ObstacleToolboxUI,
 )
