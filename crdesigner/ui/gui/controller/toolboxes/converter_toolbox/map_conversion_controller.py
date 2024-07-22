@@ -36,6 +36,8 @@ from crdesigner.ui.gui.view.toolboxes.converter_toolbox.converter_toolbox_ui imp
 
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
+    from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMOSimulation
+    from crdesigner.ui.gui.utilities.sumo_settings import SUMOSettings
 
 
 class RequestRunnable(QRunnable):
@@ -70,6 +72,11 @@ class MapConversionToolboxController(QDockWidget):
         self.adjust_ui()
         self.osm_edit_window = QMainWindow(self)
         self.connect_gui_elements()
+
+        if SUMO_AVAILABLE:
+            self.sumo_simulation = SUMOSimulation(tmp_folder=mwindow.tmp_folder)
+        else:
+            self.sumo_simulation = None
 
         self.lanelet2_to_cr_converter = Lanelet2CRConverter()
         self.lanelet2_file = None
@@ -459,6 +466,15 @@ class MapConversionToolboxController(QDockWidget):
             if not directory:
                 return
             self.sumo_simulation.convert(directory)
+        else:
+            logging.warning(
+                "Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
+                "The GUI and other map conversions should work."
+            )
+
+    def open_sumo_settings(self):
+        if SUMO_AVAILABLE:
+            SUMOSettings(self, config=self.sumo_simulation.config)
         else:
             logging.warning(
                 "Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
