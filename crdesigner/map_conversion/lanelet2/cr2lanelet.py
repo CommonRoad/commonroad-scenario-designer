@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from commonroad.common.common_lanelet import LaneletType, LineMarking
+from commonroad.scenario.area import Area
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.scenario import Location, Scenario
 from commonroad.scenario.traffic_light import TrafficLight
@@ -15,6 +16,7 @@ from crdesigner.common.config.gui_config import lanelet2_default
 from crdesigner.common.config.lanelet2_config import Lanelet2Config, lanelet2_config
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.lanelet2 import (
+    Multipolygon,
     Node,
     OSMLanelet,
     RegulatoryElement,
@@ -70,6 +72,24 @@ def _line_marking_to_type_subtype_vertices(line_marking: LineMarking) -> [str, s
     if line_marking is LineMarking.BROAD_SOLID:
         lanelet2_type = "line_thick"
         subtype = "solid"
+    if line_marking is LineMarking.CURB:
+        lanelet2_type = "curbstone"
+        subtype = "high"
+    if line_marking is LineMarking.LOWERED_CURB:
+        lanelet2_type = "curbstone"
+        subtype = "low"
+    if line_marking is LineMarking.DASHED_SOLID:
+        lanelet2_type = "line_thick"
+        subtype = "dashed_solid"
+    if line_marking is LineMarking.SOLID_DASHED:
+        lanelet2_type = "line_thick"
+        subtype = "solid_dashed"
+    if line_marking is LineMarking.SOLID_SOLID:
+        lanelet2_type = "line_thick"
+        subtype = "solid_solid"
+    if line_marking is LineMarking.DASHED_DASHED:
+        lanelet2_type = "line_thick"
+        subtype = "dashed_dashed"
 
     return lanelet2_type, subtype
 
@@ -218,11 +238,19 @@ class CR2LaneletConverter:
         for traffic_light in scenario.lanelet_network.traffic_lights:
             self._convert_traffic_light(traffic_light)
 
+        # convert areas
+        for area in scenario.lanelet_network.areas:
+            self._convert_area(area)
+
         # map the traffic signs and the referred lanelets (yield+right_of_way) to a 'right_of_way_relation' object
         self._add_right_of_way_relation()
 
         # map the traffic lights and the referred lanelets to a 'right_of_way_relation' object
         self._add_regulatory_element_for_traffic_lights()
+
+        # append the lane_change flag to osm ways if the autoware flag is set to True
+        if self._config.autoware is True:
+            self._append_lane_change_tags()
 
         return self.osm.serialize_to_xml()
 
@@ -282,6 +310,26 @@ class CR2LaneletConverter:
                     regulatory_elements=reg_elements_arr,
                 )
                 self.osm.add_way_relation(new_way_rel)
+
+    def _convert_area(self, area: Area):
+        """
+        Converts a CommonRoad area to the Lanelet2 multipolygon.
+
+        :param area: area to be converted.
+        """
+        outer_list = list()
+        for border in area.border:
+            nodes = self._create_nodes_from_vertices(border.border_vertices)
+            type, subtype = _line_marking_to_type_subtype_vertices(border.line_marking)
+            way = Way(self.id_count, nodes, {"subtype": subtype, "type": type})
+            self.osm.add_way(way)
+            outer_list.append(way.id_)
+        tag_dict = {}
+        if area.area_types:
+            for area_type in area.area_types:
+                tag_dict["subtype"] = str(area_type.value)
+        multipolygon = Multipolygon(self.id_count, outer_list, tag_dict)
+        self.osm.add_multipolygon(multipolygon)
 
     def _convert_traffic_light(self, light: TrafficLight):
         """
@@ -757,6 +805,9 @@ class CR2LaneletConverter:
                             # if there are two linemarking types, add the subtypes together to match the L2 notation
                             # as the type should be the same, the type of the first lanelet line marking is used
                             subtype = subtype_lanelet + "_" + subtype_adj_right
+                            # dashed_dashed does not exist in L2 format
+                            if subtype == "dashed_dashed":
+                                subtype = "dashed"
                         else:
                             subtype = subtype_lanelet
                         self.osm.ways[potential_right_way].tag_dict = {"type": type_lanelet, "subtype": subtype}
@@ -808,6 +859,9 @@ class CR2LaneletConverter:
                             # if there are two linemarking types, add the subtypes together to match the L2 notation
                             # as the type should be the same, the type of the first lanelet line marking is used
                             subtype = subtype_adj_left + "_" + subtype_lanelet
+                            # dashed_dashed does not exist in L2 format
+                            if subtype == "dashed_dashed":
+                                subtype = "dashed"
                         else:
                             subtype = subtype_lanelet
                         self.osm.ways[potential_left_way].tag_dict = {"type": type_lanelet, "subtype": subtype}
@@ -896,3 +950,29 @@ class CR2LaneletConverter:
                         )
         for speed_sign_id in speed_sign_ids:
             way_rel.regulatory_elements.append(str(speed_sign_id))
+
+    def _append_lane_change_tags(self):
+        """
+        Function that appends the lane change tags to osm ways based on the linemarking of the way.
+        Possibility of a lane change has been copied from the Lanelet2 documentation.
+        The lane change tags are being used by Autoware.
+        """
+        ways = list(self.osm.ways.values())
+        for way in ways:
+            if way.tag_dict:
+                if "subtype" in way.tag_dict:
+                    subtype = way.tag_dict["subtype"]
+                    if subtype == "dashed" or subtype == "dashed_dashed":
+                        way.tag_dict["lane_change"] = "yes"
+                    elif subtype == "dashed_solid":
+                        way.tag_dict["lane_change"] = "left->right: yes"
+                    elif subtype == "solid_dashed":
+                        way.tag_dict["lane_change"] = "right->left: yes"
+                    elif way.tag_dict["type"] != "traffic_light" and way.tag_dict["type"] != "traffic_sign":
+                        way.tag_dict["lane_change"] = "no"
+                    else:
+                        # if the line marking does not exist, lane change is not possible
+                        way.tag_dict["lane_change"] = "no"
+            else:
+                # if the line marking does not exist, lane change is not possible
+                way.tag_dict["lane_change"] = "no"

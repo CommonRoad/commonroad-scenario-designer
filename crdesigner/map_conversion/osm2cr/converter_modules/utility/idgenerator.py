@@ -20,7 +20,6 @@ class IdGenerator:
         draws a new id
 
         :return: new id
-        :rtype: int
         """
         res = self.counter
         self.counter += 1
@@ -41,7 +40,6 @@ def get_id():
     draws a unique id
 
     :return: new id
-    :rtype: int
     """
     return generator.get()
 

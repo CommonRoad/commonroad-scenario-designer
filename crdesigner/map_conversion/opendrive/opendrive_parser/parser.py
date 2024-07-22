@@ -178,7 +178,6 @@ def defaultval(val: Optional[str], name: str, default: str = "0") -> str:
     :param val: Value that is inspected to be None
     :param name: Name of the variable inspected
     :param default: Alternative value given a val is None
-    :type: str
     """
     default = str(default)
     if val is None:
@@ -201,7 +200,7 @@ def parse_opendrive_road_geometry(new_road: Road, road_geometry: etree.ElementTr
     )
 
     if road_geometry.find("line") is not None:
-        new_road.planView.add_line(
+        new_road.plan_view.add_line(
             start_coord, float(road_geometry.get("hdg")) - float(offset["hdg"]), float(road_geometry.get("length"))
         )
 
@@ -210,7 +209,7 @@ def parse_opendrive_road_geometry(new_road: Road, road_geometry: etree.ElementTr
         curv_end = float(defaultval(road_geometry.find("spiral").get("curvEnd"), "spiral.curvEnd"))
         if np.isclose(curv_start, curv_end):
             raise AttributeError("Curvature at the start and at the end of a spiral must be different")
-        new_road.planView.add_spiral(
+        new_road.plan_view.add_spiral(
             start_coord,
             float(road_geometry.get("hdg")) - float(offset["hdg"]),
             float(road_geometry.get("length")),
@@ -218,7 +217,7 @@ def parse_opendrive_road_geometry(new_road: Road, road_geometry: etree.ElementTr
             curv_end,
         )
     elif road_geometry.find("arc") is not None:
-        new_road.planView.add_arc(
+        new_road.plan_view.add_arc(
             start_coord,
             float(road_geometry.get("hdg")) - float(offset["hdg"]),
             float(road_geometry.get("length")),
@@ -226,7 +225,7 @@ def parse_opendrive_road_geometry(new_road: Road, road_geometry: etree.ElementTr
         )
 
     elif road_geometry.find("poly3") is not None:
-        new_road.planView.add_poly3(
+        new_road.plan_view.add_poly3(
             start_coord,
             float(road_geometry.get("hdg")),
             float(road_geometry.get("length")),
@@ -246,7 +245,7 @@ def parse_opendrive_road_geometry(new_road: Road, road_geometry: etree.ElementTr
         else:
             p_max = None
 
-        new_road.planView.add_param_poly3(
+        new_road.plan_view.add_param_poly3(
             start_coord,
             float(road_geometry.get("hdg")),
             float(road_geometry.get("length")),
@@ -281,7 +280,7 @@ def parse_opendrive_road_elevation_profile(new_road: Road, road_elevation_profil
             start_pos=float(defaultval(elevation.get("s"), "elevation.s")),
         )
 
-        new_road.elevationProfile.elevations.append(new_elevation)
+        new_road.elevation_profile.elevations.append(new_elevation)
 
 
 def parse_opendrive_road_lateral_profile(new_road: Road, road_lateral_profile: etree.ElementTree):
@@ -300,7 +299,7 @@ def parse_opendrive_road_lateral_profile(new_road: Road, road_lateral_profile: e
             start_pos=float(defaultval(super_elevation.get("s"), "super_elevation.s")),
         )
 
-        new_road.lateralProfile.superelevations.append(new_super_elevation)
+        new_road.lateral_profile.superelevations.append(new_super_elevation)
 
     for crossfall in road_lateral_profile.findall("crossfall"):
         new_crossfall = RoadLateralProfileCrossfall(
@@ -312,7 +311,7 @@ def parse_opendrive_road_lateral_profile(new_road: Road, road_lateral_profile: e
             start_pos=float(defaultval(crossfall.get("s"), "crossfall.s")),
         )
 
-        new_road.lateralProfile.crossfalls.append(new_crossfall)
+        new_road.lateral_profile.crossfalls.append(new_crossfall)
 
     for shape in road_lateral_profile.findall("shape"):
         new_shape = RoadLateralProfileShape(
@@ -324,7 +323,7 @@ def parse_opendrive_road_lateral_profile(new_road: Road, road_lateral_profile: e
             start_pos_t=float(defaultval(shape.get("t"), "shape.t")),
         )
 
-        new_road.lateralProfile.shapes.append(new_shape)
+        new_road.lateral_profile.shapes.append(new_shape)
 
 
 def parse_opendrive_road_lane_offset(new_road: Road, lane_offset: etree.ElementTree):
@@ -342,7 +341,7 @@ def parse_opendrive_road_lane_offset(new_road: Road, lane_offset: etree.ElementT
         start_pos=float(defaultval(lane_offset.get("s"), "lane_offset.s")),
     )
 
-    new_road.lanes.laneOffsets.append(new_lane_offset)
+    new_road.lanes.lane_offsets.append(new_lane_offset)
 
 
 def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane_section: etree.ElementTree):
@@ -360,12 +359,12 @@ def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane
     new_lane_section.idx = lane_section_id
 
     new_lane_section.sPos = float(lane_section.get("s"))
-    new_lane_section.singleSide = lane_section.get("singleSide")
+    new_lane_section.single_side = lane_section.get("singleSide")
 
     sides = dict(
-        left=new_lane_section.leftLanes,
-        center=new_lane_section.centerLanes,
-        right=new_lane_section.rightLanes,
+        left=new_lane_section.left_lanes,
+        center=new_lane_section.center_lanes,
+        right=new_lane_section.right_lanes,
     )
 
     for sideTag, newSideLanes in sides.items():
@@ -481,8 +480,15 @@ def parse_opendrive_road_signal(new_road: Road, road_signal: etree.ElementTree):
     new_signal.signal_value = road_signal.get("value")
     new_signal.unit = road_signal.get("unit")
     new_signal.text = road_signal.get("text")
+    if road_signal.find("validity") is not None:
+        new_signal.validity_from = road_signal.find("validity").get("fromLane")
+        new_signal.validity_to = road_signal.find("validity").get("toLane")
+    if road_signal.find("userData") is not None and road_signal.find("userData").find("vectorSignal") is not None:
+        new_signal.signal_id = road_signal.find("userData") is not None and road_signal.find("userData").find(
+            "vectorSignal"
+        ).get("signalId")
 
-    new_road.addSignal(new_signal)
+    new_road.add_signal(new_signal)
 
 
 def parse_opendrive_road_signal_reference(new_road: Road, road_signal_reference: etree.ElementTree):
@@ -497,8 +503,21 @@ def parse_opendrive_road_signal_reference(new_road: Road, road_signal_reference:
     new_signal_reference.s = road_signal_reference.get("s")  # position along the reference curve
     new_signal_reference.t = road_signal_reference.get("t")  # position away from the reference curve
     new_signal_reference.orientation = road_signal_reference.get("orientation")
+    if road_signal_reference.find("validity") is not None:
+        new_signal_reference.validity_from = road_signal_reference.find("validity").get("fromLane")
+        new_signal_reference.validity_to = road_signal_reference.find("validity").get("toLane")
+    if (
+        road_signal_reference.find("userData") is not None
+        and road_signal_reference.find("userData").find("vectorSignal") is not None
+    ):
+        if road_signal_reference.find("userData").find("vectorSignal").get("signalId") is not None:
+            new_signal_reference.signal_id = road_signal_reference.find("userData").find("vectorSignal").get("signalId")
+        if road_signal_reference.find("userData").find("vectorSignal").get("turnRelation") is not None:
+            new_signal_reference.turn_relation = (
+                road_signal_reference.find("userData").find("vectorSignal").get("turnRelation")
+            )
 
-    new_road.addSignalReference(new_signal_reference)
+    new_road.add_signal_reference(new_signal_reference)
 
 
 def parse_opendrive_road(opendrive: OpenDrive, road: etree.ElementTree):
@@ -586,10 +605,7 @@ def parse_opendrive_road_object(new_road: Road, obj: etree.ElementTree):
     """Parses opendrive road object, creates roadObject from it and adds it to the road.
 
     :param new_road: The road to add the object to.
-    :type new_road: :class:`Road`
     :param obj: XML road element which is parsed.
-    :type obj: :class:`etree.ElementTree`
-
     """
     corners = []
     if obj.find("outlines") is not None:
@@ -649,7 +665,7 @@ def parse_opendrive_road_object(new_road: Road, obj: etree.ElementTree):
             "Object id {}".format(obj.attrib.get("id"))
         )
 
-    new_road.addObject(road_object)
+    new_road.add_object(road_object)
 
 
 def calculate_lane_section_lengths(new_road: Road):
@@ -663,7 +679,7 @@ def calculate_lane_section_lengths(new_road: Road):
     for lane_section in new_road.lanes.lane_sections:
         # Last lane section in road
         if lane_section.idx + 1 >= len(new_road.lanes.lane_sections):
-            lane_section.length = new_road.planView.length - lane_section.sPos
+            lane_section.length = new_road.plan_view.length - lane_section.sPos
 
         # All but the last lane section end at the succeeding one
         else:
@@ -671,7 +687,7 @@ def calculate_lane_section_lengths(new_road: Road):
 
     # OpenDRIVE does not provide lane width lengths by itself, calculate them by ourselves
     for lane_section in new_road.lanes.lane_sections:
-        for lane in lane_section.allLanes:
+        for lane in lane_section.all_lanes:
             widths_poses = np.array([x.start_offset for x in lane.widths] + [lane_section.length])
             widths_lengths = widths_poses[1:] - widths_poses[:-1]
 

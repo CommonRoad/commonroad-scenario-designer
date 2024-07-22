@@ -725,6 +725,14 @@ class LaneletRepairing(ElementRepairing):
 
         opt_vertex = [(left_vertex[0] + right_vertex[0]) / 2, (left_vertex[1] + right_vertex[1]) / 2]
 
+        # check if the vertex is 3d
+        if len(left_vertex) == 3:
+            opt_vertex = [
+                (left_vertex[0] + right_vertex[0]) / 2,
+                (left_vertex[1] + right_vertex[1]) / 2,
+                (left_vertex[2] + right_vertex[2]) / 2,
+            ]
+
         left_vertice_tuple = (str(left_vertex[0]), str(left_vertex[1]))
         right_vertice_tuple = (str(right_vertex[0]), str(right_vertex[1]))
         left_connections: list = self._connections.get(left_vertice_tuple)
@@ -907,14 +915,18 @@ class LaneletRepairing(ElementRepairing):
 
         non_intersecting_vertices = fill_number_of_vertices(intersected_vertices, origin_vertices_size)
 
-        orientation = compute_orientation_from_polyline(non_intersecting_vertices)
+        orientation = compute_orientation_from_polyline(
+            non_intersecting_vertices[:, :2]
+        )  # function only works with 2d vertices
         orientation_dif = [abs(orientation[i + 1] - orientation[i]) for i in range(len(orientation) - 1)]
         while np.isclose(np.max(orientation_dif), np.pi, 0.01):
             idx = np.argmax(orientation_dif)
             non_intersecting_vertices[idx + 1] = (
                 non_intersecting_vertices[idx] + non_intersecting_vertices[idx + 2]
             ) / 2
-            orientation = compute_orientation_from_polyline(non_intersecting_vertices)
+            orientation = compute_orientation_from_polyline(
+                non_intersecting_vertices[:, :2]
+            )  # function only works with 2d vertices
             orientation_dif = [orientation[i + 1] - orientation[i] for i in range(len(orientation) - 1)]
 
         if is_left:
