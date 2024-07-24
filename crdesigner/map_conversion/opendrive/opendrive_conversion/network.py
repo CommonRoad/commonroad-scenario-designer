@@ -223,7 +223,12 @@ class Network:
             # A lane section is the smallest part that can be converted at once
             for lane_section in road.lanes.lane_sections:
                 parametric_lane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(
-                    lane_section, reference_border, road.cr_traffic_lights, road.cr_traffic_signs, road.cr_stop_lines
+                    lane_section,
+                    reference_border,
+                    road.cr_traffic_lights,
+                    road.cr_traffic_signs,
+                    road.cr_stop_lines,
+                    road.rule,
                 )
 
                 self._planes.extend(parametric_lane_groups)

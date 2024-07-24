@@ -78,6 +78,7 @@ class OpenDriveConverter:
         cr_traffic_lights: List[Tuple[TrafficLight, Tuple[int, int], float]],
         cr_traffic_signs: List[Tuple[TrafficSign, Tuple[int, int], float]],
         cr_stop_lines: List[Tuple[StopLine, Tuple[int, int], float]],
+        rule: bool = True,
     ) -> List[ParametricLaneGroup]:
         """Convert a whole lane section into a list of ParametricLane objects.
 
@@ -86,6 +87,7 @@ class OpenDriveConverter:
         :param cr_traffic_lights: CommonRoad traffic lights assigned to road.
         :param cr_traffic_signs: CommonRoad traffic signs assigned to road.
         :param cr_stop_lines: CommonRoad stop lines assigned to road.
+        :param rule: Driving side of the road.
         :return: The converted ParametricLane objects.
         """
 
@@ -133,6 +135,9 @@ class OpenDriveConverter:
                         lane_borders, width, lane, side, mark_idx
                     )
                     parametric_lane.reverse = bool(lane.id > 0)
+                    # check the driving side
+                    if rule is False:
+                        parametric_lane.reverse = not parametric_lane.reverse
 
                     plane_group.append(parametric_lane)
 
