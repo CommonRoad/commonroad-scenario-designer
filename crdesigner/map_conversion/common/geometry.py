@@ -241,7 +241,7 @@ def bernstein(n: int, i: int, t: float) -> float:
     :param t: point at which polynomial is evaluated, should be in [0,1]
     :return: result of the polynomialt
     """
-    return scipy.special.binom(n, i) * t**i * (1 - t) ** (n - i)
+    return scipy.special.binom(n, i) * t ** i * (1 - t) ** (n - i)
 
 
 def bezier(points: np.ndarray, t: float) -> np.ndarray:
