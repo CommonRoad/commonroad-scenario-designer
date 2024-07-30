@@ -37,30 +37,30 @@ from crdesigner.map_conversion.common.conversion_lanelet_network import (
     ConversionLaneletNetwork,
 )
 from crdesigner.map_conversion.common.utils import generate_unique_id
-from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
-from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion import utils
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.converter import (
     OpenDriveConverter,
 )
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.crosswalks import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.crosswalks import (
     get_crosswalks,
 )
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.geo_reference import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.geo_reference import (
     get_geo_reference,
 )
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.plane_group import (
     ParametricLaneGroup,
 )
-from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.traffic_signals import (
     assign_traffic_signals_to_road,
     get_traffic_signal_references,
 )
-from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.utils import (
     encode_road_section_lane_width_id,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import (
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.opendrive import (
     OpenDrive,
 )
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road import Road
 
 
 def update_line_markings(lanelet_network: ConversionLaneletNetwork) -> ConversionLaneletNetwork:
