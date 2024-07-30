@@ -9,10 +9,6 @@ from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 from crdesigner.common.config.gui_config import gui_config
 from crdesigner.common.file_reader import CRDesignerFileReader
-from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
-
-if SUMO_AVAILABLE:
-    pass
 
 
 def file_new(mwindow):
@@ -74,13 +70,7 @@ def _open_scenario(mwindow, new_scenario, filename="new_scenario"):
         mwindow.crdesigner_console_wrapper.text_browser.append("loading aborted")
         return
     mwindow.filename = filename
-    if SUMO_AVAILABLE:
-        mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(
-            mwindow.obstacle_toolbox.sumo_simulation.config, new_file_added=True
-        )
-        mwindow.obstacle_toolbox.sumo_simulation.scenario = mwindow.scenario_model.get_current_scenario()
-    else:
-        mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(new_file_added=True)
+    mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(new_file_added=True)
     mwindow.animated_viewer_wrapper.update_view()
     update_to_new_scenario(mwindow)
 

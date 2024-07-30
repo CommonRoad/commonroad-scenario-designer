@@ -11,20 +11,18 @@ from commonroad.scenario.traffic_sign import (
 )
 
 from crdesigner.map_conversion.common.utils import generate_unique_id, get_default_cycle
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.traffic_signals import (
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import (
+    assign_traffic_signals_to_road,
     calculate_stop_line_position,
     extract_traffic_element_id,
-    get_traffic_signals,
 )
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road import (
-    Road,
-)
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import (
     Lane,
     LaneSection,
     LaneWidth,
 )
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadSignal import (
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import (
     Signal,
 )
 
@@ -77,21 +75,21 @@ class TestTrafficSignals(unittest.TestCase):
         self.roadStraightLine = Road()
         self.roadStraightLine.id = 1
         self.roadStraightLine._length = 50
-        self.roadStraightLine.planView.add_line([0, 0], 0.785398, 100)
+        self.roadStraightLine.plan_view.add_line([0, 0], 0.785398, 100)
 
-        self.roadStraightLine.addSignal(s1)
-        self.roadStraightLine.addSignal(s2)
-        self.roadStraightLine.addSignal(s3)
-        self.roadStraightLine.addSignal(s4)
+        self.roadStraightLine.add_signal(s1)
+        self.roadStraightLine.add_signal(s2)
+        self.roadStraightLine.add_signal(s3)
+        self.roadStraightLine.add_signal(s4)
 
         self.roadMultipleLaneSections = Road()
         self.roadMultipleLaneSections.id = 2
         self.roadMultipleLaneSections._length = 100
-        self.roadMultipleLaneSections.planView.add_line([0, 0], 0.523599, 100)
-        self.roadMultipleLaneSections.addSignal(s1)
-        self.roadMultipleLaneSections.addSignal(s2)
-        self.roadMultipleLaneSections.addSignal(s3)
-        self.roadMultipleLaneSections.addSignal(s4)
+        self.roadMultipleLaneSections.plan_view.add_line([0, 0], 0.523599, 100)
+        self.roadMultipleLaneSections.add_signal(s1)
+        self.roadMultipleLaneSections.add_signal(s2)
+        self.roadMultipleLaneSections.add_signal(s3)
+        self.roadMultipleLaneSections.add_signal(s4)
 
     def test_extract_traffic_element_id(self):
         # test with signal_type and signal_subtype
@@ -135,7 +133,7 @@ class TestTrafficSignals(unittest.TestCase):
         # noinspection PyTypeChecker
         sign = TrafficSign(1, list([element]), None, position, virtual=False)
         # get the traffic lights, signs and stop lines from the road
-        traffic_lights, traffic_signs, stop_lines = get_traffic_signals(self.roadStraightLine)
+        traffic_lights, traffic_signs, stop_lines = assign_traffic_signals_to_road(self.roadStraightLine, {}, {})
         # check if the extracted traffic elements are equal to the true objects
         self.assertTrue(stop_lines[0].__eq__(line))
         self.assertTrue(traffic_lights[0].__eq__(traffic_light))
@@ -148,14 +146,14 @@ class TestTrafficSignals(unittest.TestCase):
         road.id = 1
         road.junction = None
         road._length = 50
-        road.planView.add_line(0, 6.5, 100)
+        road.plan_view.add_line(0, 6.5, 100)
 
         signal = Signal()
         signal.country = "DEU"
         signal.type = "294"
         signal.s = 5
         signal.t = 2.5
-        pos_calc, tangent, _, _ = road.planView.calc(signal.s, compute_curvature=False)
+        pos_calc, tangent, _, _ = road.plan_view.calc(signal.s, compute_curvature=False)
         position = np.array(
             [pos_calc[0] + signal.t * np.cos(tangent + np.pi / 2), pos_calc[1] + signal.t * np.sin(tangent + np.pi / 2)]
         )
@@ -172,31 +170,31 @@ class TestTrafficSignals(unittest.TestCase):
         lane_section1 = LaneSection(self.roadMultipleLaneSections)
         lane_section1.idx = 0
         lane_section1.sPos = 0
-        lane_section1.singleSide = "false"
+        lane_section1.single_side = "false"
         lane1 = Lane(self.roadMultipleLaneSections, lane_section1)
         lane1.id = 1
         lane1.type = "driving"
         lane_width1 = LaneWidth(*[5.0, 0, 0, 0], 0, 0)
         lane1.widths = list([lane_width1])
-        lane_section1.centerLanes.append(lane1)
+        lane_section1.center_lanes.append(lane1)
 
         lane_section2 = LaneSection(self.roadMultipleLaneSections)
         lane_section2.idx = 1
         lane_section2.sPos = 0
-        lane_section2.singleSide = "false"
+        lane_section2.single_side = "false"
         lane2 = Lane(self.roadMultipleLaneSections, lane_section2)
         lane2.id = 2
         lane2.type = "driving"
         lane_width2 = LaneWidth(*[0, 0, 0.09822, -0.0051843], idx=None, start_offset=0)
         lane_width3 = LaneWidth(*[5.22, 0, 0, 0], idx=None, start_offset=1.263)
         lane2.widths = list([lane_width2, lane_width3])
-        lane_section2.centerLanes.append(lane2)
+        lane_section2.center_lanes.append(lane2)
 
         self.roadMultipleLaneSections.lanes.lane_sections.append(lane_section1)
         self.roadMultipleLaneSections.lanes.lane_sections.append(lane_section2)
 
         # construct ground truth / expected value
-        pos_at_s, tangent, _, _ = self.roadMultipleLaneSections.planView.calc(self.signals[0].s, False, False)
+        pos_at_s, tangent, _, _ = self.roadMultipleLaneSections.plan_view.calc(self.signals[0].s, False, False)
         true_first_pos = np.array(
             [
                 pos_at_s[0] + self.signals[0].t * np.cos(tangent + np.pi / 2),

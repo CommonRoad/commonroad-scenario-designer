@@ -42,21 +42,13 @@ class GraphEdge:
         creates an edge
 
         :param id: unique id
-        :type id: int
         :param node1: node the edge starts at
-        :type node1: GraphNode
         :param node2: node the edge ends at
-        :type node2: GraphNode
         :param waypoints: list of waypoints for the course of the edge
-        :type waypoints: List[geometry.Point]
         :param lane_info: information about lanes on the edge
-        :type lane_info: Road_info
         :param assumptions: assumptions made about the edge
-        :type assumptions: Assumption_info
         :param speedlimit: speed limit on the edge
-        :type speedlimit: float
         :param roadtype: type of road the edge represents
-        :type roadtype: str
         """
         nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward = lane_info
         lane_nr_assumed, lanes_assumed, oneway_assumed = assumptions

@@ -10,7 +10,7 @@ default:
     - pip install poetry
     - poetry config virtualenvs.in-project true
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
-    - poetry install --with tests,docs,tutorials,dev
+    - poetry install --with tests,docs,tutorials
     - source .venv/bin/activate
 
 .run-test-with-coverage: &run-test-with-coverage
@@ -38,16 +38,27 @@ build_and_test_python:
   stage: test
   parallel :
     matrix :
-      - PYTHON_VERSIONS : [ "3.8", "3.9"]
+      - PYTHON_VERSIONS : [ "3.9", "3.10"]
   variables:
     QT_QPA_PLATFORM : "offscreen"
   script:
     - *run-test-with-coverage
   needs: []
 
+build_and_update_packages_debian:
+  image : python:$PYTHON_VERSIONS
+  stage: test
+  parallel :
+    matrix :
+      - PYTHON_VERSIONS : [ "3.9", "3.10", "3.11" ]
+  script:
+    - poetry update
+    - poetry install
+  needs: []
+
 build_and_test_with_coverage:
   stage : test
-  image: python:3.10
+  image: python:3.11
   variables :
     QT_QPA_PLATFORM : "offscreen"
   script :

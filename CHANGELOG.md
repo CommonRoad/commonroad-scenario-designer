@@ -1,11 +1,27 @@
 # Changelog
 
-## [0.8.2] - 2024-06-XX
+## [0.8.2] - 2024-07-22
 
 ### Added
 - lanelet2cr: Multipolygon and line marking conversion
+- lanelet2cr: Traffic light conversion for Autoware (retain traffic light ids, set own Autoware default cycle, and set traffic light active status to false)
 - cr2lanelet: Area conversion
-- CommonRoad to OpenDRIVE conversion
+- cr2lanelet: Lane change property tags
+- odr2cr: Road speed limit conversion
+- odr2cr: Option to neglect projection by setting `config.proj_string_odr = None`
+- cr2odr
+
+### Changed
+- odr2cr: Warning instead of failure in case of not supported road object type
+
+### Fixed
+- odr2cr: Missing crosswalk projection
+- odr2cr: Traffic light assignment
+- odr2cr: Self-intersecting lanelets in case of wrong predecessor/successor relationships in OpenDRIVE file
+
+### Removed
+- Support of Python 3.8
+- GUI simulation from GUI (the complete SUMO conversion/interface will be moved to another repository in the future)
 
 ## [0.8.1] - 2024-03-28
 

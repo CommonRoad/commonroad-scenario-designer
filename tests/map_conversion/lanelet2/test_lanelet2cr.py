@@ -6,7 +6,11 @@ import unittest
 import numpy as np
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork, LineMarking, StopLine
 from commonroad.scenario.scenario import GeoTransformation, Location
-from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.scenario.traffic_light import (
+    TrafficLight,
+    TrafficLightCycleElement,
+    TrafficLightState,
+)
 from commonroad.scenario.traffic_sign import (
     TrafficSign,
     TrafficSignIDGermany,
@@ -622,6 +626,38 @@ class TestLanelet2CRConverter(unittest.TestCase):
         third_duration = traffic_light.traffic_light_cycle.cycle_elements[2].duration
         self.assertEqual(third_color, "green")
         self.assertEqual(third_duration, 5)
+
+    def test_traffic_light_conversion_autoware(self):
+        # set autoware flag
+        self._config.autoware = True
+
+        l2cr = Lanelet2CRConverter()
+        l2cr(osm)
+        tl_way = Way(1, list(osm.nodes)[0:3], {"type": "traffic_light", "subtype": "red_yellow_green"})
+        tl_way_relation = RegulatoryElement(
+            2, refers=list("1"), tag_dict={"subtype": "traffic_light", "type": "regulatory_element"}
+        )
+        osm.add_way(tl_way)
+        osm.add_regulatory_element(tl_way_relation)
+
+        l2cr.traffic_light_conversion(tl_way, map)
+
+        # test that the id of the traffic light is retained after conversion
+        traffic_light: TrafficLight = l2cr.lanelet_network.traffic_lights[0]
+        tl_after_id = int(traffic_light.traffic_light_id)
+        self.assertEqual(tl_after_id, 1)
+
+        # testing the active state of the traffic light
+        tl_active_state = traffic_light.active
+        self.assertEqual(tl_active_state, False)
+
+        # testing the traffic light cycle
+        tl_cycle = traffic_light.traffic_light_cycle.cycle_elements
+        autoware_tl_cycle = [TrafficLightCycleElement(TrafficLightState.INACTIVE, 5)]
+        self.assertEqual(tl_cycle, autoware_tl_cycle)
+
+        # reset autoware flag
+        self._config.autoware = False
 
     def test_speed_limit_conversion(self):
         l2cr = Lanelet2CRConverter()

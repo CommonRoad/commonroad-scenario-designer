@@ -1,14 +1,15 @@
 import enum
 import logging
-from typing import List, Tuple, Union
+from typing import Dict, List, Set, Tuple, Union
 
 import numpy as np
 from commonroad.scenario.lanelet import LineMarking, StopLine
-from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.scenario.traffic_light import TrafficLight, TrafficLightDirection
 from commonroad.scenario.traffic_sign import (
     TrafficSign,
     TrafficSignElement,
     TrafficSignIDChina,
+    TrafficSignIDCountries,
     TrafficSignIDGermany,
     TrafficSignIDRussia,
     TrafficSignIDSpain,
@@ -61,21 +62,24 @@ def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_si
     return element_id
 
 
-def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSign], List[StopLine]]:
+def assign_traffic_signals_to_road(
+    road: Road, traffic_light_dirs: Dict[str, Set[str]], traffic_light_lanes: Dict[str, Tuple[int, int]]
+) -> Tuple[List[TrafficLight], List[TrafficSign], List[StopLine]]:
     """Extracts traffic_lights, traffic_signs, stop_lines from a road.
 
     :param road: The road object from which to extract signals.
-    :return: lists of traffic_lights, traffic_signs, stop_lines
+    :param traffic_light_dirs: Dictionary of traffic light IDs to directions.
+    :param traffic_light_lanes: Dictionary of traffic light IDs to lane validity.
     """
     traffic_signs = []
     traffic_lights = []
     stop_lines = []
-
     # TODO: Stop lines are created and appended to the list for DEU and OpenDrive format.
     # This has been replicated for other countries but has not been tested with a test case
     # Stop lines have a signal type of 294 and are handled differently in the CommonRoad format
     for signal in road.signals:
-        position, tangent, _, _ = road.planView.calc(signal.s, compute_curvature=False)
+        lanes = (0, 0) if signal.validity_from is None else (signal.validity_from, signal.validity_to)
+        position, tangent, _, _ = road.plan_view.calc(signal.s, compute_curvature=False)
         position = np.array(
             [position[0] + signal.t * np.cos(tangent + np.pi / 2), position[1] + signal.t * np.sin(tangent + np.pi / 2)]
         )
@@ -94,83 +98,26 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
                     additional_values = [str(signal.signal_value)]
 
             signal_country = utils.get_signal_country(signal.country)
+            country_stop_line_id = {"DEU": "294", "ZAM": "294", "USA": "294", "CHN": "294", "ESP": "294"}
 
-            if signal_country == "DEU":
-                if signal.type == "1000003" or signal.type == "1000004":
-                    continue  # stop line
-                    # Stop lines have a signal type of 294 and are handled differently in the commonroad format
-                if signal.type == "294":
-                    # Creating stop line object by first calculating the position of the two end points that define the
-                    # straight stop line
-                    position_1, position_2 = calculate_stop_line_position(
-                        road.lanes.lane_sections, signal, position, tangent
-                    )
-                    stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-                    stop_lines.append(stop_line)
-                    continue
-
-                element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDGermany)
-            elif signal_country == "USA":
-                element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDUsa)
-                if signal.type == "294":  # TODO has another ID
-                    # Creating stop line object by first calculating the position of the two end points that define the
-                    # straight stop line
-                    position_1, position_2 = calculate_stop_line_position(
-                        road.lanes.lane_sections, signal, position, tangent
-                    )
-                    stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-                    stop_lines.append(stop_line)
-                    continue
-
-            elif signal_country == "CHN":
-                element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDChina)
-                if signal.type == "294":  # TODO has another ID
-                    # Creating stop line object by first calculating the position of the two end points that define the
-                    # straight stop line
-                    position_1, position_2 = calculate_stop_line_position(
-                        road.lanes.lane_sections, signal, position, tangent
-                    )
-                    stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-                    stop_lines.append(stop_line)
-                    continue
-
-            elif signal_country == "ESP":
-                element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDSpain)
-                if signal.type == "294":  # TODO has another ID
-                    # Creating stop line object by first calculating the position of the two end points that define the
-                    # straight stop line
-                    position_1, position_2 = calculate_stop_line_position(
-                        road.lanes.lane_sections, signal, position, tangent
-                    )
-                    stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-                    stop_lines.append(stop_line)
-                    continue
-
-            elif signal_country == "RUS":
-                element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDRussia)
-                if signal.type == "294":  # TODO has another ID
-                    # Creating stop line object by first calculating the position of the two end points that define the
-                    # straight stop line
-                    position_1, position_2 = calculate_stop_line_position(
-                        road.lanes.lane_sections, signal, position, tangent
-                    )
-                    stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-                    stop_lines.append(stop_line)
-                    continue
-            else:
-                if signal.type == "1000003" or signal.type == "1000004":
-                    continue
-                if signal.type == "294":
-                    # Creating stop line object
-                    position_1, position_2 = calculate_stop_line_position(
-                        road.lanes.lane_sections, signal, position, tangent
-                    )
-                    stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-                    stop_lines.append(stop_line)
-                    continue
-
-                element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDZamunda)
-
+            if (
+                (signal_country == "DEU" or signal_country not in TrafficSignIDCountries.keys())
+                and signal.type == "1000003"
+                or signal.type == "1000004"
+            ):
+                continue
+            element_id = extract_traffic_element_id(
+                signal.type, str(signal.subtype), TrafficSignIDCountries[signal_country]
+            )
+            if signal.type == country_stop_line_id[signal_country]:
+                # Creating stop line object by first calculating the position of the two end points that define the
+                # straight stop line
+                position_1, position_2 = calculate_stop_line_position(
+                    road.lanes.lane_sections, signal, position, tangent
+                )
+                stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
+                road.add_stop_line((stop_line, lanes, signal.s))
+                stop_lines.append(stop_line)
             if element_id.value == "":
                 continue
             traffic_sign_element = TrafficSignElement(
@@ -184,20 +131,45 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
                 virtual=False,
             )
 
+            road.add_traffic_sign((traffic_sign, lanes, signal.s))
             traffic_signs.append(traffic_sign)
 
         elif signal.dynamic == "yes":
             # the three listed here are hard to interpret in commonroad.
             # we ignore such signals in order not cause trouble in traffic simulation
+            tdir = TrafficLightDirection.ALL
+            if traffic_light_dirs.get(signal.signal_id) is not None:
+                for tid, t_light in traffic_light_dirs.items():
+                    if "Right" in t_light and "Straight" in t_light and "Left" in t_light:
+                        tdir = TrafficLightDirection.ALL
+                    elif "Left" in t_light and "Straight" in t_light:
+                        tdir = TrafficLightDirection.LEFT_STRAIGHT
+                    elif "Right" in t_light and "Straight" in t_light:
+                        tdir = TrafficLightDirection.STRAIGHT_RIGHT
+                    elif "Left" in t_light and "Right" in t_light:
+                        tdir = TrafficLightDirection.LEFT_RIGHT
+                    elif "Left" in t_light:
+                        tdir = TrafficLightDirection.LEFT
+                    elif "Right" in t_light:
+                        tdir = TrafficLightDirection.RIGHT
+                    elif "Straight" in t_light:
+                        tdir = TrafficLightDirection.STRAIGHT
+                    else:
+                        tdir = TrafficLightDirection.ALL
+            lanes = (
+                lanes if traffic_light_lanes.get(signal.signal_id) is None else traffic_light_lanes[signal.signal_id]
+            )
             if signal.type != ("1000002" or "1000007" or "1000013"):
                 traffic_light = TrafficLight(
-                    traffic_light_id=generate_unique_id(), position=position, traffic_light_cycle=get_default_cycle()
+                    traffic_light_id=generate_unique_id(),
+                    position=position,
+                    traffic_light_cycle=get_default_cycle(),
+                    direction=tdir,
                 )  # TODO remove for new CR-Format
-
+                road.add_traffic_light((traffic_light, lanes, signal.s))
                 traffic_lights.append(traffic_light)
             else:
                 continue
-
     return traffic_lights, traffic_signs, stop_lines
 
 
@@ -207,7 +179,7 @@ def calculate_stop_line_position(
     """Function to calculate the 2 points that define the stop line which
     is a straight line from one edge of the road to the other.
 
-    :param lane_sections: Opendrive lane_sections list containing the lane_section parsed lane_section class
+    :param lane_sections: OpenDRIVE lane_sections list containing the lane_section parsed lane_section class
     :param signal: Signal object, in this case the stop line.
     :param position: initial position as calculated in the get_traffic_signals function
     :param tangent: tangent value as calculated in the get_traffic_signals function
@@ -215,7 +187,7 @@ def calculate_stop_line_position(
     """
     total_width = 0
     for lane_section in lane_sections:
-        for lane in lane_section.allLanes:
+        for lane in lane_section.all_lanes:
             # Stop line width only depends on drivable lanes
             if lane.id != 0 and lane.type in ["driving", "onRamp", "offRamp", "exit", "entry"]:
                 for width in lane.widths:
@@ -240,14 +212,25 @@ def calculate_stop_line_position(
     return position_1, position_2
 
 
-def get_traffic_signal_references(road: Road) -> list:
-    """Function to extract all the traffic sign references that are stored in the road object in order to avoid
-    duplication by redefiniing predefined signals/lights and stoplines.
+def get_traffic_signal_references(
+    road: Road, traffic_light_dirs: Dict[str, Set[str]], traffic_light_lanes: Dict[str, Tuple[int, int]]
+):
+    """Function to extract relevant information from sign references.
+
+    :param road: The road object from which to extract signals.
+    :param traffic_light_dirs: Dictionary, where signal directions should be stored.
+    :param traffic_light_lanes: Dictionary, where signal lanes should be stored.
     """
-    # TODO: This function was ultimately not used as signal references were not required to define all traffic
-    #  lights signals and stoplines. However, it needs to be verified if signal references are required elsewhere.
-    #  If not this function can safely be deleted.
-    signal_references = []
-    for signal_reference in road.signalReference:
-        signal_references.append(signal_reference)
-    return signal_references
+    for signal in road.signal_reference:
+        if signal.turn_relation is not None:
+            if traffic_light_dirs.get(signal.signal_id) is None:
+                traffic_light_dirs[signal.signal_id] = set()
+            traffic_light_dirs[signal.signal_id].add(signal.turn_relation)
+        if signal.validity_to is not None:
+            if traffic_light_lanes.get(signal.signal_id) is not None:
+                traffic_light_lanes[signal.signal_id] = (
+                    min(traffic_light_lanes[signal.signal_id][0], signal.validity_from),
+                    max(traffic_light_lanes[signal.signal_id][0], signal.validity_to),
+                )
+            else:
+                traffic_light_lanes[signal.signal_id] = (signal.validity_to, signal.validity_from)

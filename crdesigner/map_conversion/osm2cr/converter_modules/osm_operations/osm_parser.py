@@ -335,9 +335,7 @@ def parse_file(
     extracts all ways with streets and all the nodes in these streets of a given osm file
 
     :param filename: the location of the osm file
-    :type filename: str
     :param accepted_highways: a list of all highways that shall be extracted
-    :type accepted_highways: List[str]
     :return: roads, road_points: set of all way objects, dict of required nodes and list of traffic signs and more
     """
     tree = ElTree.parse(filename)
@@ -394,9 +392,7 @@ def parse_turnlane(turnlane: str) -> str:
     all possible turnlanes are found in osm_config.py
 
     :param turnlane: string, a turnlane
-    :type turnlane: str
     :return: turnlane
-    :rtype: str
     """
     if turnlane == "":
         return "none"
@@ -456,10 +452,8 @@ def extract_tag_info(road: ElTree.Element) -> Tuple[Road_info, int]:
     extracts the information of roads given in tags
 
     :param road: osm road object
-    :type road: ElTree.Element
     :return: (nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes,
         turnlanes_forward, turnlanes_backward), speedlimit
-    :rtype: Tuple[Road_info, int]
     """
     nr_of_lanes, forward_lanes, backward_lanes = None, None, None
     speedlimit, oneway = None, None
@@ -553,11 +547,8 @@ def get_graph_nodes(
     two or more ways or are at the end of a way are returned
 
     :param roads: set of osm ways
-    :type roads: Set[ElTree.Element]
     :param points: dict of points of each osm node
-    :type points: Dict[int, Point]
     :return: nodes, set of graph node objects
-    :rtype: Dict[int, GraphNode]
     """
     nodes = OrderedDict()
     point_degree = OrderedDict()  # number of roads sharing a point
@@ -618,13 +609,9 @@ def get_graph_edges_from_road(
 
     :param bounds:
     :param roads: set of osm way objects
-    :type roads: Set[ElTree.Element]
     :param nodes: set of graph nodes
-    :type nodes: Dict[int, GraphNode]
     :param points: dict of points of each osm node
-    :type points: Dict[int, Point]
     :return: edges: set of graph edge objects
-    :rtype: Set[GraphEdge]
     """
 
     def neighbor_in_area(index: int, point_in_area_list: List[bool]) -> bool:
@@ -814,14 +801,11 @@ def roads_to_graph(
 
     :param bounds:
     :param roads: set of roads
-    :type roads: Set[ElTree.Element]
     :param road_points: corresponding points
-    :type road_points: Dict[int, Point]
     :param restrictions: restrictions which will be applied to edges
     :param traffic_signs: traffic signs to apply
     :param traffic_lights: traffic lights to apply
     :param additional_nodes: nodes that should be considered additionally
-    :return:
     """
     nodes = get_graph_nodes(roads, road_points, traffic_signs, traffic_lights)
     if additional_nodes is not None:

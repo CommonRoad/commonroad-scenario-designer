@@ -74,15 +74,10 @@ class ParametricLaneGroup:
         """Initializes a ParametricLaneGroup object.
 
         :param id_: ID of the ParametricLaneGroup.
-        :type id_: str
         :param parametric_lanes: Lanes of the group.
-        :type parametric_lanes: list
         :param inner_neighbour: ID of the inner neighbor of this group.
-        :type inner_neighbour: str
         :param outer_neighbour: ID of the outer neighbor of this group.
-        :type outer_neighbour: str
         :param inner_linemarking: inside road mark present in 2 central inner lanelets, closest to the center line
-        :type inner_linemarking: RoadMark
         """
         self._geo_lengths = [np.array([0.0])]
         self.parametric_lanes: List[ParametricLane] = []
@@ -122,7 +117,6 @@ class ParametricLaneGroup:
         """Extend own ParametricLanes with new ones. Assumes ParametricLane objects in plane_list are already in order.
 
         :param plane_list: List with ParametricLane Objects
-        :rtype: list
         """
         for plane in plane_list:
             self.parametric_lanes.append(plane)
@@ -165,7 +159,6 @@ class ParametricLaneGroup:
         """Access restrictions of the first ParametricLane in this ParametricLaneGroup.
 
         :return: The access restrictions of the first Plane
-        :rtype: list[list]
         """
         return self.parametric_lanes[0].access
 
@@ -266,6 +259,9 @@ class ParametricLaneGroup:
                 line_marking_right_vertices=line_marking_right_vertices,
                 speed=self.parametric_lanes[0].speed,
                 user_bidirectional=users,
+                traffic_signs=set(sign.traffic_sign_id for sign in self.traffic_signs),
+                traffic_lights=set(light.traffic_light_id for light in self.traffic_lights),
+                stop_line=self.stop_lines[0] if len(self.stop_lines) > 0 else None,
             )
         else:
             lanelet = ConversionLanelet(
@@ -279,6 +275,9 @@ class ParametricLaneGroup:
                 line_marking_right_vertices=line_marking_right_vertices,
                 speed=self.parametric_lanes[0].speed,
                 user_one_way=users,
+                traffic_signs=set(sign.traffic_sign_id for sign in self.traffic_signs),
+                traffic_lights=set(light.traffic_light_id for light in self.traffic_lights),
+                stop_line=self.stop_lines[0] if len(self.stop_lines) > 0 else None,
             )
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
