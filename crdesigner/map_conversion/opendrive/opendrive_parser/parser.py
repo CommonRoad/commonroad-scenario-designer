@@ -532,11 +532,11 @@ def parse_opendrive_road(opendrive: OpenDrive, road: etree.ElementTree):
 
     new_road.id = int(road.get("id"))
     new_road.name = road.get("name")
-    new_road.rule = True  # RHT default
-    rule = road.get("rule")
-    if rule is not None:
-        if rule == "LHT":
-            new_road.rule = False
+    new_road.driving_direction = True  # RHT default
+    driving_direction = road.get("rule")
+    if driving_direction is not None:
+        if driving_direction == "LHT":
+            new_road.driving_direction = False
 
     junction_id = int(road.get("junction")) if road.get("junction") != "-1" else None
 

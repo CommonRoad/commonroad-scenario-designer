@@ -46,7 +46,7 @@ class Road:
     :ivar _objects: objects on the road
     :ivar _signals: signal elements on the road
     :ivar _signalReferences: signal elements on the road (reused signal definitions)
-    :ivar _rule: driving side, true if RHT, false if LHT
+    :ivar _driving_direction driving side, true if RHT, false if LHT
     """
 
     def __init__(self):
@@ -66,7 +66,7 @@ class Road:
         self._cr_traffic_lights: List[Tuple[TrafficLight, Tuple[int, int], float]] = []
         self._cr_traffic_signs: List[Tuple[TrafficSign, Tuple[int, int], float]] = []
         self._cr_stop_lines: List[Tuple[StopLine, Tuple[int, int], float]] = []
-        self._rule = True
+        self._driving_direction = True
 
     # check if objects have equal instance dictionaries
     def __eq__(self, other):
@@ -132,15 +132,15 @@ class Road:
         return self._lanes
 
     @property
-    def rule(self) -> bool:
-        """Driving side"""
-        return self._rule
+    def driving_direction(self) -> bool:
+        """Driving direction"""
+        return self._driving_direction
 
-    @rule.setter
-    def rule(self, value):
+    @driving_direction.setter
+    def driving_direction(self, value):
         if not isinstance(value, bool):
             raise TypeError("Property must be a boolean")
-        self._rule = value
+        self._driving_direction = value
 
     @property
     def objects(self) -> list:
