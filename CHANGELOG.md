@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.3]
+
+### Added
+- odr2cr: Left-hand drive consideration
+
+
 ## [0.8.2] - 2024-07-22
 
 ### Added
@@ -9,7 +15,7 @@
 - cr2lanelet: Lane change property tags
 - odr2cr: Road speed limit conversion
 - odr2cr: Option to neglect projection by setting `config.proj_string_odr = None`
-- odr2cr: Left-hand drive consideration
+
 
 ### Changed
 - odr2cr: Warning instead of failure in case of not supported road object type
