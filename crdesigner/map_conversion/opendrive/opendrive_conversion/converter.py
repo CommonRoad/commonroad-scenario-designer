@@ -78,6 +78,7 @@ class OpenDriveConverter:
         cr_traffic_lights: List[Tuple[TrafficLight, Tuple[int, int], float]],
         cr_traffic_signs: List[Tuple[TrafficSign, Tuple[int, int], float]],
         cr_stop_lines: List[Tuple[StopLine, Tuple[int, int], float]],
+        driving_direction: bool = True,
     ) -> List[ParametricLaneGroup]:
         """Convert a whole lane section into a list of ParametricLane objects.
 
@@ -86,6 +87,7 @@ class OpenDriveConverter:
         :param cr_traffic_lights: CommonRoad traffic lights assigned to road.
         :param cr_traffic_signs: CommonRoad traffic signs assigned to road.
         :param cr_stop_lines: CommonRoad stop lines assigned to road.
+        :param driving_direction: Driving direction of the road.
         :return: The converted ParametricLane objects.
         """
 
@@ -119,6 +121,7 @@ class OpenDriveConverter:
                     inner_neighbour_same_direction=inner_neighbour_same_dir,
                     outer_neighbour=outer_neighbour_id,
                     inner_linemarking=inner_line_marking,
+                    driving_direction=driving_direction,
                 )
 
                 # Create new lane for each width segment
@@ -130,9 +133,12 @@ class OpenDriveConverter:
                             mark_idx += 1
                     # create new lane
                     parametric_lane = OpenDriveConverter.create_parametric_lane(
-                        lane_borders, width, lane, side, mark_idx
+                        lane_borders, width, lane, side, mark_idx, driving_direction
                     )
                     parametric_lane.reverse = bool(lane.id > 0)
+                    # check the driving side
+                    if driving_direction is False:
+                        parametric_lane.reverse = not parametric_lane.reverse
 
                     plane_group.append(parametric_lane)
 
@@ -183,7 +189,12 @@ class OpenDriveConverter:
 
     @staticmethod
     def create_parametric_lane(
-        lane_borders: List[Border], width: LaneWidth, lane: Lane, side: str, mark_idx: int
+        lane_borders: List[Border],
+        width: LaneWidth,
+        lane: Lane,
+        side: str,
+        mark_idx: int,
+        driving_direction: bool = True,
     ) -> ParametricLane:
         """Create a parametric lane for a certain width section.
 
@@ -192,6 +203,7 @@ class OpenDriveConverter:
         :param lane: Lane in which new parametric lane is created.
         :param side: Which side of the lane section where the parametric lane is created.
         :param mark_idx: Index of line marking belonging to lane.
+        :param driving_direction: Driving direction, right if true.
         :return: A ParametricLane object with specified borders and a unique id.
         """
         if len(lane.road_mark) > 0:
@@ -220,6 +232,7 @@ class OpenDriveConverter:
             line_marking=marking,
             side=side,
             access=lane.access,
+            driving_direction=driving_direction,
         )
         return parametric_lane
 

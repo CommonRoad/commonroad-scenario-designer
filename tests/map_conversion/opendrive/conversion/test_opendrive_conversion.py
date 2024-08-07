@@ -242,6 +242,18 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         self.assertListEqual([3], network.find_lanelet_by_id(2).successor)
         self.assertEqual([2], network.find_lanelet_by_id(3).predecessor)
 
+    def test_lht(self):
+        """Test left hand traffic parsing and consideration"""
+        name = "zero_width_lanes_map"
+        name_lht = "zero_width_lanes_map_LHT"
+        scenario = load_and_convert_opendrive(name)
+        scenario_lht = load_and_convert_opendrive(name_lht)
+
+        # check if the vertices order of RHT and LHT scenarios is reversed
+        for ll in scenario.lanelet_network.lanelets:
+            ll_lht = scenario_lht.lanelet_network.find_lanelet_by_id(ll.lanelet_id)
+            self.assertEqual(ll.center_vertices.tolist(), ll_lht.center_vertices[::-1].tolist())
+
     def test_four_way_signal(self):
         """Test the file FourWaySignal.xodr"""
         name = "FourWaySignal"
