@@ -70,6 +70,7 @@ class ParametricLaneGroup:
         inner_neighbour_same_direction=True,
         outer_neighbour=None,
         inner_linemarking=None,
+        driving_direction=True,
     ):
         """Initializes a ParametricLaneGroup object.
 
@@ -78,6 +79,7 @@ class ParametricLaneGroup:
         :param inner_neighbour: ID of the inner neighbor of this group.
         :param outer_neighbour: ID of the outer neighbor of this group.
         :param inner_linemarking: inside road mark present in 2 central inner lanelets, closest to the center line
+        :param driving_direction: driving direction. right if true.
         """
         self._geo_lengths = [np.array([0.0])]
         self.parametric_lanes: List[ParametricLane] = []
@@ -99,6 +101,8 @@ class ParametricLaneGroup:
                 self.extend(parametric_lanes)
             else:
                 self.append(parametric_lanes)
+
+        self.driving_direction = driving_direction
 
     def append(self, parametric_lane: ParametricLane):
         """Append lane to start or end of internal list of ParametricLane objects. If the parametric_lane is reverse,
@@ -169,12 +173,15 @@ class ParametricLaneGroup:
         """
         return all([plane.has_zero_width_everywhere() for plane in self.parametric_lanes])
 
-    def to_lanelet(self, error_tolerance, min_delta_s, transformer: Transformer) -> ConversionLanelet:
+    def to_lanelet(
+        self, error_tolerance, min_delta_s, transformer: Transformer, driving_direction: bool = True
+    ) -> ConversionLanelet:
         """Convert a ParametricLaneGroup to a Lanelet.
 
         :param error_tolerance: Max. error between reference geometry and polyline of vertices.
         :param min_delta_s: Min. step length between two sampling positions on the reference geometry
         :param transformer: Coordinate projection transformer.
+        :param driving_direction: Driving direction, right if true.
         :return: Created Lanelet.
         """
         left_vertices, right_vertices = np.array([]), np.array([])
@@ -280,7 +287,7 @@ class ParametricLaneGroup:
                 stop_line=self.stop_lines[0] if len(self.stop_lines) > 0 else None,
             )
         # Adjacent lanes
-        self._set_adjacent_lanes(lanelet)
+        self._set_adjacent_lanes(lanelet, driving_direction)
 
         return lanelet
 
@@ -463,20 +470,33 @@ class ParametricLaneGroup:
 
         return poses
 
-    def _set_adjacent_lanes(self, lanelet: ConversionLanelet):
+    def _set_adjacent_lanes(self, lanelet: ConversionLanelet, driving_direction: bool = True):
         """
         While converting a ParametricLaneGroup to a Lanelet, set
         the proper attributes relating to adjacent lanes.
 
         :param lanelet: The lanelet which is created from the ParametricLaneGroup
+        :param driving_direction: Driving direction, right if true.
         """
-        if self.inner_neighbour is not None:
-            lanelet.adj_left = self.inner_neighbour
-            lanelet.adj_left_same_direction = self.inner_neighbour_same_direction
+        # check the driving side
+        if driving_direction is True:
+            # RHT
+            if self.inner_neighbour is not None:
+                lanelet.adj_left = self.inner_neighbour
+                lanelet.adj_left_same_direction = self.inner_neighbour_same_direction
 
-        if self.outer_neighbour is not None:
-            lanelet.adj_right = self.outer_neighbour
-            lanelet.adj_right_same_direction = True
+            if self.outer_neighbour is not None:
+                lanelet.adj_right = self.outer_neighbour
+                lanelet.adj_right_same_direction = True
+        else:
+            # LHT
+            if self.inner_neighbour is not None:
+                lanelet.adj_right = self.inner_neighbour
+                lanelet.adj_right_same_direction = self.inner_neighbour_same_direction
+
+            if self.outer_neighbour is not None:
+                lanelet.adj_left = self.outer_neighbour
+                lanelet.adj_left_same_direction = True
 
     def maximum_width(self) -> float:
         """Get the maximum width of the lanelet.

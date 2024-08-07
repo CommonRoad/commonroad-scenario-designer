@@ -223,7 +223,12 @@ class Network:
             # A lane section is the smallest part that can be converted at once
             for lane_section in road.lanes.lane_sections:
                 parametric_lane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(
-                    lane_section, reference_border, road.cr_traffic_lights, road.cr_traffic_signs, road.cr_stop_lines
+                    lane_section,
+                    reference_border,
+                    road.cr_traffic_lights,
+                    road.cr_traffic_signs,
+                    road.cr_stop_lines,
+                    road.driving_direction,
                 )
 
                 self._planes.extend(parametric_lane_groups)
@@ -348,7 +353,9 @@ class Network:
                 # Remove lanelets from intersections dictionary that do not fit the filtered type criterion
                 self._link_index.clean_intersections(parametric_lane.id_)
                 continue  # skip also for general lanelet generation
-            lanelet = parametric_lane.to_lanelet(self._config.error_tolerance, self._config.min_delta_s, transformer)
+            lanelet = parametric_lane.to_lanelet(
+                self._config.error_tolerance, self._config.min_delta_s, transformer, parametric_lane.driving_direction
+            )
             lanelet.predecessor = self._link_index.get_predecessors(parametric_lane.id_)
             lanelet.successor = self._link_index.get_successors(parametric_lane.id_)
             lanelet_network.add_lanelet(lanelet)
@@ -686,7 +693,7 @@ class LinkIndex:
                             road.id, lane_section.idx + 1, lane.link.successorId, -1
                         )
 
-                        self.add_link(parametric_lane_id, successor_id, lane.id >= 0)
+                        self.add_link(parametric_lane_id, successor_id, lane.id >= 0, road.driving_direction)
 
                     # Last lane section! > Next road in first lane section
                     # Try to get next road
@@ -706,7 +713,7 @@ class LinkIndex:
                                     lane.link.successorId,
                                     -1,
                                 )
-                            self.add_link(parametric_lane_id, successor_id, lane.id >= 0)
+                            self.add_link(parametric_lane_id, successor_id, lane.id >= 0, road.driving_direction)
 
                     # Not first lane section? > Previous lane section in same road
                     if lane_section.idx > 0:
@@ -714,7 +721,7 @@ class LinkIndex:
                             road.id, lane_section.idx - 1, lane.link.predecessorId, -1
                         )
 
-                        self.add_link(predecessor_id, parametric_lane_id, lane.id >= 0)
+                        self.add_link(predecessor_id, parametric_lane_id, lane.id >= 0, road.driving_direction)
 
                     # First lane section! > Previous road
                     # Try to get previous road
@@ -734,9 +741,11 @@ class LinkIndex:
                                     lane.link.predecessorId,
                                     -1,
                                 )
-                            self.add_link(predecessor_id, parametric_lane_id, lane.id >= 0)
+                            self.add_link(predecessor_id, parametric_lane_id, lane.id >= 0, road.driving_direction)
 
-    def add_intersection_link(self, parametric_lane_id: str, successor: str, reverse: bool = False):
+    def add_intersection_link(
+        self, parametric_lane_id: str, successor: str, reverse: bool = False, driving_direction: bool = True
+    ):
         """
         Similar to add_link, adds successors only in an intersection_dict.
         This is a temporary dictionary to accumulate junction information for each open drive junction as a dictionary
@@ -745,7 +754,12 @@ class LinkIndex:
         :param parametric_lane_id: Lane_id as per concatenated format based on opendrive IDs.
         :param successor: Successor of the opendrive lane.
         :param reverse: Whether the direction is opposite. Default is False.
+        :param driving_direction: Whether the driving is right-hand. Default is True.
         """
+        # check left-hand driving
+        if driving_direction is False:
+            reverse = not reverse
+
         if reverse:
             self.add_intersection_link(successor, parametric_lane_id)
             return
@@ -756,13 +770,17 @@ class LinkIndex:
         if successor not in self._intersection_dict[parametric_lane_id]:
             self._intersection_dict[parametric_lane_id].append(successor)
 
-    def add_link(self, parametric_lane_id: str, successor: str, reverse: bool = False):
+    def add_link(self, parametric_lane_id: str, successor: str, reverse: bool = False, driving_direction: bool = True):
         """Adds links to a parametric lane.
 
         :param parametric_lane_id: The ID of the lane to which to add link.
         :param successor: Successor of the lane.
         :param reverse: Whether direction is reversed.
+        :param driving_direction: Whether the driving is right-hand. Default is True.
         """
+        # check left-hand driving
+        if driving_direction is False:
+            reverse = not reverse
 
         # if reverse, call function recursively with switched parameters
         if reverse:
@@ -805,8 +823,12 @@ class LinkIndex:
                         connecting_road_id = encode_road_section_lane_width_id(
                             connecting_road.id, 0, lane_link.toId, -1
                         )
-                        self.add_link(incoming_road_id, connecting_road_id, lane_link.toId > 0)
-                        self.add_intersection_link(incoming_road_id, connecting_road_id, lane_link.toId > 0)
+                        self.add_link(
+                            incoming_road_id, connecting_road_id, lane_link.toId > 0, incoming_road.driving_direction
+                        )
+                        self.add_intersection_link(
+                            incoming_road_id, connecting_road_id, lane_link.toId > 0, incoming_road.driving_direction
+                        )
 
                     else:
                         incoming_road_id = encode_road_section_lane_width_id(incoming_road.id, 0, lane_link.fromId, -1)
@@ -816,8 +838,12 @@ class LinkIndex:
                             lane_link.toId,
                             -1,
                         )
-                        self.add_link(incoming_road_id, connecting_road_id, lane_link.toId < 0)
-                        self.add_intersection_link(incoming_road_id, connecting_road_id, lane_link.toId < 0)
+                        self.add_link(
+                            incoming_road_id, connecting_road_id, lane_link.toId < 0, incoming_road.driving_direction
+                        )
+                        self.add_intersection_link(
+                            incoming_road_id, connecting_road_id, lane_link.toId < 0, incoming_road.driving_direction
+                        )
             # Extracting opendrive junction links to formulate CommonRoad intersections
             self._intersections.append(self._intersection_dict)
             # dictionary reinitialized to get junction information for next junction without appending values
