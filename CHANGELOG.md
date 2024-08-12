@@ -5,6 +5,8 @@
 ### Added
 - odr2cr: Left-hand drive consideration
 
+### Fixed
+- cr2sumo: Trajectory conversion assigned non-existent edges to routes
 
 ## [0.8.2] - 2024-07-22
 
