@@ -465,7 +465,7 @@ class Network:
             for intersection in lanelet_network.intersections:
                 if is_relevant_intersection():
                     crossing_group = CrossingGroup(
-                            generate_unique_id(), {crosswalk.lanelet_id}, incoming_group_id=incoming.incoming_id
+                        generate_unique_id(), {crosswalk.lanelet_id}, incoming_group_id=incoming.incoming_id
                     )
                     intersection.crossings.append(crossing_group)
                     break
