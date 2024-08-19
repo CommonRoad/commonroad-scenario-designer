@@ -451,9 +451,9 @@ class Network:
             """
             for incoming in intersection.incomings:
                 rel_lanelets = (
-                    incoming.incoming_lanelets.union(incoming.successors_left)
-                    .union(incoming.successors_right)
-                    .union(incoming.successors_left)
+                    incoming.incoming_lanelets.union(incoming.outgoing_straight)
+                    .union(incoming.outgoing_right)
+                    .union(incoming.outgoing_left)
                 )
                 for la_id in rel_lanelets:
                     la = lanelet_network.find_lanelet_by_id(la_id)

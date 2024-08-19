@@ -6,7 +6,7 @@ import numpy as np
 from commonroad.common.common_lanelet import LaneletType, LineMarking
 from commonroad.common.common_scenario import Location
 from commonroad.scenario.area import Area
-from commonroad.scenario.lanelet import Lanelet
+from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
@@ -241,7 +241,7 @@ class CR2LaneletConverter:
 
         # convert areas
         for area in scenario.lanelet_network.areas:
-            self._convert_area(area)
+            self._convert_area(area, scenario.lanelet_network)
 
         # map the traffic signs and the referred lanelets (yield+right_of_way) to a 'right_of_way_relation' object
         self._add_right_of_way_relation()
@@ -312,7 +312,7 @@ class CR2LaneletConverter:
                 )
                 self.osm.add_way_relation(new_way_rel)
 
-    def _convert_area(self, area: Area):
+    def _convert_area(self, area: Area, road_network: LaneletNetwork):
         """
         Converts a CommonRoad area to the Lanelet2 multipolygon.
 
@@ -320,7 +320,9 @@ class CR2LaneletConverter:
         """
         outer_list = list()
         for border in area.border:
-            nodes = self._create_nodes_from_vertices(border.border_vertices)
+            nodes = self._create_nodes_from_vertices(
+                list(road_network.find_boundary_by_id(boundary_id=border.boundary).vertices)
+            )
             type, subtype = _line_marking_to_type_subtype_vertices(border.line_marking)
             way = Way(self.id_count, nodes, {"subtype": subtype, "type": type})
             self.osm.add_way(way)

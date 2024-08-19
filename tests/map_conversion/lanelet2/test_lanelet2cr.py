@@ -731,7 +731,8 @@ class TestLanelet2CRConverter(unittest.TestCase):
         # testing the border vertices conversion
         (
             self.assertEqual(
-                area.border[0].border_vertices.tolist(), l2cr._convert_way_to_vertices(osm.ways[way_id]).tolist()
+                l2cr.lanelet_network.find_boundary_by_id(area.border[0].boundary).vertices.tolist(),
+                l2cr._convert_way_to_vertices(osm.ways[way_id]).tolist(),
             )
         )
 

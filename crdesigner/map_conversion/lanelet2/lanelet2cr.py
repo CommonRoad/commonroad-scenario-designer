@@ -6,6 +6,7 @@ import numpy as np
 from commonroad.common.common_scenario import GeoTransformation, Location
 from commonroad.scenario.area import Area, AreaBorder
 from commonroad.scenario.lanelet import (
+    Bound,
     Lanelet,
     LaneletNetwork,
     LineMarking,
@@ -447,13 +448,15 @@ class Lanelet2CRConverter:
             area_border_list = list()
             for outer in multipolygon.outer_list:
                 way = osm.find_way_by_id(outer)
+                bound = Bound(generate_unique_id(), self._convert_way_to_vertices(way))
                 area_border = AreaBorder(
                     area_border_id=generate_unique_id(),
-                    border_vertices=self._convert_way_to_vertices(way),
+                    boundary=bound.boundary_id,
                     adjacent=[],
                     line_marking=None,
                 )
                 area_border_list.append(area_border)
+                self.lanelet_network.add_boundary(bound)
 
                 # line_marking
                 area_border.line_marking = convert_type_subtype_to_line_marking_lanelet(
@@ -462,8 +465,8 @@ class Lanelet2CRConverter:
 
                 # an area border is adjacent to a lanelet if they share at least one point
                 for lanelet in self.lanelet_network.lanelets:
-                    left = [np.isin(x, area_border.border_vertices).all() for x in lanelet.left_vertices]
-                    right = [np.isin(x, area_border.border_vertices).all() for x in lanelet.right_vertices]
+                    left = [np.isin(x, bound.vertices).all() for x in lanelet.left_vertices]
+                    right = [np.isin(x, bound.vertices).all() for x in lanelet.right_vertices]
                     if (True in left) or (True in right):
                         area_border.adjacent.append(lanelet.lanelet_id)
 

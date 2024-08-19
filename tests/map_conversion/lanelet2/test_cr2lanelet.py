@@ -5,7 +5,7 @@ import numpy as np
 from commonroad.common.common_lanelet import LaneletType, RoadUser
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.area import Area, AreaBorder, AreaType
-from commonroad.scenario.lanelet import Lanelet, LineMarking, StopLine
+from commonroad.scenario.lanelet import Bound, Lanelet, LineMarking, StopLine
 from commonroad.scenario.traffic_light import (
     TrafficLight,
     TrafficLightCycle,
@@ -530,7 +530,8 @@ class TestCR2LaneletConverter(unittest.TestCase):
         # multipolygons before
         self.assertEqual(0, len(cr1.osm.multipolygons))
         # creating an area border
-        area_border = AreaBorder(1, np.array([[0, 1], [1, 1]]), line_marking=LineMarking.SOLID)
+        area_border = AreaBorder(200, 201, line_marking=LineMarking.SOLID)
+        scenario.lanelet_network.add_boundary(Bound(201, np.array([[0, 1], [1, 1]])))
         # adding an area to the lanelet network
         scenario.lanelet_network.add_area(Area(1, [area_border], {AreaType.PARKING}), set())
         cr1(scenario)
