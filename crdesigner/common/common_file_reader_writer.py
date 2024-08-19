@@ -4,7 +4,7 @@ from typing import List, Union
 from commonroad.common.validity import ValidTypes
 from commonroad.geometry.shape import Circle, Polygon, Rectangle, Shape
 from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.scenario.obstacle import (
     DynamicObstacle,
     EnvironmentObstacle,

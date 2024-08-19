@@ -13,6 +13,7 @@ from crdesigner.common.common_file_reader_writer import (
     project_obstacles,
     project_scenario_and_pps,
 )
+from crdesigner.verification_repairing.config import MapVerParams
 from crdesigner.verification_repairing.map_verification_repairing import (
     verify_and_repair_map,
     verify_and_repair_scenario,

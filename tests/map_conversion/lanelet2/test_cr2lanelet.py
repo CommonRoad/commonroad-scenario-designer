@@ -87,10 +87,10 @@ class TestCR2LaneletConverter(unittest.TestCase):
 
         proj_string_from = None
         if (
-            scenario.lanelet_network.location is not None
-            and scenario.lanelet_network.location.geo_transformation is not None
+            self.scenario.lanelet_network.location is not None
+            and self.scenario.lanelet_network.location.geo_transformation is not None
         ):
-            proj_string_from = scenario.lanelet_network.location.geo_transformation.geo_reference
+            proj_string_from = self.scenario.lanelet_network.location.geo_transformation.geo_reference
         if proj_string_from is None:
             proj_string_from = general_config.proj_string_cr
         crs_from = CRS(proj_string_from)

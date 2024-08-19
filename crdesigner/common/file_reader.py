@@ -17,6 +17,7 @@ from crdesigner.common.common_file_reader_writer import (
     project_obstacles,
     project_scenario_and_pps,
 )
+from crdesigner.verification_repairing.config import MapVerParams
 from crdesigner.verification_repairing.map_verification_repairing import (
     verify_and_repair_map,
     verify_and_repair_scenario,
@@ -42,6 +43,8 @@ class CRDesignerFileReader(CommonRoadFileReader):
         :param filename_dynamic: Path of the 2024 protobuf dynamic file
         """
         super().__init__(filename_2020a, filename_map, filename_scenario, filename_dynamic)
+        # map verification parameters
+        self._mapver_params = MapVerParams()
 
     @property
     def filename_2020a(self) -> Optional[Path_T]:

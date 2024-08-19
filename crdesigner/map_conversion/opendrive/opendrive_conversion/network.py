@@ -6,7 +6,7 @@ import iso3166
 import numpy as np
 from commonroad.common.common_lanelet import LaneletType, LineMarking, StopLine
 from commonroad.common.common_scenario import GeoTransformation, Location, ScenarioID
-from commonroad.scenario.intersection import CrossingGroup, IncomingGroup
+from commonroad.scenario.intersection import CrossingGroup
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import (
@@ -444,7 +444,7 @@ class Network:
         :param lanelet_network: ConversionLaneletNetwork
         """
 
-        def is_relevant_intersection() -> bool:
+        def is_relevant_intersection() -> Optional[int]:
             """
             checks whether a lanelet intersect an intersection
             :return: Boolean indicating satisfaction
@@ -458,14 +458,14 @@ class Network:
                 for la_id in rel_lanelets:
                     la = lanelet_network.find_lanelet_by_id(la_id)
                     if la.polygon.shapely_object.intersects(crosswalk.polygon.shapely_object):
-                        return True
-            return False
+                        return incoming.incoming_id
+            return None
 
         for crosswalk in self._crosswalks:
             for intersection in lanelet_network.intersections:
-                if is_relevant_intersection():
+                if (incoming_id := is_relevant_intersection()) is not None:
                     crossing_group = CrossingGroup(
-                        generate_unique_id(), {crosswalk.lanelet_id}, incoming_group_id=incoming.incoming_id
+                        generate_unique_id(), {crosswalk.lanelet_id}, incoming_group_id=incoming_id
                     )
                     intersection.crossings.append(crossing_group)
                     break
@@ -628,7 +628,7 @@ class Network:
                 if self._config.proj_string_odr is not None
                 else None
             ),
-            **location_kwargs
+            **location_kwargs,
         )
 
         scenario_id = ScenarioID(
