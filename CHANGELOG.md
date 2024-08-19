@@ -6,7 +6,38 @@
 - Projection option for the new format scenario designer file reader and writer
 - Direct conversion from OpenDRVIE to Lanelet2
 
-## [0.8.1] - 2024-03-XX
+## [0.8.3]
+
+### Added
+- odr2cr: Left-hand drive consideration
+
+### Fixed
+- cr2sumo: Trajectory conversion assigned non-existent edges to routes
+
+## [0.8.2] - 2024-07-22
+
+### Added
+- lanelet2cr: Multipolygon and line marking conversion
+- lanelet2cr: Traffic light conversion for Autoware (retain traffic light ids, set own Autoware default cycle, and set traffic light active status to false)
+- cr2lanelet: Area conversion
+- cr2lanelet: Lane change property tags
+- odr2cr: Road speed limit conversion
+- odr2cr: Option to neglect projection by setting `config.proj_string_odr = None`
+
+
+### Changed
+- odr2cr: Warning instead of failure in case of not supported road object type
+
+### Fixed
+- odr2cr: Missing crosswalk projection
+- odr2cr: Traffic light assignment
+- odr2cr: Self-intersecting lanelets in case of wrong predecessor/successor relationships in OpenDRIVE file
+
+### Removed
+- Support of Python 3.8
+- GUI simulation from GUI (the complete SUMO conversion/interface will be moved to another repository in the future)
+
+## [0.8.1] - 2024-03-28
 
 ### Added
 - Test cases for GUI
@@ -27,6 +58,9 @@
 - Option for the scenario designer file reader and writer to project the scenario
 - Possibility to change the geo reference and translate the scenario
 - Integrated map verification/repairing error visualization
+- Separate obstacle profile widget within obstacle toolbox
+- Multiple obstacle profiles visualizable
+- Direct conversion from OpenDRIVE to Lanelet2
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files

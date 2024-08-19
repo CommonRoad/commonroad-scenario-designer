@@ -17,9 +17,7 @@ class Node:
         Initialize a node element
 
         :param node_id: unique id for node
-        :type node_id: int
         :param point: position of the node
-        :type point: geometry.position
         """
 
         self.id = node_id

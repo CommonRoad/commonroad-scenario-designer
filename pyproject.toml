@@ -7,44 +7,38 @@ license = "GPL-3.0-or-later"
 readme = "README.md"
 keywords= ["autonomous", "automated", "vehicles", "driving", "motion", "planning", "simulation", "map", "scenario"]
 classifiers = [
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: POSIX :: Linux",
-    "Operating System :: MacOS",
-    "Operating System :: Microsoft :: Windows"
+#    "Operating System :: MacOS",
+#    "Operating System :: Microsoft :: Windows"
 ]
 packages = [{include = "crdesigner"}]
-homepage = "https://commonroad.in.tum.de"
+repository = "https://github.com/CommonRoad/commonroad-scenario-designer"
+homepage = "https://commonroad.in.tum.de/tools/scenario-designer"
 
 [tool.poetry.urls]
-Documentation = "https://commonroad-scenario-designer.readthedocs.io/en/latest/"
-Forum = "https://commonroad.in.tum.de/forum/c/scenario-designer/"
-Source = "https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer"
+Documentation = "https://cps.pages.gitlab.lrz.de/commonroad/commonroad-scenario-designer/"
+Forum = "https://github.com/CommonRoad/commonroad-scenario-designer/discussions"
+Source = "https://github.com/CommonRoad/commonroad-scenario-designer"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9,<3.12"
 commonroad-io = {git = "https://github.com/CommonRoad/commonroad-io", rev = "release-2024-3"}
-commonroad-drivability-checker = "2024.1"
+commonroad-drivability-checker = "^2024.1"
 pyqt6 = ">=6.6.0"
 matplotlib = ">=3.6.0"
-numpy = [
-    {version = ">=1.22, <1.26", python = "3.8"},
-    {version = "^1.26", python = ">=3.9,<3.13"}
-]
-scipy = [
-    {version = ">=1.5.2,<1.11", python = "3.8"},
-    {version = "^1.11", python = ">=3.9,<3.13"}
-]
+numpy = "^1.26.4,<2.0"
+scipy = "^1.11.3"
 lxml = "^4.9.2"
 pyproj = "^3.4.1"
 utm = "^0.7.0"
 mgrs = ">=1.4.5"
 shapely = ">=2.0.1"
 ordered-set = "^4.1.0"
-# sumocr = "^2023.4"  TODO activate sumo test case again and activate odr validation in osm2cr conversion via sumo
+sumocr = "^2024.1"
 iso3166 = "^2.1.1"
 networkx = "^3.0"
 omegaconf = "^2.3.0"
@@ -55,12 +49,10 @@ urllib3 = "^2.0.3"
 typer = "^0.9.0"
 typing-extensions = "^4.8.0"
 antlr4-python3-runtime = "4.9.3"
-pymetis = [
-    {version = ">=2020.1", platform = 'linux'}
-     ]
+pymetis = ">=2020.1"
 similaritymeasures = ">=0.4.4"
 kdtree = "^0.16"
-pandas = "2.0.2"
+pandas = "^2.0.2"
 requests = "^2.31.0 "
 eclipse-sumo = "^1.19.0"
 

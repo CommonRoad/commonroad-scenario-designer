@@ -60,7 +60,7 @@ class TestCommandLineInterface(unittest.TestCase):
                 "lanelet2cr",
             ]
         )
-        time.sleep(10)
+        time.sleep(20)
         exists = Path(self.output_path + "/lanelet2_command_line.xml")
         self.assertTrue(exists.is_file())
         exists.unlink()
@@ -77,7 +77,7 @@ class TestCommandLineInterface(unittest.TestCase):
                 "crlanelet2",
             ]
         )
-        time.sleep(5)
+        time.sleep(20)
         exists = Path(self.output_path + "/cr_lanelet_command_line.osm")
         self.assertTrue(exists.is_file())
         exists.unlink()
@@ -99,14 +99,14 @@ class TestCommandLineInterface(unittest.TestCase):
         time.sleep(5)
         process.terminate()
         process = subprocess.Popen(["crdesigner", "gui"])
-        time.sleep(5)
+        time.sleep(10)
         process.terminate()
 
     def test_map_ver_scenario(self):
         path = Path(__file__).parent.parent / "map_verification/test_maps/paper_test_maps/DEU_Guetersloh-20_1_T-1.xml"
         path_repaired = path.parent / "DEU_Guetersloh-20_1_T-1-repaired.xml"
         process = subprocess.Popen(["crdesigner", "--input-file", str(path), "verify-map"])
-        time.sleep(15)
+        time.sleep(30)
         process.terminate()
         self.assertTrue(path_repaired.exists())
         path_repaired.unlink()

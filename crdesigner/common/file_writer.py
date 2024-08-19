@@ -50,6 +50,21 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
         super().__init__(
             scenario, planning_problem_set, author, affiliation, source, tags, location, decimal_precision, file_format
         )
+        # map verification parameters
+        self._mapver_params = MapVerParams()
+
+    @property
+    def mapver_params(self) -> MapVerParams:
+        """
+        Get the map verification parameters of the file writer.
+
+        :return: map verification parameter
+        """
+        return self._mapver_params
+
+    @mapver_params.setter
+    def mapver_params(self, mapver_params_value: MapVerParams):
+        self._mapver_params = mapver_params_value
 
     def write_to_file(
         self,

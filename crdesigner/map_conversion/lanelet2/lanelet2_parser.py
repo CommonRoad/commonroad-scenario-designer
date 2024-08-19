@@ -3,6 +3,7 @@ from lxml import etree  # type: ignore
 
 from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.lanelet2 import (
+    Multipolygon,
     Node,
     OSMLanelet,
     RegulatoryElement,
@@ -74,6 +75,16 @@ class Lanelet2Parser:
                     f"Lanelet relation {way_rel.attrib.get('id')} has either no left or no right way! "
                     f"Please check your data! Discarding this lanelet relation."
                 )
+        for multipolygon in self.xml.xpath("//relation/tag[@v='multipolygon' and @k='type']/.."):
+            outer_list = list()
+            for outer in multipolygon.xpath("./member[@type='way' and @role='outer']/@ref"):
+                outer_list.append(outer)
+            tag_dict = {
+                tag.get("k"): tag.get("v")
+                for tag in multipolygon.xpath("./tag[@k and @v]")
+                if tag.get("k") in self.config.allowed_tags
+            }
+            osm.add_multipolygon(Multipolygon(multipolygon.get("id"), outer_list, tag_dict))
 
         for reg_element_rel in self.xml.xpath("//relation/tag[@v='regulatory_element' and @k='type']/.."):
             # returns the parent element if there is another tag inside that is the right of way tag

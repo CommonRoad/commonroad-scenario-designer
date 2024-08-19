@@ -1,5 +1,5 @@
 import math
-from typing import List, Union
+from typing import List, Optional, Union
 
 import matplotlib as mpl
 import numpy as np
@@ -17,18 +17,11 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QColorDialog, QDockWidget
 
 from crdesigner.common.logging import logger
-
-# TODO to change the call
-from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
-from crdesigner.ui.gui.view.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import (
-    ObstacleToolboxUI,
-)
-
-if SUMO_AVAILABLE:
-    from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMOSimulation
-
 from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import (
     DynamicCanvasController,
+)
+from crdesigner.ui.gui.view.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import (
+    ObstacleToolboxUI,
 )
 
 
@@ -59,18 +52,13 @@ class ObstacleController(
         self.pos = []
         self.temp_obstacle = None
 
-        if SUMO_AVAILABLE:
-            self.sumo_simulation = SUMOSimulation(tmp_folder=self.tmp_folder)
-        else:
-            self.sumo_simulation = None
-
     def init_canvas(self):
         """
         so profile visualization canvas can handle events
         """
-        self.obstacle_toolbox_ui.canvas.mpl_connect("button_press_event", self.on_button_press)
-        self.obstacle_toolbox_ui.canvas.mpl_connect("button_release_event", self.on_button_release)
-        self.obstacle_toolbox_ui.canvas.mpl_connect("motion_notify_event", self.on_mouse_move)
+        self.obstacle_toolbox_ui.canvas_profile.mpl_connect("button_press_event", self.on_button_press)
+        self.obstacle_toolbox_ui.canvas_profile.mpl_connect("button_release_event", self.on_button_release)
+        self.obstacle_toolbox_ui.canvas_profile.mpl_connect("motion_notify_event", self.on_mouse_move)
 
     def adjust_ui(self):
         """
@@ -96,7 +84,7 @@ class ObstacleController(
         )
         self.obstacle_toolbox_ui.button_update_obstacle.clicked.connect(lambda: self.update_obstacle())
 
-        self.obstacle_toolbox_ui.obstacle_state_variable.currentTextChanged.connect(
+        self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentTextChanged.connect(
             lambda: self.plot_obstacle_state_profile()
         )
 
@@ -114,8 +102,27 @@ class ObstacleController(
             lambda: self.obstacle_toolbox_ui.set_default_color()
         )
 
-        if SUMO_AVAILABLE:
-            self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(lambda: self.start_sumo_simulation())
+        # ---- profile vis
+        self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentTextChanged.connect(
+            lambda: self.plot_obstacle_state_profile()
+        )
+
+        self.obstacle_toolbox_ui.initialize_obstacle_information()
+        self.obstacle_toolbox_ui.selected_obstacle_profile.itemSelectionChanged.connect(
+            lambda: self.update_obstacle_information()
+        )
+
+        self.obstacle_toolbox_ui.expand_selected_obstacle.clicked.connect(
+            lambda: self.show_hide_selected_obstacle_list()
+        )
+
+    def show_hide_selected_obstacle_list(self):
+        if self.obstacle_toolbox_ui.selected_obstacle_profile.isVisible():
+            self.obstacle_toolbox_ui.selected_obstacle_profile.hide()
+            self.obstacle_toolbox_ui.expand_selected_obstacle.setText("Show Selected Obstacles")
+        else:
+            self.obstacle_toolbox_ui.selected_obstacle_profile.show()
+            self.obstacle_toolbox_ui.expand_selected_obstacle.setText("Hide Selected Obstacles")
 
     @logger.log
     def toggle_sections(self):
@@ -369,9 +376,9 @@ class ObstacleController(
                 state_list.append(new_state)
             return state_list
 
-    def polygon_array(self) -> Union[List[float], None]:
+    def polygon_array(self) -> Optional[np.ndarray]:
         """
-        Stores values from gui menu as floats (vertice coordinates)
+        Stores values from gui menu as floats (vertices)
         :return: a list of the vertices from the gui menu
         """
         vertices = []
@@ -393,16 +400,16 @@ class ObstacleController(
         vertices = np.asarray(vertices)
         return vertices
 
-    def get_current_obstacle_id(self) -> Union[int, None]:
+    def get_current_obstacle_id(self) -> Optional[int]:
         """
-        :return: obstacle_id of current selected obstacle
+        :return: obstacle_id of current selected obstacles
         """
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() != "None":
             return int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
         else:
             return None
 
-    def get_current_obstacle(self) -> Union[Obstacle, None]:
+    def get_current_obstacle(self) -> Optional[Union[DynamicObstacle, StaticObstacle]]:
         """
         :return: current selected obstacle
         """
@@ -526,13 +533,13 @@ class ObstacleController(
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() == "None":
             return
         # if using zoom or move tool (0 is standard cursor)
-        if self.obstacle_toolbox_ui.figure.canvas.cursor().shape() != 0:
+        if self.obstacle_toolbox_ui.figure_profile.canvas.cursor().shape() != 0:
             return
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
             return
-        if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "velocity":
+        if self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentText() == "velocity":
             return
-        if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "acceleration":
+        if self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentText() == "acceleration":
             return
         self.sel_point = self.selected_point(event)
         # if no point is selected (pressed too far away from point)
@@ -554,16 +561,16 @@ class ObstacleController(
             return
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() == "None":
             return
-        if self.obstacle_toolbox_ui.figure.canvas.cursor().shape() != 0:
+        if self.obstacle_toolbox_ui.figure_profile.canvas.cursor().shape() != 0:
             return
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
             return
-        if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "velocity":
+        if self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentText() == "velocity":
             return
-        if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "acceleration":
+        if self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentText() == "acceleration":
             return
 
-        state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
+        state_variable_name = self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentText()
         i = 0
         k = 1
         # so all not updated changes are saved (when switching profile)
@@ -619,13 +626,13 @@ class ObstacleController(
             return
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() == "None":
             return
-        if self.obstacle_toolbox_ui.figure.canvas.cursor().shape() != 0:
+        if self.obstacle_toolbox_ui.figure_profile.canvas.cursor().shape() != 0:
             return
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
             return
-        if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "velocity":
+        if self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentText() == "velocity":
             return
-        if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "acceleration":
+        if self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentText() == "acceleration":
             return
 
         time = []
@@ -648,7 +655,7 @@ class ObstacleController(
         are stored in this array
         """
         selected_obstacle = self.get_current_obstacle()
-        state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
+        state_variable_name = self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentText()
         i = 0
         k = 1
 
@@ -843,7 +850,7 @@ class ObstacleController(
         contains the data that is displayed in the plot
         """
         selected_obstacle = self.get_current_obstacle()
-        state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
+        state_variable_name = self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentText()
         self.pos.clear()
         t = 0
         if self.xyova:
@@ -925,39 +932,106 @@ class ObstacleController(
                 sel_point = self.pos[i]
         return sel_point
 
-    @logger.log
+    def get_current_obstacle_ids(self) -> Optional[List[int]]:
+        """
+        :return: obstacle_id of current selected obstacle
+        """
+        obstacle_list = self.obstacle_toolbox_ui.selected_obstacle_profile.selectedItems()
+        if len(obstacle_list) != 0:
+            return [int(obs.text()) for obs in obstacle_list if obs.text() != "None"]
+        else:
+            return None
+
+    def get_current_obstacles(self) -> Optional[List[Obstacle]]:
+        """
+        :return: current selected obstacle
+        """
+        obstacle_id_lst = self.get_current_obstacle_ids()
+        if obstacle_id_lst is not None:
+            selected_obstacle = [self.scenario_model.find_obstacle_by_id(obs_id) for obs_id in obstacle_id_lst]
+            return selected_obstacle
+        else:
+            return None
+
     def plot_obstacle_state_profile(self):
         """
         Gets the values based on which profile is selected.
         If non updated changes, these values come from the xyova array,
         otherwise directly from the obstacle state_list
         """
-        if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"] and not self.update_ongoing:
-            obstacle = self.get_current_obstacle()
-            state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
+        if len(self.obstacle_toolbox_ui.selected_obstacle_profile.selectedItems()) != 0 and not self.update_ongoing:
 
-            profile, message = self.__get_obstacle_state_profile(obstacle, state_variable_name)
+            obstacle_list = self.get_current_obstacles()
 
-            if isinstance(obstacle, DynamicObstacle):
-                if self.xyova:
-                    time = [i for i in range(0, len(self.xyova))]
+            state_variable_name = self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentText()
+            self.last_selected_state = self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentIndex()
+
+            time_data = []
+            profile_data = []
+            max_len = -1
+            for obstacle in obstacle_list:
+                profile, message = self.__get_obstacle_state_profile(obstacle, state_variable_name)
+                if profile is None:
+                    self.text_browser.append(message)
+                    continue
+
+                if isinstance(obstacle, DynamicObstacle):
+                    if self.xyova:
+                        time = [i for i in range(0, len(self.xyova))]
+                    else:
+                        time = [obstacle.initial_state.time_step]
+                        time += [state.time_step for state in obstacle.prediction.trajectory.state_list]
                 else:
-                    time = [obstacle.initial_state.time_step]
-                    time += [state.time_step for state in obstacle.prediction.trajectory.state_list]
-            else:
-                time = [0]
+                    time = [0]
+
+                if len(time) > max_len:
+                    max_len = len(time)
+                    self.animation_obstacle = obstacle
+
+                time_data.append(time)
+                profile_data.append(profile)
 
             self.xmin = None
             self.xmax = None
             self.ymin = None
             self.ymax = None
 
-            if profile is not None:
-                self.draw_plot(time, profile)
-            else:
-                self.text_browser.append(message)
+            self.draw_plots(time_data, profile_data)
 
-    def __get_obstacle_state_profile(self, obstacle, state_variable_name):
+    def draw_plots(self, time_data_sets: List[List[float]], profile_data_sets: List[List[float]]):
+        state_variable_name = self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentText()
+
+        # clear the previous profile
+        self.obstacle_toolbox_ui.figure_profile.clear()
+
+        self.ax = self.obstacle_toolbox_ui.figure_profile.add_subplot(111)
+
+        for time, profile in zip(time_data_sets, profile_data_sets):
+            self.ax.plot(time, profile, ".-", markersize=4)  # Plot each dataset
+
+        # set formatter for y-axis
+        self.ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter("{x:,.1f}"))
+
+        self.ax.set_xlabel("Time [s]")
+        self.ax.set_ylabel(self.resolve_y_label(state_variable_name))
+
+        # layout adjustments
+        self.obstacle_toolbox_ui.figure_profile.tight_layout()
+
+        # setting universal y-limits based on all profiles
+        all_profiles = [item for sublist in profile_data_sets if len(sublist) > 0 for item in sublist]
+        if len(all_profiles) > 0:
+            self.ax.set_ylim([min(all_profiles) - 0.5, max(all_profiles) + 0.5])
+
+        if self.xmin and self.xmax and self.ymin and self.ymax:
+            self.ax.set_xlim([self.xmin, self.xmax])
+            self.ax.set_ylim([self.ymin, self.ymax])
+
+        # refresh canvas
+        self.obstacle_toolbox_ui.canvas_profile.draw()
+
+    def __get_obstacle_state_profile(self, obstacle: Union[StaticObstacle, DynamicObstacle], state_variable_name: str):
+        """ """
         profile = None
         message = "This Graph is only available for dynamic obstacles"
         if isinstance(obstacle.prediction, SetBasedPrediction):
@@ -1090,9 +1164,9 @@ class ObstacleController(
         # if set to "None": clear QLineEdits
         else:
             self.obstacle_toolbox_ui.clear_obstacle_fields()
-            self.obstacle_toolbox_ui.obstacle_state_variable.clear()
-            self.obstacle_toolbox_ui.figure.clear()
-            self.obstacle_toolbox_ui.canvas.draw()
+            self.obstacle_toolbox_ui.obstacle_profile_state_variable.clear()
+            self.obstacle_toolbox_ui.figure_profile.clear()
+            self.obstacle_toolbox_ui.canvas_profile.draw()
 
     @logger.log
     def start_sumo_simulation(self):
@@ -1124,28 +1198,24 @@ class ObstacleController(
             self.text_browser.append("Warning: Scenario does not exist yet. Please create or load a scenario first.")
         self.obstacle_toolbox_ui.initialize_obstacle_information()
 
-    def draw_plot(self, time, profile, xmin: float = None, xmax: float = None, ymin: float = None, ymax: float = None):
+    def draw_plot(self, time: List[int], profile: List[float]):
         """
         draws the state plot in the obstacle toolbox
         :param time: time steps
-        :param profile: the profile to be drawn, eg orientation
-        :param xmin: x lower bound to be drawn
-        :param xmax: x upper bound to be drawn
-        :param ymin: y lower bound to be drawn
-        :param: ymax: y upper bound to be drawn
+        :param profile: the profile to be drawn, e.g. orientation
         """
-        state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
+        state_variable_name = self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentText()
         # clear previous profile
-        self.obstacle_toolbox_ui.figure.clear()
+        self.obstacle_toolbox_ui.figure_profile.clear()
         # create an axis
-        ax = self.obstacle_toolbox_ui.figure.add_subplot(111)
+        ax = self.obstacle_toolbox_ui.figure_profile.add_subplot(111)
 
         # plot data
         ax.plot(time, profile, ".-", markersize=4)
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter("{x:,.1f}"))
         ax.set_xlabel("time [s]")
         ax.set_ylabel(self.resolve_y_label(state_variable_name))
-        self.obstacle_toolbox_ui.figure.tight_layout()
+        self.obstacle_toolbox_ui.figure_profile.tight_layout()
 
         # to get reasonable limits. If the difference is very small: it will be difficult to make changes
         ax.set_ylim([min(profile) - 0.5, max(profile) + 0.5])
@@ -1155,9 +1225,7 @@ class ObstacleController(
             ax.set_xlim([self.xmin, self.xmax])
             ax.set_ylim([self.ymin, self.ymax])
         # refresh canvas
-        self.obstacle_toolbox_ui.canvas.draw()
-        # ax.callbacks.connect('xlim_changed', self.on_xlim_change)
-        # ax.callbacks.connect('ylim_changed', self.on_ylim_change)
+        self.obstacle_toolbox_ui.canvas_profile.draw()
 
     @logger.log
     def color_picker(self):
@@ -1173,18 +1241,22 @@ class ObstacleController(
         self.change_color = True
 
     def animate_obstacle_profile_state(self, time_stamp):
-        if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"] and not self.update_ongoing:
+        if (
+            self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]
+            and not self.update_ongoing
+            and len(self.obstacle_toolbox_ui.figure_profile.axes) > 0
+        ):
             obstacle = self.get_current_obstacle()
-            state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
+            state_variable_name = self.obstacle_toolbox_ui.obstacle_profile_state_variable.currentText()
 
             profile, message = self.__get_obstacle_state_profile(obstacle, state_variable_name)
             # repaint profile plot
             self.plot_obstacle_state_profile()
             # get axes object current figure
-            ax = self.obstacle_toolbox_ui.figure.axes[0]
+            ax = self.obstacle_toolbox_ui.figure_profile.axes[0]
             # red dot and vertical line
             if profile and time_stamp < len(profile):
                 ax.plot(time_stamp, profile[time_stamp], "ro", markersize=4)
                 ax.axvline(x=time_stamp, color="r", linewidth=1)
             # refresh canvas
-            self.obstacle_toolbox_ui.canvas.draw()
+            self.obstacle_toolbox_ui.canvas_profile.draw()

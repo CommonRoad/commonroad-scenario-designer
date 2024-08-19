@@ -23,8 +23,8 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QListWidget,
     QPushButton,
-    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
@@ -34,11 +34,7 @@ from crdesigner.common.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 
 # try to import sumo functionality
-from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.toolbox_ui import Toolbox
-
-if SUMO_AVAILABLE:
-    from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMOSimulation
 
 
 class ObstacleToolboxUI(Toolbox):
@@ -77,11 +73,6 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_type = QComboBox()
         obstalce_type_list = [e.value for e in ObstacleType]
         self.obstacle_type.addItems(obstalce_type_list)
-
-        self.obstacle_state_variable = QComboBox()
-        self.figure = Figure(figsize=(5, 4))
-        self.canvas = FigureCanvas(self.figure)
-        self.toolbar = NavigationToolbar(self.canvas, self)
 
         self.selected_obstacle = QComboBox()
         self.button_update_obstacle = QPushButton("Update")
@@ -129,15 +120,6 @@ class ObstacleToolboxUI(Toolbox):
         self.init_rectangle_fields()
         self.init_position()
 
-        layout_obstacle_state_vis_groupbox = QFormLayout()
-        obstacle_state_vis_groupbox = QGroupBox()
-        obstacle_state_vis_groupbox.setLayout(layout_obstacle_state_vis_groupbox)
-        layout_vis_selection = QFormLayout()
-        layout_vis_selection.addRow("Visualized State:", self.obstacle_state_variable)
-        layout_obstacle_state_vis_groupbox.addRow(layout_vis_selection)
-        layout_obstacle_state_vis_groupbox.addWidget(self.toolbar)
-        layout_obstacle_state_vis_groupbox.addWidget(self.canvas)
-        self.layout_obstacle_information_groupbox.addRow(obstacle_state_vis_groupbox)
         self.layout_obstacles.addWidget(self.obstacle_information_groupbox)
 
         layout_obstacle_buttons = QFormLayout()
@@ -151,22 +133,51 @@ class ObstacleToolboxUI(Toolbox):
         title_obstacle = "Obstacle"
         self.sections.append((title_obstacle, widget_obstacles))
 
-        # --Section SUMO Simulation-
-        if SUMO_AVAILABLE:
-            widget_sumo = SUMOSimulation(self.tree)
-            layout_sumo = QFormLayout(widget_sumo)
+        # --Section Obstacle Profile-
+        widget_obstacle_profiles = QFrame(self.tree)
+        self.layout_obstacle_profiles = QVBoxLayout()
+        widget_obstacle_profiles.setLayout(self.layout_obstacle_profiles)
 
-            self.button_start_simulation = QPushButton("Simulate")
-            self.sumo_simulation_length = QSpinBox()
-            self.sumo_simulation_length.setMinimum(10)
-            self.sumo_simulation_length.setMaximum(10000)
-            self.sumo_simulation_length.setValue(200)
+        state_profile_groupbox = QGroupBox()  # 1
+        self.layout_profile_state_groupbox = QFormLayout()
+        state_profile_groupbox.setLayout(self.layout_profile_state_groupbox)
 
-            layout_sumo.addRow("Number Time Steps:", self.sumo_simulation_length)
-            layout_sumo.addRow(self.button_start_simulation)
+        self.figure_profile = Figure(figsize=(5, 4))
+        self.canvas_profile = FigureCanvas(self.figure_profile)
+        self.toolbar_profile = NavigationToolbar(self.canvas_profile, self)
 
-            title_sumo = "Sumo Simulation"
-            self.sections.append((title_sumo, widget_sumo))
+        self.selected_obstacle_profile = QListWidget()
+        self.selected_obstacle_profile.setSelectionMode(QListWidget.SelectionMode.MultiSelection)
+        self.selected_obstacle_profile.hide()
+        self.expand_selected_obstacle = QPushButton("Show Selected Obstacles", self)
+        self.expand_selected_obstacle.setStyleSheet(
+            "background-color:"
+            + self.mwindow.mwindow_ui.colorscheme().highlight
+            + "; color:"
+            + self.mwindow.mwindow_ui.colorscheme().highlight_text
+            + "; font-size:"
+            + self.mwindow.mwindow_ui.colorscheme().font_size
+        )
+
+        self.layout_profile_state_groupbox.addWidget(self.expand_selected_obstacle)
+        self.layout_profile_state_groupbox.addWidget(self.selected_obstacle_profile)
+        self.layout_profile_state_groupbox.addWidget(self.toolbar_profile)
+
+        layout_obstacle_profile_state_vis_groupbox = QFormLayout()
+        self.obstacle_profile_state_vis_groupbox = QGroupBox()
+        self.obstacle_profile_state_vis_groupbox.setLayout(layout_obstacle_profile_state_vis_groupbox)
+        layout_profile_vis_selection = QFormLayout()
+        self.obstacle_profile_state_variable = QComboBox()
+        layout_profile_vis_selection.addRow("Visualized State:", self.obstacle_profile_state_variable)
+        layout_obstacle_profile_state_vis_groupbox.addRow(layout_profile_vis_selection)
+        layout_obstacle_profile_state_vis_groupbox.addWidget(self.toolbar_profile)
+        layout_obstacle_profile_state_vis_groupbox.addWidget(self.canvas_profile)
+
+        self.layout_obstacle_profiles.addWidget(state_profile_groupbox)
+        self.layout_obstacle_profiles.addWidget(self.obstacle_profile_state_vis_groupbox)
+
+        title_obstacle_profile = "Obstacle Profiles"
+        self.sections.append((title_obstacle_profile, widget_obstacle_profiles))
 
     def initialize_obstacle_information(self):
         """
@@ -177,6 +188,9 @@ class ObstacleToolboxUI(Toolbox):
         self.selected_obstacle.clear()
         self.selected_obstacle.addItems(["None"] + [str(item) for item in self.scenario_model.collect_obstacle_ids()])
         self.selected_obstacle.setCurrentIndex(0)
+
+        self.selected_obstacle_profile.clear()
+        self.selected_obstacle_profile.addItems([str(item) for item in self.scenario_model.collect_obstacle_ids()])
 
         self.init_obstacle_defaults()
 
@@ -269,13 +283,13 @@ class ObstacleToolboxUI(Toolbox):
             self.obstacle_dyn_stat.setCurrentIndex(0)
 
         self.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
-        self.obstacle_state_variable.clear()
+        self.obstacle_profile_state_variable.clear()
         state_variables = [var for var in obstacle.initial_state.attributes if var not in ["position", "time_step"]]
 
         if "position" in obstacle.initial_state.attributes:
             state_variables += ["x-position", "y-position"]
 
-        self.obstacle_state_variable.addItems(state_variables)
+        self.obstacle_profile_state_variable.addItems(state_variables)
 
         if obstacle is None:
             self.obstacle_type.setCurrentIndex(0)

@@ -1,6 +1,6 @@
 import copy
 from collections import deque
-from typing import List, Optional
+from typing import Dict, List, Optional, Set, Tuple
 
 import iso3166
 import numpy as np
@@ -21,6 +21,7 @@ from commonroad.scenario.traffic_sign import (
 )
 from pyproj import CRS, Transformer
 
+from crdesigner.common.common_file_reader_writer import project_lanelet
 from crdesigner.common.config.general_config import GeneralConfig, general_config
 from crdesigner.common.config.opendrive_config import OpenDriveConfig, open_drive_config
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
@@ -38,8 +39,12 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.cro
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.geo_reference import (
     get_geo_reference,
 )
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import (
+    ParametricLaneGroup,
+)
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import (
-    get_traffic_signals,
+    assign_traffic_signals_to_road,
+    get_traffic_signal_references,
 )
 from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import (
     encode_road_section_lane_width_id,
@@ -137,7 +142,7 @@ class Network:
     def __init__(self, config: OpenDriveConfig = open_drive_config):
         """Initializes a network object."""
         self._config = config
-        self._planes = []
+        self._planes: List[ParametricLaneGroup] = []
         self._link_index = None
         self._geo_ref = None
         self._offset = None
@@ -178,86 +183,152 @@ class Network:
 
         # Get country ID form signal data in openDrive and set it as attribute of the network object
         self.assign_country_id(Network.get_country_id_from_opendrive(opendrive.roads))
-        # transformed_start_coord = transformer.transform(float(road_geometry.get("x")), float(road_geometry.get("y")))
-        # start_coord = np.array([transformed_start_coord[0], transformed_start_coord[1]])
+
+        # extract signal references beforehand to be able to assign them correctly
+        traffic_light_dirs: Dict[str, Set[str]] = {}
+        traffic_light_lanes: Dict[str, Tuple[int, int]] = {}
+        for road in opendrive.roads:
+            get_traffic_signal_references(road, traffic_light_dirs, traffic_light_lanes)
+
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
-            road.planView.precalculate()
-            # The reference border is the baseline for the whole road
-            reference_border = OpenDriveConverter.create_reference_border(road.planView, road.lanes.laneOffsets)
-            # Extracting signals, signs and stop lines from each road
+            road.plan_view.precalculate()
+            self._extract_road_speed_limit(road)
 
-            # signal_references = get_traffic_signal_references(road)
+            # The reference border is the baseline for the whole road
+            reference_border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.lane_offsets)
+
+            # Extracting signals, signs and stop lines from each road
+            traffic_lights, traffic_signs, stop_lines = assign_traffic_signals_to_road(
+                road, traffic_light_dirs, traffic_light_lanes
+            )
+            self._traffic_lights.extend(traffic_lights)
+            self._traffic_signs.extend(traffic_signs)
+            self._stop_lines.extend(stop_lines)
+
+            # Get crosswalks
+            self._crosswalks.extend(get_crosswalks(road))
+
+            # stop lines from road objects
+            self._stop_lines_from_road(road)
+
             # A lane section is the smallest part that can be converted at once
             for lane_section in road.lanes.lane_sections:
                 parametric_lane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(
-                    lane_section, reference_border
+                    lane_section,
+                    reference_border,
+                    road.cr_traffic_lights,
+                    road.cr_traffic_signs,
+                    road.cr_stop_lines,
+                    road.driving_direction,
                 )
 
                 self._planes.extend(parametric_lane_groups)
 
-            # stop lines from traffic signals (legacy)
-            stop_lines_final = []
-            traffic_lights, traffic_signs, stop_lines = get_traffic_signals(road)
+                # check if parametric lane group is not part of intersection
 
-            self._crosswalks.extend(get_crosswalks(road))
+                for intersection in self._link_index.intersection_maps():
+                    incomings_to_remove = []
+                    for incoming_lane_id, successors in intersection.items():
+                        for lane_group in parametric_lane_groups:
+                            if (
+                                lane_group.id_ == incoming_lane_id or lane_group.id_ in successors
+                            ) and lane_group.type != "driving":
+                                incomings_to_remove.append(incoming_lane_id)
+                    for incoming in incomings_to_remove:
+                        del intersection[incoming]
 
-            self._traffic_lights.extend(traffic_lights)
-            for stop_line in stop_lines:
-                for traffic_light in traffic_lights:
-                    if np.linalg.norm(stop_line.start - traffic_light.position) < 10:
-                        stop_lines_final.append(stop_line)  # hard-coded 10 could be adjusted later as a threshold
-            self._traffic_signs.extend(traffic_signs)
-            self._stop_lines.extend(stop_lines_final)
+    def _extract_road_speed_limit(self, road: Road):
+        """
+        Extract road speed limit and assign it lanes.
 
-            # stop lines from road objects
-            for road_object in road.objects:
-                if road_object.name == "StopLine":
-                    position, tangent, _, _ = road.planView.calc(road_object.s, compute_curvature=False)
-                    position = np.array(
+        :param road: Road to evaluate.
+        """
+        if road.types:
+            for road_type in road.types:
+                if road_type.speed:
+                    max_speed = road_type.speed.max  # possible values: "no limit", "undefined", int
+                    unit_speed = road_type.speed.unit  # possible values: "km/h", "m/s", "mph"
+
+                    if max_speed == "no limit" or max_speed == "undefined":
+                        break
+
+                    else:
+                        max_speed = float(max_speed)
+
+                        # convert km/h or mph to m/s
+                        if unit_speed == "km/h":
+                            max_speed = max_speed * 0.277
+                        elif unit_speed == "mph":
+                            max_speed = max_speed * 0.447
+
+                        # assign the road speed limit to all road sections that don't have a speed limit
+                        for section in road.lanes.lane_sections:
+                            # check the position of the road section and the starting position of a road type
+                            if section.sPos >= road_type.start_pos:
+                                for rightLane in section.right_lanes:
+                                    if rightLane.speed is None:
+                                        rightLane.speed = max_speed
+                                for leftLane in section.left_lanes:
+                                    if leftLane.speed is None:
+                                        leftLane.speed = max_speed
+                                for centerLane in section.center_lanes:
+                                    if centerLane.speed is None:
+                                        centerLane.speed = max_speed
+
+    def _stop_lines_from_road(self, road: Road):
+        """
+        Extracts stop lines from road.
+
+        :param road: Road to extract stop lines from.
+        """
+        for road_object in road.objects:
+            if road_object.name == "StopLine":
+                position, tangent, _, _ = road.plan_view.calc(road_object.s, compute_curvature=False)
+                position = np.array(
+                    [
+                        position[0] + road_object.t * np.cos(tangent + np.pi / 2),
+                        position[1] + road_object.t * np.sin(tangent + np.pi / 2),
+                    ]
+                )
+
+                angle = road_object.hdg + tangent
+                # check if stop line is orthogonal to reference line
+                if np.round(tangent) == 0:
+                    angle = np.pi / 2
+                # check orientation of stop line
+                if road_object.orientation == "+":
+                    position_1 = np.array(
                         [
-                            position[0] + road_object.t * np.cos(tangent + np.pi / 2),
-                            position[1] + road_object.t * np.sin(tangent + np.pi / 2),
+                            position[0] - 0.5 * road_object.validLength * np.cos(angle),
+                            position[1] - 0.5 * road_object.validLength * np.sin(angle),
+                        ]
+                    )
+                    position_2 = np.array(
+                        [
+                            position[0] + 0.5 * road_object.validLength * np.cos(angle),
+                            position[1] + 0.5 * road_object.validLength * np.sin(angle),
+                        ]
+                    )
+                else:
+                    position_1 = np.array(
+                        [
+                            position[0] + 0.5 * road_object.validLength * np.cos(angle),
+                            position[1] + 0.5 * road_object.validLength * np.sin(angle),
+                        ]
+                    )
+                    position_2 = np.array(
+                        [
+                            position[0] - 0.5 * road_object.validLength * np.cos(angle),
+                            position[1] - 0.5 * road_object.validLength * np.sin(angle),
                         ]
                     )
 
-                    angle = road_object.hdg + tangent
-                    # check if stop line is orthogonal to reference line
-                    if np.round(tangent) == 0:
-                        angle = np.pi / 2
-                    # check orientation of stop line
-                    if road_object.orientation == "+":
-                        position_1 = np.array(
-                            [
-                                position[0] - 0.5 * road_object.validLength * np.cos(angle),
-                                position[1] - 0.5 * road_object.validLength * np.sin(angle),
-                            ]
-                        )
-                        position_2 = np.array(
-                            [
-                                position[0] + 0.5 * road_object.validLength * np.cos(angle),
-                                position[1] + 0.5 * road_object.validLength * np.sin(angle),
-                            ]
-                        )
-                    else:
-                        position_1 = np.array(
-                            [
-                                position[0] + 0.5 * road_object.validLength * np.cos(angle),
-                                position[1] + 0.5 * road_object.validLength * np.sin(angle),
-                            ]
-                        )
-                        position_2 = np.array(
-                            [
-                                position[0] - 0.5 * road_object.validLength * np.cos(angle),
-                                position[1] - 0.5 * road_object.validLength * np.sin(angle),
-                            ]
-                        )
-
-                    stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-                    self._stop_lines.append(stop_line)
+                stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
+                self._stop_lines.append(stop_line)
 
     def export_lanelet_network(
-        self, transformer: Transformer, filter_types: Optional[List[str]] = None
+        self, transformer: Optional[Transformer], filter_types: Optional[List[str]] = None
     ) -> LaneletNetwork:
         """Export network as lanelet network.
 
@@ -273,8 +344,10 @@ class Network:
             if filter_types is not None and parametric_lane.type not in filter_types:
                 # Remove lanelets from intersections dictionary that do not fit the filtered type criterion
                 self._link_index.clean_intersections(parametric_lane.id_)
-                continue
-            lanelet = parametric_lane.to_lanelet(self._config.error_tolerance, self._config.min_delta_s, transformer)
+                continue  # skip also for general lanelet generation
+            lanelet = parametric_lane.to_lanelet(
+                self._config.error_tolerance, self._config.min_delta_s, transformer, parametric_lane.driving_direction
+            )
             lanelet.predecessor = self._link_index.get_predecessors(parametric_lane.id_)
             lanelet.successor = self._link_index.get_successors(parametric_lane.id_)
             lanelet_network.add_lanelet(lanelet)
@@ -299,6 +372,8 @@ class Network:
         # self.traffic_signal_elements.update_traffic_signs_map_lane_id(lanelet_network.old_lanelet_ids())
 
         for crosswalk in self._crosswalks:
+            if transformer is not None:
+                project_lanelet(crosswalk, transformer)
             lanelet_network.add_lanelet(crosswalk)
 
         # generating intersections
@@ -306,9 +381,21 @@ class Network:
             # Remove lanelets that are not part of the network (as they are of a different type)
             intersection_id_counter = generate_unique_id()
             lanelet_network._old_lanelet_ids[intersection_id_counter] = intersection_id_counter
-            lanelet_network.create_intersection(intersection_map, intersection_id_counter)
+            lanelet_network.create_intersection(intersection_map)
 
         self.relate_crosswalks_to_intersection(lanelet_network)
+
+        if transformer is not None:
+            # Apply the transformer to traffic controls
+            for xs in [
+                self._traffic_lights,
+                self._traffic_signs,
+            ]:
+                for x in xs:
+                    x.position = np.array(transformer.transform(*x.position))
+            for x in self._stop_lines:
+                x.start = np.array(transformer.transform(*x.start))
+                x.end = np.array(transformer.transform(*x.end))
 
         # Assign traffic signals, lights and stop lines to lanelet network
         lanelet_network.add_traffic_lights_to_network(self._traffic_lights)
@@ -357,40 +444,30 @@ class Network:
         :param lanelet_network: ConversionLaneletNetwork
         """
 
-        def generate_line(vertices: np.ndarray) -> (float, float):
+        def is_relevant_intersection() -> bool:
             """
-            generate a line from start to end of vertex
-            :param vertices:
-            :return: slope m, intersect c
+            checks whether a lanelet intersect an intersection
+            :return: Boolean indicating satisfaction
             """
-            m = (vertices[0][1] - vertices[-1][1]) / (vertices[0][0] - vertices[-1][0])
-            c = vertices[0][1] - m * vertices[0][0]
-            return m, c
-
-        def find_incoming(inc: IncomingGroup) -> bool:
-            """
-            find an intersection between a lane and a crosswalk. We can conclude that a crosswalk belongs to the same
-            intersection as the lanelet it is crossing.
-            :return: lanelet id
-            """
-            for la_id in inc.incoming_lanelets:
-                vertices = lanelet_network.find_lanelet_by_id(la_id).left_vertices
-                lanelet_m, lanelet_c = generate_line(vertices)
-                x_intersect = (lanelet_c - crosswalk_c) / (crosswalk_m - lanelet_m)
-
-                if x_intersect * lanelet_m + lanelet_c == x_intersect * crosswalk_m + crosswalk_c:
-                    return True
+            for incoming in intersection.incomings:
+                rel_lanelets = (
+                    incoming.incoming_lanelets.union(incoming.successors_left)
+                    .union(incoming.successors_right)
+                    .union(incoming.successors_left)
+                )
+                for la_id in rel_lanelets:
+                    la = lanelet_network.find_lanelet_by_id(la_id)
+                    if la.polygon.shapely_object.intersects(crosswalk.polygon.shapely_object):
+                        return True
             return False
 
         for crosswalk in self._crosswalks:
-            crosswalk_m, crosswalk_c = generate_line(crosswalk.left_vertices)
             for intersection in lanelet_network.intersections:
-                for incoming in intersection.incomings:
-                    if find_incoming(incoming):
-                        crossing_group = CrossingGroup(
+                if is_relevant_intersection():
+                    crossing_group = CrossingGroup(
                             generate_unique_id(), {crosswalk.lanelet_id}, incoming_group_id=incoming.incoming_id
-                        )
-                        intersection.crossings.append(crossing_group)
+                    )
+                    intersection.crossings.append(crossing_group)
                     break
 
     def reference_traffic_signs_with_equal_speed(self, lanelets: List[int], lanelet_network: ConversionLaneletNetwork):
@@ -536,7 +613,7 @@ class Network:
         """
         transformer = None
         location_kwargs = {}
-        if self._geo_ref is not None:
+        if self._geo_ref is not None and self._config.proj_string_odr is not None:
             longitude, latitude = get_geo_reference(self._geo_ref)
             if longitude is not None and latitude is not None:
                 location_kwargs = dict(gps_latitude=latitude, gps_longitude=longitude)
@@ -546,7 +623,12 @@ class Network:
             transformer = Transformer.from_proj(crs_from, crs_to)
 
         location = Location(
-            geo_transformation=GeoTransformation(geo_reference=self._config.proj_string_odr), **location_kwargs
+            geo_transformation=(
+                GeoTransformation(geo_reference=self._config.proj_string_odr)
+                if self._config.proj_string_odr is not None
+                else None
+            ),
+            **location_kwargs
         )
 
         scenario_id = ScenarioID(
@@ -554,8 +636,6 @@ class Network:
             map_name=g_config.map_name,
             map_id=g_config.map_id,
         )
-
-        scenario = Scenario(dt=g_config.time_step_size, scenario_id=scenario_id)
 
         scenario = Scenario(dt=g_config.time_step_size, scenario_id=scenario_id)
 
@@ -584,10 +664,10 @@ class LinkIndex:
 
     def __init__(self):
         self._successors = {}
-        self._intersections = list()
-        self._intersection_dict = dict()
+        self._intersections = []
+        self._intersection_dict = {}
 
-    def intersection_maps(self):
+    def intersection_maps(self) -> List[Dict[str, List[str]]]:
         return self._intersections
 
     def create_from_opendrive(self, opendrive: OpenDrive):
@@ -600,16 +680,16 @@ class LinkIndex:
         # Extract link information from road lanes
         for road in opendrive.roads:
             for lane_section in road.lanes.lane_sections:
-                for lane in lane_section.allLanes:
+                for lane in lane_section.all_lanes:
                     parametric_lane_id = encode_road_section_lane_width_id(road.id, lane_section.idx, lane.id, -1)
 
                     # Not the last lane section? > Next lane section in same road
-                    if lane_section.idx < road.lanes.getLastLaneSectionIdx():
+                    if lane_section.idx < road.lanes.get_last_lane_section_idx():
                         successor_id = encode_road_section_lane_width_id(
                             road.id, lane_section.idx + 1, lane.link.successorId, -1
                         )
 
-                        self.add_link(parametric_lane_id, successor_id, lane.id >= 0)
+                        self.add_link(parametric_lane_id, successor_id, lane.id >= 0, road.driving_direction)
 
                     # Last lane section! > Next road in first lane section
                     # Try to get next road
@@ -625,11 +705,11 @@ class LinkIndex:
                             else:  # contact point = end
                                 successor_id = encode_road_section_lane_width_id(
                                     next_road.id,
-                                    next_road.lanes.getLastLaneSectionIdx(),
+                                    next_road.lanes.get_last_lane_section_idx(),
                                     lane.link.successorId,
                                     -1,
                                 )
-                            self.add_link(parametric_lane_id, successor_id, lane.id >= 0)
+                            self.add_link(parametric_lane_id, successor_id, lane.id >= 0, road.driving_direction)
 
                     # Not first lane section? > Previous lane section in same road
                     if lane_section.idx > 0:
@@ -637,7 +717,7 @@ class LinkIndex:
                             road.id, lane_section.idx - 1, lane.link.predecessorId, -1
                         )
 
-                        self.add_link(predecessor_id, parametric_lane_id, lane.id >= 0)
+                        self.add_link(predecessor_id, parametric_lane_id, lane.id >= 0, road.driving_direction)
 
                     # First lane section! > Previous road
                     # Try to get previous road
@@ -653,13 +733,15 @@ class LinkIndex:
                             else:  # contact point = end
                                 predecessor_id = encode_road_section_lane_width_id(
                                     prevRoad.id,
-                                    prevRoad.lanes.getLastLaneSectionIdx(),
+                                    prevRoad.lanes.get_last_lane_section_idx(),
                                     lane.link.predecessorId,
                                     -1,
                                 )
-                            self.add_link(predecessor_id, parametric_lane_id, lane.id >= 0)
+                            self.add_link(predecessor_id, parametric_lane_id, lane.id >= 0, road.driving_direction)
 
-    def add_intersection_link(self, parametric_lane_id: str, successor: str, reverse: bool = False):
+    def add_intersection_link(
+        self, parametric_lane_id: str, successor: str, reverse: bool = False, driving_direction: bool = True
+    ):
         """
         Similar to add_link, adds successors only in an intersection_dict.
         This is a temporary dictionary to accumulate junction information for each open drive junction as a dictionary
@@ -668,7 +750,12 @@ class LinkIndex:
         :param parametric_lane_id: Lane_id as per concatenated format based on opendrive IDs.
         :param successor: Successor of the opendrive lane.
         :param reverse: Whether the direction is opposite. Default is False.
+        :param driving_direction: Whether the driving is right-hand. Default is True.
         """
+        # check left-hand driving
+        if driving_direction is False:
+            reverse = not reverse
+
         if reverse:
             self.add_intersection_link(successor, parametric_lane_id)
             return
@@ -679,13 +766,17 @@ class LinkIndex:
         if successor not in self._intersection_dict[parametric_lane_id]:
             self._intersection_dict[parametric_lane_id].append(successor)
 
-    def add_link(self, parametric_lane_id: str, successor: str, reverse: bool = False):
+    def add_link(self, parametric_lane_id: str, successor: str, reverse: bool = False, driving_direction: bool = True):
         """Adds links to a parametric lane.
 
         :param parametric_lane_id: The ID of the lane to which to add link.
         :param successor: Successor of the lane.
         :param reverse: Whether direction is reversed.
+        :param driving_direction: Whether the driving is right-hand. Default is True.
         """
+        # check left-hand driving
+        if driving_direction is False:
+            reverse = not reverse
 
         # if reverse, call function recursively with switched parameters
         if reverse:
@@ -719,7 +810,7 @@ class LinkIndex:
                     if contact_point == "start":
                         # decide which lane section to use (first or last)
                         if lane_link.fromId < 0:
-                            lane_section_idx = incoming_road.lanes.getLastLaneSectionIdx()
+                            lane_section_idx = incoming_road.lanes.get_last_lane_section_idx()
                         else:
                             lane_section_idx = 0
                         incoming_road_id = encode_road_section_lane_width_id(
@@ -728,19 +819,27 @@ class LinkIndex:
                         connecting_road_id = encode_road_section_lane_width_id(
                             connecting_road.id, 0, lane_link.toId, -1
                         )
-                        self.add_link(incoming_road_id, connecting_road_id, lane_link.toId > 0)
-                        self.add_intersection_link(incoming_road_id, connecting_road_id, lane_link.toId > 0)
+                        self.add_link(
+                            incoming_road_id, connecting_road_id, lane_link.toId > 0, incoming_road.driving_direction
+                        )
+                        self.add_intersection_link(
+                            incoming_road_id, connecting_road_id, lane_link.toId > 0, incoming_road.driving_direction
+                        )
 
                     else:
                         incoming_road_id = encode_road_section_lane_width_id(incoming_road.id, 0, lane_link.fromId, -1)
                         connecting_road_id = encode_road_section_lane_width_id(
                             connecting_road.id,
-                            connecting_road.lanes.getLastLaneSectionIdx(),
+                            connecting_road.lanes.get_last_lane_section_idx(),
                             lane_link.toId,
                             -1,
                         )
-                        self.add_link(incoming_road_id, connecting_road_id, lane_link.toId < 0)
-                        self.add_intersection_link(incoming_road_id, connecting_road_id, lane_link.toId < 0)
+                        self.add_link(
+                            incoming_road_id, connecting_road_id, lane_link.toId < 0, incoming_road.driving_direction
+                        )
+                        self.add_intersection_link(
+                            incoming_road_id, connecting_road_id, lane_link.toId < 0, incoming_road.driving_direction
+                        )
             # Extracting opendrive junction links to formulate CommonRoad intersections
             self._intersections.append(self._intersection_dict)
             # dictionary reinitialized to get junction information for next junction without appending values
@@ -799,16 +898,14 @@ class LinkIndex:
         for intersection in self._intersections:
             if parametric_lane_id in intersection.keys():
                 del intersection[parametric_lane_id]
-        return
 
-    def concatenate_lanes_in_intersection_map(self, replacement_id_map):
+    def concatenate_lanes_in_intersection_map(self, replacement_id_map: Dict):
         """
         Lanelets are concatenated if possible, hence some lanelets ids that exist in intersections
         are no longer valid and also need to be replaced with the lanelet id they are concatenated with.
 
         :param replacement_id_map: Dict that maps lanelets to their new IDs as per the concatenation results from
             lanelet_network.concatenate_possible_lanelets
-        :type replacement_id_map: dict
         """
         updated_intersection_maps = []
         for intersection_map in self.intersection_maps():

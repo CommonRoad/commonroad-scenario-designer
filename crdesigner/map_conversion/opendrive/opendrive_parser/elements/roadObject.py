@@ -1,3 +1,6 @@
+import logging
+
+
 class Object:
     """
     Describes items that influence a road by expanding, delimiting and supplementing its course.
@@ -44,7 +47,6 @@ class Object:
 
         :getter: returns type of object
         :setter: sets type of object
-        :type: string
         """
         return self._type
 
@@ -82,6 +84,8 @@ class Object:
             "vegetation",
             "wind",
             "Guidepost",
+            "Areas",
+            "portal",
         ]
         customs = [
             "permanentDelineator",
@@ -101,7 +105,7 @@ class Object:
         if value == "-1":
             value = "none"
         if value not in road_types and value not in customs:
-            raise AttributeError("Value is not a supported object type!")
+            logging.warning(f"Value {value} is not a supported road object type!")
         self._type = str(value)
 
     @property
@@ -111,7 +115,6 @@ class Object:
 
         :getter: returns name of object
         :setter: sets name of object
-        :type: string
         """
         return self._name
 
@@ -127,7 +130,6 @@ class Object:
 
         :getter: returns width of object's bounding box
         :setter: sets width of object's bounding box
-        :type: float
         """
         return self._width
 
@@ -145,7 +147,6 @@ class Object:
 
         :getter: returns height of object's bounding box
         :setter: sets height of object's bounding box
-        :type: float
         """
         return self._height
 
@@ -161,7 +162,6 @@ class Object:
 
         :getter: returns zOffset
         :setter: sets zOffset
-        :type: float
         """
         return self._zOffset
 
@@ -177,7 +177,6 @@ class Object:
 
         :getter: returns ID
         :setter: sets ID
-        :type: int
         """
         return self._id
 
@@ -193,7 +192,6 @@ class Object:
 
         :getter: returns s-coordinate
         :setter: sets s-coordinate
-        :type: float
         """
         return self._s
 
@@ -209,7 +207,6 @@ class Object:
 
         :getter: returns t-coordinate
         :setter: sets t-coordinate
-        :type: float
         """
         return self._t
 
@@ -225,7 +222,6 @@ class Object:
 
         :getter: returns validity of object
         :setter: sets validity
-        :type: float
         """
         return self._validLength
 
@@ -242,7 +238,6 @@ class Object:
 
         :getter: returns orientation
         :setter: sets orientation
-        :type: string
         """
         return self._orientation
 
@@ -259,7 +254,6 @@ class Object:
 
         :getter: returns heading angle
         :setter: sets heading angle
-        :type: float
         """
         return self._hdg
 
@@ -275,7 +269,6 @@ class Object:
 
         :getter: returns pitch angle
         :setter: sets pitch angle
-        :type: float
         """
         return self._pitch
 
@@ -291,7 +284,6 @@ class Object:
 
         :getter: returns roll angle
         :setter: sets roll angle
-        :type: float
         """
         return self._roll
 

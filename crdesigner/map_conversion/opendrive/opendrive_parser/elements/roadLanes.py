@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 if TYPE_CHECKING:
     from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
@@ -16,61 +16,59 @@ class Lanes:
     """
     Class which describes the lanes of a road. It corresponds to the lanes element of OpenDRIVE.
 
-    :ivar _laneOffsets: laneOffset elements in the Lane element
+    :ivar _lane_offsets: laneOffset elements in the Lane element
     :ivar _lane_sections: laneSection elements in the Lane element
     """
 
     def __init__(self):
-        self._laneOffsets = []
+        self._lane_offsets = []
         self._lane_sections = []
 
     @property
-    def laneOffsets(self) -> list:
+    def lane_offsets(self) -> List[LaneOffset]:
         """
         Offset of the lane from road reference line. Offsets are defined in ascending order according to their
         s-coordinate. A new offset starts when the underlying polynomial function changes.
 
         :getter: returns lane offsets
-        :type: list of instances of the class LaneOffset
         """
-        self._laneOffsets.sort(key=lambda x: x.start_pos)
-        return self._laneOffsets
+        self._lane_offsets.sort(key=lambda x: x.start_pos)
+        return self._lane_offsets
 
     @property
-    def lane_sections(self) -> list:
+    def lane_sections(self) -> List[LaneSection]:
         """
         Lane sections of the lane. Lane sections are defined in ascending order according to their s-coordinate.
 
         :getter: returns lane sections
-        :type: list of instances of the class LaneSection
         """
         self._lane_sections.sort(key=lambda x: x.sPos)
         return self._lane_sections
 
-    def getLaneSection(self, lane_section_idx: int) -> Union[None, LaneSection]:
+    def get_lane_section(self, lane_section_idx: int) -> Optional[LaneSection]:
         """
         Returns the corresponding Lane section of a Lane Section Index.
 
         :param lane_section_idx: lane section idx
         :return: instance of class LaneSection
         """
-        for laneSection in self.lane_sections:
-            if laneSection.idx == lane_section_idx:
-                return laneSection
+        for lane_section in self.lane_sections:
+            if lane_section.idx == lane_section_idx:
+                return lane_section
 
         return None
 
-    def getLastLaneSectionIdx(self) -> int:
+    def get_last_lane_section_idx(self) -> int:
         """
         Returns the Index of the last LaneSection.
 
         :return: idx of the last Lane Section
         """
 
-        numLaneSections = len(self.lane_sections)
+        num_lane_sections = len(self.lane_sections)
 
-        if numLaneSections > 1:
-            return numLaneSections - 1
+        if num_lane_sections > 1:
+            return num_lane_sections - 1
 
         return 0
 
@@ -100,12 +98,11 @@ class LeftLanes:
         self._lanes = []
 
     @property
-    def lanes(self) -> list:
+    def lanes(self) -> List[Lane]:
         """
         Describes the lane elements of the left/center/right lane of the lane section.
 
         :getter: returns lane elements of left/center/right lane
-        :type: class instance
         """
         self._lanes.sort(key=lambda x: x.id, reverse=self.sort_direction)
         return self._lanes
@@ -202,12 +199,11 @@ class Lane:
         # TODO rules -> see parser.py
 
     @property
-    def parentRoad(self) -> Road:
+    def parent_road(self) -> Road:
         """
         Road including the lane.
 
         :getter: returns the road which has includes the lane
-        :type: instance of Road class
         """
         return self._parent_road
 
@@ -218,7 +214,6 @@ class Lane:
 
         :getter: returns the ID
         :setter: sets the lane ID
-        :type: int
         """
         return self._id
 
@@ -233,7 +228,6 @@ class Lane:
 
         :getter: returns the type of the lane
         :setter: sets the type of the lane
-        :type: string
         """
         return self._type
 
@@ -251,7 +245,6 @@ class Lane:
 
         :getter: returns level attribute
         :setter: sets level attribute
-        :type: boolean
         """
         return self._level
 
@@ -268,18 +261,16 @@ class Lane:
         Describes linkage information of the lane.
 
         :getter: returns the instance of class LaneLink
-        :type: class instance
         """
         return self._link
 
     @property
-    def widths(self) -> list:
+    def widths(self) -> List[LaneWidth]:
         """
         Describes the widths of a lane.
 
         :getter: returns the width element
         :setter: sets the width of the lane
-        :type: list of LaneWidth() instances, optional
         """
         self._widths.sort(key=lambda x: x.start_offset)
         return self._widths
@@ -288,7 +279,7 @@ class Lane:
     def widths(self, value):
         self._widths = value
 
-    def getWidth(self, widthIdx: int) -> Union[None, LaneWidth]:
+    def getWidth(self, widthIdx: int) -> Optional[LaneWidth]:
         """
         Returns the width corresponding to an index, i.e. the width of a certain part of the lane.
 
@@ -300,43 +291,41 @@ class Lane:
 
         return None
 
-    def getLastLaneWidthIdx(self) -> int:
+    def get_last_lane_width_idx(self) -> int:
         """
         Returns the index of the last width sector of the lane.
         """
 
-        numWidths = len(self._widths)
+        num_widths = len(self._widths)
 
-        if numWidths > 1:
-            return numWidths - 1
+        if num_widths > 1:
+            return num_widths - 1
 
         return 0
 
     @property
-    def borders(self) -> list:
+    def borders(self) -> List[LaneBorder]:
         """
         Describes the width of a lane. It is mutually exclusive to the width element/attribute and is only used,
         if there is no width attribute given.
 
         :getter: returns instance of class border
-        :type: class instance
         """
         self._borders.sort(key=lambda x: x.start_offset)
         return self._borders
 
     @property
-    def road_mark(self) -> Union[None, RoadMark]:
+    def road_mark(self) -> List[RoadMark]:
         """
         Describes the road/lane markings. It defines the style of the line at the lane's outer border.
 
         :getter: returns instance of class RoadMark
         :setter: sets the attribute _road_mark
-        :type: class instance
         """
         return self._road_mark
 
     @road_mark.setter
-    def road_mark(self, value):
+    def road_mark(self, value: List[RoadMark]):
         self._road_mark = value
 
 
@@ -362,7 +351,6 @@ class LaneLink:
 
         :getter: returns preceding lane ID
         :setter: sets preceding lane ID
-        :type: int
         """
         return self._predecessor
 
@@ -377,7 +365,6 @@ class LaneLink:
 
         :getter: returns succeeding lane ID
         :setter: sets succeeding lane ID
-        :type: int
         """
         return self._successor
 
@@ -398,12 +385,12 @@ class LaneSection:
     :ivar idx: Index of lane section corresponding to its position in the ascending order of lane section elements in
         lanes element
     :ivar sPos: s-coordinate of start position
-    :ivar _singleSide: Describes whether lane section element is valid for one side only, used to simplify the use of
+    :ivar _single_side: Describes whether lane section element is valid for one side only, used to simplify the use of
         lane sections for complex roads
-    :ivar _leftLanes: left lanes in a lane section
-    :ivar _centerLanes: center lanes in a lane section
-    :ivar _rightLanes: right lanes in a lane section
-    :ivar _parentRoad: road the lane section belongs to
+    :ivar _left_lanes: left lanes in a lane section
+    :ivar _center_lanes: center lanes in a lane section
+    :ivar _right_lanes: right lanes in a lane section
+    :ivar _parent_road: road the lane section belongs to
     """
 
     def __init__(self, road: Road = None):
@@ -414,94 +401,88 @@ class LaneSection:
         """
         self.idx = None
         self.sPos = None
-        self._singleSide = None
-        self._leftLanes = LeftLanes()
-        self._centerLanes = CenterLanes()
-        self._rightLanes = RightLanes()
+        self._single_side = None
+        self._left_lanes = LeftLanes()
+        self._center_lanes = CenterLanes()
+        self._right_lanes = RightLanes()
 
-        self._parentRoad = road
+        self._parent_road = road
 
     @property
-    def singleSide(self) -> bool:
+    def single_side(self) -> bool:
         """
         Indicator if lane section entry is valid for one side only.
 
         :getter: Returns whether singleSide value
         :setter: sets singleSide value
-        :type: boolean
         """
-        return self._singleSide
+        return self._single_side
 
-    @singleSide.setter
-    def singleSide(self, value):
+    @single_side.setter
+    def single_side(self, value):
         if value not in ["true", "false"] and value is not None:
             raise AttributeError("Value must be true or false.")
 
-        self._singleSide = value == "true"
+        self._single_side = value == "true"
 
     @property
-    def leftLanes(self) -> list[Lane]:
+    def left_lanes(self) -> List[Lane]:
         """
         Get list of sorted lanes always starting in the middle (lane id -1).
 
         :getter: Returns the left lanes of the lane section
-        :type: class instance(s) of class Lane() in form of a list
         """
-        return self._leftLanes.lanes
+        return self._left_lanes.lanes
 
     @property
-    def centerLanes(self) -> list[Lane]:
+    def center_lanes(self) -> List[Lane]:
         """
         Get list of the one center lane element.
 
         :getter: Returns the center lane of the lane section
-        :type: class instance of class Lane() in form of a list
         """
-        return self._centerLanes.lanes
+        return self._center_lanes.lanes
 
     @property
-    def rightLanes(self) -> list[Lane]:
+    def right_lanes(self) -> List[Lane]:
         """
         Get list of sorted lanes always starting in the middle (lane id 1).
 
         :getter: Returns the right lanes of the lane section
-        :type: class instance(s) of class Lane() in form of a list
         """
-        return self._rightLanes.lanes
+        return self._right_lanes.lanes
 
     @property
-    def allLanes(self) -> list[Lane]:
+    def all_lanes(self) -> List[Lane]:
         """
         Attention! lanes are not sorted by id.
         Get list of all lanes in the lane section.
 
         :getter: Returns all lanes in the lane section
-        :type: list of class instances of class Lane()
         """
-        return self._leftLanes.lanes + self._centerLanes.lanes + self._rightLanes.lanes
+        return self._left_lanes.lanes + self._center_lanes.lanes + self._right_lanes.lanes
 
-    def getLane(self, lane_id: int) -> Union[None, Lane]:
+    def get_lane(self, lane_id: int) -> Union[None, Lane]:
         """
         Gets corresponding lane to lane ID.
 
         :param lane_id: lane ID
         :returns: lane, if lane is part of the lane section
         """
-        for lane in self.allLanes:
+        for lane in self.all_lanes:
             if lane.id == lane_id:
                 return lane
 
         return None
 
     @property
-    def parentRoad(self) -> Road:
+    def parent_road(self) -> Road:
         """
         Road the lane section belongs to.
 
         :getter: returns road which the lane section is a part of
-        :type: class instance of Road()
         """
-        return self._parentRoad
+        return self._parent_road
 
 
 class LaneWidth(RoadRecord):
@@ -533,7 +514,6 @@ class LaneWidth(RoadRecord):
         Return start_offset, which is the offset of the entry to the start of the lane section.
 
         :getter: returns start_offset
-        :type: float
         """
         return self.start_pos
 
@@ -591,7 +571,6 @@ class RoadMark:
 
         :getter: returns sOffset
         :setter: sets sOffset
-        :type: float
         """
         return self._SOffset
 
@@ -614,7 +593,6 @@ class RoadMark:
 
         :getter: returns road mark type
         :setter: sets road mark type
-        :type: string
         """
         return self._type
 
@@ -629,7 +607,6 @@ class RoadMark:
 
         :getter: returns road mark weight
         :setter: sets road mark weight
-        :type: string
         """
         return self._weight
 
@@ -653,7 +630,6 @@ class RoadMark:
 
         :getter: returns the color of the road mark
         :setter: sets the color of the road mark
-        :type: string
         """
         logging.warning("RoadMark::color: Attribute color is not used for conversion!", DeprecationWarning)
         return self._color
@@ -668,7 +644,6 @@ class RoadMark:
         Material of the road mark.
 
         :getter: returns material of the road mark
-        :type: string
         """
         logging.warning("RoadMark::material: Attribute material is not used for conversion!", DeprecationWarning)
         return self._material
@@ -679,7 +654,6 @@ class RoadMark:
         Width of the road mark.
 
         :getter: returns the width of the road mark
-        :type:
         """
         logging.warning("RoadMark::width: Attribute width is not used for conversion!", DeprecationWarning)
         return self._width
@@ -691,7 +665,6 @@ class RoadMark:
 
         :getter: returns allowed lane change
         :setter: sets lane_change
-        :type: string
         """
         logging.warning("RoadMark::lane_change: Attribute lane_change is not used for conversion", DeprecationWarning)
         return self._lane_change
@@ -706,7 +679,6 @@ class RoadMark:
         Height of the road mark.
 
         :getter: returns the height of the road mark
-        :type:
         """
         logging.warning("RoadMark::height: Attribute height is not used for conversion!", DeprecationWarning)
         return self._height

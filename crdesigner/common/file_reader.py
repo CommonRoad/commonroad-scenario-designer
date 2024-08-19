@@ -77,6 +77,15 @@ class CRDesignerFileReader(CommonRoadFileReader):
         self._filename_scenario = filename_scenario
 
     @property
+    def mapver_params(self) -> MapVerParams:
+        """
+        Get the map verification parameters of the file reader.
+
+        :return: map verification parameter
+        """
+        return self._mapver_params
+
+    @property
     def filename_dynamic(self) -> Optional[Path_T]:
         """
         Path of the 2024 dynamic file.

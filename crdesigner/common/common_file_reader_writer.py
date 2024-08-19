@@ -93,21 +93,7 @@ def project_lanelet_network(
     transformer = Transformer.from_proj(crs_from, crs_to)
 
     for lanelet in lanelet_network.lanelets:
-        for left_vertex in lanelet.left_vertices:
-            left_vertex[0], left_vertex[1] = transformer.transform(left_vertex[0], left_vertex[1])
-        for right_vertex in lanelet.right_vertices:
-            right_vertex[0], right_vertex[1] = transformer.transform(right_vertex[0], right_vertex[1])
-        for center_vertex in lanelet.center_vertices:
-            center_vertex[0], center_vertex[1] = transformer.transform(center_vertex[0], center_vertex[1])
-
-        # transform stop line coordinates
-        if lanelet.stop_line is not None:
-            lanelet.stop_line.start[0], lanelet.stop_line.start[1] = transformer.transform(
-                lanelet.stop_line.start[0], lanelet.stop_line.start[1]
-            )
-            lanelet.stop_line.end[0], lanelet.stop_line.end[1] = transformer.transform(
-                lanelet.stop_line.end[0], lanelet.stop_line.end[1]
-            )
+        project_lanelet(lanelet, transformer)
 
     # transform traffic light coordinates
     for tl in lanelet_network.traffic_lights:
@@ -125,6 +111,29 @@ def project_lanelet_network(
                     vertex[0], vertex[1] = transformer.transform(vertex[0], vertex[1])
 
     return lanelet_network
+
+
+def project_lanelet(lanelet: Lanelet, transformer: Transformer):
+    """
+    Function that performs a projection onto the lanelet.
+
+    :param lanelet: Lanelet that needs to be projected.
+    :param transformer: Transformer which should be applied.
+    """
+    for left_vertex in lanelet.left_vertices:
+        left_vertex[0], left_vertex[1] = transformer.transform(left_vertex[0], left_vertex[1])
+    for right_vertex in lanelet.right_vertices:
+        right_vertex[0], right_vertex[1] = transformer.transform(right_vertex[0], right_vertex[1])
+    for center_vertex in lanelet.center_vertices:
+        center_vertex[0], center_vertex[1] = transformer.transform(center_vertex[0], center_vertex[1])
+    # transform stop line coordinates
+    if lanelet.stop_line is not None:
+        lanelet.stop_line.start[0], lanelet.stop_line.start[1] = transformer.transform(
+            lanelet.stop_line.start[0], lanelet.stop_line.start[1]
+        )
+        lanelet.stop_line.end[0], lanelet.stop_line.end[1] = transformer.transform(
+            lanelet.stop_line.end[0], lanelet.stop_line.end[1]
+        )
 
 
 def project_obstacles(

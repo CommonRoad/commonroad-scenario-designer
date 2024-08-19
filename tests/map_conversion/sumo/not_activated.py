@@ -60,9 +60,17 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
         wrapper = CR2SumoMapConverter(self.scenario, config)
         return config, wrapper
 
-    def sumo_run(self, config: SumoConfig, converter: CR2SumoMapConverter, tls_lanelet_ids: List[int]) -> str:
+    def sumo_run(
+        self,
+        config: SumoConfig,
+        converter: CR2SumoMapConverter,
+        tls_lanelet_ids: List[int],
+        create_routes_from_trajectories: bool = False,
+    ) -> str:
         # was the conversion successful?
-        conversion_successful = converter.create_sumo_files(self.out_path_test)
+        conversion_successful = converter.create_sumo_files(
+            self.out_path_test, traffic_from_trajectories=create_routes_from_trajectories
+        )
         self.assertTrue(conversion_successful)
 
         # can we generate traffic light systems?
@@ -172,6 +180,20 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
     def test_parameterized_sumo_run(self, cr_file_name: str, tls: List[int]):
         config, converter = self.read_cr_file(cr_file_name)
         out = self.sumo_run(config, converter, tls)
+        self.validate_output(out)
+
+    @parameterized.expand(
+        [
+            # Scenarios that contain dyanimc obstacles with trajectories
+            ["DEU_Muc-13_1_T-1", [257, 253]],
+            ["ZAM_Zip-1_54_T-1", []],
+            ["USA_US101-3_1_T-1", []],
+        ]
+    )
+    @pytest.mark.parallel
+    def test_converts_cr_trajectories_to_valid_sumo_routes(self, cr_file_name: str, tls: List[int]):
+        config, converter = self.read_cr_file(cr_file_name)
+        out = self.sumo_run(config, converter, tls, create_routes_from_trajectories=True)
         self.validate_output(out)
 
     # @parameterized.expand([

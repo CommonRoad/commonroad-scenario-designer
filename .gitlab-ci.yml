@@ -33,22 +33,32 @@ lint_flake8:
     - pip install "flake8~=6.1.0"
     - flake8 ./tests ./crdesigner ./docs ./tutorials
 
-
 build_and_test_python:
   image : python:$PYTHON_VERSIONS
   stage: test
   parallel :
     matrix :
-      - PYTHON_VERSIONS : [ "3.8", "3.9"]
+      - PYTHON_VERSIONS : [ "3.9", "3.10"]
   variables:
     QT_QPA_PLATFORM : "offscreen"
   script:
     - *run-test-with-coverage
   needs: []
 
+build_and_update_packages_debian:
+  image : python:$PYTHON_VERSIONS
+  stage: test
+  parallel :
+    matrix :
+      - PYTHON_VERSIONS : [ "3.9", "3.10", "3.11" ]
+  script:
+    - poetry update
+    - poetry install
+  needs: []
+
 build_and_test_with_coverage:
   stage : test
-  image: python:3.10
+  image: python:3.11
   variables :
     QT_QPA_PLATFORM : "offscreen"
   script :

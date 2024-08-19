@@ -87,10 +87,6 @@ def opendrive_to_commonroad(
     opendrive = parse_opendrive(input_file)
     road_network = Network()
     road_network.load_opendrive(opendrive)
-    for index in range(len(road_network._traffic_lights)):
-        road_network._traffic_lights[index]._traffic_light_id = abs(
-            road_network._traffic_lights[index].traffic_light_id
-        )
     return road_network.export_commonroad_scenario(general_conf, odr_conf)
 
 
