@@ -7,6 +7,7 @@
 
 ### Fixed
 - cr2sumo: Trajectory conversion assigned non-existent edges to routes
+- Command line interface: Providing no input path
 
 ## [0.8.2] - 2024-07-22
 
