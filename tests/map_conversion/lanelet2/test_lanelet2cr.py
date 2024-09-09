@@ -23,8 +23,14 @@ from pyproj import CRS, Transformer
 from crdesigner.common.config.general_config import general_config
 from crdesigner.common.config.gui_config import lanelet2_default
 from crdesigner.common.config.lanelet2_config import lanelet2_config
-from crdesigner.map_conversion.lanelet2.lanelet2 import (Multipolygon, Node, RegulatoryElement, Way, WayRelation,
-                                                         OSMLanelet, )
+from crdesigner.map_conversion.lanelet2.lanelet2 import (
+    Multipolygon,
+    Node,
+    OSMLanelet,
+    RegulatoryElement,
+    Way,
+    WayRelation,
+)
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import (
     Lanelet2CRConverter,
