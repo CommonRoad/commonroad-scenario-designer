@@ -116,6 +116,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertEqual(l2cr.transformer.definition, transformer.definition)
 
     def test_call(self):
+        lanelet2_config.translate = False
         l2cr = Lanelet2CRConverter()  # object referred to as "self" in the source code
         scenario = l2cr(osm)
         origin_lat = min([node.lat for node in l2cr.osm.nodes.values()])
