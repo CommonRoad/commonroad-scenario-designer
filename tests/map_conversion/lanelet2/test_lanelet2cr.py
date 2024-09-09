@@ -23,13 +23,8 @@ from pyproj import CRS, Transformer
 from crdesigner.common.config.general_config import general_config
 from crdesigner.common.config.gui_config import lanelet2_default
 from crdesigner.common.config.lanelet2_config import lanelet2_config
-from crdesigner.map_conversion.lanelet2.lanelet2 import (
-    Multipolygon,
-    Node,
-    RegulatoryElement,
-    Way,
-    WayRelation,
-)
+from crdesigner.map_conversion.lanelet2.lanelet2 import (Multipolygon, Node, RegulatoryElement, Way, WayRelation,
+                                                         OSMLanelet, )
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import (
     Lanelet2CRConverter,
@@ -148,7 +143,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
         # test if the lanelet networks are equal
         self.assertEqual(scenario.lanelet_network, l2cr.lanelet_network)
 
-    def test__add_closest_traffic_sign_to_lanelet(self):
+    def test_add_closest_traffic_sign_to_lanelet(self):
         # testing the function by creating a list of lanelets and a list of signs and checking the result
 
         # lanelet1
@@ -186,7 +181,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
             if i.traffic_sign_id == 2:
                 self.assertEqual(i, sign2)
 
-    def test__add_stop_line_to_lanelet(self):
+    def test_add_stop_line_to_lanelet(self):
         # lanelet1
         right_vertices = np.array([[0, 0], [1, 0], [2, 0]])
         left_vertices = np.array([[0, 1], [1, 1], [2, 1]])
@@ -223,7 +218,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertCountEqual(lanelet2.stop_line.start, [11, 1])
         self.assertCountEqual(lanelet2.stop_line.end, [11, 0])
 
-    def test__right_of_way_to_traffic_sign(self):
+    def test_right_of_way_to_traffic_sign(self):
         supportedCountryList = [TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDSpain]
         l2cr = Lanelet2CRConverter()  # object referred to as "self" in the source code
         l2cr(osm)
@@ -312,7 +307,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertFalse(yield_lanelets)
         self.assertFalse(priority_lanelets)
 
-    def test__fix_relation_unequal_ways(self):
+    def test_fix_relation_unequal_ways(self):
         l2cr = Lanelet2CRConverter()  # object referred to as "self" in the source code
         l2cr(osm)
 
@@ -371,7 +366,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertEqual(right_way.nodes, ["1", "1003", "2"])
         self.assertEqual(left_way.nodes, ["3", "4", "5"])
 
-    def test__find_lanelet_ids_of_suitable_nodes(self):
+    def test_find_lanelet_ids_of_suitable_nodes(self):
         l2cr = Lanelet2CRConverter()  # object referred to as "self" in the source code
         l2cr(osm)
 
@@ -428,7 +423,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
         real_dist = np.linalg.norm(vec1 - vec2)
         self.assertEqual(function_distance, real_dist)
 
-    def test__convert_way_to_vertices(self):
+    def test_convert_way_to_vertices2(self):
         l2cr = Lanelet2CRConverter()  # object referred to as "self" in the source code
         l2cr(osm)
 
@@ -465,6 +460,39 @@ class TestLanelet2CRConverter(unittest.TestCase):
             y -= l2cr.origin_utm[1]
             self.assertEqual(v[0], x)
             self.assertEqual(v[1], y)
+
+    def test_convert_way_with_left_right_same_start_node_to_vertices(self):
+        custom_osm = OSMLanelet()
+        l2cr = Lanelet2CRConverter()
+
+        n1 = Node(1, 50.9946592, 6.8944186)
+        n2 = Node(2, 50.9947912, 6.8942458)
+        n3 = Node(3, 50.9947987, 6.8942709)
+
+        custom_osm.add_node(n1)
+        custom_osm.add_node(n2)
+        custom_osm.add_node(n3)
+
+        way1 = Way("11", ["1", "2"])
+        custom_osm.add_way(way1)
+        way2 = Way("12", ["1", "3"])
+        custom_osm.add_way(way2)
+
+        # creating a way relation
+        wayrel = WayRelation("111", "11", "12")
+        custom_osm.add_way_relation(wayrel)
+
+        l2cr(custom_osm)
+
+        self.assertAlmostEquals(l2cr.lanelet_network.lanelets[0].right_vertices[0][0], 767483.16786767, 6)
+        self.assertAlmostEquals(l2cr.lanelet_network.lanelets[0].right_vertices[0][1], 6620349.05142523, 6)
+        self.assertAlmostEquals(l2cr.lanelet_network.lanelets[0].right_vertices[1][0], 767466.72597888, 6)
+        self.assertAlmostEquals(l2cr.lanelet_network.lanelets[0].right_vertices[1][1], 6620373.72455713, 6)
+
+        self.assertAlmostEquals(l2cr.lanelet_network.lanelets[0].left_vertices[0][0], 767483.16786767, 6)
+        self.assertAlmostEquals(l2cr.lanelet_network.lanelets[0].left_vertices[0][1], 6620349.05142523, 6)
+        self.assertAlmostEquals(l2cr.lanelet_network.lanelets[0].left_vertices[1][0], 767463.93185966, 6)
+        self.assertAlmostEquals(l2cr.lanelet_network.lanelets[0].left_vertices[1][1], 6620372.39804278, 6)
 
     def test_check_for_predecessor(self):
         l2cr = Lanelet2CRConverter()
