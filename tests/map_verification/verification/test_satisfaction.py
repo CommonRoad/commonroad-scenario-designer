@@ -557,9 +557,8 @@ class TestLaneletFormulaPool(TestFormulaPool):
 
         self.check_sat(formula_id, self.network, expected=False)
 
-        self.lanelet_1.right_vertices, self.lanelet_1.left_vertices = np.flip(self.lanelet_1.left_vertices), np.flip(
-            self.lanelet_1.right_vertices
-        )
+        self.lanelet_1.left_vertices = np.array([[0.0, 0.0], [0.5, 0.0], [1.0, 0.0]])
+        self.lanelet_1.right_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [1.0, 1.0]])
 
         self.check_sat(formula_id, self.network, expected=True)
 
