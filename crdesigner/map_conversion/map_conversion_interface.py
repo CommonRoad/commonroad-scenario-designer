@@ -31,6 +31,7 @@ from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export imp
 
 Path_T = Union[str, Path]
 
+
 def lanelet_to_commonroad(
     input_file: Path_T, general_conf: general_config = general_config, lanelet2_conf: lanelet2_config = lanelet2_config
 ) -> Scenario:
