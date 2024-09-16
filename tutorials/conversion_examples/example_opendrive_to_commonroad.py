@@ -8,11 +8,12 @@ from crdesigner.common.config.opendrive_config import open_drive_config
 from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
 
-input_path = Path.cwd().parent.parent / "tests/map_conversion/test_maps/opendrive/opendrive-1.xodr"
-output_path = Path.cwd() / "example_files/opendrive/opendrive-1.xml"
+input_path = Path("/home/sebastian/Downloads/Town01.xodr")
+output_path = Path("/home/sebastian/Downloads/Town01.xml")
 
 config = open_drive_config
 config.lanelet_types_backwards_compatible = False
+config.proj_string_odr = None
 
 # load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
 scenario = opendrive_to_commonroad(input_path)
