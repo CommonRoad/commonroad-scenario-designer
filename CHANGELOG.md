@@ -5,6 +5,9 @@
 ### Added
 - odr2cr: Left-hand drive consideration
 
+### Changed
+- map-conversion: Interfaces can consider string and Path objects
+
 ### Fixed
 - cr2sumo: Trajectory conversion assigned non-existent edges to routes
 - Command line interface: Providing no input path
