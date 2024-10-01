@@ -71,8 +71,10 @@ def main(
     ] = "",
     tags: Annotated[Optional[List[str]], typer.Option(help="Tags for the created map")] = None,
 ):
-    if ctx.invoked_subcommand is None:
+    if ctx.invoked_subcommand is None and input_file is not None:
         start_gui(input_file.name)
+    elif ctx.invoked_subcommand is None and input_file is None:
+        start_gui()
     else:
         # copied from commonroad-dataset-converter
         frame = inspect.currentframe()
