@@ -28,9 +28,7 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadSi
 )
 
 
-def extract_traffic_element_id(
-    signal_type: str, signal_subtype: str, traffic_sign_enum: enum
-) -> Union[
+def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_sign_enum: enum) -> Union[
     TrafficSignIDZamunda,
     TrafficSignIDGermany,
     TrafficSignIDUsa,
@@ -198,8 +196,8 @@ def calculate_stop_line_position(
                     lane_width = (
                         coefficients[0]
                         + coefficients[1] * signal.s
-                        + coefficients[2] * signal.s ** 2
-                        + coefficients[3] * signal.s ** 3
+                        + coefficients[2] * signal.s**2
+                        + coefficients[3] * signal.s**3
                     )
 
                     total_width += lane_width
