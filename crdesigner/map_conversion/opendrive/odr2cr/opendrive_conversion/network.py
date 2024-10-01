@@ -60,9 +60,7 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.utils impor
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.opendrive import (
     OpenDrive,
 )
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road import (
-    Road,
-)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road import Road
 
 
 def update_line_markings(lanelet_network: ConversionLaneletNetwork) -> ConversionLaneletNetwork:

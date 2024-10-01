@@ -16,9 +16,7 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_eleme
     calculate_stop_line_position,
     extract_traffic_element_id,
 )
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road import (
-    Road,
-)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road import Road
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     Lane,
     LaneSection,

@@ -22,6 +22,7 @@
 - cr2lanelet: Lane change property tags
 - odr2cr: Road speed limit conversion
 - odr2cr: Option to neglect projection by setting `config.proj_string_odr = None`
+- cr2odr
 
 
 ### Changed
