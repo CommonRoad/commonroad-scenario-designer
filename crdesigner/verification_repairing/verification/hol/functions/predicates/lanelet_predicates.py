@@ -166,7 +166,9 @@ def _wrong_left_right_boundary_side(
             center_vertices = resample_polyline(center_vertices, config.resampling_repeated_step)
             continue
 
-    return sum(left - right > 0) / len(left) < config.perc_vert_wrong_side
+    # >= since we use the function also for the lanelet2cr conversion where it might be
+    # that start/ending vertices of forks/merges match
+    return sum(left - right >= 0) / len(left) < config.perc_vert_wrong_side
 
 
 def has_predecessor(lanelet_0: Lanelet, lanelet_1: Lanelet) -> bool:

@@ -173,7 +173,7 @@ If you want to contribute to the toolbox, you can also post it in the [forum](ht
 ## Authors
 Responsible: Sebastian Maierhofer, Sebastian Mair  
 Contribution (in alphabetic order by last name): Daniel Asch, Hamza Begic, Mohamed Bouhali, Florian Braunmiller, 
-Tim Dang, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Tom Irion, Aaron Kaefer, Anton Kluge, 
+Tim Dang, Setenay Eryasar, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Tom Irion, Aaron Kaefer, Anton Kluge, 
 David Le, Gustaf Lindgren, Sarra Ben Mohamed, Benjamin Orthen, Luisa Ortner, Louis Pröbstle, Benedikt Reinhard, 
 Maximilian Rieger, Til Stotz, Stefan Urban, Max Winklhofer
 

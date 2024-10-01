@@ -14,8 +14,13 @@ from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
 from crdesigner.map_conversion.map_conversion_interface import (
     osm_to_commonroad_using_sumo,
 )
-from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
-from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
+from crdesigner.map_conversion.opendrive.cr2odr.converter import Converter
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.network import (
+    Network,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import (
+    parse_opendrive,
+)
 from crdesigner.map_conversion.osm2cr.converter_modules import converter
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import (
     convert_to_scenario,
@@ -101,7 +106,8 @@ class MapConversionToolboxController(QDockWidget):
         self.converter_toolbox_ui.adjust_sections()
 
         if self.converter_toolbox_ui.open_drive.isChecked():
-            self.converter_toolbox_ui.button_convert_opendrive.clicked.connect(lambda: self.load_open_drive())
+            self.converter_toolbox_ui.button_convert_opendrive2cr.clicked.connect(lambda: self.load_open_drive())
+            self.converter_toolbox_ui.button_convert_cr2opendrive.clicked.connect(lambda: self.convert_cr2opendrive())
         elif self.converter_toolbox_ui.lanelet.isChecked():
             self.converter_toolbox_ui.button_convert_lanelet2_to_cr.clicked.connect(lambda: self.load_lanelet2())
             self.converter_toolbox_ui.button_convert_cr_to_lanelet2.clicked.connect(
@@ -353,6 +359,24 @@ class MapConversionToolboxController(QDockWidget):
             )
             return
         self.convert_with_spinner(self.convert_open_drive_to_cr)
+
+    @logger.log
+    def convert_cr2opendrive(self):
+        """
+        Converts the currently loaded CR map to OpenDRIVE.
+        """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
+        directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Option.ShowDirsOnly)
+
+        if not self.scenario_model.scenario_created or directory == "":
+            return
+        output_path = directory + "/" + str(self.scenario_model.get_scenario_id()) + ".xodr"
+        crodr_converter = Converter(self.scenario_model.get_current_scenario())
+        crodr_converter.convert(str(output_path))
+        self.text_browser.append("Conversion from CommonRoad to OpenDRIVE is finished.")
 
     @logger.log
     def load_lanelet2(self):
