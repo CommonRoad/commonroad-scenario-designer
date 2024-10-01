@@ -7,7 +7,7 @@ import numpy as np
 from commonroad.common.common_lanelet import LaneletType
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Path_T
-from commonroad.scenario.intersection import IntersectionIncomingElement
+from commonroad.scenario.intersection import IncomingGroup
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.scenario import Scenario
 
@@ -254,10 +254,10 @@ class Converter:
         start = time.time()
         # initialize writer object
         if (
-            self.scenario.location.geo_transformation is not None
-            and self.scenario.location.geo_transformation.geo_reference is not None
+            self.scenario.lanelet_network.location.geo_transformation is not None
+            and self.scenario.lanelet_network.location.geo_transformation.geo_reference is not None
         ):
-            geo_reference = self.scenario.location.geo_transformation.geo_reference
+            geo_reference = self.scenario.lanelet_network.location.geo_transformation.geo_reference
         else:
             geo_reference = ""
         self.writer = fwr.Writer(file_path_out, geo_reference)
@@ -494,7 +494,8 @@ class Converter:
                         successors_straight.update(lanelet.successor)
                         incomings.add(lanelet.lanelet_id)
 
-                    incoming = IntersectionIncomingElement(1, incomings, set(), successors_straight, set(), None)
+                    incoming = IncomingGroup(1, incomings, None, successors_straight, set(), None)
+                    # TODO outgoing group id
 
                     Junction.counting += 1
                     Junction(

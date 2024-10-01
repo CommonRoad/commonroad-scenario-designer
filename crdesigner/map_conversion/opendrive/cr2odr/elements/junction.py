@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from commonroad.scenario.intersection import IntersectionIncomingElement  # type: ignore
+from commonroad.scenario.intersection import IncomingGroup  # type: ignore
 from commonroad.scenario.lanelet import LaneletNetwork  # type: ignore
 from lxml import etree  # type: ignore
 from lxml.etree import Element
@@ -21,7 +21,7 @@ class Junction:
 
     def __init__(
         self,
-        incoming: List[IntersectionIncomingElement],
+        incoming: List[IncomingGroup],
         id_to_road: Dict[int, int],
         lanelet_to_lane: Dict[int, int],
         root: Element,
@@ -51,20 +51,20 @@ class Junction:
         self.junction = junction
         connection_num = 1
 
-        # Do this for every IntersectionIncomingElement
+        # Do this for every IncomingGroup
         for inter_incoming in incoming:
             all_incomings = list(inter_incoming.incoming_lanelets)
             if len(all_incomings) == 0:  # todo this should be covered in the map verification
                 continue
 
-            # get all successors of the IntersectionIncomingElement
+            # get all successors of the IncomingGroup
             # inc_suc are all roads as successors with their OpenDrive ID
             inc_suc = set()
             map_road_to_lane_link: dict = {}
 
             # all_suc has all successors with the commonroad-id
-            all_suc = inter_incoming.successors_right.union(
-                inter_incoming.successors_straight, inter_incoming.successors_left
+            all_suc = inter_incoming.outgoing_right.union(
+                inter_incoming.outgoing_straight, inter_incoming.outgoing_left
             )
             for suc in all_suc:
                 road_id = id_to_road[suc]
