@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   crdesigner.map_conversion.opendrive.cr_to_opendrive
    crdesigner.map_conversion.opendrive.opendrive_conversion
    crdesigner.map_conversion.opendrive.opendrive_parser
 

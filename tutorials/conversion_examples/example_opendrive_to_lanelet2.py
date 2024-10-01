@@ -7,7 +7,7 @@ from crdesigner.common.config.opendrive_config import open_drive_config
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_lanelet
 
 # get the input and the output paths
-input_path = Path.cwd().parent.parent / "tests/map_conversion/test_maps/opendrive/opendrive-1.xodr"
+input_path = Path.cwd().parent.parent / "tests/map_conversion/test_maps/odr2cr/opendrive-1.xodr"
 output_path = Path.cwd() / "example_files/lanelet2/l2_opendrive-1.osm"
 
 # define configs
