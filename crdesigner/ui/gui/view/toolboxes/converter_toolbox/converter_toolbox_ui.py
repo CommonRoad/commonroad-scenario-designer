@@ -101,8 +101,10 @@ class MapConversionToolboxUI(Toolbox):
             self.init_sumo()
 
     def init_open_drive(self):
-        self.button_convert_opendrive = QPushButton("Convert OpenDRIVE to CommonRoad")
-        self.layout_con_groupbox.insertRow(1, self.button_convert_opendrive)
+        self.button_convert_opendrive2cr = QPushButton("Convert OpenDRIVE to CommonRoad")
+        self.layout_con_groupbox.insertRow(1, self.button_convert_opendrive2cr)
+        self.button_convert_cr2opendrive = QPushButton("Convert CommonRoad to OpenDRIVE")
+        self.layout_con_groupbox.insertRow(2, self.button_convert_cr2opendrive)
 
     def init_lanelet(self):
         self.button_convert_lanelet2_to_cr = QPushButton("Convert Lanelet/Lanelet2 to CommonRoad")
@@ -170,7 +172,8 @@ class MapConversionToolboxUI(Toolbox):
 
     def remove_fields(self):
         if self.chosen_method == "open_drive":
-            self.layout_con_groupbox.removeRow(self.button_convert_opendrive)
+            self.layout_con_groupbox.removeRow(self.button_convert_opendrive2cr)
+            self.layout_con_groupbox.removeRow(self.button_convert_cr2opendrive)
         elif self.chosen_method == "lanelet":
             self.layout_con_groupbox.removeRow(self.button_convert_lanelet2_to_cr)
             self.layout_con_groupbox.removeRow(self.button_convert_cr_to_lanelet2)

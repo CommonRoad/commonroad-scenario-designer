@@ -134,7 +134,7 @@ class SUMOSimulation(QFrame):
         simulates the current scenario and returns the simulated version
         """
         if not self._scenario:
-            error(self, "No Scenario loaded, load a valid commonroad scenario to simulate")
+            error(self, "No Scenario loaded, load a valid CommonRoad scenario to simulate")
             return False
 
         self.waiting_msg = WaitingDialog()
@@ -144,7 +144,7 @@ class SUMOSimulation(QFrame):
 
         # show Info box, telling user to wait for the simulation to finish
         # self.waiting_msg.information(self, "SUMO Simulation", "Simulating...",
-        #                              QMessageBox.Ok)
+        #                              QMessageBox.StandardButton.Ok)
         self.waiting_msg.exec()
 
         return True
@@ -154,7 +154,7 @@ class SUMOSimulation(QFrame):
         simulates the current scenario and returns the simulated version
         """
         if not self._scenario:
-            error(self, "No Scenario loaded, load a valid commonroad scenario to simulate")
+            error(self, "No Scenario loaded, load a valid CommonRoad scenario to simulate")
             return False
 
         self.waiting_msg = WaitingDialog()
@@ -164,7 +164,7 @@ class SUMOSimulation(QFrame):
 
         # show Info box, telling user to wait for the simulation to finish
         # self.waiting_msg.information(self, "SUMO Simulation", "Simulating...",
-        #                              QMessageBox.Ok)
+        #                             QMessageBox.StandardButton.Ok)
         self.waiting_msg.exec()
 
         return True

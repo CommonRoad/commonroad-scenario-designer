@@ -5,8 +5,12 @@ from commonroad.scenario.scenario import Scenario
 from lxml import etree
 from PyQt6.QtWidgets import QMessageBox
 
-from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
-from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.network import (
+    Network,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import (
+    parse_opendrive,
+)
 
 
 def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
@@ -16,10 +20,10 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
     :param net_file: path of .net.xml file
     :param verbose: Boolean indicating whether status should be printed to console
 
-    :return: commonroad map file
+    :return: CommonRoad map file
     """
     if net_file is None:
-        QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.Ok)
+        QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.StandardButton.Ok)
         return
     assert isinstance(net_file, str)
 
@@ -36,7 +40,7 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
     if verbose:
         print("converted to OpenDrive (.xodr)")
 
-    # convert to commonroad using opendrive2lanelet
+    # convert to CommonRoad using opendrive2lanelet
     # import, parse and convert OpenDRIVE file
     with open(opendrive_file, "r") as fi:
         open_drive = parse_opendrive(etree.parse(fi).getroot())

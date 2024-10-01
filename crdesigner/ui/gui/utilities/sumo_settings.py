@@ -163,4 +163,4 @@ class SUMOSettings:
 
     def warn(self, msg):
         messbox = QMessageBox()
-        messbox.warning(None, "Warning", msg, QMessageBox.Ok, QMessageBox.Ok)
+        messbox.warning(None, "Warning", msg, QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Ok)

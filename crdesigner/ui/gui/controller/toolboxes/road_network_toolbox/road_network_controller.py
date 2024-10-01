@@ -167,7 +167,6 @@ class RoadNetworkController(
 
     @pyqtSlot(str)
     def stopSpinner(self, data):
-        print(data)
         self.scenario_model.notify_all()
         self.road_network_toolbox_ui.Spinner.stop()
 
