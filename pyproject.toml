@@ -26,7 +26,7 @@ Source = "https://github.com/CommonRoad/commonroad-scenario-designer"
 
 [tool.poetry.dependencies]
 python = "^3.9,<3.12"
-commonroad-io = {git = "https://github.com/CommonRoad/commonroad-io", rev = "release-2024-3"}
+commonroad-io = {git = "https://github.com/commonroad/commonroad-io", rev = "release-2024-3"}
 commonroad-drivability-checker = "^2024.1"
 pyqt6 = ">=6.6.0"
 matplotlib = ">=3.6.0"
