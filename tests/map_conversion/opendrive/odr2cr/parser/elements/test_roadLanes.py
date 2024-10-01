@@ -31,13 +31,13 @@ class TestRoadLanes(unittest.TestCase):
         lane_section3.sPos = 6
 
         lanes = Lanes()
-        lanes.laneOffsets.append(offset1)
-        lanes.laneOffsets.append(offset2)
-        lanes.laneOffsets.append(offset3)
+        lanes.lane_offsets.append(offset1)
+        lanes.lane_offsets.append(offset2)
+        lanes.lane_offsets.append(offset3)
         lanes.lane_sections.append(lane_section1)
         lanes.lane_sections.append(lane_section2)
         lanes.lane_sections.append(lane_section3)
-        self.assertEqual([offset2, offset3, offset1], lanes.laneOffsets)
+        self.assertEqual([offset2, offset3, offset1], lanes.lane_offsets)
         self.assertEqual([lane_section2, lane_section1, lane_section3], lanes.lane_sections)
 
     def test_get_lane_section(self):
@@ -56,7 +56,7 @@ class TestRoadLanes(unittest.TestCase):
         lanes.lane_sections.append(lane_section1)
         lanes.lane_sections.append(lane_section2)
         lanes.lane_sections.append(lane_section3)
-        self.assertEqual(lane_section2, lanes.getLaneSection(0))
+        self.assertEqual(lane_section2, lanes.get_lane_section(0))
 
     def test_get_last_lane_section_idx(self):
         road = Road()
@@ -71,7 +71,7 @@ class TestRoadLanes(unittest.TestCase):
         lanes.lane_sections.append(lane_section1)
         lanes.lane_sections.append(lane_section2)
         lanes.lane_sections.append(lane_section3)
-        self.assertEqual(2, lanes.getLastLaneSectionIdx())
+        self.assertEqual(2, lanes.get_last_lane_section_idx())
 
     def test_initialize_lane_offset(self):
         a, b, c, d = 2.0, 3.0, 5.0, 1.0
@@ -166,7 +166,7 @@ class TestRoadLanes(unittest.TestCase):
         road_mark = RoadMark()
         lane1.road_mark = road_mark
 
-        self.assertEqual(road, lane1.parentRoad)
+        self.assertEqual(road, lane1.parent_road)
         self.assertEqual(4, lane1.id)
         for lane_type in types:
             lane1.type = lane_type
@@ -188,7 +188,7 @@ class TestRoadLanes(unittest.TestCase):
         self.assertEqual([lane_width2, lane_width3, lane_width1], lane1.widths)
         self.assertEqual(lane_width1, lane1.getWidth(2))
         self.assertEqual(lane_width3, lane1.getWidth(1))
-        self.assertEqual(2, lane1.getLastLaneWidthIdx())
+        self.assertEqual(2, lane1.get_last_lane_width_idx())
         # in parser.py the setter of widths is used to assign the parameters of the borders attribute to the widths
         # attribute
         lane2.widths = lane1.borders
@@ -206,30 +206,30 @@ class TestRoadLanes(unittest.TestCase):
         lane1.id = 5
         lane2.id = 4
         lane3.id = 6
-        lane_section.leftLanes.append(lane1)
-        lane_section.centerLanes.append(lane2)
-        lane_section.rightLanes.append(lane3)
+        lane_section.left_lanes.append(lane1)
+        lane_section.center_lanes.append(lane2)
+        lane_section.right_lanes.append(lane3)
         lane_section.idx = 1
         lane_section.sPos = 1.2
 
         self.assertEqual(1, lane_section.idx)
         self.assertEqual(1.2, lane_section.sPos)
-        lane_section.singleSide = values[0]
-        self.assertEqual(True, lane_section.singleSide)
-        lane_section.singleSide = values[1]
-        self.assertEqual(False, lane_section.singleSide)
-        lane_section.singleSide = None
-        self.assertEqual(False, lane_section.singleSide)
+        lane_section.single_side = values[0]
+        self.assertEqual(True, lane_section.single_side)
+        lane_section.single_side = values[1]
+        self.assertEqual(False, lane_section.single_side)
+        lane_section.single_side = None
+        self.assertEqual(False, lane_section.single_side)
         with self.assertRaises(AttributeError):
-            lane_section.singleSide = "wrong value"
-            lane_section.singleSide = 2
-        self.assertEqual([lane1], lane_section.leftLanes)
-        self.assertEqual([lane2], lane_section.centerLanes)
-        self.assertEqual([lane3], lane_section.rightLanes)
-        self.assertEqual([lane1, lane2, lane3], lane_section.allLanes)
-        self.assertEqual(lane2, lane_section.getLane(4))
-        self.assertEqual(None, lane_section.getLane(1))
-        self.assertEqual(p_road, lane_section.parentRoad)
+            lane_section.single_side = "wrong value"
+            lane_section.single_side = 2
+        self.assertEqual([lane1], lane_section.left_lanes)
+        self.assertEqual([lane2], lane_section.center_lanes)
+        self.assertEqual([lane3], lane_section.right_lanes)
+        self.assertEqual([lane1, lane2, lane3], lane_section.all_lanes)
+        self.assertEqual(lane2, lane_section.get_lane(4))
+        self.assertEqual(None, lane_section.get_lane(1))
+        self.assertEqual(p_road, lane_section.parent_road)
 
     def test_road_mark(self):
         road_mark = RoadMark()

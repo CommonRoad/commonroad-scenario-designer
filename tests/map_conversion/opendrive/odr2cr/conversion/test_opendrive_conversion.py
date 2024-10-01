@@ -133,6 +133,17 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         # test position of a traffic light
         np.testing.assert_almost_equal(network.find_traffic_light_by_id(9).position, [0.145, 8.317], 3)
 
+    def test_zero_width_lanes_map_road_type(self):
+        """Test the zero_width_lanes_map_road_type.xodr"""
+        name = "zero_width_lanes_map_road_type"
+        scenario = load_and_convert_opendrive(name)
+
+        network = scenario.lanelet_network
+
+        # test the road speed limit conversion
+        self.assertEqual(float(network.traffic_signs[0].traffic_sign_elements[0].additional_values[0]), 22.35)
+        self.assertEqual(float(network.traffic_signs[1].traffic_sign_elements[0].additional_values[0]), 22.35)
+
     def test_roundabout(self):
         """Test the file roundabout.xodr"""
         name = "roundabout"
@@ -234,6 +245,18 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         self.assertListEqual([1], network.find_lanelet_by_id(2).predecessor)
         self.assertListEqual([3], network.find_lanelet_by_id(2).successor)
         self.assertEqual([2], network.find_lanelet_by_id(3).predecessor)
+
+    def test_lht(self):
+        """Test left hand traffic parsing and consideration"""
+        name = "zero_width_lanes_map"
+        name_lht = "zero_width_lanes_map_LHT"
+        scenario = load_and_convert_opendrive(name)
+        scenario_lht = load_and_convert_opendrive(name_lht)
+
+        # check if the vertices order of RHT and LHT scenarios is reversed
+        for ll in scenario.lanelet_network.lanelets:
+            ll_lht = scenario_lht.lanelet_network.find_lanelet_by_id(ll.lanelet_id)
+            self.assertEqual(ll.center_vertices.tolist(), ll_lht.center_vertices[::-1].tolist())
 
     def test_four_way_signal(self):
         """Test the file FourWaySignal.xodr"""

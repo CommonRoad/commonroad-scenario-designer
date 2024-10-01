@@ -94,6 +94,7 @@ class ParametricLane:
         side: Optional[str] = None,
         speed: Optional[float] = None,
         access: Optional[List] = None,
+        driving_direction: bool = True,
     ):
         """Initializes a ParametricLane object.
 
@@ -105,6 +106,7 @@ class ParametricLane:
         :param side: the side in lane section. Used for determining the line marking side. Default is None
         :param speed: Speed limit for this individual plane
         :param access: equivalent to access restrictions from opendrive lanes
+        :param driving_direction: driving direction, right if true
         """
         self.border_group = border_group
         self.id_ = id_
@@ -115,6 +117,7 @@ class ParametricLane:
         self.side = side
         self.speed = speed
         self.access = access if access is not None else []
+        self.driving_direction = driving_direction
 
     def calc_border(
         self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature: bool = True

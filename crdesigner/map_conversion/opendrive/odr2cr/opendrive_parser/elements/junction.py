@@ -25,7 +25,6 @@ class Junction:
 
         :getter: returns the junction ID
         :setter: sets the junction ID
-        :type: int
         """
         return self._id
 
@@ -40,7 +39,6 @@ class Junction:
 
         :getter: returns the junction name
         :setter: sets the junction name
-        :type: string
         """
         return self._name
 
@@ -54,7 +52,6 @@ class Junction:
         Shows the connections associated with the junction.
 
         :getter: returns the connection objects in the form of a list [connection1, connection2, ...]
-        :type: list of object instances of class Connection
         """
         return self._connections
 
@@ -97,7 +94,6 @@ class Connection:
 
         :getter: returns the ID of the connection
         :setter: sets the ID of the connection
-        :type: int
         """
         return self._id
 
@@ -112,7 +108,6 @@ class Connection:
 
         :getter: returns the ID of the incoming road
         :setter: sets the ID of the incoming road
-        :type: int
         """
         return self._incomingRoad
 
@@ -127,7 +122,6 @@ class Connection:
 
         :getter: returns the ID of the connecting road
         :setter: sets the ID of the connecting road
-        :type: int
         """
         return self._connectingRoad
 
@@ -142,7 +136,6 @@ class Connection:
 
         :getter: returns the contact point
         :setter: sets the contact point
-        :type: string
         """
         return self._contactPoint
 
@@ -159,7 +152,6 @@ class Connection:
         Shows the laneLinks associated with the connection element.
 
         :getter: returns the laneLink objects in the form of a list [laneLink1, laneLink2, ...]
-        :type: list of object instances of class LaneLink
         """
         return self._laneLinks
 
@@ -199,7 +191,6 @@ class LaneLink:
 
         :getter: returns ID
         :setter: sets ID
-        :type: int
         """
         return self._from
 
@@ -214,7 +205,6 @@ class LaneLink:
 
         :getter: returns ID
         :setter: sets ID
-        :type: int
         """
         return self._to
 

@@ -31,7 +31,6 @@ class Link:
 
         :getter: returns preceding road/junction
         :setter: sets preceding road/junction
-        :type: instance of class Predecessor()
         """
         return self._predecessor
 
@@ -50,7 +49,6 @@ class Link:
 
         :getter: returns succeeding road/junction
         :setter: sets succeeding road/junction
-        :type: instance of class Successor()
         """
         return self._successor
 
@@ -69,7 +67,6 @@ class Link:
 
         :getter: returns neighbors
         :setter: sets neighbors
-        :type: instance of class Neighbor()
         """
         warnings.warn(
             "Neighbors element was used in OpenDRIVE V1.4 for legacy purposes. V1.7 does not contain"
@@ -124,7 +121,6 @@ class Predecessor:
 
         :getter: returns type
         :setter: sets type of the preceding element
-        :type: string
         """
         return self._elementType
 
@@ -143,7 +139,6 @@ class Predecessor:
 
         :getter: returns ID
         :setter: sets ID
-        :type: int
         """
         return self._elementId
 
@@ -159,7 +154,6 @@ class Predecessor:
 
         :getter: returns contact point
         :setter: sets contact point
-        :type: string
         """
         return self._contactPoint
 
@@ -207,7 +201,6 @@ class Neighbor:
 
         :getter: returns whether left or right neighbor is meant
         :setter: sets neighbor
-        :type: string
         """
         return self._side
 
@@ -226,7 +219,6 @@ class Neighbor:
 
         :getter: returns road ID
         :setter: sets road ID
-        :type: int
         """
         return self._elementId
 
@@ -242,7 +234,6 @@ class Neighbor:
 
         :getter: returns direction of neighbor relative to own
         :setter: sets direction of neighbor relative to own
-        :type: string
         """
         return self._direction
 

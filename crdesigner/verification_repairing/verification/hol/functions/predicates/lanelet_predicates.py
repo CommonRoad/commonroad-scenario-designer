@@ -166,7 +166,9 @@ def _wrong_left_right_boundary_side(
             center_vertices = resample_polyline(center_vertices, config.resampling_repeated_step)
             continue
 
-    return sum(left - right > 0) / len(left) < config.perc_vert_wrong_side
+    # >= since we use the function also for the lanelet2cr conversion where it might be
+    # that start/ending vertices of forks/merges match
+    return sum(left - right >= 0) / len(left) < config.perc_vert_wrong_side
 
 
 def has_predecessor(lanelet_0: Lanelet, lanelet_1: Lanelet) -> bool:
@@ -221,8 +223,8 @@ def is_polylines_intersection(polyline_0: np.ndarray, polyline_1: np.ndarray) ->
     :param polyline_1: Second lanelet.
     :return: Boolean indicates whether two polylines intersect each other.
     """
-    line_0 = [(x, y) for x, y in polyline_0]
-    line_1 = [(x, y) for x, y in polyline_1]
+    line_0 = [(x, y, z[0]) if z else (x, y) for x, y, *z in polyline_0]
+    line_1 = [(x, y, z[0]) if z else (x, y) for x, y, *z in polyline_1]
 
     line_string_0 = LineString(line_0)
     line_string_1 = LineString(line_1)
@@ -239,8 +241,8 @@ def is_polyline_self_intersection(polyline: np.ndarray):
     :param polyline: Polyline.
     :return: Boolean indicates whether the polyline intersects itself.
     """
-    line = [(x, y) for x, y in polyline]
-    orientation = compute_orientation_from_polyline(polyline)
+    line = [(x, y, z[0]) if z else (x, y) for x, y, *z in polyline]
+    orientation = compute_orientation_from_polyline(polyline[:, :2])  # function does not support 3d vertices
     orientation_dif = [abs(orientation[i + 1] - orientation[i]) for i in range(len(orientation) - 1)]
     line_string = LineString(line)
 

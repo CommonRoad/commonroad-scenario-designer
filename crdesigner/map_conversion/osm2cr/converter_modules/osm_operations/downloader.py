@@ -40,16 +40,10 @@ def download_map(filename: str, lon1: float, lat1: float, lon2: float, lat2: flo
     downloads an osm map of a specified area and saves it to disk
 
     :param filename: name of the file the map is saved to
-    :type filename: str
     :param lon1: longitude of the left border of the downloaded area
-    :type lon1: float
     :param lat1: latitude of the upper border of the downloaded area
-    :type lat1: float
     :param lon2: longitude of the right border of the downloaded area
-    :type lon2: float
     :param lat2: latitude of the lower border of the downloaded area
-    :type lat2: float
-    :return: None
     """
     # query = "https://overpass-api.de/api/map?bbox={},{},{},{}".format(
     #     lon1, lat1, lon2, lat2
@@ -68,13 +62,9 @@ def get_frame(lon: float, lat: float, radius: float) -> Tuple[float, float, floa
     gets the frame of area to download
 
     :param lon: longitude of center of the area
-    :type lon: float
     :param lat: latitude of center of the area
-    :type lat: float
     :param radius: half width of the frame
-    :type radius: float
     :return: frame of the area
-    :rtype: Tuple[float, float, float, float]
     """
     lon_constant = np.pi / 180 * config.EARTH_RADIUS * np.cos(np.radians(lat))
     lat_constant = np.pi / 180 * config.EARTH_RADIUS
@@ -90,14 +80,9 @@ def download_around_map(filename: str, lat: float, lon: float, radius: float = 5
     downloads map around center point and saves it to file
 
     :param filename: name of the file the map is saved to
-    :type filename: str
     :param lon: longitude of center of the area
-    :type lon: float
     :param lat: latitude of center of the area
-    :type lat: float
     :param radius: half width of the frame
-    :type radius: float
-    :return: None
     """
     lon1, lat1, lon2, lat2 = get_frame(lon, lat, radius)
     download_map(config.SAVE_PATH + filename, lon1, lat1, lon2, lat2)

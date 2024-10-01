@@ -2190,22 +2190,17 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     vehicle_node.setAttribute("departPos", str(depart_pos))
 
                     vehicle_route_node = domTree.createElement("route")
-                    edges = [str(self.lanelet_id2edge_id[lanelet_id]) for lanelet_id in lanelet_ids]
-                    # Remove internal edges
-                    if edges[0].startswith(":"):
-                        idx = next(
-                            idx
-                            for idx, (current_edge, next_edge) in enumerate(zip(edges[0:-1], edges[1:]))
-                            if not next_edge.startswith(":")
-                        )
-                    else:
-                        idx = 0
-                    filtered_edges = [edges[idx]]
-                    filtered_edges.extend([edge_id for edge_id in edges[idx + 1 :] if not edge_id.startswith(":")])
-                    # remove duplicates
-                    filtered_edges = [x[0] for x in groupby(filtered_edges)]
 
-                    vehicle_route_node.setAttribute("edges", " ".join(filtered_edges))
+                    edge_ids = [self.lanelet_id2edge_id[lanelet_id] for lanelet_id in lanelet_ids]
+                    # When junctions are created, the connecting edges in those junctions are removed.
+                    # To make sure, we do not reference removed edges in the resulting route, we collect only edges,
+                    # which are present after the internal edges were removed.
+                    filtered_edges = [edge_id for edge_id in edge_ids if edge_id in self.new_edges]
+                    # remove consecutive duplicates e.g. [26, 26, 28, 27, 26] becomes [26, 28, 27, 26]
+                    deduplicated_filtered_edges = [x[0] for x in groupby(filtered_edges)]
+
+                    deduplicated_filtered_edges_str = [str(edge_id) for edge_id in deduplicated_filtered_edges]
+                    vehicle_route_node.setAttribute("edges", " ".join(deduplicated_filtered_edges_str))
                     vehicle_node.appendChild(vehicle_route_node)
 
                     routes_node.appendChild(vehicle_node)
