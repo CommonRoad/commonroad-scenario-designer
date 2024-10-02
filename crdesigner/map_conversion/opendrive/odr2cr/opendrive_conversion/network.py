@@ -112,7 +112,7 @@ def convert_to_base_lanelet_network(lanelet_network: ConversionLaneletNetwork) -
         network.add_traffic_light(light, set())
     for la in lanelet_network.lanelets:
         left_bound = Bound(generate_unique_id(), la.left_vertices, la.line_marking_left_vertices)
-        right_bound = Bound(generate_unique_id(), la.left_vertices, la.line_marking_left_vertices)
+        right_bound = Bound(generate_unique_id(), la.right_vertices, la.line_marking_right_vertices)
         network.add_boundary(left_bound)
         network.add_boundary(right_bound)
         network.add_lanelet(
