@@ -7,7 +7,7 @@ import numpy as np
 from commonroad.common.common_lanelet import LaneletType, LineMarking, StopLine
 from commonroad.common.common_scenario import GeoTransformation, Location, ScenarioID
 from commonroad.scenario.intersection import CrossingGroup
-from commonroad.scenario.lanelet import Lanelet, LaneletNetwork, Bound
+from commonroad.scenario.lanelet import Bound, Lanelet, LaneletNetwork
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import (
     TrafficSign,
