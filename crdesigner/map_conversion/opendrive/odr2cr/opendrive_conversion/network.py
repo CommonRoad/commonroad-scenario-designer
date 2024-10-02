@@ -7,7 +7,7 @@ import numpy as np
 from commonroad.common.common_lanelet import LaneletType, LineMarking, StopLine
 from commonroad.common.common_scenario import GeoTransformation, Location, ScenarioID
 from commonroad.scenario.intersection import CrossingGroup
-from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
+from commonroad.scenario.lanelet import Lanelet, LaneletNetwork, Bound
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import (
     TrafficSign,
@@ -111,11 +111,15 @@ def convert_to_base_lanelet_network(lanelet_network: ConversionLaneletNetwork) -
     for light in lanelet_network.traffic_lights:
         network.add_traffic_light(light, set())
     for la in lanelet_network.lanelets:
+        left_bound = Bound(generate_unique_id(), la.left_vertices, la.line_marking_left_vertices)
+        right_bound = Bound(generate_unique_id(), la.left_vertices, la.line_marking_left_vertices)
+        network.add_boundary(left_bound)
+        network.add_boundary(right_bound)
         network.add_lanelet(
             Lanelet(
-                la.left_vertices,
+                left_bound,
                 la.center_vertices,
-                la.right_vertices,
+                right_bound,
                 la.lanelet_id,
                 la.predecessor,
                 la.successor,
