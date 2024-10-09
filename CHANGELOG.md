@@ -10,6 +10,7 @@
 
 ### Fixed
 - cr2sumo: Trajectory conversion assigned non-existent edges to routes
+- osm2cr: Intersection incoming elements did not reference any incoming lanelets
 - Command line interface: Providing no input path
 
 ## [0.8.2] - 2024-07-22
