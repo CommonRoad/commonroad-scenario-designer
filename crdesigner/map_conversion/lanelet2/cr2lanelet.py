@@ -286,6 +286,8 @@ class CR2LaneletConverter:
                 # map the end of the lanelet to the ref_line
                 # maybe map the stop line also? Lanelets from examples didn't have stopLines so double check if needed
                 x, y = self._get_shared_last_nodes_from_other_lanelets(ll)
+                if x is None or y is None:
+                    x, y = self.last_nodes.get(ll.lanelet_id, (None, None))
                 way_tl = Way(self.id_count, [x, y])
                 self.osm.add_way(way_tl)
                 way_list = [way_tl.id_]
