@@ -4,6 +4,7 @@ from typing import Dict, List, Set, Tuple
 import numpy as np
 from commonroad.scenario.traffic_light import (
     TrafficLight,
+    TrafficLightCycle,
     TrafficLightCycleElement,
     TrafficLightState,
 )
@@ -111,7 +112,7 @@ def _sync_traffic_light_cycles(traffic_lights: List[TrafficLight]) -> List[List[
     )
     states = np.array(
         [
-            _cycles_to_states(traffic_light.traffic_light_cycle.cycle_elements, time_steps)
+            _sample_traffic_light_cycle_to_states(traffic_light.traffic_light_cycle, time_steps)
             for traffic_light in traffic_lights
         ]
     ).T
@@ -130,18 +131,16 @@ def _sync_traffic_light_cycles(traffic_lights: List[TrafficLight]) -> List[List[
     return res
 
 
-def _cycles_to_states(cycles: List[TrafficLightCycleElement], max_time: int) -> List[TrafficLightState]:
+def _sample_traffic_light_cycle_to_states(cycle: TrafficLightCycle, max_time: int) -> List[TrafficLightState]:
     """
-    Sample TrafficLightCycleElements for each timestep in max_time
-    :param cycles:
-    :param max_time:
-    :return:
+    Sample the states of `cycle` for each timestep from 0 to `max_time`.
+
+    :param cycle: The traffic light cycle that should be resampled.
+    :param max_time: The time step until which the cycle should be sampled.
+
+    :return: Sampled traffic light states.
     """
     states: List[TrafficLightState] = []
-    cycle_idx = 0
-    length = sum(c.duration for c in cycles)
     for i in range(max_time):
-        if (i % length) >= sum(c.duration for c in cycles[: cycle_idx + 1]):
-            cycle_idx = (cycle_idx + 1) % len(cycles)
-        states.append(cycles[cycle_idx].state)
+        states.append(cycle.get_state_at_time_step(i))
     return states
