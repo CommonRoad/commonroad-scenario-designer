@@ -13,6 +13,7 @@
 - osm2cr: Intersection incoming elements did not reference any incoming lanelets
 - Command line interface: Providing no input path
 - Scenario fails to be opened, if any of the dynamic obstacles does not contain a prediction
+- GUI: wrong usage of button
 
 ## [0.8.2] - 2024-07-22
 
