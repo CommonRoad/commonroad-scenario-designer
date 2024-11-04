@@ -565,12 +565,12 @@ iso3166 = ">=1.0.1"
 lxml = ">=4.2.2"
 matplotlib = ">=3.0.0"
 networkx = ">=2.2"
-numpy = ">=1.26.1"
+numpy = {version = ">=1.26.1", markers = "python_version < \"3.13\""}
 omegaconf = ">=2.0"
 pillow = ">=10.4.0"
 protobuf = "==3.20.2"
 rtree = ">=0.8.3"
-scipy = "^1.11.3"
+scipy = {version = ">=1.11.3", markers = "python_version < \"3.13\""}
 shapely = "^2.0.1"
 tqdm = ">=4.64"
 
@@ -578,7 +578,7 @@ tqdm = ">=4.64"
 type = "git"
 url = "https://github.com/commonroad/commonroad-io"
 reference = "release-2024-3"
-resolved_reference = "5ab8d07e9ba05e56c5604835defacbdd5e0cbad5"
+resolved_reference = "897f0f979fa9267da23f3b185c6fc4d97a505270"
 
 [[package]]
 name = "commonroad-vehicle-models"
