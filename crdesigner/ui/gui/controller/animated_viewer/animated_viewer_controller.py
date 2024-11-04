@@ -131,7 +131,11 @@ class AnimatedViewerController:
         if start == end:
             warning_dialog = QMessageBox()
             warning_dialog.warning(
-                None, "Warning", "This Scenario only has one time step!", QMessageBox.Ok, QMessageBox.Ok
+                None,
+                "Warning",
+                "This Scenario only has one time step!",
+                QMessageBox.StandardButton.Ok,
+                QMessageBox.StandardButton.Ok,
             )
             warning_dialog.close()
 
