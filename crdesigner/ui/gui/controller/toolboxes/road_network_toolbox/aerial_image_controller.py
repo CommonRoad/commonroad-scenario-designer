@@ -12,7 +12,7 @@ try:
     from PyQt6.QtWidgets import QMessageBox
 
     pyqt_available = True
-except ImportError:
+except (ImportError, RuntimeError):
     pyqt_available = False
 
 from crdesigner.common.config.gui_config import gui_config as config_settings

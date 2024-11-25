@@ -27,5 +27,5 @@ try:
     ) -> QMessageBox.StandardButton:
         return _message(widget, "Warning", text, buttons, default_button)
 
-except ImportError:
+except (ImportError, RuntimeError):
     pyqt_available = False

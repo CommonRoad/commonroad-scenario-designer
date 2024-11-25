@@ -11,7 +11,7 @@ try:
     from PyQt6.QtWidgets import QMessageBox
 
     pyqt_available = True
-except ImportError:
+except (ImportError, RuntimeError):
     pyqt_available = False
 
 from crdesigner.ui.gui.utilities.custom_yaml import add_custom_interval_interpreter
