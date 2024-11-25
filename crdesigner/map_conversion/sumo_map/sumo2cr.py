@@ -27,7 +27,7 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
     :return: commonroad map file
     """
     if net_file is None and pyqt_available:
-        QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.Ok)
+        QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.StandardButton.Ok)
         return
     assert isinstance(net_file, str)
 
