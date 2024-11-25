@@ -5,7 +5,15 @@ from typing import TYPE_CHECKING, Optional
 from commonroad.scenario.scenario import Scenario
 from pyproj import CRS, Transformer
 from PyQt6.QtCore import Q_ARG, QMetaObject, QRunnable, Qt, QThreadPool
-from PyQt6.QtWidgets import QMessageBox
+
+try:
+    # required for Ubuntu 20.04 since there a system library is too old for pyqt6 and the import fails
+    # when not importing this, one can still use the map conversion
+    from PyQt6.QtWidgets import QMessageBox
+
+    pyqt_available = True
+except ImportError:
+    pyqt_available = False
 
 from crdesigner.common.config.gui_config import gui_config as config_settings
 from crdesigner.common.config.gui_config import lanelet2_default
@@ -149,7 +157,7 @@ class AddAerialImageController:
             return
 
         if self.road_network_toolbox_ui.bing_selection.isChecked():
-            if config_settings.BING_MAPS_KEY == "":
+            if config_settings.BING_MAPS_KEY == "" and pyqt_available:
                 print("_Warning__: No Bing Maps key specified. Go to settings and set password.")
                 warning_dialog = QMessageBox()
                 warning_dialog.warning(
