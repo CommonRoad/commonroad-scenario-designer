@@ -1,6 +1,14 @@
 from commonroad.common.util import Interval
 from commonroad.scenario.obstacle import ObstacleType
-from PyQt6.QtWidgets import QMessageBox
+
+try:
+    # required for Ubuntu 20.04 since there a system library is too old for pyqt6 and the import fails
+    # when not importing this, one can still use the map conversion
+    from PyQt6.QtWidgets import QMessageBox
+
+    pyqt_available = True
+except (ImportError, RuntimeError):
+    pyqt_available = False
 
 from crdesigner.map_conversion.sumo_map.config import SumoConfig
 from crdesigner.ui.gui.utilities.util import Observable
@@ -162,5 +170,6 @@ class SUMOSettings:
         self.update_ui_values()
 
     def warn(self, msg):
-        messbox = QMessageBox()
-        messbox.warning(None, "Warning", msg, QMessageBox.Ok, QMessageBox.Ok)
+        if pyqt_available:
+            messbox = QMessageBox()
+            messbox.warning(None, "Warning", msg, QMessageBox.StandardButton.Ok, QMessageBox.StandardButton.Ok)

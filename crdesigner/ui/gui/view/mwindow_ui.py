@@ -6,8 +6,8 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
 
 from crdesigner.common.config.gui_config import ColorSchema, gui_config
+from crdesigner.common.sumo_available import SUMO_AVAILABLE
 from crdesigner.ui.gui.resources.MainWindow import Ui_mainWindow
-from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 
 if SUMO_AVAILABLE:
     pass
