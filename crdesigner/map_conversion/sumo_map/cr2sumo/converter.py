@@ -623,6 +623,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     # however sumo doesn't need a junction for this
                     continue
                 cluster_instruction = self.get_cluster_instruction(intersection, lanelet_network, intersecting_edges)
+                self.logger.debug(
+                    f"Clustering intersection {intersection.intersection_id} according to {cluster_instruction}"
+                )
                 intersect_any = False
                 if cluster_instruction != ClusterInstruction.NO_CLUSTERING:
                     for incoming in intersection.incomings:

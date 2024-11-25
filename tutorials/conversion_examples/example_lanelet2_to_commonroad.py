@@ -14,7 +14,7 @@ output_path = Path.cwd() / "example_files/lanelet2/merging_lanelets_utm.xml"
 lanelet2_config.adjacencies = True
 
 # load lanelet/lanelet2 file, parse it, and convert it to a CommonRoad scenario
-scenario = lanelet_to_commonroad(str(input_path))
+scenario = lanelet_to_commonroad(str(input_path), lanelet2_conf=lanelet2_config)
 
 # store converted file as CommonRoad scenario
 writer = CRDesignerFileWriter(

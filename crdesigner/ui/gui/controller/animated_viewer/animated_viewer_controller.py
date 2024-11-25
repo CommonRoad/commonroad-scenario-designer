@@ -1,6 +1,5 @@
 from typing import List, Optional
 
-import numpy as np
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
@@ -132,7 +131,11 @@ class AnimatedViewerController:
         if start == end:
             warning_dialog = QMessageBox()
             warning_dialog.warning(
-                None, "Warning", "This Scenario only has one time step!", QMessageBox.Ok, QMessageBox.Ok
+                None,
+                "Warning",
+                "This Scenario only has one time step!",
+                QMessageBox.StandardButton.Ok,
+                QMessageBox.StandardButton.Ok,
             )
             warning_dialog.close()
 
@@ -225,17 +228,29 @@ class AnimatedViewerController:
         if not self.scenario_model.scenario_created():
             return 0
 
-        if (
-            len(self.scenario_model.get_dynamic_obstacles()) > 0
-            and self.scenario_model.get_dynamic_obstacles()[0].prediction is not None
-        ):
-            time_steps = [
-                obstacle.prediction.occupancy_set[-1].time_step
-                for obstacle in self.scenario_model.get_dynamic_obstacles()
-            ]
-            self.max_timestep = np.max(time_steps) if time_steps else 0
-        else:
-            self.max_timestep = 0
+        # The maximum time step is usually given by the final time step in the prediction
+        # of one of the dynamic obstacles
+        max_prediction_final_time_steps = max(
+            [
+                dynamic_obstacle.prediction.final_time_step
+                for dynamic_obstacle in self.scenario_model.get_dynamic_obstacles()
+                if dynamic_obstacle.prediction is not None
+            ],
+            default=0,
+        )
+        # Additionally, consider the initial time step of each obstacle.
+        # This makes sure that obstacles, which only have an initial state, no prediction
+        # and enter the scenario after all other obstacles, are also displayed.
+        max_initial_time_steps = max(
+            [
+                dynamic_obstacle.initial_state.time_step
+                for dynamic_obstacle in self.scenario_model.get_dynamic_obstacles()
+                if dynamic_obstacle.prediction is None
+            ],
+            default=0,
+        )
+
+        self.max_timestep = max(max_prediction_final_time_steps, max_initial_time_steps)
 
         return self.max_timestep
 

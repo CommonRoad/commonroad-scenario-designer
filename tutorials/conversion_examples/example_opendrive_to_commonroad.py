@@ -15,7 +15,7 @@ config = open_drive_config
 config.lanelet_types_backwards_compatible = False
 
 # load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
-scenario = opendrive_to_commonroad(input_path)
+scenario = opendrive_to_commonroad(input_path, odr_conf=config)
 
 # store converted file as CommonRoad scenario
 writer = CRDesignerFileWriter(

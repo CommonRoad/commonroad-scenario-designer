@@ -2,6 +2,7 @@
 This module removes converting errors before exporting the scenario to XML
 """
 
+import copy
 import logging
 from typing import Dict, List, Set
 
@@ -665,18 +666,24 @@ def create_laneletnetwork(
 
     # Add lanelets
     for lanelet in lanelets:
+        # In contrast to all other objects, the lanelets do not need to be copied,
+        # because they are newly created by `create_lanelet` during the sanitization process.
+        # Therefore, they should not be susceptible to the same problems as traffic signs/lights and intersections.
         net.add_lanelet(lanelet)
+
+    # Traffic signs/lights and intersections all must be copied, so that modifications to the objects
+    # in the original lanelet network do not spill over into the new lanelet network.
 
     # Add Traffic Signs
     for sign in traffic_signs:
-        net.add_traffic_sign(sign, set())
+        net.add_traffic_sign(copy.deepcopy(sign), set())
 
     # Add Traffic Lights
     for light in traffic_lights:
-        net.add_traffic_light(light, set())
+        net.add_traffic_light(copy.deepcopy(light), set())
 
     # Add Intersections
     for intersection in intersections:
-        net.add_intersection(intersection)
+        net.add_intersection(copy.deepcopy(intersection))
 
     return net
