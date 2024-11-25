@@ -14,6 +14,7 @@
 - Command line interface: Providing no input path
 - Scenario fails to be opened, if any of the dynamic obstacles does not contain a prediction
 - GUI: wrong usage of button
+- Check for qt6 so that map conversions work under Ubuntu 20.04
 
 ## [0.8.2] - 2024-07-22
 
