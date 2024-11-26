@@ -6,11 +6,11 @@ from commonroad.visualization.mp_renderer import MPRenderer
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
 from crdesigner.common.config.gui_config import gui_config
+from crdesigner.common.sumo_available import SUMO_AVAILABLE
 from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import (
     DynamicCanvasController,
 )
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
-from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.helper import draw_lanelet_polygon
 
 if SUMO_AVAILABLE:

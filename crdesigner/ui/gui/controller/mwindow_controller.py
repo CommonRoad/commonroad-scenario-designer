@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 from crdesigner.common.config.gui_config import gui_config
 from crdesigner.common.logging import logger
+from crdesigner.common.sumo_available import SUMO_AVAILABLE
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
 from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_wrapper_controller import (
     AnimatedViewerWrapperController,
@@ -32,7 +33,6 @@ from crdesigner.ui.gui.controller.top_bar.top_bar_controller import TopBarContro
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.file_actions import open_commonroad_file
-from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.util import (
     find_invalid_lanelet_polygons,
     find_invalid_ref_of_traffic_lights,

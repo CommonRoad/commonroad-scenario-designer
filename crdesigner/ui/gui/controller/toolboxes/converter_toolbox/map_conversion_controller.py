@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import QDockWidget, QFileDialog, QMainWindow, QMessageBox
 
 from crdesigner.common.config.osm_config import osm_config
 from crdesigner.common.logging import logger
+from crdesigner.common.sumo_available import SUMO_AVAILABLE
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
@@ -32,7 +33,6 @@ from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloade
     download_around_map,
 )
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.util import select_local_file
 from crdesigner.ui.gui.utilities.waitingspinnerwidget import QtWaitingSpinner
 from crdesigner.ui.gui.view.toolboxes.converter_toolbox.converter_toolbox_ui import (

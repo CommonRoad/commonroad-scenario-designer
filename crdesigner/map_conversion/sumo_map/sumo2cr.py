@@ -3,7 +3,15 @@ import subprocess
 
 from commonroad.scenario.scenario import Scenario
 from lxml import etree
-from PyQt6.QtWidgets import QMessageBox
+
+try:
+    # required for Ubuntu 20.04 since there a system library is too old for pyqt6 and the import fails
+    # when not importing this, one can still use the map conversion
+    from PyQt6.QtWidgets import QMessageBox
+
+    pyqt_available = True
+except (ImportError, RuntimeError):
+    pyqt_available = False
 
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.network import (
     Network,
@@ -22,7 +30,7 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
 
     :return: CommonRoad map file
     """
-    if net_file is None:
+    if net_file is None and pyqt_available:
         QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.StandardButton.Ok)
         return
     assert isinstance(net_file, str)
