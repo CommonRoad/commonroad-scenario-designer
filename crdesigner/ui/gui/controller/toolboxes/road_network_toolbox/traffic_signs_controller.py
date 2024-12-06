@@ -3,6 +3,7 @@ from commonroad.scenario.traffic_sign import (
     SupportedTrafficSignCountry,
     TrafficSign,
     TrafficSignElement,
+    TrafficSignIDCountries,
 )
 
 from crdesigner.common.logging import logger
@@ -77,9 +78,7 @@ class AddTrafficSignController:
         # Check if 'None' is and other items are selected -> Uncheck 'None'
         elif "None" in self.road_network_toolbox_ui.referenced_lanelets_traffic_sign.get_checked_items():
             self.road_network_toolbox_ui.referenced_lanelets_traffic_sign.uncheck_items("None")
-        country_signs = globals()[
-            "TrafficSignID" + SupportedTrafficSignCountry(self.scenario_model.get_country_id()).name.capitalize()
-        ]
+
         traffic_sign_elements = []
         referenced_lanelets = {
             int(la) for la in self.road_network_toolbox_ui.referenced_lanelets_traffic_sign.get_checked_items()
@@ -100,7 +99,11 @@ class AddTrafficSignController:
                 additional_value = []
             else:
                 additional_value = [self.road_network_toolbox_ui.traffic_sign_element_table.item(row, 1).text()]
-            traffic_sign_elements.append(TrafficSignElement(country_signs[sign_id], additional_value))
+            traffic_sign_elements.append(
+                TrafficSignElement(
+                    TrafficSignIDCountries[self.scenario_model.get_country_id()][sign_id], additional_value
+                )
+            )
 
         if len(traffic_sign_elements) == 0:
             self.road_network_controller.text_browser.append("_Warning:_ No traffic sign element added.")
