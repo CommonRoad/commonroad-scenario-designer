@@ -1,4 +1,7 @@
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
+from commonroad.scenario.traffic_sign import (
+    SupportedTrafficSignCountry,
+    TrafficSignIDCountries,
+)
 from PyQt6.QtWidgets import QComboBox, QTableWidgetItem
 
 from crdesigner.common.logging import logger
@@ -87,13 +90,5 @@ class AddTrafficSignUI:
         num_rows = self.road_network_toolbox_ui.traffic_sign_element_table.rowCount()
         self.road_network_toolbox_ui.traffic_sign_element_table.insertRow(num_rows)
         combo_box = QComboBox()
-        combo_box.addItems(
-            [
-                elem.name
-                for elem in globals()[
-                    "TrafficSignID"
-                    + SupportedTrafficSignCountry(self.scenario_model.get_country_id()).name.capitalize()
-                ]
-            ]
-        )
+        combo_box.addItems([elem.name for elem in TrafficSignIDCountries[self.scenario_model.get_country_id()]])
         self.road_network_toolbox_ui.traffic_sign_element_table.setCellWidget(num_rows, 0, combo_box)
