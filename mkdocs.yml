@@ -1,0 +1,17 @@
+site_name: CommonRoad Scenario Designer
+theme:
+  name: material
+  logo: assets/commonroad_white150.png
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: sphinx
+  - search
+
+nav:
+  - Introduction: index.md
+  - Example Usage: example.md
+  - API Reference:
+      - "Basic": basic.md
