@@ -13,5 +13,3 @@ plugins:
 nav:
   - Introduction: index.md
   - Example Usage: example.md
-  - API Reference:
-      - "Basic": basic.md
