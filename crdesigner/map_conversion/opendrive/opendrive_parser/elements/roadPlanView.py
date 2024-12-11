@@ -63,7 +63,14 @@ class PlanView:
         """
         self._add_geometry(Line(start_pos, heading, length), False)
 
-    def add_spiral(self, start_pos: np.ndarray, heading: float, length: float, curv_start: float, curv_end: float):
+    def add_spiral(
+        self,
+        start_pos: np.ndarray,
+        heading: float,
+        length: float,
+        curv_start: float,
+        curv_end: float,
+    ):
         """
         Calls _add_geometry for Spiral elements.
 
@@ -124,7 +131,16 @@ class PlanView:
             True,
         )
 
-    def add_poly3(self, start_pos: np.ndarray, heading: float, length: float, a: float, b: float, c: float, d: float):
+    def add_poly3(
+        self,
+        start_pos: np.ndarray,
+        heading: float,
+        length: float,
+        a: float,
+        b: float,
+        c: float,
+        d: float,
+    ):
         """
         Calls _add_geometry for Poly3 elements.
 
@@ -175,7 +191,9 @@ class PlanView:
         #     return self.interpolate_cached_values(s_pos)
 
         # start = time.time()
-        result_pos, result_tang, curv, max_geometry_length = self.calc_geometry(s_pos, compute_curvature, reverse)
+        result_pos, result_tang, curv, max_geometry_length = self.calc_geometry(
+            s_pos, compute_curvature, reverse
+        )
         # end = time.time()
         # self.normal_time += end - start
         return result_pos, result_tang, curv, max_geometry_length
@@ -307,7 +325,9 @@ class PlanView:
             if s == remaining_length:
                 s += self._min_delta_s
             else:
-                s = calc_next_s(s, curv, self._error_tolerance_s, self._min_delta_s, remaining_length)
+                s = calc_next_s(
+                    s, curv, self._error_tolerance_s, self._min_delta_s, remaining_length
+                )
             s = min(self.length, s)
             # i += 1
 

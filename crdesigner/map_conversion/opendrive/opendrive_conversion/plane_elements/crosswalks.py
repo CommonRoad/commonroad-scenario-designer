@@ -20,7 +20,10 @@ def get_crosswalks(road: Road) -> List[ConversionLanelet]:
     for crosswalk in [obj for obj in road.objects if obj.type == "crosswalk"]:
         pos, tan, _, _ = road.plan_view.calc(crosswalk.s, compute_curvature=False)
         position = np.array(
-            [pos[0] + crosswalk.t * np.cos(tan + np.pi / 2), pos[1] + crosswalk.t * np.sin(tan + np.pi / 2)]
+            [
+                pos[0] + crosswalk.t * np.cos(tan + np.pi / 2),
+                pos[1] + crosswalk.t * np.sin(tan + np.pi / 2),
+            ]
         )
         corners = np.empty((0, 2))
         # origin of local u/v coordinate system that hdg rotates about
@@ -28,7 +31,10 @@ def get_crosswalks(road: Road) -> List[ConversionLanelet]:
         # rotation matrix
         rotation_angle = tan + crosswalk.hdg
         rotation_matrix = np.array(
-            [[np.cos(rotation_angle), -np.sin(rotation_angle)], [np.sin(rotation_angle), np.cos(rotation_angle)]]
+            [
+                [np.cos(rotation_angle), -np.sin(rotation_angle)],
+                [np.sin(rotation_angle), np.cos(rotation_angle)],
+            ]
         )
 
         for outline in crosswalk.outline:
@@ -50,9 +56,15 @@ def get_crosswalks(road: Road) -> List[ConversionLanelet]:
         # object has more than four elements -> fit rectangle over polygon and select closest vertices as corners
         else:
             rect = MultiPoint(corners).minimum_rotated_rectangle
-            lower_left = np.argmin(np.linalg.norm(np.array(rect.boundary.coords[1]) - corners, axis=1))
-            lower_right = np.argmin(np.linalg.norm(np.array(rect.boundary.coords[2]) - corners, axis=1))
-            upper_left = np.argmin(np.linalg.norm(np.array(rect.boundary.coords[0]) - corners, axis=1))
+            lower_left = np.argmin(
+                np.linalg.norm(np.array(rect.boundary.coords[1]) - corners, axis=1)
+            )
+            lower_right = np.argmin(
+                np.linalg.norm(np.array(rect.boundary.coords[2]) - corners, axis=1)
+            )
+            upper_left = np.argmin(
+                np.linalg.norm(np.array(rect.boundary.coords[0]) - corners, axis=1)
+            )
 
             # select long side as lanelet boundaries assuming index 0 corresponds to lower left corner
             if np.linalg.norm(corners[lower_left] - corners[upper_left]) > np.linalg.norm(
@@ -80,7 +92,12 @@ def get_crosswalks(road: Road) -> List[ConversionLanelet]:
         center_vertices = (left_vertices + right_vertices) / 2
         # create ConversionLanelet
         lanelet = ConversionLanelet(
-            None, left_vertices, center_vertices, right_vertices, generate_unique_id(), lanelet_type="crosswalk"
+            None,
+            left_vertices,
+            center_vertices,
+            right_vertices,
+            generate_unique_id(),
+            lanelet_type="crosswalk",
         )
         crosswalks.append(lanelet)
     return crosswalks

@@ -1,4 +1,4 @@
-.. 
+..
   Normally, there are no heading levels assigned to certain characters as the structure is
   determined from the succession of headings. However, this convention is used in Python’s
   Style Guide for documenting which you may follow:
@@ -72,7 +72,7 @@ Python API
     )
     writer.write_to_file(output_path, OverwriteExistingFile.ALWAYS)
 
-In order to use the API calls, the save_path and Benchmark_ID has to be set in the config file. 
+In order to use the API calls, the save_path and Benchmark_ID has to be set in the config file.
 The config file can be found at */crdesigner/map_conversion/osm2cr* and is described in detail at the end of this document.
 
 The GUI provides also functionality to edit already the OSM graph structure before converting to CommonRoad.
@@ -361,8 +361,8 @@ External Data Sources
 Geonames Scenario Infos
 =======================
 
-`Geonames <https://www.geonames.org/>`_ is a free database that contains information (such as population density) about over eleven million places worldwide. 
-When providing a Geonames username in the **config.py**, a Geonames ID will be stored in the scenario. 
+`Geonames <https://www.geonames.org/>`_ is a free database that contains information (such as population density) about over eleven million places worldwide.
+When providing a Geonames username in the **config.py**, a Geonames ID will be stored in the scenario.
 This ID can be later on used to retrieve further location information about the scenario.
 
 
@@ -375,11 +375,11 @@ In order to request data from Mapillary, an API key is needed, which can be obta
 The key has to be saved in the **config.py** file.
 
 Since Mapillary is only providing the coordinates of each detected traffic sign, signs are added to the lanelet with the closest distance.
-This strategy can sometimes lead to traffic signs that are not correctly placed in the final scenario. 
+This strategy can sometimes lead to traffic signs that are not correctly placed in the final scenario.
 A manual review is therefore recommended.
 
 It is also possible to change the behavior how traffic signs are added to the scenario using **config.py** file.
-For example, Mapillary can be used as single source for traffic signs or several filters can be applied on signs. 
+For example, Mapillary can be used as single source for traffic signs or several filters can be applied on signs.
 
 Configuration
 *************
@@ -441,7 +441,7 @@ Aerial Image Settings
 
 Map Download Settings
 =====================
-* | **SAVE_PATH** 
+* | **SAVE_PATH**
   | Path to save downloaded files
   |  SAVE_PATH = "files/"
 
@@ -473,7 +473,7 @@ Scenario Settings
 
 * | **ACCEPTED_HIGHWAYS_MAINLAYER**
   | Types of roads extracted from the OSM file. Suitable types are: 'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential', 'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link', 'living_street', 'service'
-  |  ACCEPTED_HIGHWAYS_MAINLAYER = 
+  |  ACCEPTED_HIGHWAYS_MAINLAYER =
     ['motorway',
     'trunk',
     'primary',
@@ -495,7 +495,7 @@ Scenario Settings
 
 * | **ACCEPTED_HIGHWAYS_SUBLAYER**
   | Types of highways extracted from the OSM file as sublayer. Elements must not be in *ACCEPTED_HIGHWAYS_MAINLAYER*
-  |  ACCEPTED_HIGHWAYS_SUBLAYER = 
+  |  ACCEPTED_HIGHWAYS_SUBLAYER =
     ["path",
     "footway",
     "cycleway"]
@@ -508,14 +508,14 @@ Scenario Settings
   | Lanelet type of the sublayer lanelets that cross the main layer. Overwrites SUBLAYER_LANELETTYPE for lanelets applied on
   |  CROSSING_LANELETTYPE = 'crosswalk'
 
-* | **REJECTED_TAGS** 
-  | OSM ways with these tags are not taken into account 
-  |  REJECTED_TAGS = 
+* | **REJECTED_TAGS**
+  | OSM ways with these tags are not taken into account
+  |  REJECTED_TAGS =
     {"area": "yes"}
 
 * | **LANECOUNTS**
   | number of lanes for each type of road should be >=1
-  |  LANECOUNTS = 
+  |  LANECOUNTS =
     {'motorway': 6,
     'trunk': 4,
     'primary': 2,
@@ -533,7 +533,7 @@ Scenario Settings
 
 * | **LANEWIDTHS**
   | Width of lanes for each type of road in meters
-  |  LANEWIDTHS = 
+  |  LANEWIDTHS =
     {"motorway": 3.5,
     "trunk": 3.5,
     "primary": 3.5,
@@ -551,10 +551,10 @@ Scenario Settings
     "path": 2.0,
     "footway": 2.0,
     "cycleway": 2.0}
-  
+
 * | **SPEED_LIMITS**
   | Default speed limit for each type of road in km/h
-  |  SPEED_LIMITS = 
+  |  SPEED_LIMITS =
     {'motorway': 120,
     'trunk': 100,
     'primary': 100,
@@ -655,10 +655,10 @@ These settings can be used to improve the conversion process for individual scen
 * | **REMOVE_UNCONNECTED_LANELETS**
   | Option to remove unconnected lanelets from the main lanelet scenario
   |  REMOVE_UNCONNECTED_LANELETS = True
-  
+
 * | **RECOGNIZED_TURNLANES**
   | Set of processed turn lanes. This should only be changed for further development
-  |  RECOGNIZED_TURNLANES = 
+  |  RECOGNIZED_TURNLANES =
     ["left",
     "through",
     "right",
@@ -668,43 +668,43 @@ These settings can be used to improve the conversion process for individual scen
     "left;through",
     "left;through;right",
     "left;right",
-    "none"]  
+    "none"]
 
 Traffic Lights
 ==============
 * | **TRAFFIC_LIGHT_CYCLE**
-  | Cycle that will be applied to each traffic light. Values in seconds 
-  |  TRAFFIC_LIGHT_CYCLE = 
-    {"red_phase": 57, 
-    "red_yellow_phase": 3, 
+  | Cycle that will be applied to each traffic light. Values in seconds
+  |  TRAFFIC_LIGHT_CYCLE =
+    {"red_phase": 57,
+    "red_yellow_phase": 3,
     "green_phase": 37,
-    "yellow_phase": 3}   
+    "yellow_phase": 3}
 
 Traffic Signs
 =============
 * | **TRAFFIC_SIGN_VALUES**
   | Values to search for in OSM
-  |  TRAFFIC_SIGN_VALUES = 
+  |  TRAFFIC_SIGN_VALUES =
     ["traffic_signals",
     "stop",
     "give_way",
-    "city_limit"]  
+    "city_limit"]
 
 * | **TRAFFIC_SIGN_KEYS**
-  | Keys to search for in OSM 
-  |  TRAFFIC_SIGN_KEYS = 
+  | Keys to search for in OSM
+  |  TRAFFIC_SIGN_KEYS =
     ["traffic_sign",
     "overtaking",
     "traffic_signals:direction",
-    "maxspeed"]  
+    "maxspeed"]
 
 * | **MAPILLARY_CATEGORIES**
-  | Categories to include if mapillary is used for sign extraction  
+  | Categories to include if mapillary is used for sign extraction
   |  MAPILLARY_CATEGORIES =
     ["warning",
     "regulatory",
     "information",
-    "complementary"] 
+    "complementary"]
 
 * | **ACCEPTED_TRAFFIC_SIGNS**
   | Include traffic signs based on their id, e.g. "Max_SPEED". Keep "ALL" to accept all found traffic sings

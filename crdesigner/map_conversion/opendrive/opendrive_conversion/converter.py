@@ -111,12 +111,16 @@ class OpenDriveConverter:
                     inner_neighbour_same_dir,
                 ) = OpenDriveConverter.determine_neighbours(lane)
 
-                lane_borders.append(OpenDriveConverter._create_outer_lane_border(lane_borders, lane, coeff_factor))
+                lane_borders.append(
+                    OpenDriveConverter._create_outer_lane_border(lane_borders, lane, coeff_factor)
+                )
 
                 inner_line_marking = OpenDriveConverter.extract_inner_line_marking(lane)
 
                 plane_group = ParametricLaneGroup(
-                    id_=encode_road_section_lane_width_id(lane_section.parent_road.id, lane_section.idx, lane.id, -1),
+                    id_=encode_road_section_lane_width_id(
+                        lane_section.parent_road.id, lane_section.idx, lane.id, -1
+                    ),
                     inner_neighbour=inner_neighbour_id,
                     inner_neighbour_same_direction=inner_neighbour_same_dir,
                     outer_neighbour=outer_neighbour_id,
@@ -144,13 +148,25 @@ class OpenDriveConverter:
 
                     # assign regulatory elements
                     for light in cr_traffic_lights:
-                        if light[1][0] <= lane.id and lane.id <= light[1][1] and width.start_offset < light[2]:
+                        if (
+                            light[1][0] <= lane.id
+                            and lane.id <= light[1][1]
+                            and width.start_offset < light[2]
+                        ):
                             plane_group.traffic_lights.append(light[0])
                     for sign in cr_traffic_signs:
-                        if sign[1][0] <= lane.id and lane.id <= sign[1][1] and width.start_offset < sign[2]:
+                        if (
+                            sign[1][0] <= lane.id
+                            and lane.id <= sign[1][1]
+                            and width.start_offset < sign[2]
+                        ):
                             plane_group.traffic_signs.append(sign[0])
                     for line in cr_stop_lines:
-                        if line[1][0] <= lane.id and lane.id <= line[1][1] and width.start_offset < line[2]:
+                        if (
+                            line[1][0] <= lane.id
+                            and lane.id <= line[1][1]
+                            and width.start_offset < line[2]
+                        ):
                             plane_group.stop_lines.append(line[0])
 
                 # if lane borders are specified by offsets instead of widths
@@ -172,7 +188,9 @@ class OpenDriveConverter:
                     # check if the center lane has a road mark
                     if len(parent_lane_section.center_lanes[0].road_mark) > 0:
                         # assign the road mark to the inner line marking
-                        inner_line_marking = copy.deepcopy(parent_lane_section.center_lanes[0].road_mark[0])
+                        inner_line_marking = copy.deepcopy(
+                            parent_lane_section.center_lanes[0].road_mark[0]
+                        )
                         # check if the road mark type is made up of 2 different markings,
                         # assume right hand drive
                         if parent_lane_section.center_lanes[0].road_mark[0].type == "solid broken":
@@ -237,7 +255,9 @@ class OpenDriveConverter:
         return parametric_lane
 
     @staticmethod
-    def _create_outer_lane_border(lane_borders: List[Border], lane: Lane, coeff_factor: float) -> Border:
+    def _create_outer_lane_border(
+        lane_borders: List[Border], lane: Lane, coeff_factor: float
+    ) -> Border:
         """Create an outer lane border of a lane.
         InnerBorder is already saved in lane_borders, as it is
         the outer border of the inner neighbour of the lane.
@@ -265,7 +285,9 @@ class OpenDriveConverter:
 
         for width in lane.widths:
             border.width_coefficient_offsets.append(width.start_offset)
-            border.width_coefficients.append([x * coeff_factor for x in width.polynomial_coefficients])
+            border.width_coefficients.append(
+                [x * coeff_factor for x in width.polynomial_coefficients]
+            )
         return border
 
     @staticmethod

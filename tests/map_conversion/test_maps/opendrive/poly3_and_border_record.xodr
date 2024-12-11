@@ -375,7 +375,7 @@
               </type>
             </roadMark>
             <roadMark sOffset="3.3e+00" type="none" color="standard" weight="standard" width="0.00000000000000e-00" laneChange="none">
-            </roadMark>            
+            </roadMark>
             <speed sOffset="0.0000000000000000e+00" max="3.0000000000000000e+01" unit="km/h"/>
           </lane>
         </left>

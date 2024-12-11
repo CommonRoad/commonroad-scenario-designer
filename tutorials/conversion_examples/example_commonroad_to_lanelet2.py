@@ -4,7 +4,9 @@ from pathlib import Path
 from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.map_conversion_interface import commonroad_to_lanelet
 
-input_path = Path.cwd().parent.parent / "tests/map_conversion/test_maps/lanelet2/merging_lanelets_utm.xml"
+input_path = (
+    Path.cwd().parent.parent / "tests/map_conversion/test_maps/lanelet2/merging_lanelets_utm.xml"
+)
 output_name = Path.cwd() / "example_files/lanelet2/merging_lanelets_utm.osm"
 config = lanelet2_config
 config.autoware = False

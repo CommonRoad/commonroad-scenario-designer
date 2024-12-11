@@ -45,15 +45,21 @@ class RoadNetworkController(
         self.updated_lanelet = False
         self.aerial_map_threshold = config.AERIAL_IMAGE_THRESHOLD
 
-        self.lanelet_controller = AddLaneletController(self, self.scenario_model, self.road_network_toolbox_ui)
-        self.traffic_sign_controller = AddTrafficSignController(self, self.scenario_model, self.road_network_toolbox_ui)
+        self.lanelet_controller = AddLaneletController(
+            self, self.scenario_model, self.road_network_toolbox_ui
+        )
+        self.traffic_sign_controller = AddTrafficSignController(
+            self, self.scenario_model, self.road_network_toolbox_ui
+        )
         self.traffic_lights_controller = AddTrafficLightsController(
             self, self.scenario_model, self.road_network_toolbox_ui
         )
         self.intersection_controller = AddIntersectionController(
             self, self.scenario_model, self.road_network_toolbox_ui
         )
-        self.aerial_image_controller = AddAerialImageController(self, self.scenario_model, self.road_network_toolbox_ui)
+        self.aerial_image_controller = AddAerialImageController(
+            self, self.scenario_model, self.road_network_toolbox_ui
+        )
 
         self.traffic_sign_controller.traffic_sign_ui.initialize_traffic_sign_information()
         self.traffic_lights_controller.traffic_lights_ui.initialize_traffic_light_information()
@@ -105,7 +111,9 @@ class RoadNetworkController(
         @return: string argument as valid float if not empty or not - else standard value 5
         """
         if str.text() == "-":
-            self.text_browser.append("Inserted value of invalid. Standard value 5 will be used instead.")
+            self.text_browser.append(
+                "Inserted value of invalid. Standard value 5 will be used instead."
+            )
         if str.text() and str.text() != "-":
             return float(str.text().replace(",", "."))
         else:
@@ -127,9 +135,15 @@ class RoadNetworkController(
             return
 
         place_at_position = self.road_network_toolbox_ui.place_at_position.isChecked()
-        connect_to_last_selection = self.road_network_toolbox_ui.connect_to_previous_selection.isChecked()
-        connect_to_predecessors_selection = self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked()
-        connect_to_successors_selection = self.road_network_toolbox_ui.connect_to_successors_selection.isChecked()
+        connect_to_last_selection = (
+            self.road_network_toolbox_ui.connect_to_previous_selection.isChecked()
+        )
+        connect_to_predecessors_selection = (
+            self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked()
+        )
+        connect_to_successors_selection = (
+            self.road_network_toolbox_ui.connect_to_successors_selection.isChecked()
+        )
         if button_title == "Add Lanelet" and (
             place_at_position
             or connect_to_last_selection
@@ -162,7 +176,9 @@ class RoadNetworkController(
                 )
                 self.road_network_toolbox_ui.curved_check_button.setChecked(False)
         else:
-            self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
+            self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+                False
+            )
             self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(False)
 
     @pyqtSlot(str)

@@ -28,7 +28,9 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal im
 )
 
 
-def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_sign_enum: enum) -> Union[
+def extract_traffic_element_id(
+    signal_type: str, signal_subtype: str, traffic_sign_enum: enum
+) -> Union[
     TrafficSignIDZamunda,
     TrafficSignIDGermany,
     TrafficSignIDUsa,
@@ -63,7 +65,9 @@ def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_si
 
 
 def assign_traffic_signals_to_road(
-    road: Road, traffic_light_dirs: Dict[str, Set[str]], traffic_light_lanes: Dict[str, Tuple[int, int]]
+    road: Road,
+    traffic_light_dirs: Dict[str, Set[str]],
+    traffic_light_lanes: Dict[str, Tuple[int, int]],
 ) -> Tuple[List[TrafficLight], List[TrafficSign], List[StopLine]]:
     """Extracts traffic_lights, traffic_signs, stop_lines from a road.
 
@@ -78,10 +82,15 @@ def assign_traffic_signals_to_road(
     # This has been replicated for other countries but has not been tested with a test case
     # Stop lines have a signal type of 294 and are handled differently in the commonroad format
     for signal in road.signals:
-        lanes = (0, 0) if signal.validity_from is None else (signal.validity_from, signal.validity_to)
+        lanes = (
+            (0, 0) if signal.validity_from is None else (signal.validity_from, signal.validity_to)
+        )
         position, tangent, _, _ = road.plan_view.calc(signal.s, compute_curvature=False)
         position = np.array(
-            [position[0] + signal.t * np.cos(tangent + np.pi / 2), position[1] + signal.t * np.sin(tangent + np.pi / 2)]
+            [
+                position[0] + signal.t * np.cos(tangent + np.pi / 2),
+                position[1] + signal.t * np.sin(tangent + np.pi / 2),
+            ]
         )
         if signal.dynamic == "no":
             if (
@@ -98,7 +107,13 @@ def assign_traffic_signals_to_road(
                     additional_values = [str(signal.signal_value)]
 
             signal_country = utils.get_signal_country(signal.country)
-            country_stop_line_id = {"DEU": "294", "ZAM": "294", "USA": "294", "CHN": "294", "ESP": "294"}
+            country_stop_line_id = {
+                "DEU": "294",
+                "ZAM": "294",
+                "USA": "294",
+                "CHN": "294",
+                "ESP": "294",
+            }
 
             if (
                 (signal_country == "DEU" or signal_country not in TrafficSignIDCountries.keys())
@@ -157,7 +172,9 @@ def assign_traffic_signals_to_road(
                     else:
                         tdir = TrafficLightDirection.ALL
             lanes = (
-                lanes if traffic_light_lanes.get(signal.signal_id) is None else traffic_light_lanes[signal.signal_id]
+                lanes
+                if traffic_light_lanes.get(signal.signal_id) is None
+                else traffic_light_lanes[signal.signal_id]
             )
             if signal.type != ("1000002" or "1000007" or "1000013"):
                 traffic_light = TrafficLight(
@@ -213,7 +230,9 @@ def calculate_stop_line_position(
 
 
 def get_traffic_signal_references(
-    road: Road, traffic_light_dirs: Dict[str, Set[str]], traffic_light_lanes: Dict[str, Tuple[int, int]]
+    road: Road,
+    traffic_light_dirs: Dict[str, Set[str]],
+    traffic_light_lanes: Dict[str, Tuple[int, int]],
 ):
     """Function to extract relevant information from sign references.
 

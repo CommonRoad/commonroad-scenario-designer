@@ -33,8 +33,10 @@ def get_geonamesID(lat: float, lng: float, cities_kdtree: kdtree.KDNode = None) 
             if config.GEONAMES_USERNAME == "demo":
                 raise ValueError("geonames demo ID used")
 
-            query = "http://api.geonames.org/findNearbyPlaceNameJSON?lat={}&lng={}&username={}".format(
-                lat, lng, config.GEONAMES_USERNAME
+            query = (
+                "http://api.geonames.org/findNearbyPlaceNameJSON?lat={}&lng={}&username={}".format(
+                    lat, lng, config.GEONAMES_USERNAME
+                )
             )
             data = urlopen(query).read().decode("utf-8")
             response = json.loads(data)
@@ -62,7 +64,9 @@ def get_geonamesID(lat: float, lng: float, cities_kdtree: kdtree.KDNode = None) 
                 "Message from Geonames server: " + response["status"]["message"]
             )
         except KeyError:
-            logging.error("Couldn't retrieve a valid GeonamesID. Using fallback GeonamesID instead.")
+            logging.error(
+                "Couldn't retrieve a valid GeonamesID. Using fallback GeonamesID instead."
+            )
         return -999
     # catch errors we don't know about yet
     except Exception:

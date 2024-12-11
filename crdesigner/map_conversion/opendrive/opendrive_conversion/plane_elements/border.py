@@ -49,7 +49,12 @@ class Border:
     # instead of recalculating them over and over.
     @lru_cache(maxsize=200000)
     def calc(
-        self, s_pos: float, width_offset: float = 0.0, is_last_pos: bool = False, reverse=False, compute_curvature=True
+        self,
+        s_pos: float,
+        width_offset: float = 0.0,
+        is_last_pos: bool = False,
+        reverse=False,
+        compute_curvature=True,
     ) -> Tuple[Optional[Any], Any, Any, Any]:
         """Calculate the Cartesian coordinates and the tangential direction of
         the border by calculating position of reference border at s_pos
@@ -72,11 +77,16 @@ class Border:
 
         try:
             ref_coord, tang_angle, curv, max_geometry_length = self.reference.calc(
-                self.ref_offset + s_pos, is_last_pos=is_last_pos, reverse=reverse, compute_curvature=compute_curvature
+                self.ref_offset + s_pos,
+                is_last_pos=is_last_pos,
+                reverse=reverse,
+                compute_curvature=compute_curvature,
             )
         except TypeError:
             ref_coord, tang_angle, curv, max_geometry_length = self.reference.calc(
-                np.round(self.ref_offset + s_pos, 3), reverse=reverse, compute_curvature=compute_curvature
+                np.round(self.ref_offset + s_pos, 3),
+                reverse=reverse,
+                compute_curvature=compute_curvature,
             )
 
         if not self.width_coefficients or not self.width_coefficient_offsets:

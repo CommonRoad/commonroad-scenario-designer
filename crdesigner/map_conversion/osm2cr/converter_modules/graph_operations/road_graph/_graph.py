@@ -117,7 +117,9 @@ class Graph:
         for edge in self.edges:
             # width = config.LANEWIDTHS[edge.roadtype]
             width = edge.lanewidth
-            waypoints = get_lane_waypoints(edge.nr_of_lanes, width, edge.get_interpolated_waypoints())
+            waypoints = get_lane_waypoints(
+                edge.nr_of_lanes, width, edge.get_interpolated_waypoints()
+            )
             assert len(edge.lanes) == edge.nr_of_lanes
             assert len(waypoints) == len(edge.lanes)
             for index, lane in enumerate(edge.lanes):
@@ -171,16 +173,20 @@ class Graph:
                             otherwaypoints = otherwaypoints[::-1]
                         i = 0
                         if config.INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS:
-                            distance_to_edge = edge.get_width() / 2 + other_edge.get_width() / 2 + cropping_dist
+                            distance_to_edge = (
+                                edge.get_width() / 2 + other_edge.get_width() / 2 + cropping_dist
+                            )
                             while (
                                 i < min(len(edgewaypoints), len(otherwaypoints))
-                                and np.linalg.norm(edgewaypoints[i] - otherwaypoints[i]) < distance_to_edge
+                                and np.linalg.norm(edgewaypoints[i] - otherwaypoints[i])
+                                < distance_to_edge
                             ):
                                 i += 1
                         else:
                             while (
                                 i < min(len(edgewaypoints), len(otherwaypoints))
-                                and np.linalg.norm(edgewaypoints[i] - edgewaypoints[0]) < cropping_dist
+                                and np.linalg.norm(edgewaypoints[i] - edgewaypoints[0])
+                                < cropping_dist
                             ):
                                 i += 1
                         if i >= len(edgewaypoints):
@@ -378,7 +384,10 @@ class Graph:
                     segment.waypoints = waypoints
 
                     # segment is only added if it does not form a turn
-                    if successor.edge != predecessor.edge and geometry.curvature(waypoints) > config.LANE_SEGMENT_ANGLE:
+                    if (
+                        successor.edge != predecessor.edge
+                        and geometry.curvature(waypoints) > config.LANE_SEGMENT_ANGLE
+                    ):
                         self.lanelinks.add(segment)
 
         self.set_adjacents()
@@ -439,7 +448,9 @@ class Graph:
         if config.FILTER:
             logging.info("filtering points")
             for edge in self.edges:
-                lines = [lane.waypoints if lane.forward else lane.waypoints[::-1] for lane in edge.lanes]
+                lines = [
+                    lane.waypoints if lane.forward else lane.waypoints[::-1] for lane in edge.lanes
+                ]
                 lines = geometry.pre_filter_points(lines)
                 lines = geometry.filter_points(lines, config.COMPRESSION_THRESHOLD)
                 for index, lane in enumerate(edge.lanes):
@@ -450,7 +461,10 @@ class Graph:
                     continue
                 lane_list, forward = sort_adjacent_lanes(lane_link)
                 visited |= set(lane_list)
-                lines = [lane.waypoints if forward[i] else lane.waypoints[::-1] for i, lane in enumerate(lane_list)]
+                lines = [
+                    lane.waypoints if forward[i] else lane.waypoints[::-1]
+                    for i, lane in enumerate(lane_list)
+                ]
                 lines = geometry.pre_filter_points(lines)
                 lines = geometry.filter_points(lines, config.COMPRESSION_THRESHOLD)
                 for index, lane in enumerate(lane_list):

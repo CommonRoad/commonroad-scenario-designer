@@ -1,4 +1,4 @@
-.. 
+..
   Normally, there are no heading levels assigned to certain characters as the structure is
   determined from the succession of headings. However, this convention is used in Python’s
   Style Guide for documenting which you may follow:
@@ -194,6 +194,3 @@ To get a better understanding of the conversion process, a flowchart of the func
   :width: 500
 
 The function takes a lanelet as an input and creates nodes based on those lanelet's vertices. As the nodes form right and left ways, the function checks if those ways already exist. If not, the function creates those ways, maps them to the way relation, and assigns them to the osm object's dictionary. If the way already exists, there is no need to create it, as the function maps the same id as of the newly found way to the way relation in the previously mentioned dictionary.
-
-
-

@@ -18,6 +18,10 @@ class ElementRepairing(ABC):
         """
 
         self._complete_map_name = (
-            str(scenario_id.country_id) + "_" + str(scenario_id.map_name) + "-" + str(scenario_id.map_id)
+            str(scenario_id.country_id)
+            + "_"
+            + str(scenario_id.map_name)
+            + "-"
+            + str(scenario_id.map_id)
         )
         self._network = network

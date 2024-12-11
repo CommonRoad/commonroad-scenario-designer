@@ -17,7 +17,10 @@ def intersection_enhancement(intermediate_format):
             if incoming_lane.traffic_lights:
                 traffic_lights_on_intersections.extend(incoming_lane.traffic_lights)
         intermediate_format.traffic_lights = list(
-            filter(lambda x: x.traffic_light_id in traffic_lights_on_intersections, intermediate_format.traffic_lights)
+            filter(
+                lambda x: x.traffic_light_id in traffic_lights_on_intersections,
+                intermediate_format.traffic_lights,
+            )
         )
 
     def remove_existing_traffic_lights(incoming_lanes):
@@ -34,9 +37,9 @@ def intersection_enhancement(intermediate_format):
         # if lane is short and predecessor is other incoming's successor
         remove = False
         for lane in incoming_lanes:
-            if geometry.distance(lane.center_points[0], [lane.center_points[-1]]) < 2 and check_pre_incoming_lane(
-                lane, intermediate_format
-            ):  # shorter than two meters
+            if geometry.distance(
+                lane.center_points[0], [lane.center_points[-1]]
+            ) < 2 and check_pre_incoming_lane(lane, intermediate_format):  # shorter than two meters
                 remove = True
                 indicating_lane = lane.id
         if remove:
@@ -92,7 +95,9 @@ def intersection_enhancement(intermediate_format):
             # process next left of current incoming
             processed_incomings.add(incoming)
             # new incoming is incoming with left_of id of current incoming, else None
-            incoming = next((i for i in intersection.incomings if i.incoming_id == incoming.left_of), None)
+            incoming = next(
+                (i for i in intersection.incomings if i.incoming_id == incoming.left_of), None
+            )
             # edge case if only 2 incomings were found:
             if len(intersection.incomings) == 2:
                 incoming = intersection.incomings[-1]
@@ -113,7 +118,9 @@ def intersection_enhancement(intermediate_format):
                     has_traffic_lights = True
                 # also check up to 2 predecessors ahead of lane
                 pre1 = (
-                    intermediate_format.find_edge_by_id(lane.predecessors[0]) if len(lane.predecessors) == 1 else None
+                    intermediate_format.find_edge_by_id(lane.predecessors[0])
+                    if len(lane.predecessors) == 1
+                    else None
                 )
                 pre2 = (
                     intermediate_format.find_edge_by_id(pre1.predecessors[0])

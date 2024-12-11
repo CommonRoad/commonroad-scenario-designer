@@ -85,7 +85,9 @@ class TrafficLightWidget:
         self.toolbox.button_add_traffic_light = QPushButton("Add")
         self.toolbox.button_update_traffic_light = QPushButton("Update")
         self.toolbox.button_remove_traffic_light = QPushButton("Remove")
-        self.toolbox.button_create_traffic_lights = QPushButton("Create Traffic Lights for Referenced Lanelets")
+        self.toolbox.button_create_traffic_lights = QPushButton(
+            "Create Traffic Lights for Referenced Lanelets"
+        )
 
         self.toolbox.traffic_light_cycle_order = QComboBox()
         self.toolbox.traffic_light_cycle_order.addItems(
@@ -98,7 +100,9 @@ class TrafficLightWidget:
         traffic_light_information_groupbox.setLayout(traffic_light_information_layout)
         traffic_light_information_layout.addRow(label_general)
         button_traffic_light_position = PositionButton(
-            self.toolbox.x_position_traffic_light, self.toolbox.y_position_traffic_light, self.toolbox
+            self.toolbox.x_position_traffic_light,
+            self.toolbox.y_position_traffic_light,
+            self.toolbox,
         )
         traffic_light_position = QGridLayout()
         traffic_light_position.addWidget(QLabel("x: "), 1, 0)
@@ -116,8 +120,12 @@ class TrafficLightWidget:
         traffic_light_information_layout.addRow("Time green", self.toolbox.time_green)
         traffic_light_information_layout.addRow("Time yellow", self.toolbox.time_yellow)
         traffic_light_information_layout.addRow("Time inactive", self.toolbox.time_inactive)
-        traffic_light_information_layout.addRow("Cycle order:", self.toolbox.traffic_light_cycle_order)
-        traffic_light_information_layout.addRow("Referenced lanelets", self.toolbox.referenced_lanelets_traffic_light)
+        traffic_light_information_layout.addRow(
+            "Cycle order:", self.toolbox.traffic_light_cycle_order
+        )
+        traffic_light_information_layout.addRow(
+            "Referenced lanelets", self.toolbox.referenced_lanelets_traffic_light
+        )
         traffic_light_information_layout.addRow(self.toolbox.traffic_light_active)
         traffic_light_layout.addRow(self.toolbox.button_add_traffic_light)
         traffic_light_layout.addRow("Selected traffic light", self.toolbox.selected_traffic_light)

@@ -128,59 +128,113 @@ class ScenarioToolboxController(QDockWidget):
             lambda: self._selected_planning_problem_changed()
         )
 
-        self.scenario_toolbox_ui.button_add_planning_problems.clicked.connect(lambda: self.add_planning_problem())
+        self.scenario_toolbox_ui.button_add_planning_problems.clicked.connect(
+            lambda: self.add_planning_problem()
+        )
 
-        self.scenario_toolbox_ui.button_remove_planning_problems.clicked.connect(lambda: self.remove_planning_problem())
+        self.scenario_toolbox_ui.button_remove_planning_problems.clicked.connect(
+            lambda: self.remove_planning_problem()
+        )
 
         """Initial State"""
-        self.scenario_toolbox_ui.button_update_initial_state.clicked.connect(lambda: self.update_initial_state())
+        self.scenario_toolbox_ui.button_update_initial_state.clicked.connect(
+            lambda: self.update_initial_state()
+        )
 
         """Goal States"""
         self.scenario_toolbox_ui.goal_states_list_table.currentCellChanged.connect(
             lambda: self.update_current_goal_state()
         )
 
-        self.scenario_toolbox_ui.type.currentTextChanged.connect(lambda: self.set_goal_state_information_toggle_type())
+        self.scenario_toolbox_ui.type.currentTextChanged.connect(
+            lambda: self.set_goal_state_information_toggle_type()
+        )
 
-        self.scenario_toolbox_ui.button_add_goal_state.clicked.connect(lambda: self.add_goal_state())
+        self.scenario_toolbox_ui.button_add_goal_state.clicked.connect(
+            lambda: self.add_goal_state()
+        )
 
-        self.scenario_toolbox_ui.button_remove_goal_state.clicked.connect(lambda: self.remove_goal_state())
+        self.scenario_toolbox_ui.button_remove_goal_state.clicked.connect(
+            lambda: self.remove_goal_state()
+        )
 
-        self.scenario_toolbox_ui.button_update_goal_state.clicked.connect(lambda: self.update_goal_state())
+        self.scenario_toolbox_ui.button_update_goal_state.clicked.connect(
+            lambda: self.update_goal_state()
+        )
 
     def connect_settings_elements(self) -> None:
         """adds functionality to the gui elements like buttons, menus,..."""
-        self.scenario_toolbox_ui.country.currentTextChanged.connect(lambda: self.update_scenario_meta_data())
-        self.scenario_toolbox_ui.scenario_scene_name.textChanged.connect(lambda: self.update_scenario_meta_data())
-        self.scenario_toolbox_ui.scenario_scene_id.valueChanged.connect(lambda: self.update_scenario_meta_data())
-        self.scenario_toolbox_ui.scenario_config_id.valueChanged.connect(lambda: self.update_scenario_meta_data())
-        self.scenario_toolbox_ui.prediction_type.currentTextChanged.connect(lambda: self.update_scenario_meta_data())
-        self.scenario_toolbox_ui.scenario_prediction_id.valueChanged.connect(lambda: self.update_scenario_meta_data())
-        self.scenario_toolbox_ui.cooperative_scenario.stateChanged.connect(lambda: self.update_scenario_meta_data())
-        self.scenario_toolbox_ui.scenario_tags.currentTextChanged.connect(lambda: self.update_scenario_meta_data())
-        self.scenario_toolbox_ui.scenario_time_step_size.textChanged.connect(lambda: self.update_scenario_meta_data())
-        self.scenario_toolbox_ui.scenario_author.textChanged.connect(lambda: self.update_scenario_meta_data())
-        self.scenario_toolbox_ui.scenario_affiliation.textChanged.connect(lambda: self.update_scenario_meta_data())
-        self.scenario_toolbox_ui.scenario_source.textChanged.connect(lambda: self.update_scenario_meta_data())
+        self.scenario_toolbox_ui.country.currentTextChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.scenario_toolbox_ui.scenario_scene_name.textChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.scenario_toolbox_ui.scenario_scene_id.valueChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.scenario_toolbox_ui.scenario_config_id.valueChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.scenario_toolbox_ui.prediction_type.currentTextChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.scenario_toolbox_ui.scenario_prediction_id.valueChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.scenario_toolbox_ui.cooperative_scenario.stateChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.scenario_toolbox_ui.scenario_tags.currentTextChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.scenario_toolbox_ui.scenario_time_step_size.textChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.scenario_toolbox_ui.scenario_author.textChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.scenario_toolbox_ui.scenario_affiliation.textChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.scenario_toolbox_ui.scenario_source.textChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
         self.scenario_toolbox_ui.location_storage_selection.stateChanged.connect(
             lambda: self.update_scenario_meta_data()
         )
 
-        self.scenario_toolbox_ui.geo_reference.currentTextChanged.connect(lambda: self.change_geo_reference())
-        self.scenario_toolbox_ui.translate_button.clicked.connect(lambda: self.update_scenario_location())
+        self.scenario_toolbox_ui.geo_reference.currentTextChanged.connect(
+            lambda: self.change_geo_reference()
+        )
+        self.scenario_toolbox_ui.translate_button.clicked.connect(
+            lambda: self.update_scenario_location()
+        )
 
-        self.scenario_toolbox_ui.scenario_geo_name_id.textChanged.connect(lambda: self.update_scenario_meta_data())
-        self.scenario_toolbox_ui.scenario_latitude.textChanged.connect(lambda: self.update_scenario_meta_data())
-        self.scenario_toolbox_ui.scenario_longitude.textChanged.connect(lambda: self.update_scenario_meta_data())
+        self.scenario_toolbox_ui.scenario_geo_name_id.textChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.scenario_toolbox_ui.scenario_latitude.textChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.scenario_toolbox_ui.scenario_longitude.textChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
         self.scenario_toolbox_ui.scenario_time_of_day.currentTextChanged.connect(
             lambda: self.update_scenario_meta_data()
         )
-        self.scenario_toolbox_ui.scenario_weather.currentTextChanged.connect(lambda: self.update_scenario_meta_data())
+        self.scenario_toolbox_ui.scenario_weather.currentTextChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
         self.scenario_toolbox_ui.scenario_underground.currentTextChanged.connect(
             lambda: self.update_scenario_meta_data()
         )
-        self.scenario_toolbox_ui.scenario_time_hour.textChanged.connect(lambda: self.update_scenario_meta_data())
-        self.scenario_toolbox_ui.scenario_time_minute.textChanged.connect(lambda: self.update_scenario_meta_data())
+        self.scenario_toolbox_ui.scenario_time_hour.textChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.scenario_toolbox_ui.scenario_time_minute.textChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
 
     def reset_toolbox(self) -> None:
         """
@@ -231,7 +285,9 @@ class ScenarioToolboxController(QDockWidget):
 
         new_gr = GoalRegion(state_list=[], lanelets_of_goal_position=dict())
 
-        new_pp = PlanningProblem(planning_problem_id=id, initial_state=new_initial_state, goal_region=new_gr)
+        new_pp = PlanningProblem(
+            planning_problem_id=id, initial_state=new_initial_state, goal_region=new_gr
+        )
 
         self.pps_model.add_planing_problem(new_pp)
         self.pps_model.set_selected_pp_id(id)
@@ -245,7 +301,9 @@ class ScenarioToolboxController(QDockWidget):
             return
 
         if self.scenario_toolbox_ui.planning_problems_list_table.currentItem() is not None:
-            self.pps_model.remove_pp(int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()))
+            self.pps_model.remove_pp(
+                int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text())
+            )
             self.scenario_toolbox_ui.planning_problems_list_table.clearSelection()
             self.scenario_toolbox_ui.goal_states_list_table.setRowCount(0)
             self.scenario_toolbox_ui.goal_states_list_table.clearSelection()
@@ -278,7 +336,9 @@ class ScenarioToolboxController(QDockWidget):
         initial state and goal state if planning problem is deleted"""
         if self.scenario_toolbox_ui.planning_problems_list_table.currentItem() is not None:
             initial_state = self.collect_initial_state(
-                planning_problem_id=int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text())
+                planning_problem_id=int(
+                    self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()
+                )
             )
             self.scenario_toolbox_ui.set_initial_state_information(initial_state)
             self.set_goal_states_information()
@@ -321,7 +381,9 @@ class ScenarioToolboxController(QDockWidget):
             self.set_planning_problem_information()
             self.scenario_toolbox_ui.planning_problems_list_table.selectRow(0)
         """update initial state of planning problem"""
-        current_planning_problem_id = int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text())
+        current_planning_problem_id = int(
+            self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()
+        )
         new_gs = CustomState()
         new_gs.time_step = Interval(start=0, end=0)
 
@@ -341,7 +403,9 @@ class ScenarioToolboxController(QDockWidget):
             )
             i = self.scenario_toolbox_ui.goal_states_list_table.currentRow()
             self.collect_goal_states(planning_problem_id=current_planning_problem_id).pop(
-                len(self.collect_goal_states(planning_problem_id=current_planning_problem_id)) - i - 1
+                len(self.collect_goal_states(planning_problem_id=current_planning_problem_id))
+                - i
+                - 1
             )
             self.scenario_toolbox_ui.goal_states_list_table.clearSelection()
             self.set_goal_states_information()
@@ -361,7 +425,9 @@ class ScenarioToolboxController(QDockWidget):
             self.text_browser.append("Please create and/or select a planning problem.")
             return
 
-        current_planning_problem_id = int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text())
+        current_planning_problem_id = int(
+            self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()
+        )
 
         if current_goal_state_id is None:
             if self.scenario_toolbox_ui.goal_states_list_table.currentItem() is None:
@@ -412,12 +478,16 @@ class ScenarioToolboxController(QDockWidget):
             if self.get_float(self.scenario_toolbox_ui.goal_orientation_start) > self.get_float(
                 self.scenario_toolbox_ui.goal_orientation_end
             ):
-                self.text_browser.append("Start of interval must be <= end. Orientation is not edited")
+                self.text_browser.append(
+                    "Start of interval must be <= end. Orientation is not edited"
+                )
             else:
                 self.collect_goal_states(planning_problem_id=current_planning_problem_id)[
                     current_goal_state_id
                 ].orientation = Interval(
-                    start=math.radians(self.get_float(self.scenario_toolbox_ui.goal_orientation_start)),
+                    start=math.radians(
+                        self.get_float(self.scenario_toolbox_ui.goal_orientation_start)
+                    ),
                     end=math.radians(self.get_float(self.scenario_toolbox_ui.goal_orientation_end)),
                 )
         else:
@@ -439,7 +509,8 @@ class ScenarioToolboxController(QDockWidget):
             except KeyError:
                 pass
             self.pps_model.remove_lanelet_from_goals(
-                int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()), current_goal_state_id
+                int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()),
+                current_goal_state_id,
             )
 
         elif self.scenario_toolbox_ui.type.currentText() == "Shape":
@@ -450,7 +521,8 @@ class ScenarioToolboxController(QDockWidget):
                 current_goal_state_id
             ].position = self.shape_group_from_shape(self.current_shapes)
             self.pps_model.remove_lanelet_from_goals(
-                int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()), current_goal_state_id
+                int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()),
+                current_goal_state_id,
             )
 
         elif self.scenario_toolbox_ui.type.currentText() == "Lanelet":
@@ -473,8 +545,13 @@ class ScenarioToolboxController(QDockWidget):
     @logger.log
     def add_goal_state_lanelet(self) -> None:
         """Add lanelet to goal state in GUI and backend (current_lanelets)"""
-        selected_lanelet_button = self.scenario_toolbox_ui.goal_state_position_lanelet_update.currentText()
-        if selected_lanelet_button != "None" and int(selected_lanelet_button) not in self.current_lanelets:
+        selected_lanelet_button = (
+            self.scenario_toolbox_ui.goal_state_position_lanelet_update.currentText()
+        )
+        if (
+            selected_lanelet_button != "None"
+            and int(selected_lanelet_button) not in self.current_lanelets
+        ):
             self.current_lanelets.append(int(selected_lanelet_button))
             self.scenario_toolbox_ui.goal_states_lanelet_list_table.insertRow(
                 self.scenario_toolbox_ui.goal_states_lanelet_list_table_row_count
@@ -614,7 +691,9 @@ class ScenarioToolboxController(QDockWidget):
             and self.scenario_toolbox_ui.goal_states_shape_list_table.currentRow() != -1
         ):
             self.current_shapes.pop(
-                len(self.current_shapes) - self.scenario_toolbox_ui.goal_states_shape_list_table.currentRow() - 1
+                len(self.current_shapes)
+                - self.scenario_toolbox_ui.goal_states_shape_list_table.currentRow()
+                - 1
             )
             self.scenario_toolbox_ui.goal_states_shape_list_table.removeRow(
                 self.scenario_toolbox_ui.goal_states_shape_list_table.currentRow()
@@ -637,7 +716,9 @@ class ScenarioToolboxController(QDockWidget):
         """updates goal states table with data from the selected planning problem"""
         self.scenario_toolbox_ui.goal_states_list_table.setRowCount(0)
         goal_states = self.collect_goal_states(
-            planning_problem_id=int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text())
+            planning_problem_id=int(
+                self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()
+            )
         )
         index = 0
         for goal_state in goal_states:
@@ -649,7 +730,11 @@ class ScenarioToolboxController(QDockWidget):
                     self.scenario_toolbox_ui.goal_states_list_list_table_row_count,
                     0,
                     QTableWidgetItem(
-                        "[" + str(goal_state.time_step.start) + " ; " + str(goal_state.time_step.end) + "]"
+                        "["
+                        + str(goal_state.time_step.start)
+                        + " ; "
+                        + str(goal_state.time_step.end)
+                        + "]"
                     ),
                 )
             else:
@@ -660,7 +745,8 @@ class ScenarioToolboxController(QDockWidget):
                 )
             if goal_state.has_value("position"):
                 if self.pps_model.is_position_a_lanelet(
-                    int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()), index
+                    int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()),
+                    index,
                 ):
                     self.scenario_toolbox_ui.goal_states_list_table.setItem(
                         self.scenario_toolbox_ui.goal_states_list_list_table_row_count,
@@ -701,7 +787,13 @@ class ScenarioToolboxController(QDockWidget):
                 self.scenario_toolbox_ui.goal_states_list_table.setItem(
                     self.scenario_toolbox_ui.goal_states_list_list_table_row_count,
                     3,
-                    QTableWidgetItem("[" + str(goal_state.velocity.start) + " ; " + str(goal_state.velocity.end) + "]"),
+                    QTableWidgetItem(
+                        "["
+                        + str(goal_state.velocity.start)
+                        + " ; "
+                        + str(goal_state.velocity.end)
+                        + "]"
+                    ),
                 )
             else:
                 self.scenario_toolbox_ui.goal_states_list_table.setItem(
@@ -744,8 +836,12 @@ class ScenarioToolboxController(QDockWidget):
                 self.scenario_toolbox_ui.goal_velocity_end.setText(str(0.0))
             if goal_state.has_value("orientation"):
                 self.scenario_toolbox_ui.goal_orientation_selected.setChecked(True)
-                self.scenario_toolbox_ui.goal_orientation_start.setText(str(math.degrees(goal_state.orientation.start)))
-                self.scenario_toolbox_ui.goal_orientation_end.setText(str(math.degrees(goal_state.orientation.end)))
+                self.scenario_toolbox_ui.goal_orientation_start.setText(
+                    str(math.degrees(goal_state.orientation.start))
+                )
+                self.scenario_toolbox_ui.goal_orientation_end.setText(
+                    str(math.degrees(goal_state.orientation.end))
+                )
             else:
                 self.scenario_toolbox_ui.goal_orientation_selected.setChecked(False)
                 self.scenario_toolbox_ui.goal_orientation_start.setText(str(0.0))
@@ -753,7 +849,9 @@ class ScenarioToolboxController(QDockWidget):
             if goal_state.has_value("position"):
                 if goal_state.position is None:
                     self.scenario_toolbox_ui.type.setCurrentText("None")
-                elif self.pps_model.is_position_a_lanelet(current_planning_problem_id, current_goal_state_id):
+                elif self.pps_model.is_position_a_lanelet(
+                    current_planning_problem_id, current_goal_state_id
+                ):
                     self.scenario_toolbox_ui.type.setCurrentText("Lanelet")
                     self.set_goal_state_lanelet_information()
                 else:
@@ -810,7 +908,9 @@ class ScenarioToolboxController(QDockWidget):
                     - self.scenario_toolbox_ui.goal_states_list_table.currentRow()
                     - 1
                 )
-                goal_state = self.pps_model.get_pp(current_planning_problem_id).goal.state_list[current_goal_state_id]
+                goal_state = self.pps_model.get_pp(current_planning_problem_id).goal.state_list[
+                    current_goal_state_id
+                ]
 
                 if goal_state.has_value("position"):
                     if isinstance(goal_state.position, ShapeGroup):
@@ -876,7 +976,9 @@ class ScenarioToolboxController(QDockWidget):
             and self.scenario_toolbox_ui.planning_problems_list_table.currentRow() != -1
         ):
             current_shape = self.current_shapes[
-                len(self.current_shapes) - self.scenario_toolbox_ui.goal_states_shape_list_table.currentRow() - 1
+                len(self.current_shapes)
+                - self.scenario_toolbox_ui.goal_states_shape_list_table.currentRow()
+                - 1
             ]
             if isinstance(current_shape, Rectangle):
                 self.scenario_toolbox_ui.goal_states_shape_selector.setCurrentText("Rectangle")
@@ -885,7 +987,9 @@ class ScenarioToolboxController(QDockWidget):
                 self.scenario_toolbox_ui.rectangle_y.setText(str(current_shape.center[1]))
                 self.scenario_toolbox_ui.rectangle_length.setText(str(current_shape.length))
                 self.scenario_toolbox_ui.rectangle_width.setText(str(current_shape.width))
-                self.scenario_toolbox_ui.rectangle_orientation.setText(str(math.degrees(current_shape.orientation)))
+                self.scenario_toolbox_ui.rectangle_orientation.setText(
+                    str(math.degrees(current_shape.orientation))
+                )
             elif isinstance(current_shape, Circle):
                 self.scenario_toolbox_ui.goal_states_shape_selector.setCurrentText("Circle")
                 self.set_goal_state_information_toggle_shape()
@@ -964,31 +1068,33 @@ class ScenarioToolboxController(QDockWidget):
             return
 
         """update initial state of planning problem"""
-        current_planning_problem_id = int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text())
-        self.collect_initial_state(planning_problem_id=current_planning_problem_id).position[0] = self.get_float(
-            self.scenario_toolbox_ui.initial_position_x
+        current_planning_problem_id = int(
+            self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()
         )
-        self.collect_initial_state(planning_problem_id=current_planning_problem_id).position[1] = self.get_float(
-            self.scenario_toolbox_ui.initial_position_y
+        self.collect_initial_state(planning_problem_id=current_planning_problem_id).position[0] = (
+            self.get_float(self.scenario_toolbox_ui.initial_position_x)
         )
-        self.collect_initial_state(planning_problem_id=current_planning_problem_id).velocity = self.get_float(
-            self.scenario_toolbox_ui.initial_velocity
+        self.collect_initial_state(planning_problem_id=current_planning_problem_id).position[1] = (
+            self.get_float(self.scenario_toolbox_ui.initial_position_y)
         )
-        self.collect_initial_state(planning_problem_id=current_planning_problem_id).orientation = math.radians(
-            self.get_float(self.scenario_toolbox_ui.initial_orientation)
-        )
-        self.collect_initial_state(planning_problem_id=current_planning_problem_id).yaw_rate = self.get_float(
-            self.scenario_toolbox_ui.initial_yawRate
-        )
-        self.collect_initial_state(planning_problem_id=current_planning_problem_id).slip_angle = self.get_float(
-            self.scenario_toolbox_ui.initial_slipAngle
-        )
-        self.collect_initial_state(planning_problem_id=current_planning_problem_id).time_step = self.get_int(
-            self.scenario_toolbox_ui.initial_time
-        )
-        self.collect_initial_state(planning_problem_id=current_planning_problem_id).acceleration = self.get_float(
-            self.scenario_toolbox_ui.initial_acceleration
-        )
+        self.collect_initial_state(
+            planning_problem_id=current_planning_problem_id
+        ).velocity = self.get_float(self.scenario_toolbox_ui.initial_velocity)
+        self.collect_initial_state(
+            planning_problem_id=current_planning_problem_id
+        ).orientation = math.radians(self.get_float(self.scenario_toolbox_ui.initial_orientation))
+        self.collect_initial_state(
+            planning_problem_id=current_planning_problem_id
+        ).yaw_rate = self.get_float(self.scenario_toolbox_ui.initial_yawRate)
+        self.collect_initial_state(
+            planning_problem_id=current_planning_problem_id
+        ).slip_angle = self.get_float(self.scenario_toolbox_ui.initial_slipAngle)
+        self.collect_initial_state(
+            planning_problem_id=current_planning_problem_id
+        ).time_step = self.get_int(self.scenario_toolbox_ui.initial_time)
+        self.collect_initial_state(
+            planning_problem_id=current_planning_problem_id
+        ).acceleration = self.get_float(self.scenario_toolbox_ui.initial_acceleration)
 
         self.pps_model.notify_all()
 
@@ -1001,7 +1107,9 @@ class ScenarioToolboxController(QDockWidget):
         :return: string argument as valid float if not empty or not - else standard value 0.0
         """
         if entered_string.text() == "-":
-            self.text_browser.append("Inserted value of invalid. Standard value 0 will be used instead.")
+            self.text_browser.append(
+                "Inserted value of invalid. Standard value 0 will be used instead."
+            )
         if entered_string.text() and entered_string.text() != "-":
             return float(entered_string.text().replace(",", "."))
         else:
@@ -1014,7 +1122,9 @@ class ScenarioToolboxController(QDockWidget):
         :return: string argument as valid int if not empty or not - else standard value 0.0
         """
         if entered_string.text() == "-":
-            self.text_browser.append("Inserted value of invalid. Standard value 0 will be used instead.")
+            self.text_browser.append(
+                "Inserted value of invalid. Standard value 0 will be used instead."
+            )
         if entered_string.text() and entered_string.text() != "-":
             return int(entered_string.text())
         else:
@@ -1029,7 +1139,10 @@ class ScenarioToolboxController(QDockWidget):
 
         if self.current_scenario.get_current_scenario() is not None:
             return sorted(
-                [la.lanelet_id for la in self.current_scenario.get_current_scenario().lanelet_network.lanelets]
+                [
+                    la.lanelet_id
+                    for la in self.current_scenario.get_current_scenario().lanelet_network.lanelets
+                ]
             )
         else:
             return []
@@ -1076,11 +1189,15 @@ class ScenarioToolboxController(QDockWidget):
         self.init_settings = True
         if self.current_scenario.get_current_scenario() is not None:
             # self.initialized = False
-            self.scenario_toolbox_ui.scenario_author.setText(self.current_scenario.get_current_scenario().author)
+            self.scenario_toolbox_ui.scenario_author.setText(
+                self.current_scenario.get_current_scenario().author
+            )
             self.scenario_toolbox_ui.scenario_affiliation.setText(
                 self.current_scenario.get_current_scenario().affiliation
             )
-            self.scenario_toolbox_ui.scenario_source.setText(self.current_scenario.get_current_scenario().source)
+            self.scenario_toolbox_ui.scenario_source.setText(
+                self.current_scenario.get_current_scenario().source
+            )
             self.scenario_toolbox_ui.scenario_time_step_size.setText(
                 str(self.current_scenario.get_current_scenario().dt)
             )
@@ -1129,10 +1246,13 @@ class ScenarioToolboxController(QDockWidget):
                 )
 
                 if self.current_scenario.get_current_scenario().location.geo_transformation:
-                    if self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference in [
-                        self.scenario_toolbox_ui.geo_reference.itemText(i)
-                        for i in range(self.scenario_toolbox_ui.geo_reference.count())
-                    ]:
+                    if (
+                        self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference
+                        in [
+                            self.scenario_toolbox_ui.geo_reference.itemText(i)
+                            for i in range(self.scenario_toolbox_ui.geo_reference.count())
+                        ]
+                    ):
                         self.scenario_toolbox_ui.geo_reference.setCurrentText(
                             self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference
                         )
@@ -1145,10 +1265,14 @@ class ScenarioToolboxController(QDockWidget):
                         )
 
                     self.scenario_toolbox_ui.x_translation.setText(
-                        str(self.current_scenario.get_current_scenario().location.geo_transformation.x_translation)
+                        str(
+                            self.current_scenario.get_current_scenario().location.geo_transformation.x_translation
+                        )
                     )
                     self.scenario_toolbox_ui.y_translation.setText(
-                        str(self.current_scenario.get_current_scenario().location.geo_transformation.y_translation)
+                        str(
+                            self.current_scenario.get_current_scenario().location.geo_transformation.y_translation
+                        )
                     )
 
                 if self.current_scenario.get_current_scenario().location.environment:
@@ -1184,7 +1308,10 @@ class ScenarioToolboxController(QDockWidget):
         :return: Shapegroup
         """
         shapes = [
-            self.current_scenario.get_current_scenario().lanelet_network.find_lanelet_by_id(i).polygon for i in lanelets
+            self.current_scenario.get_current_scenario()
+            .lanelet_network.find_lanelet_by_id(i)
+            .polygon
+            for i in lanelets
         ]
         shape_group = ShapeGroup(shapes=shapes)
         return shape_group
@@ -1246,9 +1373,13 @@ class ScenarioToolboxController(QDockWidget):
                                     int(self.scenario_toolbox_ui.scenario_time_hour.text()),
                                     int(self.scenario_toolbox_ui.scenario_time_minute.text()),
                                 ),
-                                TimeOfDay(self.scenario_toolbox_ui.scenario_time_of_day.currentText()),
+                                TimeOfDay(
+                                    self.scenario_toolbox_ui.scenario_time_of_day.currentText()
+                                ),
                                 Weather(self.scenario_toolbox_ui.scenario_weather.currentText()),
-                                Underground(self.scenario_toolbox_ui.scenario_underground.currentText()),
+                                Underground(
+                                    self.scenario_toolbox_ui.scenario_underground.currentText()
+                                ),
                             ),
                             geo_transformation=GeoTransformation(
                                 geo_reference=self.current_scenario.get_current_scenario().location.geo_transformation.geo_reference,
@@ -1266,12 +1397,18 @@ class ScenarioToolboxController(QDockWidget):
                                     int(self.scenario_toolbox_ui.scenario_time_hour.text()),
                                     int(self.scenario_toolbox_ui.scenario_time_minute.text()),
                                 ),
-                                TimeOfDay(self.scenario_toolbox_ui.scenario_time_of_day.currentText()),
+                                TimeOfDay(
+                                    self.scenario_toolbox_ui.scenario_time_of_day.currentText()
+                                ),
                                 Weather(self.scenario_toolbox_ui.scenario_weather.currentText()),
-                                Underground(self.scenario_toolbox_ui.scenario_underground.currentText()),
+                                Underground(
+                                    self.scenario_toolbox_ui.scenario_underground.currentText()
+                                ),
                             ),
                             geo_transformation=GeoTransformation(
-                                geo_reference=gui_config.pseudo_mercator, x_translation=0.0, y_translation=0.0
+                                geo_reference=gui_config.pseudo_mercator,
+                                x_translation=0.0,
+                                y_translation=0.0,
                             ),
                         )
 
@@ -1305,7 +1442,11 @@ class ScenarioToolboxController(QDockWidget):
         Manages the editable option for the dropdown menu for the geo reference for the sceanrio
         """
         reference = self.scenario_toolbox_ui.geo_reference.currentText()
-        if reference in [gui_config.utm_default, gui_config.pseudo_mercator, gui_config.lanelet2_default]:
+        if reference in [
+            gui_config.utm_default,
+            gui_config.pseudo_mercator,
+            gui_config.lanelet2_default,
+        ]:
             self.scenario_toolbox_ui.geo_reference.setEditable(False)
         else:
             self.scenario_toolbox_ui.geo_reference.setEditable(True)

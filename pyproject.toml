@@ -24,6 +24,13 @@ Documentation = "https://cps.pages.gitlab.lrz.de/commonroad/commonroad-scenario-
 Forum = "https://github.com/CommonRoad/commonroad-scenario-designer/discussions"
 Source = "https://github.com/CommonRoad/commonroad-scenario-designer"
 
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+crdesigner = 'crdesigner.ui.command_line:cli'
+
 [tool.poetry.dependencies]
 python = "^3.9,<3.12"
 commonroad-io = "2024.2"
@@ -60,21 +67,9 @@ eclipse-sumo = "^1.19.0"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.1.1"
-isort = "^5.13.1"
-flake8 = [
-    { version = "^5.0.4", python = ">=3.8,<3.8.1" },
-    { version = "^6.1.0", python = ">=3.8.1" }
-]
-
-[tool.poetry.group.docs]
-optional = true
-
-[tool.poetry.group.docs.dependencies]
-ipython = "^8.11.0"
-sphinx = ">=2.2.1"
-sphinx-autodoc-typehints = ">=1.11.0,<1.21.0"
-sphinx-rtd-theme = "^1.2.0"
+pip-licenses = "^4.3.4"
+ruff = "^0.6.0"
+pre-commit = "^4.0.1"
 
 [tool.poetry.group.tests]
 optional = true
@@ -91,17 +86,24 @@ optional = true
 [tool.poetry.group.tutorials.dependencies]
 jupyter = "^1.0.0"
 
-[tool.poetry.scripts]
-crdesigner = 'crdesigner.ui.command_line:cli'
+[tool.poetry.group.docs]
+optional = true
 
-[tool.black]
-extend-exclude = "(gen/)"
-line-length = 120
+[tool.poetry.group.docs.dependencies]
+mkdocstrings-python = "^1.8.0"
+mkdocs-material = "^9.5.12"
 
-[tool.isort]
-profile = "black"
-extend_skip = ["gen"]
+[tool.coverage.run]
+source = ["crdesigner"]
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.ruff]
+line-length = 100
+indent-width = 4
+format.quote-style = "double"
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402", "F401"]

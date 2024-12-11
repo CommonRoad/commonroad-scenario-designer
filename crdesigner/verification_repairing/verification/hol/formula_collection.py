@@ -2,7 +2,9 @@ from typing import Dict
 
 
 class GeneralFormulas:
-    formulas: Dict[str, str] = {"unique_id_all": "!(E k2 in M. (k1 != k2 & el_id(k1) = el_id(k2))) || k1 in M"}
+    formulas: Dict[str, str] = {
+        "unique_id_all": "!(E k2 in M. (k1 != k2 & el_id(k1) = el_id(k2))) || k1 in M"
+    }
     domains: Dict[str, str] = {}
     subformulas: Dict[str, str] = {}
 
@@ -10,20 +12,30 @@ class GeneralFormulas:
 class LaneletFormulas:
     formulas: Dict[str, str] = {
         "same_vertices_size": "size(left_polyline(l)) = size(right_polyline(l)) || l in L",
-        "vertices_more_than_one": "(size(left_polyline(l)) > 1 & size(right_polyline(l)) > 1) " "|| l in L",
-        "existence_left_adj": "(Has_left_adj_ref(l1)) -> E l2 in L. (Has_left_adj(l1, " "l2)) || l1 in L",
-        "existence_right_adj": "(Has_right_adj_ref(l1)) -> E l2 in L. (Has_right_adj(l1, " "l2)) || l1 in L",
-        "existence_predecessor": "E l2 in L. (lanelet_id(l2) = p_id) || l1 in L, " "p_id in predecessors(l1)",
-        "existence_successor": "E l2 in L. (lanelet_id(l2) = s_id) || l1 in L, " "s_id in successors(l1)",
-        "polylines_intersection": "!(Is_polylines_intersection(left_polyline(l), " "right_polyline(l))) || l in L",
+        "vertices_more_than_one": "(size(left_polyline(l)) > 1 & size(right_polyline(l)) > 1) "
+        "|| l in L",
+        "existence_left_adj": "(Has_left_adj_ref(l1)) -> E l2 in L. (Has_left_adj(l1, "
+        "l2)) || l1 in L",
+        "existence_right_adj": "(Has_right_adj_ref(l1)) -> E l2 in L. (Has_right_adj(l1, "
+        "l2)) || l1 in L",
+        "existence_predecessor": "E l2 in L. (lanelet_id(l2) = p_id) || l1 in L, "
+        "p_id in predecessors(l1)",
+        "existence_successor": "E l2 in L. (lanelet_id(l2) = s_id) || l1 in L, "
+        "s_id in successors(l1)",
+        "polylines_intersection": "!(Is_polylines_intersection(left_polyline(l), "
+        "right_polyline(l))) || l in L",
         "left_self_intersection": "!(Is_polyline_self_intersection(left_polyline(l))) || l in" " L",
-        "right_self_intersection": "!(Is_polyline_self_intersection(right_polyline(l))) || l " "in L",
-        "connections_predecessor": "(Has_predecessor(l1, l2)) -> are_predecessor_connections(" "l1, l2) || l1, l2 in L",
-        "connections_successor": "(Has_successor(l1, l2)) -> are_successor_connections(l1, " "l2) || l1, l2 in L",
+        "right_self_intersection": "!(Is_polyline_self_intersection(right_polyline(l))) || l "
+        "in L",
+        "connections_predecessor": "(Has_predecessor(l1, l2)) -> are_predecessor_connections("
+        "l1, l2) || l1, l2 in L",
+        "connections_successor": "(Has_successor(l1, l2)) -> are_successor_connections(l1, "
+        "l2) || l1, l2 in L",
         "potential_predecessor": "(!(Has_predecessor(l1, l2))) -> !("
         "are_predecessor_connections(l1, l2)) || l1, "
         "l2 in L",
-        "potential_successor": "(!(Has_successor(l1, l2))) -> !(are_successor_connections(l1," " l2)) || l1, l2 in L",
+        "potential_successor": "(!(Has_successor(l1, l2))) -> !(are_successor_connections(l1,"
+        " l2)) || l1, l2 in L",
         "non_predecessor_as_successor": "(lanelet_id(l1) != lanelet_id(l2) & Has_successor(l1, "
         "l2) & !(Has_predecessor(l1, l2))) -> !("
         "are_predecessor_connections(l1, "
@@ -37,8 +49,10 @@ class LaneletFormulas:
         "l2) | Has_right_adj(l1, l2) | Has_predecessor("
         "l1, l2) | Has_successor("
         "l1, l2)) || l1, l2 in L",
-        "existence_traffic_signs": "E t in TS. (traffic_sign_id(t) = t_id) || l in L, " "t_id in traffic_signs(l)",
-        "existence_traffic_lights": "E t in TL. (traffic_light_id(t) = t_id) || l in L, " "t_id in traffic_lights(l)",
+        "existence_traffic_signs": "E t in TS. (traffic_sign_id(t) = t_id) || l in L, "
+        "t_id in traffic_signs(l)",
+        "existence_traffic_lights": "E t in TL. (traffic_light_id(t) = t_id) || l in L, "
+        "t_id in traffic_lights(l)",
         "zero_or_two_points_stop_line": "(Has_stop_line(l)) -> (Has_start_point(stop_line(l)) "
         "<-> Has_end_point("
         "stop_line(l))) || l in L",
@@ -146,7 +160,8 @@ class LaneletFormulas:
         "are_right_forking_adj_connections(l2, l1)) -> "
         "(!(are_conflicting_connections(l1, l2)))"
         "|| l1, l2 in L",
-        "left_right_boundary_assignment": "Is_correct_left_right_boundary_assignment(l) " "|| l in L",
+        "left_right_boundary_assignment": "Is_correct_left_right_boundary_assignment(l) "
+        "|| l in L",
     }
     domains: Dict[str, str] = {}
     subformulas: Dict[str, str] = {

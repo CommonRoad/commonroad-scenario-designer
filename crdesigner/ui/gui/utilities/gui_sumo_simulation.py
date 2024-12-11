@@ -9,6 +9,7 @@ from crdesigner.ui.gui.utilities.util import Observable
 
 if SUMO_AVAILABLE:
     from sumocr.interface.sumo_simulation import SumoSimulation
+
     from crdesigner.map_conversion.sumo_map.config import SumoConfig
     from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
 
@@ -129,7 +130,9 @@ class SUMOSimulation(QFrame):
             return False
 
         self.waiting_msg = WaitingDialog()
-        self.worker: ConversionWorker = ConversionWorker(self._scenario, self._config, output_folder)
+        self.worker: ConversionWorker = ConversionWorker(
+            self._scenario, self._config, output_folder
+        )
         self.worker.finished.connect(self.simulation_done)
         self.worker.start()
 
@@ -149,7 +152,9 @@ class SUMOSimulation(QFrame):
             return False
 
         self.waiting_msg = WaitingDialog()
-        self.worker: SimulationWorker = SimulationWorker(self._scenario, self._config, self._output_folder)
+        self.worker: SimulationWorker = SimulationWorker(
+            self._scenario, self._config, self._output_folder
+        )
         self.worker.finished.connect(self.simulation_done)
         self.worker.start()
 

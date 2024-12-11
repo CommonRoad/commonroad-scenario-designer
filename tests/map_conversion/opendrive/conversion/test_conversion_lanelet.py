@@ -49,7 +49,11 @@ def init_conversion_lanelet() -> ConversionLanelet:
     plane_group.parametric_lanes.append(lane)
     # create the conversion lanelet
     lanelet = ConversionLanelet(
-        plane_group, np.array([[0, 1], [1, 2]]), np.array([[0, 0], [1, 1]]), np.array([[0, -1], [1, 0]]), 1
+        plane_group,
+        np.array([[0, 1], [1, 2]]),
+        np.array([[0, 0], [1, 1]]),
+        np.array([[0, -1], [1, 0]]),
+        1,
     )
     return lanelet
 
@@ -276,10 +280,18 @@ class TestConversionLanelet(unittest.TestCase):
 
     def test_concatenate(self):
         lanelet = ConversionLanelet(
-            None, np.array([[0, 1], [1, 2]]), np.array([[0, 0], [1, 1]]), np.array([[0, -1], [1, 0]]), 1
+            None,
+            np.array([[0, 1], [1, 2]]),
+            np.array([[0, 0], [1, 1]]),
+            np.array([[0, -1], [1, 0]]),
+            1,
         )
         lanelet_conc = ConversionLanelet(
-            None, np.array([[1, 2], [2, 2]]), np.array([[1, 1], [2, 1]]), np.array([[1, 0], [2, 0]]), 1
+            None,
+            np.array([[1, 2], [2, 2]]),
+            np.array([[1, 1], [2, 1]]),
+            np.array([[1, 0], [2, 0]]),
+            1,
         )
         lanelet.concatenate(lanelet_conc, False)
         # test 1: Initial lanelet has same end vertices as start vertices of the concatenate vertex
@@ -293,11 +305,19 @@ class TestConversionLanelet(unittest.TestCase):
         # test 2: Initial lanelet has different end vertices as start vertices of the concatenate vertex
 
         lanelet = ConversionLanelet(
-            None, np.array([[0, 1], [1, 2]]), np.array([[0, 0], [1, 1]]), np.array([[0, -1], [1, 0]]), 1
+            None,
+            np.array([[0, 1], [1, 2]]),
+            np.array([[0, 0], [1, 1]]),
+            np.array([[0, -1], [1, 0]]),
+            1,
         )
 
         lanelet_conc = ConversionLanelet(
-            None, np.array([[2, 2], [3, 2]]), np.array([[2, 1], [3, 1]]), np.array([[2, 0], [3, 0]]), 1
+            None,
+            np.array([[2, 2], [3, 2]]),
+            np.array([[2, 1], [3, 1]]),
+            np.array([[2, 0], [3, 0]]),
+            1,
         )
 
         lanelet.concatenate(lanelet_conc, False)
@@ -353,10 +373,12 @@ class TestConversionLanelet(unittest.TestCase):
         lanelet = init_conversion_lanelet()
         self.assertFalse(lanelet.has_zero_width_everywhere())
 
-        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.clear()
-        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.append(
-            [0.0, 0.0, 0.0, 0.0]
-        )
+        lanelet.parametric_lane_group.parametric_lanes[
+            0
+        ].border_group.outer_border.width_coefficients.clear()
+        lanelet.parametric_lane_group.parametric_lanes[
+            0
+        ].border_group.outer_border.width_coefficients.append([0.0, 0.0, 0.0, 0.0])
         self.assertTrue(lanelet.has_zero_width_everywhere())
 
     def test_first_zero_width_change_position(self):
@@ -364,10 +386,12 @@ class TestConversionLanelet(unittest.TestCase):
         res = lanelet.first_zero_width_change_position(False, 0.0)
         np.testing.assert_almost_equal((120, 3.75000), res, 5)
         # change outer border width coefficients to a polynomial with roots
-        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.clear()
-        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.append(
-            [3.75, 0.0, -0.015, 0.0004]
-        )
+        lanelet.parametric_lane_group.parametric_lanes[
+            0
+        ].border_group.outer_border.width_coefficients.clear()
+        lanelet.parametric_lane_group.parametric_lanes[
+            0
+        ].border_group.outer_border.width_coefficients.append([3.75, 0.0, -0.015, 0.0004])
         # roots of above polynomial are 0, 25
         res = lanelet.first_zero_width_change_position(False, 0.0)
         np.testing.assert_almost_equal((25.0, 3.125), res, 3)
@@ -377,10 +401,12 @@ class TestConversionLanelet(unittest.TestCase):
         max_width = lanelet.maximum_width()
         self.assertEqual(3.75, max_width)
         # change outer border width coefficients to a polynomial with roots
-        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.clear()
-        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.append(
-            [3.75, 0.0, -0.015, 0.0004]
-        )
+        lanelet.parametric_lane_group.parametric_lanes[
+            0
+        ].border_group.outer_border.width_coefficients.clear()
+        lanelet.parametric_lane_group.parametric_lanes[
+            0
+        ].border_group.outer_border.width_coefficients.append([3.75, 0.0, -0.015, 0.0004])
         self.assertEqual(3.75, max_width)
 
     def test_optimal_join_split_values(self):
@@ -393,10 +419,12 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertAlmostEqual(true_merge_width, merge_width, 7)
 
         # now polynomial has real roots, merge pos is at roots
-        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.clear()
-        lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.append(
-            [3.75, 0.0, -0.015, 0.0004]
-        )
+        lanelet.parametric_lane_group.parametric_lanes[
+            0
+        ].border_group.outer_border.width_coefficients.clear()
+        lanelet.parametric_lane_group.parametric_lanes[
+            0
+        ].border_group.outer_border.width_coefficients.append([3.75, 0.0, -0.015, 0.0004])
         merge_pos, merge_width = lanelet.optimal_join_split_values(True, False, 0.0)
         true_merge_pos = 25.0
         true_merge_width = 3.125

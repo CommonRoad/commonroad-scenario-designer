@@ -84,7 +84,9 @@ def execute_menubar_test(window):
 def execute_toolbar_test(window):
     # action_new
     toolbar_wrapper_action_new_successful = False
-    scenario = Scenario(0.1, affiliation="Technical University of Munich", source="CommonRoad Scenario Designer")
+    scenario = Scenario(
+        0.1, affiliation="Technical University of Munich", source="CommonRoad Scenario Designer"
+    )
     net = LaneletNetwork()
     scenario.replace_lanelet_network(net)
     scenario_in_app = None
@@ -148,7 +150,9 @@ def execute_toolbar_test(window):
 
 def execute_scenario_tests(window):
     # Tests for adding a Lanelet to a Scenario
-    scenario = Scenario(0.1, affiliation="Technical University of Munich", source="CommonRoad Scenario Designer")
+    scenario = Scenario(
+        0.1, affiliation="Technical University of Munich", source="CommonRoad Scenario Designer"
+    )
     net = LaneletNetwork()
     scenario.replace_lanelet_network(net)
     lanelet_start_pos_x = 0.0
@@ -215,14 +219,18 @@ def execute_scenario_tests(window):
     changed_lanelet_length_after_update = 0
 
     try:
-        window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.setCurrentIndex(1)
+        window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.setCurrentIndex(
+            1
+        )
         actual_selected_lanelet_length = window.road_network_toolbox.get_float(
             window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_length
         )
         window.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_length.setText("20.0")
         window.road_network_toolbox.road_network_toolbox_ui.button_update_lanelet.click()
-        changed_lanelet_length_after_update = window.road_network_toolbox.lanelet_controller.lanelet_ui.get_length(
-            window.scenario_model.find_lanelet_by_id(1)
+        changed_lanelet_length_after_update = (
+            window.road_network_toolbox.lanelet_controller.lanelet_ui.get_length(
+                window.scenario_model.find_lanelet_by_id(1)
+            )
         )
 
     except Exception as e:
@@ -263,7 +271,9 @@ def execute_add_obstacle_test(window):
 
 
 def execute_load_scenario_test(window):
-    parent_directory = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
+    parent_directory = os.path.abspath(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir)
+    )
     path_to_test = parent_directory + "/map_conversion/test_maps/sumo/ARG_Carcarana-10_2_T-1.xml"
     expected_count_lanelets = 94
     expected_count_traffic_signs = 8

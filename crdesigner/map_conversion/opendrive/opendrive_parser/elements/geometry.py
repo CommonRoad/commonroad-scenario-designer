@@ -58,7 +58,9 @@ class Geometry(abc.ABC):
         return self._heading
 
     @abc.abstractmethod
-    def calc_position(self, s_pos: float, compute_curvature: bool = True) -> Tuple[np.ndarray, np.ndarray, float]:
+    def calc_position(
+        self, s_pos: float, compute_curvature: bool = True
+    ) -> Tuple[np.ndarray, np.ndarray, float]:
         """
         Calculates the position of the geometry as if the starting point is (0/0)
 
@@ -76,7 +78,9 @@ class Line(Geometry):
     This class is a subclass of Geometry
     """
 
-    def calc_position(self, s_pos: float, compute_curvature: bool = True) -> Tuple[np.ndarray, float, int]:
+    def calc_position(
+        self, s_pos: float, compute_curvature: bool = True
+    ) -> Tuple[np.ndarray, float, int]:
         """
         Calculates x and y coordinates at position s along the line and returns additionally the orientation and
         curvature. It overrides the abstract method of the superclass Geometry.
@@ -85,7 +89,9 @@ class Line(Geometry):
         :param compute_curvature: decides whether curvature should be calculated
         :return: x and y position, orientation and curvature in the form ([x, y], orientation, curvature=0)
         """
-        pos = self.start_position + np.array([s_pos * np.cos(self.heading), s_pos * np.sin(self.heading)])
+        pos = self.start_position + np.array(
+            [s_pos * np.cos(self.heading), s_pos * np.sin(self.heading)]
+        )
         tangent = self.heading
 
         return pos, tangent, CurvatureRes.CONST_ZERO
@@ -110,7 +116,9 @@ class Arc(Geometry):
         self.curvature = curvature
         super().__init__(start_position=start_position, heading=heading, length=length)
 
-    def calc_position(self, s_pos: float, compute_curvature: bool = True) -> Tuple[np.ndarray, float, float]:
+    def calc_position(
+        self, s_pos: float, compute_curvature: bool = True
+    ) -> Tuple[np.ndarray, float, float]:
         """
         Calculates x and y coordinates at position s along the line and returns additionally the orientation and
         curvature. The chord a connecting the arc's endpoints is described as a = 2*r*sin(0.5*theta) and the
@@ -145,7 +153,14 @@ class Spiral(Geometry):
     This class is a subclass of Geometry and uses the EulerSpiral class from eulerspiral.py
     """
 
-    def __init__(self, start_position: np.ndarray, heading: float, length: float, curv_start: float, curv_end: float):
+    def __init__(
+        self,
+        start_position: np.ndarray,
+        heading: float,
+        length: float,
+        curv_start: float,
+        curv_end: float,
+    ):
         """
         Constructor of Spiral().
 
@@ -159,7 +174,9 @@ class Spiral(Geometry):
         self._curv_end = curv_end
 
         super().__init__(start_position=start_position, heading=heading, length=length)
-        self._spiral = EulerSpiral.create_from_length_and_curvature(self.length, self._curv_start, self._curv_end)
+        self._spiral = EulerSpiral.create_from_length_and_curvature(
+            self.length, self._curv_start, self._curv_end
+        )
 
     def calc_position(
         self, s_pos: float, compute_curvature: bool = True
@@ -190,7 +207,14 @@ class Poly3(Geometry):
     """
 
     def __init__(
-        self, start_position: np.ndarray, heading: float, length: float, a: float, b: float, c: float, d: float
+        self,
+        start_position: np.ndarray,
+        heading: float,
+        length: float,
+        a: float,
+        b: float,
+        c: float,
+        d: float,
     ):
         """
         Constructor of Cubic polynom of the form y(x) = a + b*x + c*x^2 + d*x^3
@@ -339,15 +363,23 @@ class ParamPoly3(Geometry):
             np.polynomial.polynomial.polyval(pos, self.d2_coeffs_v)
         ):
             if np.polynomial.polynomial.polyval(pos, self.d2_coeffs_u) > 0:
-                return np.polynomial.polynomial.polyval(pos, self.d2_coeffs_u), self.curvature_derivative_max
+                return np.polynomial.polynomial.polyval(
+                    pos, self.d2_coeffs_u
+                ), self.curvature_derivative_max
             else:
-                return np.polynomial.polynomial.polyval(pos, self.d2_coeffs_u), self.curvature_derivative_min
+                return np.polynomial.polynomial.polyval(
+                    pos, self.d2_coeffs_u
+                ), self.curvature_derivative_min
 
         else:
             if np.polynomial.polynomial.polyval(pos, self.d2_coeffs_v) > 0:
-                return np.polynomial.polynomial.polyval(pos, self.d2_coeffs_v), self.curvature_derivative_max
+                return np.polynomial.polynomial.polyval(
+                    pos, self.d2_coeffs_v
+                ), self.curvature_derivative_max
             else:
-                return np.polynomial.polynomial.polyval(pos, self.d2_coeffs_v), self.curvature_derivative_min
+                return np.polynomial.polynomial.polyval(
+                    pos, self.d2_coeffs_v
+                ), self.curvature_derivative_min
 
     def calc_position(
         self, s_pos: float, compute_curvature: bool = True
@@ -381,7 +413,9 @@ class ParamPoly3(Geometry):
         return self.start_position + np.array([xrot, yrot]), self.heading + tangent, curvature
 
 
-def calc_next_s(s_current: float, curvature: float, error_tolerance: float, min_delta_s: float, s_max: float) -> float:
+def calc_next_s(
+    s_current: float, curvature: float, error_tolerance: float, min_delta_s: float, s_max: float
+) -> float:
     """
     Adaptive computation of next longitudinal sampling position considering approximated error using the curvature.
     Formula: error_tolerance(curvature) <= (curvature^2)/8 * max_{[a,b]}(|f''(s)|)
@@ -421,7 +455,9 @@ def calc_next_s(s_current: float, curvature: float, error_tolerance: float, min_
     return s_next
 
 
-def calc_delta_s(curvature: Union[None, float, Tuple[float, float]], error_tolerance: float) -> float:
+def calc_delta_s(
+    curvature: Union[None, float, Tuple[float, float]], error_tolerance: float
+) -> float:
     """
     Calculates the difference to the next s_position.
 
@@ -445,7 +481,9 @@ def calc_delta_s(curvature: Union[None, float, Tuple[float, float]], error_toler
         if curv_derivative is not None and abs(curv_derivative) > 2.0:
 
             def f(ds):
-                return (math.pow(ds, 2) * curvature + math.pow(ds, 3) * curv_derivative) / 8 - error_tolerance
+                return (
+                    math.pow(ds, 2) * curvature + math.pow(ds, 3) * curv_derivative
+                ) / 8 - error_tolerance
 
             def f_p(ds):
                 return ds * 0.25 * curvature + math.pow(ds, 2) * 0.375 * curv_derivative

@@ -69,7 +69,12 @@ class FirstOrder(Unary, ABC):
         """
         string = self._symbol + " "
         for i, (var, domain) in enumerate(zip(self._vars, self._domains)):
-            string += var.name + " in " + domain.to_string() + (". " if i == len(self._vars) - 1 else ", ")
+            string += (
+                var.name
+                + " in "
+                + domain.to_string()
+                + (". " if i == len(self._vars) - 1 else ", ")
+            )
         string += self._expr.to_string()
         return string
 
@@ -85,14 +90,20 @@ class FirstOrder(Unary, ABC):
                 if domain.domain_id in model.domain_vals.keys():
                     domain.values = model.domain_vals[domain.domain_id]
                 else:
-                    warnings.warn("Unsuccessful initialization of values of fixed domain {}".format(domain.domain_id))
+                    warnings.warn(
+                        "Unsuccessful initialization of values of fixed domain {}".format(
+                            domain.domain_id
+                        )
+                    )
             elif isinstance(domain, DynamicDomain):
                 if domain.func.name in model.function_funcs.keys():
                     domain.func.func = model.function_funcs[domain.func.name]
                     domain.initialize(model)
                 else:
                     warnings.warn(
-                        "Unsuccessful initialization of function of dynamic domain {}".format(domain.func.name)
+                        "Unsuccessful initialization of function of dynamic domain {}".format(
+                            domain.func.name
+                        )
                     )
 
         super().initialize(model)

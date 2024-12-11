@@ -32,16 +32,29 @@ class MapPartitioning(ABC):
         self._network = network
 
         self._lanelet_ids = [lanelet.lanelet_id for lanelet in self._network.lanelets]
-        self._traffic_sign_ids = [traffic_sign.traffic_sign_id for traffic_sign in self._network.traffic_signs]
-        self._traffic_light_ids = [traffic_light.traffic_light_id for traffic_light in self._network.traffic_lights]
-        self._intersection_ids = [intersection.intersection_id for intersection in self._network.intersections]
+        self._traffic_sign_ids = [
+            traffic_sign.traffic_sign_id for traffic_sign in self._network.traffic_signs
+        ]
+        self._traffic_light_ids = [
+            traffic_light.traffic_light_id for traffic_light in self._network.traffic_lights
+        ]
+        self._intersection_ids = [
+            intersection.intersection_id for intersection in self._network.intersections
+        ]
 
     def one_block_partition(self) -> Partition:
         """
         Forms the complete lanelet network as one partition block.
 
         """
-        return [(self._lanelet_ids, self._traffic_sign_ids, self._traffic_light_ids, self._intersection_ids)]
+        return [
+            (
+                self._lanelet_ids,
+                self._traffic_sign_ids,
+                self._traffic_light_ids,
+                self._intersection_ids,
+            )
+        ]
 
     @staticmethod
     def _chunks(ids: List[int], size: int):
@@ -99,7 +112,10 @@ class LaneletPartitioning(MapPartitioning):
 
         lanelet_partition = self._map_lanelet_partition(lanelet_partition)
 
-        partition = [(block, self._traffic_sign_ids, self._traffic_light_ids, []) for block in lanelet_partition]
+        partition = [
+            (block, self._traffic_sign_ids, self._traffic_light_ids, [])
+            for block in lanelet_partition
+        ]
 
         return partition
 
@@ -135,14 +151,21 @@ class LaneletPartitioning(MapPartitioning):
 
         lanelet_partition = self._map_lanelet_partition(lanelet_partition)
 
-        partition = [(block, self._traffic_sign_ids, self._traffic_light_ids, []) for block in lanelet_partition]
+        partition = [
+            (block, self._traffic_sign_ids, self._traffic_light_ids, [])
+            for block in lanelet_partition
+        ]
 
         logging.info([len(block) for block in lanelet_partition])
 
         return partition
 
     def _partition(
-        self, max_size: int = 25, v_weights: List[int] = None, e_weights: List[int] = None, buffered: bool = False
+        self,
+        max_size: int = 25,
+        v_weights: List[int] = None,
+        e_weights: List[int] = None,
+        buffered: bool = False,
     ) -> List[LaneletBlock]:
         """
         Partitions the graph representing the map.
@@ -205,12 +228,18 @@ class LaneletPartitioning(MapPartitioning):
                     graph[lan_node_id].append((adj_node_id, EdgeType.PREDECESSOR))
 
             adj_left_id = lanelet.adj_left
-            if adj_left_id is not None and self._network.find_lanelet_by_id(adj_left_id) is not None:
+            if (
+                adj_left_id is not None
+                and self._network.find_lanelet_by_id(adj_left_id) is not None
+            ):
                 adj_node_id = self._get_node_id(adj_left_id)
                 graph[lan_node_id].append((adj_node_id, EdgeType.LEFT_ADJ))
 
             adj_right_id = lanelet.adj_right
-            if adj_right_id is not None and self._network.find_lanelet_by_id(adj_right_id) is not None:
+            if (
+                adj_right_id is not None
+                and self._network.find_lanelet_by_id(adj_right_id) is not None
+            ):
                 adj_node_id = self._get_node_id(adj_right_id)
                 graph[lan_node_id].append((adj_node_id, EdgeType.RIGHT_ADJ))
 
@@ -256,7 +285,9 @@ class LaneletPartitioning(MapPartitioning):
 
         return mapped_partition
 
-    def _add_buffered_area_lanelets(self, partition: List[List[int]], buffer: float) -> List[List[int]]:
+    def _add_buffered_area_lanelets(
+        self, partition: List[List[int]], buffer: float
+    ) -> List[List[int]]:
         """
         Adds lanelet to the partition if lanelet intersects the buffered area of one of the partitions lanelets.
 
@@ -264,8 +295,12 @@ class LaneletPartitioning(MapPartitioning):
         :return: Extended partition.
         """
         for block in partition:
-            lanelets_p = [self._network.find_lanelet_by_id(self._get_lanelet_id(node_id)) for node_id in block]
-            buffered_areas = [lanelet.polygon.shapely_object.buffer(buffer) for lanelet in lanelets_p]
+            lanelets_p = [
+                self._network.find_lanelet_by_id(self._get_lanelet_id(node_id)) for node_id in block
+            ]
+            buffered_areas = [
+                lanelet.polygon.shapely_object.buffer(buffer) for lanelet in lanelets_p
+            ]
 
             for lanelet in self._network.lanelets:
                 node_id = self._get_node_id(lanelet.lanelet_id)

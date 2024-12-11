@@ -198,7 +198,9 @@ class OsmConfig(BaseConfig):
     INTERSECTION_DISTANCE_SUBLAYER = Attribute(1.0, "Intersection Distance Sublayer")
     # defines if the distance to other roads is used for cropping
     # if false the distance to the center of the intersection is used
-    INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = Attribute(True, "Intersection Cropping with Respect to Roads")
+    INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = Attribute(
+        True, "Intersection Cropping with Respect to Roads"
+    )
     # threshold above which angles are considered as soft in degrees
     SOFT_ANGLE_THRESHOLD = Attribute(55.0, "Soft Angle Threshold")
     # least angle for lane segment to be added to the graph in degrees.
@@ -236,7 +238,8 @@ class OsmConfig(BaseConfig):
     # Traffic Lights
     # cycle that will be applied to each traffic light. Values in seconds
     TRAFFIC_LIGHT_CYCLE = Attribute(
-        {"red_phase": 57, "red_yellow_phase": 3, "green_phase": 37, "yellow_phase": 3}, "Traffic Light Cycle"
+        {"red_phase": 57, "red_yellow_phase": 3, "green_phase": 37, "yellow_phase": 3},
+        "Traffic Light Cycle",
     )
 
     # Traffic Signs

@@ -18,14 +18,18 @@ class GeneralConfig(BaseConfig):
     # CommonRoad map/scenario author
     author = Attribute("Max Mustermann", "CommonRoad map/scenario author")
     # CommonRoad scenario/map author affiliation
-    affiliation = Attribute("Technical University of Munich", "CommonRoad scenario/map author affiliation")
+    affiliation = Attribute(
+        "Technical University of Munich", "CommonRoad scenario/map author affiliation"
+    )
     # CommonRoad scenario/map source
     source = Attribute("CommonRoad Scenario Designer", "CommonRoad scenario/map source")
     # projection used
     # additional tags for the benchmark
     tags = Attribute("urban", "CommonRoad Tags")
     # projection used for the CommonRoad scenario
-    proj_string_cr = Attribute(pseudo_mercator, "Projection string", "String used for the initialization of projection")
+    proj_string_cr = Attribute(
+        pseudo_mercator, "Projection string", "String used for the initialization of projection"
+    )
 
     LAYOUT = [
         [

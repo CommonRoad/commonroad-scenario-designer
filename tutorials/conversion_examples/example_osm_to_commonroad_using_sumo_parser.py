@@ -28,4 +28,6 @@ if os.path.exists(Path.cwd() / "example_files") is False:
 if os.path.exists(Path.cwd() / "example_files/osm") is False:
     os.mkdir(Path.cwd() / "example_files/osm")
 
-writer.write_to_file(str(Path.cwd() / "example_files/osm/test_ped_crossing.xml"), OverwriteExistingFile.ALWAYS)
+writer.write_to_file(
+    str(Path.cwd() / "example_files/osm/test_ped_crossing.xml"), OverwriteExistingFile.ALWAYS
+)

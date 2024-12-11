@@ -12,21 +12,31 @@ class OpenDriveConfig(BaseConfig):
     )
 
     min_delta_s = Attribute(
-        0.5, "Min. delta s", "Min. step length between two sampling positions on the reference geometry"
+        0.5,
+        "Min. delta s",
+        "Min. step length between two sampling positions on the reference geometry",
     )
 
-    precision = Attribute(0.5, "Precision", "Precision with which to convert plane group to lanelet")
+    precision = Attribute(
+        0.5, "Precision", "Precision with which to convert plane group to lanelet"
+    )
 
     driving_default_lanelet_type = Attribute(
-        "urban", "Driving default lanelet type", "Mapping of OpenDRIVE driveway lane type to a CommonRoad lanelet type"
+        "urban",
+        "Driving default lanelet type",
+        "Mapping of OpenDRIVE driveway lane type to a CommonRoad lanelet type",
     )
 
     general_lanelet_type_activ = Attribute(
-        True, "General lanelet type active", "Activates whether certain lanelet type should be added to all lanelets"
+        True,
+        "General lanelet type active",
+        "Activates whether certain lanelet type should be added to all lanelets",
     )
 
     general_lanelet_type = Attribute(
-        "urban", "General lanelet type", "Lanelet type which is added to every lanelet (if activated)"
+        "urban",
+        "General lanelet type",
+        "Lanelet type which is added to every lanelet (if activated)",
     )
 
     lanelet_types_backwards_compatible = Attribute(
@@ -51,7 +61,9 @@ class OpenDriveConfig(BaseConfig):
         "a value of 0 is recommended",
     )
 
-    proj_string_odr = Attribute(pseudo_mercator, "Proj string", "String used for the " "initialization of projection")
+    proj_string_odr = Attribute(
+        pseudo_mercator, "Proj string", "String used for the " "initialization of projection"
+    )
 
     filter_types = Attribute(
         [

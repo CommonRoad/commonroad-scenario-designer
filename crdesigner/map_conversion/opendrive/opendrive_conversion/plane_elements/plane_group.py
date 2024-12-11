@@ -219,7 +219,17 @@ class ParametricLaneGroup:
         center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
         # access to user conversion
         user_list = [set(), set()]
-        user_set = {"car", "truck", "bus", "motorcycle", "priorityVehicle", "taxi", "bicycle", "pedestrian", "train"}
+        user_set = {
+            "car",
+            "truck",
+            "bus",
+            "motorcycle",
+            "priorityVehicle",
+            "taxi",
+            "bicycle",
+            "pedestrian",
+            "train",
+        }
         direct_map_set = {"truck", "bus", "motorcycle", "pedestrian", "bicycle", "taxi"}
         vehicle_set = {"car", "truck", "bus", "motorcycle", "priorityVehicle", "taxi"}
 
@@ -239,7 +249,9 @@ class ParametricLaneGroup:
 
         for restriction in self.access:
             if not np.isclose(0.0, restriction[2]):
-                warnings.warn("There exist an offset in the lane access restrictions that is currently ignored")
+                warnings.warn(
+                    "There exist an offset in the lane access restrictions that is currently ignored"
+                )
             if restriction[0] in direct_map_set:
                 user = restriction[0]
             elif restriction[0] == "passengerCar":
@@ -318,7 +330,10 @@ class ParametricLaneGroup:
                 )
 
         return self.parametric_lanes[plane_idx].calc_border(
-            border, s_pos - self._geo_lengths[plane_idx], width_offset, compute_curvature=compute_curvature
+            border,
+            s_pos - self._geo_lengths[plane_idx],
+            width_offset,
+            compute_curvature=compute_curvature,
         )
 
     def to_lanelet_with_mirroring(
@@ -359,7 +374,9 @@ class ParametricLaneGroup:
             original_width = np.linalg.norm(inner_pos - outer_pos)
 
             # if not mirroring lane or outside of range
-            if (pos < mirror_interval[0] or pos > mirror_interval[1]) and not np.isclose(pos, mirror_interval[1]):
+            if (pos < mirror_interval[0] or pos > mirror_interval[1]) and not np.isclose(
+                pos, mirror_interval[1]
+            ):
                 if transformer is not None:
                     left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
                     right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
@@ -382,21 +399,29 @@ class ParametricLaneGroup:
 
                     # change width s.t. it does not mirror inner border but instead
                     # outer border
-                    local_width_offset = math.copysign(1, local_width_offset) * last_width_difference
+                    local_width_offset = (
+                        math.copysign(1, local_width_offset) * last_width_difference
+                    )
                     if modified_width < original_width:
                         new_vertex = self.calc_border("outer", pos, local_width_offset)[0]
                         if transformer is not None:
-                            right_vertices.append(transformer.transform(new_vertex[0], new_vertex[1]))
+                            right_vertices.append(
+                                transformer.transform(new_vertex[0], new_vertex[1])
+                            )
                         else:
                             right_vertices.append(new_vertex)
                     elif modified_width > original_width + adjacent_width:
                         if transformer is not None:
-                            right_vertices.append(transformer.transform(adj_outer_pos[0], adj_outer_pos[1]))
+                            right_vertices.append(
+                                transformer.transform(adj_outer_pos[0], adj_outer_pos[1])
+                            )
                         else:
                             right_vertices.append(adj_outer_pos)
                     else:
                         if transformer is not None:
-                            right_vertices.append(transformer.transform(new_outer_pos[0], new_outer_pos[1]))
+                            right_vertices.append(
+                                transformer.transform(new_outer_pos[0], new_outer_pos[1])
+                            )
                         else:
                             right_vertices.append(new_outer_pos)
                         last_width_difference = abs(modified_width - original_width)
@@ -409,21 +434,29 @@ class ParametricLaneGroup:
                     new_inner_pos = self.calc_border("outer", pos, local_width_offset)[0]
                     modified_width = np.linalg.norm(new_inner_pos - outer_pos)
 
-                    local_width_offset = math.copysign(1, local_width_offset) * last_width_difference
+                    local_width_offset = (
+                        math.copysign(1, local_width_offset) * last_width_difference
+                    )
                     if modified_width < original_width:
                         new_vertex = self.calc_border("inner", pos, local_width_offset)[0]
                         if transformer is not None:
-                            left_vertices.append(transformer.transform(new_vertex[0], new_vertex[1]))
+                            left_vertices.append(
+                                transformer.transform(new_vertex[0], new_vertex[1])
+                            )
                         else:
                             left_vertices.append(new_vertex)
                     elif modified_width > original_width + adjacent_width:
                         if transformer is not None:
-                            left_vertices.append(transformer.transform(adj_inner_pos[0], adj_inner_pos[1]))
+                            left_vertices.append(
+                                transformer.transform(adj_inner_pos[0], adj_inner_pos[1])
+                            )
                         else:
                             left_vertices.append(adj_inner_pos)
                     else:
                         if transformer is not None:
-                            left_vertices.append(transformer.transform(new_inner_pos[0], new_inner_pos[1]))
+                            left_vertices.append(
+                                transformer.transform(new_inner_pos[0], new_inner_pos[1])
+                            )
                         else:
                             left_vertices.append(new_inner_pos)
                         last_width_difference = abs(modified_width - original_width)
@@ -440,7 +473,9 @@ class ParametricLaneGroup:
         # right_vertices = np.array(right_vertices)
 
         center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
-        lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_)
+        lanelet = ConversionLanelet(
+            copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_
+        )
 
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
