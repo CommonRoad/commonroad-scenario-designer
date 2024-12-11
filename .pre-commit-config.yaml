@@ -8,11 +8,10 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    # Ruff version.
     rev: v0.6.8
     hooks:
-      # Run the linter.
       - id: ruff
         args: [ --fix ]
-      # Run the formatter.
+        exclude: crdesigner/verification_repairing/verification/hol/parser/gen/
       - id: ruff-format
+        exclude: crdesigner/verification_repairing/verification/hol/parser/gen/
