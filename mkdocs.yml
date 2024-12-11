@@ -12,4 +12,9 @@ plugins:
 
 nav:
   - Introduction: index.md
-  - Example Usage: example.md
+  - GUI: gui.md
+  - Conversions:
+    - Lanelet2: lanelet2.md
+    - OpenDRIVE: open_drive.md
+    - OSM: osm.md
+    - SUMO: sumo.md

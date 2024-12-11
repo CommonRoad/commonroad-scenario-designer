@@ -1,10 +1,10 @@
 # CommonRoad Scenario Designer
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
 [![PyPI version fury.io](https://badge.fury.io/py/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
 [![PyPI download week](https://img.shields.io/pypi/dw/commonroad-scenario-designer.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
 [![PyPI download month](https://img.shields.io/pypi/dm/commonroad-scenario-designer.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
 [![PyPI license](https://img.shields.io/pypi/l/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
-![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
 
 This toolbox provides map converters for [OpenStreetMap](https://www.openstreetmap.de/karte.html) (OSM),
 [Lanelet](https://www.mrt.kit.edu/software/libLanelet/libLanelet.html) / [Lanelet2](https://github.com/fzi-forschungszentrum-informatik/Lanelet2),
@@ -62,7 +62,7 @@ the different usage methods.
 
 ### GUI
 
-![GUI_Screenshot](docs/source/details/images/gui_screenshot.png)
+![GUI_Screenshot](assets/gui_screenshot.png)
 
 The recommended aspect ratio is 16:9 with a scaling of 100%.
 Within the GUI, you can also execute the different converters.
@@ -155,7 +155,7 @@ The tutorials include a jupyter notebook and exemplary Python scripts for each c
 To generate the documentation from source, first install the necessary dependencies with pip:
 
 ```bash
-cd docs/source && sphinx-build -b html . ../../public
+mkdocs serve
 ```
 
 The documentation can be accessed by opening `public/index.html`.
@@ -166,9 +166,9 @@ The full documentation of the API and introducing examples can also be found [he
 A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).
 
 ## Bug and feature reporting
-This release (v0.8.9) is still a BETA version.
-In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18).
-If you want to contribute to the toolbox, you can also post it in the [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) or contact [Sebastian Maierhofer](sebastian.maierhofer@tum.de).
+This release (v0.9.3) is still a BETA version.
+In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://github.com/CommonRoad/commonroad-scenario-designer/discussions).
+If you want to contribute to the toolbox, you can also post it in the [forum](https://github.com/CommonRoad/commonroad-scenario-designer/discussions).
 
 ## Authors
 Responsible: Sebastian Maierhofer, Sebastian Mair
@@ -179,7 +179,7 @@ Maximilian Rieger, Til Stotz, Stefan Urban, Max Winklhofer
 
 ## Credits
 We gratefully acknowledge partial financial support by
-- DFG (German Research Fundation) Priority Program SPP 1835 Cooperative Interacting Automobiles
+- DFG (German Research Foundation) Priority Program SPP 1835 Cooperative Interacting Automobiles
 - BMW Group within the Car@TUM project
 - Central Innovation Programme of the German Federal Government under grant no. ZF4086007BZ8
 
