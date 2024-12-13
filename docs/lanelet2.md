@@ -1,18 +1,14 @@
-Converting Lanelet/Lanelet2 to CommonRoad and vice versa
-########################################################
+# Converting Lanelet/Lanelet2 to CommonRoad and vice versa
 
-Lanelet/Lanelet2 to CommonRoad
-******************************
+## Lanelet/Lanelet2 to CommonRoad
 This conversion allows you to convert a road network description from the
 `Lanelet/Lanelet2 format <https://github.com/fzi-forschungszentrum-informatik/Lanelet2>`_ to
 the `CommonRoad format <https://gitlab.lrz.de/tum-cps/commonroad-sc
 enarios/blob/master/documentation/XML_commonRoad_2020a.pdf>`_ (Version 2020a).
 
-Quick Start Guide
-=================
+### Quick Start Guide
 
-Command Line Interface
-----------------------
+#### Command Line Interface
 
 Want to quickly convert an Lanelet/Lanelet2 file to a CommonRoad map?
 
@@ -38,25 +34,21 @@ produces a file called *new_converted_file_name.xml*
 You can also use the GUI to convert an lanelet file.
 The GUI can be started from command line with ``crdesigner`` or ``crdesigner gui``.
 
-Python APIs
------------
-
-.. code:: python
-
+#### Python APIs
     from commonroad.scenario.scenario import Tag
     from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
     from commonroad.planning.planning_problem import PlanningProblemSet
-
+    
     from crdesigner.config.lanelet2_config import lanelet2_config
     from crdesigner.map_conversion.map_conversion_interface import lanelet_to_commonroad
-
+    
     input_path = ""
     output_path = ""
     lanelet2_config.adjacencies = True
-
+    
     # load lanelet/lanelet2 file, parse it, and convert it to a CommonRoad scenario
     scenario = lanelet_to_commonroad(input_path)
-
+    
     # store converted file as CommonRoad scenario
     writer = CRDesignerFileWriter(
         scenario=scenario,
@@ -68,8 +60,7 @@ Python APIs
     )
     writer.write_to_file(output_path, OverwriteExistingFile.ALWAYS)
 
-Implementation Details
-======================
+### Implementation Details
 
 As OSM lanelet boundaries are saved as geographic coordinates (lat, lon) and CommonRoad saves the
 boundaries as cartesian (map projection) coordinates, a projection is needed for the conversion.
@@ -89,33 +80,30 @@ A few comments on the conversion:
 
 
 
+#### Flowchart of the conversion function
 
-
-
-
-
-Flowchart of the conversion function
-====================================
 To get a better understanding of the conversion process, a flowchart of the function that transforms the WayRelation (Lanelet2/OSM format) to the Lanelet (CommonRoad format) is given below:
 
 .. image::
   images/Lanelet2/Lanelet2_Flowcharts/Way_rel_to_lanelet_FLOWCHART.png
   :height: 1650
 
-Both left and right ways of the WayRelation object have to be of the same size. If not, the function tries to fix the issue by resizing one of the ways, raising an error in case of a failutre. If there is no failure, the function creates left and right vertices from those respective ways. Potentially, it reverses them, depending on the driving system and the location of the start and the end points of those newly created vertices. Special meanings of the WayRelation, such as the road user, direction or the road type are extracted and stored as Lanelet's attributes. A set of traffic signs, from the WayRelation object, is created, after which the function checks for potentially already existing successor and predecessor laneletes.
+Both left and right ways of the WayRelation object have to be of the same size. 
+If not, the function tries to fix the issue by resizing one of the ways, raising an error in case of a failure. 
+If there is no failure, the function creates left and right vertices from those respective ways. 
+Potentially, it reverses them, depending on the driving system and the location of the start and the end points of those newly created vertices. 
+Special meanings of the WayRelation, such as the road user, direction or the road type are extracted and stored as lanelet's attributes. 
+A set of traffic signs, from the WayRelation object, is created, after which the function checks for potentially already existing successor and predecessor lanelets.
 
-CommonRoad to Lanelet2
-**********************
+## CommonRoad to Lanelet2
 This conversion allows you to convert a road network description from
 the `CommonRoad format <https://gitlab.lrz.de/tum-cps/commonroad-sc
 enarios/blob/master/documentation/XML_commonRoad_2020a.pdf>`_ (Version 2020a) format to the
 `Lanelet/Lanelet2 format <https://github.com/fzi-forschungszentrum-informatik/Lanelet2>`_ format.
 
-Quick Start Guide
-=================
+### Quick Start Guide
 
-Command Line Interface
-----------------------
+#### Command Line Interface
 
 Want to quickly convert an CommonRoad map to a OSM lanelet map?
 
@@ -142,11 +130,7 @@ You can also use the GUI to convert an lanelet file.
 The GUI can be started from command line with ``crdesigner`` or ``crdesigner gui``.
 
 
-Python API
------------
-
-.. code:: python
-
+#### Python API
     from crdesigner.config.lanelet2_config import lanelet2_config
     from crdesigner.map_conversion.map_conversion_interface import commonroad_to_lanelet
 
@@ -159,8 +143,7 @@ Python API
     # load CommonRoad file and convert it to lanelet format
     commonroad_to_lanelet(input_path, output_name, config)
 
-Implementation Details
-======================
+### Implementation Details
 
 Converting back from cartesian to geographic coordinates requires, like mentioned in the above description of the
 reverse conversion, a projection.
@@ -172,8 +155,7 @@ This code of this conversion take some points into account:
 - If a lanelet is adjacent to another lanelet, and the vertices of the shared border coincide, they can share a way in the converted OSM document.
 
 
-Flowchart of the conversion function
-====================================
+#### Flowchart of the conversion function
 
 To get a better understanding of the conversion process, a flowchart of the function that transforms the lanelet (CommonRoad format) to the WayRelation (Lanelet2/OSM format) is given below:
 
