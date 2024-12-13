@@ -4,12 +4,12 @@
 
 ### Added
 - odr2cr: Left-hand drive consideration
+- pre-commit hook
 
 ### Changed
 - map-conversion: Interfaces can consider string and Path objects
 - mkdocs for docu
 - ruff for formatting
-- add pre-commit hook
 
 ### Fixed
 - cr2sumo: Trajectory conversion assigned non-existent edges to routes
