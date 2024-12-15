@@ -208,12 +208,16 @@ def resample_lanelet(lanelet: Lanelet, step=3.0):
         if current_position <= current_distance:
             # add new sample and increase current position
             ratio = current_position / current_distance
-            polyline_new_c.append((1 - ratio) * polyline[current_idx] + ratio * polyline[current_idx + 1])
+            polyline_new_c.append(
+                (1 - ratio) * polyline[current_idx] + ratio * polyline[current_idx + 1]
+            )
             polyline_new_r.append(
-                (1 - ratio) * lanelet.right_vertices[current_idx] + ratio * lanelet.right_vertices[current_idx + 1]
+                (1 - ratio) * lanelet.right_vertices[current_idx]
+                + ratio * lanelet.right_vertices[current_idx + 1]
             )
             polyline_new_l.append(
-                (1 - ratio) * lanelet.left_vertices[current_idx] + ratio * lanelet.left_vertices[current_idx + 1]
+                (1 - ratio) * lanelet.left_vertices[current_idx]
+                + ratio * lanelet.left_vertices[current_idx + 1]
             )
             current_position += step
 
@@ -251,14 +255,22 @@ def erode_lanelet(lanelet: Lanelet, radius: float):
             return vertices
 
         cut_vertices_start = reshape_vertices(lanelet.interpolate_position(radius))
-        cut_vertices_end = reshape_vertices(lanelet.interpolate_position(lanelet.distance[-1] - radius))
+        cut_vertices_end = reshape_vertices(
+            lanelet.interpolate_position(lanelet.distance[-1] - radius)
+        )
 
         # erode at start
         lanelet._center_vertices = np.insert(
-            lanelet._center_vertices[cut_vertices_start[3] + 1 :, :], 0, cut_vertices_start[0], axis=0
+            lanelet._center_vertices[cut_vertices_start[3] + 1 :, :],
+            0,
+            cut_vertices_start[0],
+            axis=0,
         )
         lanelet._right_vertices = np.insert(
-            lanelet._right_vertices[cut_vertices_start[3] + 1 :, :], 0, cut_vertices_start[1], axis=0
+            lanelet._right_vertices[cut_vertices_start[3] + 1 :, :],
+            0,
+            cut_vertices_start[1],
+            axis=0,
         )
         lanelet._left_vertices = np.insert(
             lanelet._left_vertices[cut_vertices_start[3] + 1 :, :], 0, cut_vertices_start[2], axis=0
@@ -291,7 +303,9 @@ def erode_lanelet(lanelet: Lanelet, radius: float):
 
     # recompute polyon if present
     if lanelet._polygon:
-        lanelet._polygon = Polygon(np.concatenate((lanelet.right_vertices, np.flip(lanelet.left_vertices, axis=0))))
+        lanelet._polygon = Polygon(
+            np.concatenate((lanelet.right_vertices, np.flip(lanelet.left_vertices, axis=0)))
+        )
     return lanelet
 
 
@@ -388,15 +402,25 @@ def remove_unreferenced_traffic_lights(lanelet_network: LaneletNetwork) -> Lanel
 
 
 def max_lanelet_network_id(lanelet_network: LaneletNetwork) -> int:
-    max_lanelet = np.max([la.lanelet_id for la in lanelet_network.lanelets]) if lanelet_network.lanelets else 0
+    max_lanelet = (
+        np.max([la.lanelet_id for la in lanelet_network.lanelets])
+        if lanelet_network.lanelets
+        else 0
+    )
     max_intersection = (
-        np.max([i.intersection_id for i in lanelet_network.intersections]) if lanelet_network.intersections else 0
+        np.max([i.intersection_id for i in lanelet_network.intersections])
+        if lanelet_network.intersections
+        else 0
     )
     max_traffic_light = (
-        np.max([t.traffic_light_id for t in lanelet_network.traffic_lights]) if lanelet_network.traffic_lights else 0
+        np.max([t.traffic_light_id for t in lanelet_network.traffic_lights])
+        if lanelet_network.traffic_lights
+        else 0
     )
     max_traffic_sign = (
-        np.max([t.traffic_sign_id for t in lanelet_network.traffic_signs]) if lanelet_network.traffic_signs else 0
+        np.max([t.traffic_sign_id for t in lanelet_network.traffic_signs])
+        if lanelet_network.traffic_signs
+        else 0
     )
     return np.max([max_lanelet, max_intersection, max_traffic_light, max_traffic_sign])
 
@@ -463,15 +487,21 @@ def merge_lanelets(lanelets: List[Lanelet]) -> List[Lanelet]:
                     other
                     for other in old
                     if other.lanelet_id != current.lanelet_id
-                    and (other.lanelet_id in current.successor or current.lanelet_id in other.successor)
+                    and (
+                        other.lanelet_id in current.successor
+                        or current.lanelet_id in other.successor
+                    )
                 )
                 merging_ids = {match.lanelet_id, current.lanelet_id}
                 merged = Lanelet.merge_lanelets(match, current)
                 for lanelet in old:
                     lanelet._predecessor = [
-                        p if p not in merging_ids else merged.lanelet_id for p in lanelet.predecessor
+                        p if p not in merging_ids else merged.lanelet_id
+                        for p in lanelet.predecessor
                     ]
-                    lanelet._successor = [s if s not in merging_ids else merged.lanelet_id for s in lanelet.successor]
+                    lanelet._successor = [
+                        s if s not in merging_ids else merged.lanelet_id for s in lanelet.successor
+                    ]
                 new = old - {current, match} | {merged}
                 break
             except StopIteration:

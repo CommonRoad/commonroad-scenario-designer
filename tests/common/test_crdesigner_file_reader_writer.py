@@ -38,7 +38,9 @@ class TestCRDesignerFileReaderWriter(unittest.TestCase):
         self.assertEqual(projected_scenario, scenario)
 
         # opening it with the different projection
-        projected_scenario = crdesigner_reader.open(target_projection="+proj=utm +zone=30 +ellps=WGS84")[0]
+        projected_scenario = crdesigner_reader.open(
+            target_projection="+proj=utm +zone=30 +ellps=WGS84"
+        )[0]
         # scenarios should not be the same as the projections are different
         self.assertNotEqual(projected_scenario, scenario)
 
@@ -63,8 +65,12 @@ class TestCRDesignerFileReaderWriter(unittest.TestCase):
         crdesigner_reader.open(verify_repair_scenario=True)
 
         # checking that the visualization files exist
-        self.assertTrue(Path.exists(Path.cwd() / "error_visualization_images/initial_result_USA_US101-9.svg"))
-        self.assertTrue(Path.exists(Path.cwd() / "error_visualization_images/final_result_USA_US101-9.svg"))
+        self.assertTrue(
+            Path.exists(Path.cwd() / "error_visualization_images/initial_result_USA_US101-9.svg")
+        )
+        self.assertTrue(
+            Path.exists(Path.cwd() / "error_visualization_images/final_result_USA_US101-9.svg")
+        )
 
     def test_crdesigner_file_writer(self):
         # reading a scenario
@@ -75,7 +81,8 @@ class TestCRDesignerFileReaderWriter(unittest.TestCase):
 
         # writing it without verifying and repairing
         CRDesignerFileWriter(scenario, pp).write_to_file(
-            str(Path(__file__).parent / "scenario.xml"), overwrite_existing_file=OverwriteExistingFile.ALWAYS
+            str(Path(__file__).parent / "scenario.xml"),
+            overwrite_existing_file=OverwriteExistingFile.ALWAYS,
         )
         reader_scenario = CRDesignerFileReader(Path(__file__).parent / "scenario.xml").open()[0]
 
@@ -97,9 +104,9 @@ class TestCRDesignerFileReaderWriter(unittest.TestCase):
         )
 
         # compare the two verified and repaired scenarios
-        writer_repaired_scenario = CRDesignerFileReader(Path(__file__).parent / "writer_repaired_scenario.xml").open()[
-            0
-        ]
+        writer_repaired_scenario = CRDesignerFileReader(
+            Path(__file__).parent / "writer_repaired_scenario.xml"
+        ).open()[0]
         function_repaired_scenario = CRDesignerFileReader(
             Path(__file__).parent / "function_repaired_scenario.xml"
         ).open()[0]
@@ -135,5 +142,9 @@ class TestCRDesignerFileReaderWriter(unittest.TestCase):
         )
 
         # checking that the visualization files exist
-        self.assertTrue(Path.exists(Path.cwd() / "error_visualization_images/initial_result_CHN_Merging-1.svg"))
-        self.assertTrue(Path.exists(Path.cwd() / "error_visualization_images/final_result_CHN_Merging-1.svg"))
+        self.assertTrue(
+            Path.exists(Path.cwd() / "error_visualization_images/initial_result_CHN_Merging-1.svg")
+        )
+        self.assertTrue(
+            Path.exists(Path.cwd() / "error_visualization_images/final_result_CHN_Merging-1.svg")
+        )

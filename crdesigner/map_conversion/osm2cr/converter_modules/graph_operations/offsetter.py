@@ -29,7 +29,9 @@ def offset_graph(graph: Graph) -> None:
                     incoming, _ = lane_linker.get_incomings_outgoings(other, node)
                     if len(incoming) < len(outgoing):
                         # new lanes are created, outgoing edge is set off
-                        offset = (len(outgoing) - len(incoming)) / 2 * config.LANEWIDTHS[edge.roadtype]
+                        offset = (
+                            (len(outgoing) - len(incoming)) / 2 * config.LANEWIDTHS[edge.roadtype]
+                        )
                         if lane_linker.merge_left(incoming, outgoing):
                             offset *= -1
                         edge.interpolated_waypoints = geometry.offset_polyline(
@@ -37,7 +39,9 @@ def offset_graph(graph: Graph) -> None:
                         )
                     elif len(incoming) > len(outgoing):
                         # lanes are removed, incoming edge is set off
-                        offset = (len(incoming) - len(outgoing)) / 2 * config.LANEWIDTHS[edge.roadtype]
+                        offset = (
+                            (len(incoming) - len(outgoing)) / 2 * config.LANEWIDTHS[edge.roadtype]
+                        )
                         if lane_linker.merge_left(incoming, outgoing):
                             offset *= -1
                         other.interpolated_waypoints = geometry.offset_polyline(
@@ -64,14 +68,18 @@ def offset_graph(graph: Graph) -> None:
                     else:
                         raise ValueError("Graph is malformed")
                     if len(incoming) < len(outgoing):
-                        offset = (len(outgoing) - len(incoming)) / 2 * config.LANEWIDTHS[edge.roadtype]
+                        offset = (
+                            (len(outgoing) - len(incoming)) / 2 * config.LANEWIDTHS[edge.roadtype]
+                        )
                         if not to_right:
                             offset *= -1
                         edge.interpolated_waypoints = geometry.offset_polyline(
                             edge.interpolated_waypoints, offset, False
                         )
                     elif len(incoming) > len(outgoing):
-                        offset = (len(incoming) - len(outgoing)) / 2 * config.LANEWIDTHS[edge.roadtype]
+                        offset = (
+                            (len(incoming) - len(outgoing)) / 2 * config.LANEWIDTHS[edge.roadtype]
+                        )
                         if to_right:
                             offset *= -1
                         edge.interpolated_waypoints = geometry.offset_polyline(

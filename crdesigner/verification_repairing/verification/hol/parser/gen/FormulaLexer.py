@@ -1,12 +1,13 @@
 # Generated from Formula.g4 by ANTLR 4.9.3
-from antlr4 import *
-from io import StringIO
 import sys
+from io import StringIO
+
+from antlr4 import *
+
 if sys.version_info[1] > 5:
     from typing import TextIO
 else:
     from typing.io import TextIO
-
 
 
 def serializedATN():
@@ -17,7 +18,7 @@ def serializedATN():
         buf.write("\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23")
         buf.write("\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30")
         buf.write("\4\31\t\31\4\32\t\32\4\33\t\33\4\34\t\34\4\35\t\35\4\36")
-        buf.write("\t\36\4\37\t\37\4 \t \4!\t!\4\"\t\"\3\2\3\2\3\3\3\3\3")
+        buf.write('\t\36\4\37\t\37\4 \t \4!\t!\4"\t"\3\2\3\2\3\3\3\3\3')
         buf.write("\4\3\4\3\5\3\5\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\5\6V\n")
         buf.write("\6\3\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7\5\7b\n\7\3")
         buf.write("\b\3\b\3\b\3\b\3\b\3\b\3\b\5\bk\n\b\3\t\3\t\3\t\3\t\5")
@@ -38,16 +39,16 @@ def serializedATN():
         buf.write("\u00f1\n\36\f\36\16\36\u00f4\13\36\3\37\6\37\u00f7\n\37")
         buf.write("\r\37\16\37\u00f8\3\37\3\37\3 \3 \3 \5 \u0100\n \3 \6")
         buf.write(" \u0103\n \r \16 \u0104\7 \u0107\n \f \16 \u010a\13 \3")
-        buf.write(" \3 \3!\3!\3!\6!\u0111\n!\r!\16!\u0112\5!\u0115\n!\3\"")
-        buf.write("\3\"\3\"\5\"\u011a\n\"\2\2#\3\3\5\4\7\5\t\6\13\7\r\b\17")
+        buf.write(' \3 \3!\3!\3!\6!\u0111\n!\r!\16!\u0112\5!\u0115\n!\3"')
+        buf.write('\3"\3"\5"\u011a\n"\2\2#\3\3\5\4\7\5\t\6\13\7\r\b\17')
         buf.write("\t\21\n\23\13\25\f\27\r\31\16\33\17\35\20\37\21!\22#\23")
-        buf.write("%\24\'\25)\26+\27-\30/\31\61\2\63\2\65\32\67\339\34;\35")
+        buf.write("%\24'\25)\26+\27-\30/\31\61\2\63\2\65\32\67\339\34;\35")
         buf.write("=\36?\37A C!\3\2\t\3\2c|\3\2aa\5\2\62;C\\c|\3\2C\\\3\2")
-        buf.write("\62;\4\2\13\f\"\"\3\2\63;\2\u0137\2\3\3\2\2\2\2\5\3\2")
+        buf.write('\62;\4\2\13\f""\3\2\63;\2\u0137\2\3\3\2\2\2\2\5\3\2')
         buf.write("\2\2\2\7\3\2\2\2\2\t\3\2\2\2\2\13\3\2\2\2\2\r\3\2\2\2")
         buf.write("\2\17\3\2\2\2\2\21\3\2\2\2\2\23\3\2\2\2\2\25\3\2\2\2\2")
         buf.write("\27\3\2\2\2\2\31\3\2\2\2\2\33\3\2\2\2\2\35\3\2\2\2\2\37")
-        buf.write("\3\2\2\2\2!\3\2\2\2\2#\3\2\2\2\2%\3\2\2\2\2\'\3\2\2\2")
+        buf.write("\3\2\2\2\2!\3\2\2\2\2#\3\2\2\2\2%\3\2\2\2\2'\3\2\2\2")
         buf.write("\2)\3\2\2\2\2+\3\2\2\2\2-\3\2\2\2\2/\3\2\2\2\2\65\3\2")
         buf.write("\2\2\2\67\3\2\2\2\29\3\2\2\2\2;\3\2\2\2\2=\3\2\2\2\2?")
         buf.write("\3\2\2\2\2A\3\2\2\2\2C\3\2\2\2\3E\3\2\2\2\5G\3\2\2\2\7")
@@ -55,7 +56,7 @@ def serializedATN():
         buf.write("\2\21p\3\2\2\2\23y\3\2\2\2\25\u0081\3\2\2\2\27\u008a\3")
         buf.write("\2\2\2\31\u0091\3\2\2\2\33\u009a\3\2\2\2\35\u009c\3\2")
         buf.write("\2\2\37\u009f\3\2\2\2!\u00a3\3\2\2\2#\u00a6\3\2\2\2%\u00a8")
-        buf.write("\3\2\2\2\'\u00ab\3\2\2\2)\u00ad\3\2\2\2+\u00af\3\2\2\2")
+        buf.write("\3\2\2\2'\u00ab\3\2\2\2)\u00ad\3\2\2\2+\u00af\3\2\2\2")
         buf.write("-\u00b2\3\2\2\2/\u00b5\3\2\2\2\61\u00b9\3\2\2\2\63\u00cb")
         buf.write("\3\2\2\2\65\u00dc\3\2\2\2\67\u00df\3\2\2\29\u00e1\3\2")
         buf.write("\2\2;\u00e5\3\2\2\2=\u00f6\3\2\2\2?\u00fc\3\2\2\2A\u0114")
@@ -86,7 +87,7 @@ def serializedATN():
         buf.write("\u0097\3\2\2\2\u009b\34\3\2\2\2\u009c\u009d\7/\2\2\u009d")
         buf.write("\u009e\7@\2\2\u009e\36\3\2\2\2\u009f\u00a0\7>\2\2\u00a0")
         buf.write("\u00a1\7/\2\2\u00a1\u00a2\7@\2\2\u00a2 \3\2\2\2\u00a3")
-        buf.write("\u00a4\7k\2\2\u00a4\u00a5\7p\2\2\u00a5\"\3\2\2\2\u00a6")
+        buf.write('\u00a4\7k\2\2\u00a4\u00a5\7p\2\2\u00a5"\3\2\2\2\u00a6')
         buf.write("\u00a7\7?\2\2\u00a7$\3\2\2\2\u00a8\u00a9\7#\2\2\u00a9")
         buf.write("\u00aa\7?\2\2\u00aa&\3\2\2\2\u00ab\u00ac\7>\2\2\u00ac")
         buf.write("(\3\2\2\2\u00ad\u00ae\7@\2\2\u00ae*\3\2\2\2\u00af\u00b0")
@@ -142,10 +143,9 @@ def serializedATN():
 
 
 class FormulaLexer(Lexer):
-
     atn = ATNDeserializer().deserialize(serializedATN())
 
-    decisionsToDFA = [ DFA(ds, i) for i, ds in enumerate(atn.decisionToState) ]
+    decisionsToDFA = [DFA(ds, i) for i, ds in enumerate(atn.decisionToState)]
 
     T__0 = 1
     T__1 = 2
@@ -179,35 +179,102 @@ class FormulaLexer(Lexer):
     INT_VALUE = 30
     FLOAT_VALUE = 31
 
-    channelNames = [ u"DEFAULT_TOKEN_CHANNEL", u"HIDDEN" ]
+    channelNames = ["DEFAULT_TOKEN_CHANNEL", "HIDDEN"]
 
-    modeNames = [ "DEFAULT_MODE" ]
+    modeNames = ["DEFAULT_MODE"]
 
-    literalNames = [ "<INVALID>",
-            "'.'", "','", "')'", "'('", "'->'", "'<->'", "'in'", "'='", 
-            "'!='", "'<'", "'>'", "'<='", "'>='", "'||'" ]
+    literalNames = [
+        "<INVALID>",
+        "'.'",
+        "','",
+        "')'",
+        "'('",
+        "'->'",
+        "'<->'",
+        "'in'",
+        "'='",
+        "'!='",
+        "'<'",
+        "'>'",
+        "'<='",
+        "'>='",
+        "'||'",
+    ]
 
-    symbolicNames = [ "<INVALID>",
-            "TRUE", "FALSE", "NOT", "UNIVERSAL", "EXISTENTIAL", "COUNTING", 
-            "AND", "OR", "XOR", "IMPL", "EQ", "IN", "EQUAL", "UNEQUAL", 
-            "LESS", "GREATER", "LESS_EQUAL", "GREATER_EQUAL", "WITH", "PREDICATE", 
-            "VAR", "FUNCTION", "FIXED_DOMAIN", "WS", "STR_VALUE", "INT_VALUE", 
-            "FLOAT_VALUE" ]
+    symbolicNames = [
+        "<INVALID>",
+        "TRUE",
+        "FALSE",
+        "NOT",
+        "UNIVERSAL",
+        "EXISTENTIAL",
+        "COUNTING",
+        "AND",
+        "OR",
+        "XOR",
+        "IMPL",
+        "EQ",
+        "IN",
+        "EQUAL",
+        "UNEQUAL",
+        "LESS",
+        "GREATER",
+        "LESS_EQUAL",
+        "GREATER_EQUAL",
+        "WITH",
+        "PREDICATE",
+        "VAR",
+        "FUNCTION",
+        "FIXED_DOMAIN",
+        "WS",
+        "STR_VALUE",
+        "INT_VALUE",
+        "FLOAT_VALUE",
+    ]
 
-    ruleNames = [ "T__0", "T__1", "T__2", "T__3", "TRUE", "FALSE", "NOT", 
-                  "UNIVERSAL", "EXISTENTIAL", "COUNTING", "AND", "OR", "XOR", 
-                  "IMPL", "EQ", "IN", "EQUAL", "UNEQUAL", "LESS", "GREATER", 
-                  "LESS_EQUAL", "GREATER_EQUAL", "WITH", "LOWER_ALPHA_UNDERSCORE", 
-                  "UPPER_ALPHA_UNDERSCORE", "PREDICATE", "VAR", "FUNCTION", 
-                  "FIXED_DOMAIN", "WS", "STR_VALUE", "INT_VALUE", "FLOAT_VALUE" ]
+    ruleNames = [
+        "T__0",
+        "T__1",
+        "T__2",
+        "T__3",
+        "TRUE",
+        "FALSE",
+        "NOT",
+        "UNIVERSAL",
+        "EXISTENTIAL",
+        "COUNTING",
+        "AND",
+        "OR",
+        "XOR",
+        "IMPL",
+        "EQ",
+        "IN",
+        "EQUAL",
+        "UNEQUAL",
+        "LESS",
+        "GREATER",
+        "LESS_EQUAL",
+        "GREATER_EQUAL",
+        "WITH",
+        "LOWER_ALPHA_UNDERSCORE",
+        "UPPER_ALPHA_UNDERSCORE",
+        "PREDICATE",
+        "VAR",
+        "FUNCTION",
+        "FIXED_DOMAIN",
+        "WS",
+        "STR_VALUE",
+        "INT_VALUE",
+        "FLOAT_VALUE",
+    ]
 
     grammarFileName = "Formula.g4"
 
-    def __init__(self, input=None, output:TextIO = sys.stdout):
+    def __init__(self, input=None, output: TextIO = sys.stdout):
         super().__init__(input, output)
         self.checkVersion("4.9.3")
-        self._interp = LexerATNSimulator(self, self.atn, self.decisionsToDFA, PredictionContextCache())
+        self._interp = LexerATNSimulator(
+            self, self.atn, self.decisionsToDFA, PredictionContextCache()
+        )
         self._actions = None
         self._predicates = None
-
-

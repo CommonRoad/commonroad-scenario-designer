@@ -37,7 +37,8 @@ class TestCommandLineInterface(unittest.TestCase):
             [
                 "crdesigner",
                 "--input-file",
-                os.path.dirname(os.path.realpath(__file__)) + "/../map_conversion/test_maps/osm/munich.osm",
+                os.path.dirname(os.path.realpath(__file__))
+                + "/../map_conversion/test_maps/osm/munich.osm",
                 "--output-file",
                 self.output_path + "/osm_command_line.xml",
                 "osmcr",
@@ -103,7 +104,10 @@ class TestCommandLineInterface(unittest.TestCase):
         process.terminate()
 
     def test_map_ver_scenario(self):
-        path = Path(__file__).parent.parent / "map_verification/test_maps/paper_test_maps/DEU_Guetersloh-20_1_T-1.xml"
+        path = (
+            Path(__file__).parent.parent
+            / "map_verification/test_maps/paper_test_maps/DEU_Guetersloh-20_1_T-1.xml"
+        )
         path_repaired = path.parent / "DEU_Guetersloh-20_1_T-1-repaired.xml"
         process = subprocess.Popen(["crdesigner", "--input-file", str(path), "verify-map"])
         time.sleep(30)

@@ -20,7 +20,10 @@ def load_and_convert_opendrive(xodr_file_name: str) -> Scenario:
     generate_unique_id(0)  # reset ID counter
     opendrive_config.proj_string_odr = utm_default
     scenario = opendrive_to_commonroad(
-        Path(os.path.dirname(os.path.realpath(__file__)) + "/../../test_maps/opendrive/{}.xodr".format(xodr_file_name))
+        Path(
+            os.path.dirname(os.path.realpath(__file__))
+            + "/../../test_maps/opendrive/{}.xodr".format(xodr_file_name)
+        )
     )
 
     return scenario
@@ -80,17 +83,41 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         np.testing.assert_equal(4, len(scenario.lanelet_network.traffic_signs))
         # 40mph
         np.testing.assert_almost_equal(
-            17.881, float(scenario.lanelet_network.traffic_signs[0].traffic_sign_elements[0].additional_values[0]), 2
+            17.881,
+            float(
+                scenario.lanelet_network.traffic_signs[0]
+                .traffic_sign_elements[0]
+                .additional_values[0]
+            ),
+            2,
         )
         np.testing.assert_almost_equal(
-            17.881, float(scenario.lanelet_network.traffic_signs[2].traffic_sign_elements[0].additional_values[0]), 2
+            17.881,
+            float(
+                scenario.lanelet_network.traffic_signs[2]
+                .traffic_sign_elements[0]
+                .additional_values[0]
+            ),
+            2,
         )
         # 65 mph
         np.testing.assert_almost_equal(
-            29.057, float(scenario.lanelet_network.traffic_signs[1].traffic_sign_elements[0].additional_values[0]), 2
+            29.057,
+            float(
+                scenario.lanelet_network.traffic_signs[1]
+                .traffic_sign_elements[0]
+                .additional_values[0]
+            ),
+            2,
         )
         np.testing.assert_almost_equal(
-            29.057, float(scenario.lanelet_network.traffic_signs[3].traffic_sign_elements[0].additional_values[0]), 2
+            29.057,
+            float(
+                scenario.lanelet_network.traffic_signs[3]
+                .traffic_sign_elements[0]
+                .additional_values[0]
+            ),
+            2,
         )
 
         np.testing.assert_almost_equal(
@@ -127,7 +154,9 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         self.assertEqual(12, len(network.traffic_lights))
 
         # test position of a traffic light
-        np.testing.assert_almost_equal(network.find_traffic_light_by_id(9).position, [0.145, 8.317], 3)
+        np.testing.assert_almost_equal(
+            network.find_traffic_light_by_id(9).position, [0.145, 8.317], 3
+        )
 
     def test_zero_width_lanes_map_road_type(self):
         """Test the zero_width_lanes_map_road_type.xodr"""
@@ -137,8 +166,12 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         network = scenario.lanelet_network
 
         # test the road speed limit conversion
-        self.assertEqual(float(network.traffic_signs[0].traffic_sign_elements[0].additional_values[0]), 22.35)
-        self.assertEqual(float(network.traffic_signs[1].traffic_sign_elements[0].additional_values[0]), 22.35)
+        self.assertEqual(
+            float(network.traffic_signs[0].traffic_sign_elements[0].additional_values[0]), 22.35
+        )
+        self.assertEqual(
+            float(network.traffic_signs[1].traffic_sign_elements[0].additional_values[0]), 22.35
+        )
 
     def test_roundabout(self):
         """Test the file roundabout.xodr"""
@@ -152,7 +185,9 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
 
         # test vertices
         lanelet = network.find_lanelet_by_id(17)
-        np.testing.assert_almost_equal(15.268, np.linalg.norm(lanelet.left_vertices[0] - lanelet.right_vertices[0]), 3)
+        np.testing.assert_almost_equal(
+            15.268, np.linalg.norm(lanelet.left_vertices[0] - lanelet.right_vertices[0]), 3
+        )
 
         # test for calculating the vertices without sampling
         self.assertEqual(44, len(lanelet.left_vertices))
@@ -160,7 +195,9 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         # self.assertEqual(3, len(lanelet.left_vertices))
 
         lanelet = network.find_lanelet_by_id(4)
-        np.testing.assert_almost_equal(3.500, np.linalg.norm(lanelet.left_vertices[0] - lanelet.right_vertices[0]), 3)
+        np.testing.assert_almost_equal(
+            3.500, np.linalg.norm(lanelet.left_vertices[0] - lanelet.right_vertices[0]), 3
+        )
 
         # test length of lane
         # test for calculating the vertices with sampling
@@ -188,7 +225,8 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
                 [
                     s
                     for s in network.traffic_signs
-                    if s.traffic_sign_elements[0].traffic_sign_element_id == TrafficSignIDZamunda.PRIORITY
+                    if s.traffic_sign_elements[0].traffic_sign_element_id
+                    == TrafficSignIDZamunda.PRIORITY
                 ]
             ),
         )
@@ -200,13 +238,16 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
                 [
                     s
                     for s in network.traffic_signs
-                    if s.traffic_sign_elements[0].traffic_sign_element_id == TrafficSignIDZamunda.YIELD
+                    if s.traffic_sign_elements[0].traffic_sign_element_id
+                    == TrafficSignIDZamunda.YIELD
                 ]
             ),
         )
 
         # test position of a traffic sign
-        np.testing.assert_almost_equal(network.find_traffic_sign_by_id(1).position, [467.03, 498.24], 2)
+        np.testing.assert_almost_equal(
+            network.find_traffic_sign_by_id(1).position, [467.03, 498.24], 2
+        )
 
         # test line marking of a stop lines
         lanelet_with_stop_line = next(la for la in network.lanelets if la.stop_line is not None)
@@ -228,8 +269,12 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         # test vertices of lanelet 1
         # test for calculating the vertices without sampling
         self.assertEqual(210, len(network.find_lanelet_by_id(1).left_vertices))
-        np.testing.assert_almost_equal([-72.84, -5.19], network.find_lanelet_by_id(1).left_vertices[0], 2)
-        np.testing.assert_almost_equal([31.93, -4.35], network.find_lanelet_by_id(1).left_vertices[-1], 2)
+        np.testing.assert_almost_equal(
+            [-72.84, -5.19], network.find_lanelet_by_id(1).left_vertices[0], 2
+        )
+        np.testing.assert_almost_equal(
+            [31.93, -4.35], network.find_lanelet_by_id(1).left_vertices[-1], 2
+        )
 
         # test for calculating the vertices with sampling
         # self.assertEqual(3, len(network.find_lanelet_by_id(1).left_vertices))
@@ -279,7 +324,9 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         )
 
         # test position of a traffic light
-        np.testing.assert_almost_equal(network.find_traffic_light_by_id(1).position, [13.15, 12.32], 2)
+        np.testing.assert_almost_equal(
+            network.find_traffic_light_by_id(1).position, [13.15, 12.32], 2
+        )
 
     def test_opendrive_1(self):
         """Test the file opendrive-1.xodr"""
@@ -314,7 +361,9 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         )
 
         # test position of traffic sign
-        np.testing.assert_almost_equal(network.find_traffic_sign_by_id(9).position, [5.86, 13.78], 2)
+        np.testing.assert_almost_equal(
+            network.find_traffic_sign_by_id(9).position, [5.86, 13.78], 2
+        )
 
         # test number of intersections
         self.assertEqual(1, len(network.intersections))
@@ -327,26 +376,33 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         network = scenario.lanelet_network
 
         # test number of sidewalks
-        self.assertEqual(8, len([la for la in network.lanelets if la.lanelet_type == {LaneletType.SIDEWALK}]))
+        self.assertEqual(
+            8, len([la for la in network.lanelets if la.lanelet_type == {LaneletType.SIDEWALK}])
+        )
         # test number of driving lanes
         self.assertEqual(22, len(network.lanelets))
 
     def test_access_to_user_allow(self):
         name = "straight_road_lane_access"
         scenario = load_and_convert_opendrive(name)
-        self.assertEqual({RoadUser.PEDESTRIAN}, scenario.lanelet_network.find_lanelet_by_id(2).user_one_way)
+        self.assertEqual(
+            {RoadUser.PEDESTRIAN}, scenario.lanelet_network.find_lanelet_by_id(2).user_one_way
+        )
 
     def test_access_to_user_deny(self):
         name = "straight_road_lane_access_deny"
         scenario = load_and_convert_opendrive(name)
         self.assertEqual(
-            {RoadUser.VEHICLE, RoadUser.TRAIN}, scenario.lanelet_network.find_lanelet_by_id(2).user_one_way
+            {RoadUser.VEHICLE, RoadUser.TRAIN},
+            scenario.lanelet_network.find_lanelet_by_id(2).user_one_way,
         )
 
     def test_access_to_user_allow_bi(self):
         name = "straight_road_lane_access_bi"
         scenario = load_and_convert_opendrive(name)
-        self.assertEqual({RoadUser.PEDESTRIAN}, scenario.lanelet_network.find_lanelet_by_id(2).user_bidirectional)
+        self.assertEqual(
+            {RoadUser.PEDESTRIAN}, scenario.lanelet_network.find_lanelet_by_id(2).user_bidirectional
+        )
 
     def test_access_to_user_deny_bi(self):
         name = "straight_road_lane_access_deny_bi"
@@ -365,15 +421,21 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         )
         name = "straight_road_lane_access_emergency"
         scenario = load_and_convert_opendrive(name)
-        self.assertEqual({RoadUser.PRIORITY_VEHICLE}, scenario.lanelet_network.find_lanelet_by_id(2).user_one_way)
+        self.assertEqual(
+            {RoadUser.PRIORITY_VEHICLE}, scenario.lanelet_network.find_lanelet_by_id(2).user_one_way
+        )
 
         name = "straight_road_lane_access_passengerCar"
         scenario = load_and_convert_opendrive(name)
-        self.assertEqual({RoadUser.CAR}, scenario.lanelet_network.find_lanelet_by_id(2).user_one_way)
+        self.assertEqual(
+            {RoadUser.CAR}, scenario.lanelet_network.find_lanelet_by_id(2).user_one_way
+        )
 
         name = "straight_road_lane_access_trucks"
         scenario = load_and_convert_opendrive(name)
-        self.assertEqual({RoadUser.TRUCK}, scenario.lanelet_network.find_lanelet_by_id(2).user_one_way)
+        self.assertEqual(
+            {RoadUser.TRUCK}, scenario.lanelet_network.find_lanelet_by_id(2).user_one_way
+        )
 
     def test_mona_east_projection(self):
         name = "MONAEast"
@@ -387,7 +449,9 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         name = "conflicting_references"
         scenario = load_and_convert_opendrive(name)
         for la in scenario.lanelet_network.lanelets:
-            self.assertLess(np.max(np.linalg.norm(la.left_vertices[:-1] - la.left_vertices[1:], axis=1)), 1)
+            self.assertLess(
+                np.max(np.linalg.norm(la.left_vertices[:-1] - la.left_vertices[1:], axis=1)), 1
+            )
 
 
 if __name__ == "__main__":

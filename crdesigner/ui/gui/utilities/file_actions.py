@@ -15,7 +15,9 @@ def file_new(mwindow):
     """
     Function passed to the fileNewAction to create the action in the menu bar.
     """
-    scenario = Scenario(0.1, affiliation="Technical University of Munich", source="CommonRoad Scenario Designer")
+    scenario = Scenario(
+        0.1, affiliation="Technical University of Munich", source="CommonRoad Scenario Designer"
+    )
     net = LaneletNetwork()
     scenario.replace_lanelet_network(net)
     mwindow.scenario_model.set_scenario(scenario)
@@ -49,12 +51,15 @@ def open_path(mwindow, path):
             commonroad_reader = CRDesignerFileReader(path, file_format=FileFormat.PROTOBUF)
         else:
             commonroad_reader = CRDesignerFileReader(path, file_format=FileFormat.XML)
-        scenario, pps = commonroad_reader.open(verify_repair_scenario=gui_config.verify_repair_scenario)
+        scenario, pps = commonroad_reader.open(
+            verify_repair_scenario=gui_config.verify_repair_scenario
+        )
     except Exception as e:
         QMessageBox.warning(
             mwindow.mwindow_ui,
             "CommonRoad XML error",
-            "There was an error during the loading of the selected CommonRoad file.\n\n" + "Syntax Error: {}".format(e),
+            "There was an error during the loading of the selected CommonRoad file.\n\n"
+            + "Syntax Error: {}".format(e),
             QMessageBox.StandardButton.Ok,
         )
         return

@@ -41,7 +41,17 @@ def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder, label) -> List[float
 
     path = Path(verts, codes)
 
-    ax.add_patch(PathPatch(path, facecolor=color, edgecolor="black", lw=0.0, alpha=alpha, zorder=zorder, label=label))
+    ax.add_patch(
+        PathPatch(
+            path,
+            facecolor=color,
+            edgecolor="black",
+            lw=0.0,
+            alpha=alpha,
+            zorder=zorder,
+            label=label,
+        )
+    )
 
     return [xlim1, xlim2, ylim1, ylim2]
 

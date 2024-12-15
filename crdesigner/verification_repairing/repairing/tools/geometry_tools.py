@@ -29,7 +29,9 @@ def check_line_intersection_efficient(line1: List[List[float]], line2: List[List
     ) != ccw(line1[0], line1[1], line2[1])
 
 
-def check_intersected_lines(line1: np.ndarray, line2: np.ndarray = None, excluded_points=None) -> bool:
+def check_intersected_lines(
+    line1: np.ndarray, line2: np.ndarray = None, excluded_points=None
+) -> bool:
     """
     Checks whether two lines intersect each other. If the second line is none self-intersection will be considered. If
     the computed intersection point is equal to one of the excluded points it is treated as if no crossing is present.
@@ -110,7 +112,9 @@ def fill_number_of_vertices(vertices: np.ndarray, number: int) -> np.ndarray:
     return suited_vertices
 
 
-def average_vertices(left_vertices: np.ndarray, right_vertices: np.ndarray, reverse: bool) -> np.ndarray:
+def average_vertices(
+    left_vertices: np.ndarray, right_vertices: np.ndarray, reverse: bool
+) -> np.ndarray:
     if reverse:
         right_vertices = right_vertices[::-1]
     avg_vertices = []
@@ -157,7 +161,8 @@ def insert_vertices(long_polyline: np.ndarray, short_polyline: np.ndarray) -> np
             lb = short_polyline[last_key]
             for idx in range(1, counter + 1):
                 insertion_factor = (
-                    path_length_percentage_long[last_key + idx] - path_length_percentage_long[last_key]
+                    path_length_percentage_long[last_key + idx]
+                    - path_length_percentage_long[last_key]
                 ) / (path_length_percentage_long[key] - path_length_percentage_long[last_key])
                 new_vertex = insertion_factor * (ub - lb) + lb
                 short_polyline_updated = np.insert(short_polyline, last_key + idx, new_vertex, 0)
@@ -169,7 +174,9 @@ def insert_vertices(long_polyline: np.ndarray, short_polyline: np.ndarray) -> np
     return short_polyline
 
 
-def create_mapping(path_length_percentage_long: np.ndarray, path_length_percentage_short: np.ndarray) -> List[int]:
+def create_mapping(
+    path_length_percentage_long: np.ndarray, path_length_percentage_short: np.ndarray
+) -> List[int]:
     """
     Extracts places (indices) where new vertices have to be added in shorter lanelet.
 
@@ -189,12 +196,19 @@ def create_mapping(path_length_percentage_long: np.ndarray, path_length_percenta
         threshold = 0.01
         while key not in index_mapping and not finished:
             for idx_long in range(
-                last_idx_long, len(path_length_percentage_long) - (len(path_length_percentage_short) - key) + 1
+                last_idx_long,
+                len(path_length_percentage_long) - (len(path_length_percentage_short) - key) + 1,
             ):
-                if abs(path_length_percentage_long[idx_long] - value) < threshold and index_mapping[idx_long] == -1:
+                if (
+                    abs(path_length_percentage_long[idx_long] - value) < threshold
+                    and index_mapping[idx_long] == -1
+                ):
                     index_mapping[idx_long] = key
                     last_idx_long = idx_long
-                    if len(path_length_percentage_short) - key + 1 == len(index_mapping) - idx_long + 1:
+                    if (
+                        len(path_length_percentage_short) - key + 1
+                        == len(index_mapping) - idx_long + 1
+                    ):
                         for idx in range(idx_long + 1, len(index_mapping)):
                             index_mapping[idx] = key + 1
                             key += 1

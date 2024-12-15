@@ -47,7 +47,9 @@ def step_collection_2(graph: Graph) -> Graph:
         logging.info("deleting short edges")
         graph.delete_edges(edges_to_delete)
     if isinstance(graph, SublayeredGraph):
-        edges_to_delete = graph.sublayer_graph.crop_waypoints_at_intersections(config.INTERSECTION_DISTANCE_SUBLAYER)
+        edges_to_delete = graph.sublayer_graph.crop_waypoints_at_intersections(
+            config.INTERSECTION_DISTANCE_SUBLAYER
+        )
         if config.DELETE_SHORT_EDGES:
             graph.sublayer_graph.delete_edges(edges_to_delete)
     logging.info("applying traffic signs to edges and nodes")

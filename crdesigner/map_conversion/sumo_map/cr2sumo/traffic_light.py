@@ -31,7 +31,10 @@ class TrafficLightEncoder:
         self.conf = conf
 
     def encode(
-        self, node: Node, traffic_lights: List[TrafficLight], light_2_connections: Dict[TrafficLight, Set[Connection]]
+        self,
+        node: Node,
+        traffic_lights: List[TrafficLight],
+        light_2_connections: Dict[TrafficLight, Set[Connection]],
     ) -> Tuple[TLSProgram, List[Connection]]:
         # create SUMO Traffic Light Node
         self.index += 1
@@ -46,9 +49,12 @@ class TrafficLightEncoder:
         light_states = _sync_traffic_light_cycles(traffic_lights)
         # ungroup light states
         light_states = [
-            [s for i, s in enumerate(state) for _ in light_2_connections[traffic_lights[i]]] for state in light_states
+            [s for i, s in enumerate(state) for _ in light_2_connections[traffic_lights[i]]]
+            for state in light_states
         ]
-        connections: List[Connection] = [conn for tl in traffic_lights for conn in light_2_connections[tl]]
+        connections: List[Connection] = [
+            conn for tl in traffic_lights for conn in light_2_connections[tl]
+        ]
 
         # convert states to SUMO
         sumo_states: List[List[SignalState]] = []
@@ -101,14 +107,19 @@ class TrafficLightEncoder:
         return tls_program, connections
 
 
-def _sync_traffic_light_cycles(traffic_lights: List[TrafficLight]) -> List[List[TrafficLightCycleElement]]:
+def _sync_traffic_light_cycles(
+    traffic_lights: List[TrafficLight],
+) -> List[List[TrafficLightCycleElement]]:
     """
     Synchronizes traffic lights cycles for a list
     :param traffic_lights:
     :return: list of synchronized states
     """
     time_steps = np.lcm.reduce(
-        [sum(cycle.duration for cycle in tl.traffic_light_cycle.cycle_elements) for tl in traffic_lights]
+        [
+            sum(cycle.duration for cycle in tl.traffic_light_cycle.cycle_elements)
+            for tl in traffic_lights
+        ]
     )
     states = np.array(
         [
@@ -131,7 +142,9 @@ def _sync_traffic_light_cycles(traffic_lights: List[TrafficLight]) -> List[List[
     return res
 
 
-def _sample_traffic_light_cycle_to_states(cycle: TrafficLightCycle, max_time: int) -> List[TrafficLightState]:
+def _sample_traffic_light_cycle_to_states(
+    cycle: TrafficLightCycle, max_time: int
+) -> List[TrafficLightState]:
     """
     Sample the states of `cycle` for each timestep from 0 to `max_time`.
 

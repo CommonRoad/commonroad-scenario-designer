@@ -156,10 +156,14 @@ class SubMap:
 
         self._traffic_sign_ids = self._traffic_sign_ids.union(lanelet.traffic_signs)
         if lanelet.stop_line is not None and lanelet.stop_line.traffic_sign_ref is not None:
-            self._traffic_sign_ids = self._traffic_sign_ids.union(lanelet.stop_line.traffic_sign_ref)
+            self._traffic_sign_ids = self._traffic_sign_ids.union(
+                lanelet.stop_line.traffic_sign_ref
+            )
         self._traffic_light_ids = self._traffic_light_ids.union(lanelet.traffic_lights)
         if lanelet.stop_line is not None and lanelet.stop_line.traffic_light_ref is not None:
-            self._traffic_light_ids = self._traffic_light_ids.union(lanelet.stop_line.traffic_light_ref)
+            self._traffic_light_ids = self._traffic_light_ids.union(
+                lanelet.stop_line.traffic_light_ref
+            )
 
     def _extract_refs_from_traffic_sign(self, traffic_sign_id: int):
         """
@@ -174,7 +178,11 @@ class SubMap:
 
         self._lanelet_ids = self._lanelet_ids.union(traffic_sign.first_occurrence)
         self._lanelet_ids = self._lanelet_ids.union(
-            set(la.lanelet_id for la in self._network.lanelets if traffic_sign_id in la.traffic_signs)
+            set(
+                la.lanelet_id
+                for la in self._network.lanelets
+                if traffic_sign_id in la.traffic_signs
+            )
         )
 
     def _extract_refs_from_traffic_light(self, traffic_light_id: int):
@@ -186,7 +194,11 @@ class SubMap:
         """
         self._traffic_light_ids.add(traffic_light_id)
         self._lanelet_ids = self._lanelet_ids.union(
-            set(la.lanelet_id for la in self._network.lanelets if traffic_light_id in la.traffic_lights)
+            set(
+                la.lanelet_id
+                for la in self._network.lanelets
+                if traffic_light_id in la.traffic_lights
+            )
         )
 
     def _extract_refs_from_intersection(self, intersection_id: int):

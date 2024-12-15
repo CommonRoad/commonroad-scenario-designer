@@ -83,7 +83,9 @@ class Attribute(Generic[T], QObject):
         :param value: The value to set the attribute to.
         """
         if not isinstance(value, self.value_type) and value is not None:
-            raise TypeError(f"Expected type {self.value_type} for attribute {self.display_name}, got {type(value)}")
+            raise TypeError(
+                f"Expected type {self.value_type} for attribute {self.display_name}, got {type(value)}"
+            )
         if self.options is not None:
             if value not in self.options:
                 self._warning_wrong_setting()

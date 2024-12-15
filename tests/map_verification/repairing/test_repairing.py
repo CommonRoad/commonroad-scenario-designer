@@ -46,9 +46,13 @@ class TestGeneralRepairing(unittest.TestCase):
 
         # self.stop_line = StopLine(np.array([0., 0.]), np.array([1., 1.]), LineMarking.NO_MARKING, {9}, set(),
         # stop_line_id=1)
-        self.stop_line = StopLine(np.array([0.0, 0.0]), np.array([1.0, 1.0]), LineMarking.NO_MARKING, {9}, set())
+        self.stop_line = StopLine(
+            np.array([0.0, 0.0]), np.array([1.0, 1.0]), LineMarking.NO_MARKING, {9}, set()
+        )
 
-        self.lanelet_1 = Lanelet(left_polyline_1, center_polyline_1, right_polyline_1, 1, stop_line=self.stop_line)
+        self.lanelet_1 = Lanelet(
+            left_polyline_1, center_polyline_1, right_polyline_1, 1, stop_line=self.stop_line
+        )
         self.lanelet_2 = Lanelet(left_polyline_2, center_polyline_2, right_polyline_2, 2)
 
         self.traffic_light = TrafficLight(1, np.array([0.0, 0.0]))
@@ -115,18 +119,25 @@ class TestLaneletRepairing(unittest.TestCase):
         self.lanelet_repairer.repair_same_vertices_size((1,))
 
         self.assertEqual(3, len(self.lanelet_1.left_vertices))
-        self.assertEqual([[0.0, 1.0], [1.0, 1.0], [2.0, 1.0]], self.lanelet_1.left_vertices.tolist())
+        self.assertEqual(
+            [[0.0, 1.0], [1.0, 1.0], [2.0, 1.0]], self.lanelet_1.left_vertices.tolist()
+        )
 
         self.assertEqual(3, len(self.lanelet_1.right_vertices))
-        self.assertEqual([[0.0, 0.0], [1.0, 0.0], [2.0, 0.0]], self.lanelet_1.right_vertices.tolist())
+        self.assertEqual(
+            [[0.0, 0.0], [1.0, 0.0], [2.0, 0.0]], self.lanelet_1.right_vertices.tolist()
+        )
 
-        self.lanelet_1.left_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [1.0, 1.0], [1.5, 1.0], [2.0, 1.0]])
+        self.lanelet_1.left_vertices = np.array(
+            [[0.0, 1.0], [0.5, 1.0], [1.0, 1.0], [1.5, 1.0], [2.0, 1.0]]
+        )
 
         self.lanelet_repairer.repair_same_vertices_size((1,))
 
         self.assertEqual(5, len(self.lanelet_1.right_vertices))
         self.assertEqual(
-            [[0.0, 0.0], [0.5, 0.0], [1.0, 0.0], [1.5, 0.0], [2.0, 0.0]], self.lanelet_1.right_vertices.tolist()
+            [[0.0, 0.0], [0.5, 0.0], [1.0, 0.0], [1.5, 0.0], [2.0, 0.0]],
+            self.lanelet_1.right_vertices.tolist(),
         )
 
     def test_existence_left_adj(self):
@@ -162,130 +173,170 @@ class TestLaneletRepairing(unittest.TestCase):
 
         self.lanelet_repairer.repair_connections_predecessor((1, 2))
 
-        self.assertEqual(self.lanelet_1.left_vertices[0].tolist(), self.lanelet_2.left_vertices[2].tolist())
+        self.assertEqual(
+            self.lanelet_1.left_vertices[0].tolist(), self.lanelet_2.left_vertices[2].tolist()
+        )
 
         self.lanelet_2.right_vertices = np.array([[-2.0, 0.0], [-1.0, 0.0], [0.0, 0.1]])
 
         self.lanelet_repairer.repair_connections_predecessor((1, 2))
 
-        self.assertEqual(self.lanelet_1.right_vertices[0].tolist(), self.lanelet_2.right_vertices[2].tolist())
+        self.assertEqual(
+            self.lanelet_1.right_vertices[0].tolist(), self.lanelet_2.right_vertices[2].tolist()
+        )
 
     def test_connections_successor(self):
         self.lanelet_2.left_vertices = np.array([[2.0, 0.9], [3.0, 1.0], [4.0, 1.0]])
 
         self.lanelet_repairer.repair_connections_successor((1, 2))
 
-        self.assertEqual(self.lanelet_1.left_vertices[2].tolist(), self.lanelet_2.left_vertices[0].tolist())
+        self.assertEqual(
+            self.lanelet_1.left_vertices[2].tolist(), self.lanelet_2.left_vertices[0].tolist()
+        )
 
         self.lanelet_2.right_vertices = np.array([[2.0, -0.05], [3.0, 0], [4.0, 0]])
 
         self.lanelet_repairer.repair_connections_successor((1, 2))
 
-        self.assertEqual(self.lanelet_1.right_vertices[2].tolist(), self.lanelet_2.right_vertices[0].tolist())
+        self.assertEqual(
+            self.lanelet_1.right_vertices[2].tolist(), self.lanelet_2.right_vertices[0].tolist()
+        )
 
     def test_polylines_left_same_dir_parallel_adj(self):
         self.lanelet_2.right_vertices = np.array([[0.0, 1.0], [1.0, 0.9], [2.0, 1.0]])
 
         self.lanelet_repairer.repair_polylines_left_same_dir_parallel_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.left_vertices.tolist(), self.lanelet_2.right_vertices.tolist())
+        self.assertEqual(
+            self.lanelet_1.left_vertices.tolist(), self.lanelet_2.right_vertices.tolist()
+        )
 
     def test_polylines_left_opposite_dir_parallel_adj(self):
         self.lanelet_2.left_vertices = np.array([[2.0, 1.0], [1.0, 0.9], [0.0, 1.2]])
 
         self.lanelet_repairer.repair_polylines_left_opposite_dir_parallel_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.left_vertices.tolist(), self.lanelet_2.left_vertices.tolist()[::-1])
+        self.assertEqual(
+            self.lanelet_1.left_vertices.tolist(), self.lanelet_2.left_vertices.tolist()[::-1]
+        )
 
     def test_polylines_right_same_dir_parallel_adj(self):
         self.lanelet_2.left_vertices = np.array([[0.1, 0.0], [1.0, 0.0], [2.0, 0.0]])
 
         self.lanelet_repairer.repair_polylines_right_same_dir_parallel_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.right_vertices.tolist(), self.lanelet_2.left_vertices.tolist())
+        self.assertEqual(
+            self.lanelet_1.right_vertices.tolist(), self.lanelet_2.left_vertices.tolist()
+        )
 
     def test_polylines_right_opposite_dir_parallel_adj(self):
         self.lanelet_2.right_vertices = np.array([[2.0, 0.0], [1.0, 0.5], [0.0, 0.0]])
 
         self.lanelet_repairer.repair_polylines_right_opposite_dir_parallel_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.right_vertices.tolist(), self.lanelet_2.right_vertices.tolist()[::-1])
+        self.assertEqual(
+            self.lanelet_1.right_vertices.tolist(), self.lanelet_2.right_vertices.tolist()[::-1]
+        )
 
     def test_connections_left_merging_adj(self):
         self.lanelet_2.left_vertices = np.array([[0.0, 2.0], [1.0, 1.5], [2.0, 1.1]])
 
         self.lanelet_repairer.repair_connections_left_merging_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.left_vertices[2].tolist(), self.lanelet_2.left_vertices[2].tolist())
+        self.assertEqual(
+            self.lanelet_1.left_vertices[2].tolist(), self.lanelet_2.left_vertices[2].tolist()
+        )
 
         self.lanelet_2.right_vertices = np.array([[0.0, 1.0], [1.0, 0.5], [2.0, 0.1]])
 
         self.lanelet_repairer.repair_connections_left_merging_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.right_vertices[2].tolist(), self.lanelet_2.right_vertices[2].tolist())
+        self.assertEqual(
+            self.lanelet_1.right_vertices[2].tolist(), self.lanelet_2.right_vertices[2].tolist()
+        )
 
         self.lanelet_2.right_vertices = np.array([[0.0, 1.0], [1.0, 0.5], [2.0, 0.1]])
 
         self.lanelet_repairer.repair_connections_left_merging_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.left_vertices[0].tolist(), self.lanelet_2.right_vertices[0].tolist())
+        self.assertEqual(
+            self.lanelet_1.left_vertices[0].tolist(), self.lanelet_2.right_vertices[0].tolist()
+        )
 
     def test_connections_right_merging_adj(self):
         self.lanelet_2.left_vertices = np.array([[0.1, 0.0], [1.0, 0.5], [2.0, 1.0]])
 
         self.lanelet_repairer.repair_connections_right_merging_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.right_vertices[0].tolist(), self.lanelet_2.left_vertices[0].tolist())
+        self.assertEqual(
+            self.lanelet_1.right_vertices[0].tolist(), self.lanelet_2.left_vertices[0].tolist()
+        )
 
         self.lanelet_2.left_vertices = np.array([[0.0, 0.0], [1.0, 0.5], [2.0, 1.5]])
 
         self.lanelet_repairer.repair_connections_right_merging_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.left_vertices[2].tolist(), self.lanelet_2.left_vertices[2].tolist())
+        self.assertEqual(
+            self.lanelet_1.left_vertices[2].tolist(), self.lanelet_2.left_vertices[2].tolist()
+        )
 
         self.lanelet_2.right_vertices = np.array([[0.0, -1.0], [1.0, -0.5], [2.0, 0.1]])
 
         self.lanelet_repairer.repair_connections_right_merging_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.right_vertices[2].tolist(), self.lanelet_2.right_vertices[2].tolist())
+        self.assertEqual(
+            self.lanelet_1.right_vertices[2].tolist(), self.lanelet_2.right_vertices[2].tolist()
+        )
 
     def test_connections_left_forking_adj(self):
         self.lanelet_2.left_vertices = np.array([[0.0, 0.9], [1.0, 1.5], [2.0, 2.0]])
 
         self.lanelet_repairer.repair_connections_left_forking_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.left_vertices[0].tolist(), self.lanelet_2.left_vertices[0].tolist())
+        self.assertEqual(
+            self.lanelet_1.left_vertices[0].tolist(), self.lanelet_2.left_vertices[0].tolist()
+        )
 
         self.lanelet_2.right_vertices = np.array([[0.0, 0.0], [1.0, 0.5], [1.9, 1.0]])
 
         self.lanelet_repairer.repair_connections_left_forking_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.left_vertices[2].tolist(), self.lanelet_2.right_vertices[2].tolist())
+        self.assertEqual(
+            self.lanelet_1.left_vertices[2].tolist(), self.lanelet_2.right_vertices[2].tolist()
+        )
 
         self.lanelet_2.right_vertices = np.array([[0.0, -0.1], [1.0, 0.5], [2.0, 1.0]])
 
         self.lanelet_repairer.repair_connections_left_forking_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.right_vertices[0].tolist(), self.lanelet_2.right_vertices[0].tolist())
+        self.assertEqual(
+            self.lanelet_1.right_vertices[0].tolist(), self.lanelet_2.right_vertices[0].tolist()
+        )
 
     def test_connections_right_forking_adj(self):
         self.lanelet_2.right_vertices = np.array([[0.0, 0.1], [1.0, -0.5], [2.0, -1.0]])
 
         self.lanelet_repairer.repair_connections_right_forking_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.right_vertices[0].tolist(), self.lanelet_2.right_vertices[0].tolist())
+        self.assertEqual(
+            self.lanelet_1.right_vertices[0].tolist(), self.lanelet_2.right_vertices[0].tolist()
+        )
 
         self.lanelet_2.left_vertices = np.array([[0.0, 1.1], [1.0, 0.5], [2.0, 0.0]])
 
         self.lanelet_repairer.repair_connections_right_forking_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.left_vertices[0].tolist(), self.lanelet_2.left_vertices[0].tolist())
+        self.assertEqual(
+            self.lanelet_1.left_vertices[0].tolist(), self.lanelet_2.left_vertices[0].tolist()
+        )
 
         self.lanelet_2.left_vertices = np.array([[0.0, 1.0], [1.0, 0.5], [2.3, 0.0]])
 
         self.lanelet_repairer.repair_connections_right_forking_adj((1, 2))
 
-        self.assertEqual(self.lanelet_1.right_vertices[2].tolist(), self.lanelet_2.left_vertices[2].tolist())
+        self.assertEqual(
+            self.lanelet_1.right_vertices[2].tolist(), self.lanelet_2.left_vertices[2].tolist()
+        )
 
     def test_potential_predecessor(self):
         self.lanelet_repairer.repair_potential_predecessor((1, 2))
@@ -350,8 +401,12 @@ class TestLaneletRepairing(unittest.TestCase):
 
         self.lanelet_repairer.repair_polylines_intersection((1,))
 
-        self.assertEqual([[0.0, 1.0], [1.0, 2.0], [2.0, 1.0]], self.lanelet_1.left_vertices.tolist())
-        self.assertEqual([[0.0, 0.0], [1.0, 1.0], [2.0, 0.0]], self.lanelet_1.right_vertices.tolist())
+        self.assertEqual(
+            [[0.0, 1.0], [1.0, 2.0], [2.0, 1.0]], self.lanelet_1.left_vertices.tolist()
+        )
+        self.assertEqual(
+            [[0.0, 0.0], [1.0, 1.0], [2.0, 0.0]], self.lanelet_1.right_vertices.tolist()
+        )
 
     def test_left_self_intersection(self):
         self.lanelet_1.left_vertices = np.array(
@@ -379,11 +434,23 @@ class TestLaneletRepairing(unittest.TestCase):
 
         self.lanelet_1.left_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [0.5, 1.0], [0.75, 1.0]])
         self.lanelet_repairer.repair_left_self_intersection((1,))
-        self.assertEqual([[0.0, 1.0], [0.25, 1.0], [0.5, 1.0], [0.75, 1.0]], self.lanelet_1.left_vertices.tolist())
+        self.assertEqual(
+            [[0.0, 1.0], [0.25, 1.0], [0.5, 1.0], [0.75, 1.0]],
+            self.lanelet_1.left_vertices.tolist(),
+        )
 
     def test_right_self_intersection(self):
         self.lanelet_1.right_vertices = np.array(
-            [[0.0, 0.0], [1.0, 0.0], [2.0, 0.0], [3.0, 0], [2.0, 0.5], [2.0, -0.5], [3, -0.5], [4, -0.5]]
+            [
+                [0.0, 0.0],
+                [1.0, 0.0],
+                [2.0, 0.0],
+                [3.0, 0],
+                [2.0, 0.5],
+                [2.0, -0.5],
+                [3, -0.5],
+                [4, -0.5],
+            ]
         )
         self.lanelet_repairer.repair_right_self_intersection((1,))
         self.assertEqual(
@@ -402,7 +469,10 @@ class TestLaneletRepairing(unittest.TestCase):
 
         self.lanelet_1.right_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [0.5, 1.0], [0.75, 1.0]])
         self.lanelet_repairer.repair_right_self_intersection((1,))
-        self.assertEqual([[0.0, 1.0], [0.25, 1.0], [0.5, 1.0], [0.75, 1.0]], self.lanelet_1.right_vertices.tolist())
+        self.assertEqual(
+            [[0.0, 1.0], [0.25, 1.0], [0.5, 1.0], [0.75, 1.0]],
+            self.lanelet_1.right_vertices.tolist(),
+        )
 
         self.lanelet_1.right_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [0.25, 1.0], [0.75, 1.0]])
         self.lanelet_repairer.repair_right_self_intersection((1,))
@@ -444,7 +514,9 @@ class TestLaneletRepairing(unittest.TestCase):
         self.assertEqual(set(), self.lanelet_1.traffic_lights)
 
     def test_existence_stop_line_traffic_signs(self):
-        stop_line = StopLine(np.array([0.0, 0.0]), np.array([1.0, 1.0]), LineMarking.NO_MARKING, {9}, set())
+        stop_line = StopLine(
+            np.array([0.0, 0.0]), np.array([1.0, 1.0]), LineMarking.NO_MARKING, {9}, set()
+        )
         self.lanelet_1.stop_line = stop_line
 
         self.lanelet_repairer.repair_existence_stop_line_traffic_signs((1, 9))
@@ -452,7 +524,9 @@ class TestLaneletRepairing(unittest.TestCase):
         self.assertEqual(set(), self.lanelet_1.stop_line.traffic_sign_ref)
 
     def test_existence_stop_line_traffic_lights(self):
-        stop_line = StopLine(np.array([0.0, 0.0]), np.array([1.0, 1.0]), LineMarking.NO_MARKING, set(), {9})
+        stop_line = StopLine(
+            np.array([0.0, 0.0]), np.array([1.0, 1.0]), LineMarking.NO_MARKING, set(), {9}
+        )
         self.lanelet_1.stop_line = stop_line
 
         self.lanelet_repairer.repair_existence_stop_line_traffic_lights((1, 9))
@@ -460,7 +534,9 @@ class TestLaneletRepairing(unittest.TestCase):
         self.assertEqual(set(), self.lanelet_1.stop_line.traffic_light_ref)
 
     def test_included_stop_line_traffic_signs(self):
-        stop_line = StopLine(np.array([0.0, 0.0]), np.array([1.0, 1.0]), LineMarking.NO_MARKING, {1, 2}, set())
+        stop_line = StopLine(
+            np.array([0.0, 0.0]), np.array([1.0, 1.0]), LineMarking.NO_MARKING, {1, 2}, set()
+        )
         self.lanelet_1.stop_line = stop_line
 
         self.lanelet_1.traffic_signs = {1, 3}
@@ -479,7 +555,9 @@ class TestLaneletRepairing(unittest.TestCase):
         self.assertEqual(None, self.lanelet_1.stop_line.end)
 
     def test_included_stop_line_traffic_lights(self):
-        stop_line = StopLine(np.array([0.0, 0.0]), np.array([1.0, 1.0]), LineMarking.NO_MARKING, set(), {1, 2})
+        stop_line = StopLine(
+            np.array([0.0, 0.0]), np.array([1.0, 1.0]), LineMarking.NO_MARKING, set(), {1, 2}
+        )
         self.lanelet_1.stop_line = stop_line
 
         self.lanelet_1.traffic_lights = {1, 3}
@@ -489,7 +567,9 @@ class TestLaneletRepairing(unittest.TestCase):
         self.assertEqual({1, 2, 3}, self.lanelet_1.traffic_lights)
 
     def test_stop_line_points_on_polylines(self):
-        stop_line = StopLine(np.array([2.0, 1.5]), np.array([2.0, -0.5]), LineMarking.NO_MARKING, set(), set())
+        stop_line = StopLine(
+            np.array([2.0, 1.5]), np.array([2.0, -0.5]), LineMarking.NO_MARKING, set(), set()
+        )
         self.lanelet_1.stop_line = stop_line
 
         self.lanelet_repairer.repair_stop_line_points_on_polylines((1,))
@@ -539,7 +619,9 @@ class TestTrafficSignRepairing(unittest.TestCase):
         traffic_sign_element = TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED, [])
         self.traffic_sign.traffic_sign_elements = [traffic_sign_element]
 
-        self.traffic_sign_repairer.repair_given_additional_value((1, hash(TrafficSignIDZamunda.MAX_SPEED.name.lower())))
+        self.traffic_sign_repairer.repair_given_additional_value(
+            (1, hash(TrafficSignIDZamunda.MAX_SPEED.name.lower()))
+        )
 
         self.assertEqual(["120"], self.traffic_sign.traffic_sign_elements[0].additional_values)
 
@@ -581,7 +663,9 @@ class TestTrafficLightRepairing(unittest.TestCase):
         self.traffic_light = TrafficLight(
             1,
             np.array([0.0, 0.0]),
-            TrafficLightCycle([traffic_cycle_element_0, traffic_cycle_element_1, traffic_cycle_element_2]),
+            TrafficLightCycle(
+                [traffic_cycle_element_0, traffic_cycle_element_1, traffic_cycle_element_2]
+            ),
         )
 
         self.network = LaneletNetwork()
@@ -637,7 +721,10 @@ class TestTrafficLightRepairing(unittest.TestCase):
                 (TrafficLightState.GREEN, 30),
                 (TrafficLightState.YELLOW, 3),
             ],
-            [(cycle_e.state, cycle_e.duration) for cycle_e in self.traffic_light.traffic_light_cycle.cycle_elements],
+            [
+                (cycle_e.state, cycle_e.duration)
+                for cycle_e in self.traffic_light.traffic_light_cycle.cycle_elements
+            ],
         )
 
 

@@ -48,7 +48,9 @@ class VerificationResult:
     map_verifications: List[MapVerification] = field(default_factory=list)
 
 
-def extract_verification_computation_times(verification_result: VerificationResult) -> Dict[str, float]:
+def extract_verification_computation_times(
+    verification_result: VerificationResult,
+) -> Dict[str, float]:
     """
     Extracts computation time required for verification for each map.
 
@@ -57,12 +59,16 @@ def extract_verification_computation_times(verification_result: VerificationResu
     """
     val_times = {}
     for map_verification in verification_result.map_verifications:
-        val_times[map_verification.benchmark_id] = map_verification.map_verification_result.verification_time
+        val_times[map_verification.benchmark_id] = (
+            map_verification.map_verification_result.verification_time
+        )
 
     return val_times
 
 
-def extract_repairing_computation_times(verification_result: VerificationResult) -> Dict[str, float]:
+def extract_repairing_computation_times(
+    verification_result: VerificationResult,
+) -> Dict[str, float]:
     """
     Extracts computation time required for repairing for each map.
 
@@ -71,7 +77,9 @@ def extract_repairing_computation_times(verification_result: VerificationResult)
     """
     rep_times = {}
     for map_verification in verification_result.map_verifications:
-        rep_times[map_verification.benchmark_id] = map_verification.map_verification_result.repairing_time
+        rep_times[map_verification.benchmark_id] = (
+            map_verification.map_verification_result.repairing_time
+        )
 
     return rep_times
 
@@ -89,7 +97,9 @@ def extract_benchmark_ids(verification_result: VerificationResult) -> List[str]:
     return benchmark_ids
 
 
-def extract_invalid_states(verification_result: VerificationResult) -> Dict[str, Dict[FormulaID, List[int]]]:
+def extract_invalid_states(
+    verification_result: VerificationResult,
+) -> Dict[str, Dict[FormulaID, List[int]]]:
     """
     Extracts invalid states from all maps.
 
@@ -106,7 +116,9 @@ def extract_invalid_states(verification_result: VerificationResult) -> Dict[str,
     return invalid_states
 
 
-def extract_verification_parameters(verification_result: VerificationResult) -> Dict[str, Tuple[int, int, bool]]:
+def extract_verification_parameters(
+    verification_result: VerificationResult,
+) -> Dict[str, Tuple[int, int, bool]]:
     """
     Extracts parameters of all map verification s.
 
@@ -138,7 +150,12 @@ def initial_map_verification(
 
     formulas = config.verification.formulas
     if config.verification.formulas is None:
-        for formula_pool in [LaneletFormulaID, TrafficSignFormulaID, TrafficLightFormulaID, IntersectionFormulaID]:
+        for formula_pool in [
+            LaneletFormulaID,
+            TrafficSignFormulaID,
+            TrafficLightFormulaID,
+            IntersectionFormulaID,
+        ]:
             for formula in formula_pool:
                 formulas.append(formula)
     map_verification.formulas = formulas
@@ -149,7 +166,10 @@ def initial_map_verification(
 
 
 def update_map_verification(
-    map_verification: MapVerification, verification_time: float, repairing_time: float, invalid_states: InvalidStates
+    map_verification: MapVerification,
+    verification_time: float,
+    repairing_time: float,
+    invalid_states: InvalidStates,
 ):
     """
     Updates a map verification .
@@ -159,13 +179,17 @@ def update_map_verification(
     :param repairing_time: Computation time of repairing.
     :param invalid_states: Invalid states.
     """
-    map_verification_result = MapVerificationResult(verification_time=verification_time, repairing_time=repairing_time)
+    map_verification_result = MapVerificationResult(
+        verification_time=verification_time, repairing_time=repairing_time
+    )
 
     for formula, locations in invalid_states.items():
         element_ids = []
         for location in locations:
             element_ids.append(location[0])
-        map_verification_result.invalid_states.append(InvalidState(formula=formula, element_ids=element_ids))
+        map_verification_result.invalid_states.append(
+            InvalidState(formula=formula, element_ids=element_ids)
+        )
 
     map_verification.map_verification_result = map_verification_result
 
@@ -177,7 +201,9 @@ class MapVerificationComparison:
     map_id: str = ""
     comp_time: float = 0.0
     most_violated_spec: Dict[str, int] = field(
-        default_factory=lambda: {formula.name: 0 for formula_type in FormulaTypes for formula in formula_type}
+        default_factory=lambda: {
+            formula.name: 0 for formula_type in FormulaTypes for formula in formula_type
+        }
     )
     repairing_time: float = 0.0
     num_invalid_states: int = 0

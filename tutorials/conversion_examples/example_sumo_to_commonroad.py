@@ -26,7 +26,8 @@ writer = CRDesignerFileWriter(
     tags={Tag.URBAN},
 )
 writer.write_to_file(
-    os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_SUMO-1_1-T1.xml", OverwriteExistingFile.ALWAYS
+    os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_SUMO-1_1-T1.xml",
+    OverwriteExistingFile.ALWAYS,
 )
 
 
@@ -45,5 +46,6 @@ writer = CRDesignerFileWriter(
     tags={Tag.URBAN},
 )
 writer.write_to_file(
-    os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_SUMO-1_1-T1.xml", OverwriteExistingFile.ALWAYS
+    os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_SUMO-1_1-T1.xml",
+    OverwriteExistingFile.ALWAYS,
 )

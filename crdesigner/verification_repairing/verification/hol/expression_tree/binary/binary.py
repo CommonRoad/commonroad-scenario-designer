@@ -45,7 +45,15 @@ class Binary(Expression, ABC):
         """
         Converts binary expression to string representation.
         """
-        return "(" + self._left_expr.to_string() + " " + self._symbol + " " + self._right_expr.to_string() + ")"
+        return (
+            "("
+            + self._left_expr.to_string()
+            + " "
+            + self._symbol
+            + " "
+            + self._right_expr.to_string()
+            + ")"
+        )
 
     def initialize(self, model: Context):
         """

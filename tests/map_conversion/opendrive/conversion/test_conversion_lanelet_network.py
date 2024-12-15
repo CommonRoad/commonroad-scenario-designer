@@ -43,7 +43,11 @@ def init_lanelet_from_id(identifier) -> ConversionLanelet:
 
 def init_lanelet_empty_vertices_from_id(plane_group, id) -> ConversionLanelet:
     lanelet = ConversionLanelet(
-        plane_group, np.array([[0, 0], [0, 0]]), np.array([[0, 0], [0, 0]]), np.array([[0, 0], [0, 0]]), id
+        plane_group,
+        np.array([[0, 0], [0, 0]]),
+        np.array([[0, 0], [0, 0]]),
+        np.array([[0, 0], [0, 0]]),
+        id,
     )
     return lanelet
 
@@ -62,7 +66,10 @@ class TestConversionLanelet(unittest.TestCase):
         old_lanelet_id = "71.0.-3.-1"
         true_new_id = ids_assigned[old_lanelet_id]
         self.assertEqual(
-            true_new_id, crdesigner.map_conversion.common.utils.convert_to_new_lanelet_id(old_lanelet_id, ids_assigned)
+            true_new_id,
+            crdesigner.map_conversion.common.utils.convert_to_new_lanelet_id(
+                old_lanelet_id, ids_assigned
+            ),
         )
 
     def test_init(self):
@@ -73,14 +80,18 @@ class TestConversionLanelet(unittest.TestCase):
     def test_old_lanelet_ids(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
         conversion_lanelet_network._old_lanelet_ids = {"69.0.-1.-1": 5, "89.0.4.-1": 6}
-        self.assertDictEqual({"69.0.-1.-1": 5, "89.0.4.-1": 6}, conversion_lanelet_network.old_lanelet_ids())
+        self.assertDictEqual(
+            {"69.0.-1.-1": 5, "89.0.4.-1": 6}, conversion_lanelet_network.old_lanelet_ids()
+        )
 
     def test_remove_lanelet(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
         conversion_lanelet_1 = init_lanelet_from_id("79.0.-3.-1")
         conversion_lanelet_2 = init_lanelet_from_id("89.0.4.-1")
 
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
+        add_lanelets_to_network(
+            conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2]
+        )
         # test without removing references
         conversion_lanelet_network.remove_lanelet("89.0.4.-1")
         lanelets = [lanelet.lanelet_id for lanelet in conversion_lanelet_network.lanelets]
@@ -91,7 +102,8 @@ class TestConversionLanelet(unittest.TestCase):
         conversion_lanelet_1.predecessor.append("86.0.-1.-1")
         conversion_lanelet_1.successor.append("82.0.-3.-1")
         add_lanelets_to_network(
-            conversion_lanelet_network, [init_lanelet_from_id("82.0.-3.-1"), init_lanelet_from_id("86.0.-1.-1")]
+            conversion_lanelet_network,
+            [init_lanelet_from_id("82.0.-3.-1"), init_lanelet_from_id("86.0.-1.-1")],
         )
 
         conversion_lanelet_network.remove_lanelet("82.0.-3.-1", True)
@@ -101,8 +113,12 @@ class TestConversionLanelet(unittest.TestCase):
         lanelets = [lanelet.lanelet_id for lanelet in conversion_lanelet_network.lanelets]
         true_lanelets = ["79.0.-3.-1"]
         self.assertListEqual(true_lanelets, lanelets)
-        self.assertListEqual([[]], [lanelet.successor for lanelet in conversion_lanelet_network.lanelets])
-        self.assertListEqual([[]], [lanelet.predecessor for lanelet in conversion_lanelet_network.lanelets])
+        self.assertListEqual(
+            [[]], [lanelet.successor for lanelet in conversion_lanelet_network.lanelets]
+        )
+        self.assertListEqual(
+            [[]], [lanelet.predecessor for lanelet in conversion_lanelet_network.lanelets]
+        )
 
     def test_find_lanelet_by_id(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
@@ -110,7 +126,9 @@ class TestConversionLanelet(unittest.TestCase):
 
         add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1])
 
-        self.assertEqual("79.0.-3.-1", conversion_lanelet_network.find_lanelet_by_id("79.0.-3.-1").lanelet_id)
+        self.assertEqual(
+            "79.0.-3.-1", conversion_lanelet_network.find_lanelet_by_id("79.0.-3.-1").lanelet_id
+        )
 
         self.assertIsNone(conversion_lanelet_network.find_lanelet_by_id("foo"))
 
@@ -187,14 +205,20 @@ class TestConversionLanelet(unittest.TestCase):
         lanelet_3.predecessor = ["69.0.-1.-1", "200.0.0.0"]
         lanelet_4.successor = ["72.0.-1.-1", "201.0.0.0"]
 
-        add_lanelets_to_network(conversion_lanelet_network, [lanelet_1, lanelet_2, lanelet_3, lanelet_4])
+        add_lanelets_to_network(
+            conversion_lanelet_network, [lanelet_1, lanelet_2, lanelet_3, lanelet_4]
+        )
 
         conversion_lanelet_network.prune_network()
 
         self.assertIsNone(conversion_lanelet_network.find_lanelet_by_id("69.0.-1.-1").adj_left)
         self.assertIsNone(conversion_lanelet_network.find_lanelet_by_id("69.0.-3.-1").adj_right)
-        self.assertListEqual(["69.0.-1.-1"], conversion_lanelet_network.find_lanelet_by_id("71.0.-1.-1").predecessor)
-        self.assertListEqual(["72.0.-1.-1"], conversion_lanelet_network.find_lanelet_by_id("72.0.-1.-1").successor)
+        self.assertListEqual(
+            ["69.0.-1.-1"], conversion_lanelet_network.find_lanelet_by_id("71.0.-1.-1").predecessor
+        )
+        self.assertListEqual(
+            ["72.0.-1.-1"], conversion_lanelet_network.find_lanelet_by_id("72.0.-1.-1").successor
+        )
 
     def test_delete_zero_width_parametric_lane(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
@@ -217,8 +241,12 @@ class TestConversionLanelet(unittest.TestCase):
         outer_border_2.width_coefficient_offsets.append(0.0)
         plane_border_group_2 = ParametricLaneBorderGroup(inner_border_2, 0.0, outer_border_2, 0.0)
 
-        parametric_lane = ParametricLane("69.0.-1.0", "driving", plane_border_group, 26.5, None, "right")
-        parametric_lane2 = ParametricLane("70.0.1.-1", "driving", plane_border_group_2, 26.5, None, "right")
+        parametric_lane = ParametricLane(
+            "69.0.-1.0", "driving", plane_border_group, 26.5, None, "right"
+        )
+        parametric_lane2 = ParametricLane(
+            "70.0.1.-1", "driving", plane_border_group_2, 26.5, None, "right"
+        )
 
         plane_group.parametric_lanes.append(parametric_lane)
         plane_group2.parametric_lanes.append(parametric_lane2)
@@ -226,7 +254,9 @@ class TestConversionLanelet(unittest.TestCase):
         conversion_lanelet.adj_right = 1
         conversion_lanelet_adj_right = init_lanelet_empty_vertices_from_id(plane_group2, 1)
 
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet, conversion_lanelet_adj_right])
+        add_lanelets_to_network(
+            conversion_lanelet_network, [conversion_lanelet, conversion_lanelet_adj_right]
+        )
 
         conversion_lanelet_network.delete_zero_width_parametric_lanes()
         self.assertEqual(1, len(conversion_lanelet_network.lanelets))
@@ -247,17 +277,25 @@ class TestConversionLanelet(unittest.TestCase):
 
         conversion_lanelet_network.update_lanelet_id_references("91.0.1.-1", "80.0.-1.-1")
         true_pred_1 = ["80.0.-1.-1"]
-        self.assertListEqual(true_pred_1, conversion_lanelet_network.find_lanelet_by_id("71.0.-1.-1").predecessor)
+        self.assertListEqual(
+            true_pred_1, conversion_lanelet_network.find_lanelet_by_id("71.0.-1.-1").predecessor
+        )
 
         conversion_lanelet_network.update_lanelet_id_references("81.0.-1.-1", "99.0.0.-3")
         true_succ_1 = ["76.0.-1.-1", "77.0.-1.-1", "99.0.0.-3"]
-        self.assertListEqual(true_succ_1, conversion_lanelet_network.find_lanelet_by_id("71.0.-1.-1").successor)
+        self.assertListEqual(
+            true_succ_1, conversion_lanelet_network.find_lanelet_by_id("71.0.-1.-1").successor
+        )
 
         conversion_lanelet_network.update_lanelet_id_references("71.0.1.-1", "100.0.0.-1")
-        self.assertEqual("100.0.0.-1", conversion_lanelet_network.find_lanelet_by_id("71.0.-1.-1").adj_left)
+        self.assertEqual(
+            "100.0.0.-1", conversion_lanelet_network.find_lanelet_by_id("71.0.-1.-1").adj_left
+        )
 
         conversion_lanelet_network.update_lanelet_id_references("68.0.1.1", "102.0.0.-1")
-        self.assertEqual("102.0.0.-1", conversion_lanelet_network.find_lanelet_by_id("71.0.-1.-1").adj_right)
+        self.assertEqual(
+            "102.0.0.-1", conversion_lanelet_network.find_lanelet_by_id("71.0.-1.-1").adj_right
+        )
 
     def test_concatenate_possible_lanelets(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
@@ -296,7 +334,8 @@ class TestConversionLanelet(unittest.TestCase):
 
         replacement_ids = conversion_lanelet_network.concatenate_possible_lanelets()
         self.assertDictEqual(
-            {"51.0.0.0": "50.0.0.0", "51.0.0.-1": "50.0.0.-1", "51.0.0.1": "50.0.0.1"}, replacement_ids
+            {"51.0.0.0": "50.0.0.0", "51.0.0.-1": "50.0.0.-1", "51.0.0.1": "50.0.0.1"},
+            replacement_ids,
         )
 
     def test_concatenate_lanelet_pairs_group(self):
@@ -310,8 +349,12 @@ class TestConversionLanelet(unittest.TestCase):
         center_vertices_2 = np.array([[1, 0], [2, 0]])
         right_vertices_2 = np.array([[1, -1], [2, -1]])
 
-        lanelet_1 = ConversionLanelet(plane_group, left_vertices_1, center_vertices_1, right_vertices_1, "69.0.-3.-1")
-        lanelet_2 = ConversionLanelet(plane_group, left_vertices_2, center_vertices_2, right_vertices_2, "71.0.3.-1")
+        lanelet_1 = ConversionLanelet(
+            plane_group, left_vertices_1, center_vertices_1, right_vertices_1, "69.0.-3.-1"
+        )
+        lanelet_2 = ConversionLanelet(
+            plane_group, left_vertices_2, center_vertices_2, right_vertices_2, "71.0.3.-1"
+        )
 
         add_lanelets_to_network(conversion_lanelet_network, [lanelet_1, lanelet_2])
 
@@ -333,7 +376,9 @@ class TestConversionLanelet(unittest.TestCase):
 
         add_lanelets_to_network(conversion_lanelet_network, [lanelet_1, lanelet_1_pred])
 
-        self.assertTrue(conversion_lanelet_network.predecessor_is_neighbor_of_neighbors_predecessor(lanelet_1))
+        self.assertTrue(
+            conversion_lanelet_network.predecessor_is_neighbor_of_neighbors_predecessor(lanelet_1)
+        )
 
     def test_add_successors_to_lanelet(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
@@ -341,7 +386,9 @@ class TestConversionLanelet(unittest.TestCase):
         lanelet_1_succ_1 = init_lanelet_empty_vertices_from_id(None, "51.0.0.-1")
         lanelet_1_succ_2 = init_lanelet_empty_vertices_from_id(None, "51.0.0.-2")
 
-        add_lanelets_to_network(conversion_lanelet_network, [lanelet_1, lanelet_1_succ_1, lanelet_1_succ_2])
+        add_lanelets_to_network(
+            conversion_lanelet_network, [lanelet_1, lanelet_1_succ_1, lanelet_1_succ_2]
+        )
 
         conversion_lanelet_network.add_successors_to_lanelet(lanelet_1, ["51.0.0.-1", "51.0.0.-2"])
         self.assertListEqual(["51.0.0.-1", "51.0.0.-2"], lanelet_1.successor)
@@ -354,9 +401,13 @@ class TestConversionLanelet(unittest.TestCase):
         lanelet_1_pred_1 = init_lanelet_empty_vertices_from_id(None, "49.0.0.-1")
         lanelet_1_pred_2 = init_lanelet_empty_vertices_from_id(None, "49.0.0.-2")
 
-        add_lanelets_to_network(conversion_lanelet_network, [lanelet_1, lanelet_1_pred_1, lanelet_1_pred_2])
+        add_lanelets_to_network(
+            conversion_lanelet_network, [lanelet_1, lanelet_1_pred_1, lanelet_1_pred_2]
+        )
 
-        conversion_lanelet_network.add_predecessors_to_lanelet(lanelet_1, ["49.0.0.-1", "49.0.0.-2"])
+        conversion_lanelet_network.add_predecessors_to_lanelet(
+            lanelet_1, ["49.0.0.-1", "49.0.0.-2"]
+        )
         self.assertListEqual(["49.0.0.-1", "49.0.0.-2"], lanelet_1.predecessor)
         self.assertListEqual(["50.0.0.0"], lanelet_1_pred_1.successor)
         self.assertListEqual(["50.0.0.0"], lanelet_1_pred_2.successor)
@@ -427,11 +478,17 @@ class TestConversionLanelet(unittest.TestCase):
             ],
         )
 
-        mergeable_lanelets = conversion_lanelet_network.check_concatenation_potential(lanelet_1, "left")
+        mergeable_lanelets = conversion_lanelet_network.check_concatenation_potential(
+            lanelet_1, "left"
+        )
         self.assertListEqual(mergeable_lanelets, [("50.0.0.0", "51.0.0.0")])
 
-        mergeable_lanelets = conversion_lanelet_network.check_concatenation_potential(lanelet_1, "right")
-        self.assertListEqual([("50.0.0.0", "51.0.0.0"), ("50.0.0.-1", "51.0.0.-1")], mergeable_lanelets)
+        mergeable_lanelets = conversion_lanelet_network.check_concatenation_potential(
+            lanelet_1, "right"
+        )
+        self.assertListEqual(
+            [("50.0.0.0", "51.0.0.0"), ("50.0.0.-1", "51.0.0.-1")], mergeable_lanelets
+        )
 
     def test_successor_is_neighbor_of_neighbors_successor(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
@@ -467,7 +524,9 @@ class TestConversionLanelet(unittest.TestCase):
             ],
         )
 
-        self.assertTrue(conversion_lanelet_network.successor_is_neighbor_of_neighbors_successor(lanelet_1))
+        self.assertTrue(
+            conversion_lanelet_network.successor_is_neighbor_of_neighbors_successor(lanelet_1)
+        )
 
     def test_has_unique_pred_succ_relation(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
@@ -506,7 +565,8 @@ class TestConversionLanelet(unittest.TestCase):
         lanelet_1_succ.adj_right = "51.0.1.-2"
 
         add_lanelets_to_network(
-            conversion_lanelet_network, [lanelet_1, lanelet_1_succ, lanelet_1_adj_right, lanelet_1_adj_right_succ]
+            conversion_lanelet_network,
+            [lanelet_1, lanelet_1_succ, lanelet_1_adj_right, lanelet_1_adj_right_succ],
         )
 
         self.assertTrue(conversion_lanelet_network.adj_right_consistent_nb(lanelet_1))
@@ -526,7 +586,8 @@ class TestConversionLanelet(unittest.TestCase):
         lanelet_1_succ.adj_left = "51.0.1.2"
 
         add_lanelets_to_network(
-            conversion_lanelet_network, [lanelet_1, lanelet_1_succ, lanelet_1_adj_left, lanelet_1_adj_left_succ]
+            conversion_lanelet_network,
+            [lanelet_1, lanelet_1_succ, lanelet_1_adj_left, lanelet_1_adj_left_succ],
         )
 
         self.assertTrue(conversion_lanelet_network.adj_left_consistent_nb(lanelet_1))
@@ -583,33 +644,61 @@ class TestConversionLanelet(unittest.TestCase):
         lanelet_1.successor = [0]
 
         left_vertices = np.array(
-            [[453.90265159, 495.27523765], [455.77043119, 435.28374993], [456.37176199, 375.28599181]]
+            [
+                [453.90265159, 495.27523765],
+                [455.77043119, 435.28374993],
+                [456.37176199, 375.28599181],
+            ]
         )
         right_vertices = np.array(
-            [[450.15269756, 495.25667099], [452.02047715, 435.26518327], [452.62180795, 375.26742514]]
+            [
+                [450.15269756, 495.25667099],
+                [452.02047715, 435.26518327],
+                [452.62180795, 375.26742514],
+            ]
         )
         center_vertices = np.array(
-            [[452.02767457, 495.26595432], [453.89545417, 435.2744666], [454.49678497, 375.27670847]]
+            [
+                [452.02767457, 495.26595432],
+                [453.89545417, 435.2744666],
+                [454.49678497, 375.27670847],
+            ]
         )
 
         lanelet_2 = ConversionLanelet(None, left_vertices, center_vertices, right_vertices, 0)
         lanelet_2.successor = [1]
 
         left_vertices_succ = np.array(
-            [[453.74916757, 526.27485758], [453.8259089, 510.77504756], [453.90265022, 495.27523754]]
+            [
+                [453.74916757, 526.27485758],
+                [453.8259089, 510.77504756],
+                [453.90265022, 495.27523754],
+            ]
         )
         right_vertices_succ = np.array(
-            [[449.99921353, 526.25629114], [450.07595486, 510.75648111], [450.15269618, 495.25667109]]
+            [
+                [449.99921353, 526.25629114],
+                [450.07595486, 510.75648111],
+                [450.15269618, 495.25667109],
+            ]
         )
         center_vertices_succ = np.array(
-            [[451.87419055, 526.26557436], [451.95093188, 510.76576434], [452.0276732, 495.26595431]]
+            [
+                [451.87419055, 526.26557436],
+                [451.95093188, 510.76576434],
+                [452.0276732, 495.26595431],
+            ]
         )
 
-        lanelet_2_succ = ConversionLanelet(None, left_vertices_succ, center_vertices_succ, right_vertices_succ, 1)
+        lanelet_2_succ = ConversionLanelet(
+            None, left_vertices_succ, center_vertices_succ, right_vertices_succ, 1
+        )
 
         add_lanelets_to_network(conversion_lanelet_network, [lanelet_2, lanelet_2_succ])
 
-        conversion_lanelet_network.check_lanelet_type_for_successor_of_successor(lanelet_1, intersection_map)
+        conversion_lanelet_network.check_lanelet_type_for_successor_of_successor(
+            lanelet_1, intersection_map
+        )
         self.assertEqual({LaneletType.INTERSECTION, LaneletType.URBAN}, lanelet_2.lanelet_type)
 
     def test_check_if_lanelet_in_intersection(self):
@@ -617,33 +706,61 @@ class TestConversionLanelet(unittest.TestCase):
         intersection_map = {0: [1]}
 
         left_vertices = np.array(
-            [[453.90265159, 495.27523765], [455.77043119, 435.28374993], [456.37176199, 375.28599181]]
+            [
+                [453.90265159, 495.27523765],
+                [455.77043119, 435.28374993],
+                [456.37176199, 375.28599181],
+            ]
         )
         right_vertices = np.array(
-            [[450.15269756, 495.25667099], [452.02047715, 435.26518327], [452.62180795, 375.26742514]]
+            [
+                [450.15269756, 495.25667099],
+                [452.02047715, 435.26518327],
+                [452.62180795, 375.26742514],
+            ]
         )
         center_vertices = np.array(
-            [[452.02767457, 495.26595432], [453.89545417, 435.2744666], [454.49678497, 375.27670847]]
+            [
+                [452.02767457, 495.26595432],
+                [453.89545417, 435.2744666],
+                [454.49678497, 375.27670847],
+            ]
         )
 
         lanelet_1 = ConversionLanelet(None, left_vertices, center_vertices, right_vertices, 0)
         lanelet_1.successor = [1]
 
         left_vertices_succ = np.array(
-            [[453.74916757, 526.27485758], [453.8259089, 510.77504756], [453.90265022, 495.27523754]]
+            [
+                [453.74916757, 526.27485758],
+                [453.8259089, 510.77504756],
+                [453.90265022, 495.27523754],
+            ]
         )
         right_vertices_succ = np.array(
-            [[449.99921353, 526.25629114], [450.07595486, 510.75648111], [450.15269618, 495.25667109]]
+            [
+                [449.99921353, 526.25629114],
+                [450.07595486, 510.75648111],
+                [450.15269618, 495.25667109],
+            ]
         )
         center_vertices_succ = np.array(
-            [[451.87419055, 526.26557436], [451.95093188, 510.76576434], [452.0276732, 495.26595431]]
+            [
+                [451.87419055, 526.26557436],
+                [451.95093188, 510.76576434],
+                [452.0276732, 495.26595431],
+            ]
         )
 
-        lanelet_1_succ = ConversionLanelet(None, left_vertices_succ, center_vertices_succ, right_vertices_succ, 1)
+        lanelet_1_succ = ConversionLanelet(
+            None, left_vertices_succ, center_vertices_succ, right_vertices_succ, 1
+        )
 
         add_lanelets_to_network(conversion_lanelet_network, [lanelet_1, lanelet_1_succ])
 
-        self.assertTrue(conversion_lanelet_network.check_if_lanelet_in_intersection(lanelet_1, intersection_map))
+        self.assertTrue(
+            conversion_lanelet_network.check_if_lanelet_in_intersection(lanelet_1, intersection_map)
+        )
 
     def test_check_if_successor_is_intersecting(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
@@ -695,7 +812,11 @@ class TestConversionLanelet(unittest.TestCase):
             ]
         )
         successor_lane = ConversionLanelet(
-            None, successor_lane_left_vertices, successor_lane_center_vertices, successor_lane_right_vertices, 100
+            None,
+            successor_lane_left_vertices,
+            successor_lane_center_vertices,
+            successor_lane_right_vertices,
+            100,
         )
 
         incoming_successor_lane_left_vertices = np.array(
@@ -736,13 +857,21 @@ class TestConversionLanelet(unittest.TestCase):
             101,
         )
 
-        add_lanelets_to_network(conversion_lanelet_network, [lanelet, successor_lane, incoming_successor_lane])
-        self.assertTrue(conversion_lanelet_network.check_if_successor_is_intersecting(intersection_map, successor_list))
+        add_lanelets_to_network(
+            conversion_lanelet_network, [lanelet, successor_lane, incoming_successor_lane]
+        )
+        self.assertTrue(
+            conversion_lanelet_network.check_if_successor_is_intersecting(
+                intersection_map, successor_list
+            )
+        )
 
     def test_get_successor_directions(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
 
-        center_vertices = np.array([[0, 5.0], [1.0, 5.0], [2.0, 5.0], [3.0, 5.0], [4.0, 5.0], [4.5, 5.0]])
+        center_vertices = np.array(
+            [[0, 5.0], [1.0, 5.0], [2.0, 5.0], [3.0, 5.0], [4.0, 5.0], [4.5, 5.0]]
+        )
         left_vertices = np.empty([5, 2])
         right_vertices = np.empty([5, 2])
 
@@ -752,7 +881,9 @@ class TestConversionLanelet(unittest.TestCase):
         left_vertices = np.empty([10, 2])
         right_vertices = np.empty([10, 2])
 
-        center_vertices = np.array([[5.0, 4.9], [5.4, 4.5], [5.7, 4.0], [5.9, 3.5], [5.98, 3.0], [6.0, 2.5]])
+        center_vertices = np.array(
+            [[5.0, 4.9], [5.4, 4.5], [5.7, 4.0], [5.9, 3.5], [5.98, 3.0], [6.0, 2.5]]
+        )
         successor1 = ConversionLanelet(None, left_vertices, center_vertices, right_vertices, 10)
         add_lanelets_to_network(conversion_lanelet_network, [successor1])
         directions = conversion_lanelet_network.get_successor_directions(incoming_lane)
@@ -761,16 +892,24 @@ class TestConversionLanelet(unittest.TestCase):
 
         # test 2: Two successors, add a left curve to the right curve of test 1
         incoming_lane.successor = [10, 11]
-        center_vertices = np.array([[5.0, 5.1], [5.4, 5.5], [5.7, 6], [5.9, 6.5], [5.98, 7.0], [6.0, 7.5]])
-        successor2 = ConversionLanelet(None, np.empty([6, 2]), center_vertices, np.empty([6, 2]), 11)
+        center_vertices = np.array(
+            [[5.0, 5.1], [5.4, 5.5], [5.7, 6], [5.9, 6.5], [5.98, 7.0], [6.0, 7.5]]
+        )
+        successor2 = ConversionLanelet(
+            None, np.empty([6, 2]), center_vertices, np.empty([6, 2]), 11
+        )
         add_lanelets_to_network(conversion_lanelet_network, [successor2])
         directions = conversion_lanelet_network.get_successor_directions(incoming_lane)
         self.assertDictEqual({10: "right", 11: "left"}, directions)
 
         # test 3: Three successors, the two ones of the previous tests plus a straight successor
         incoming_lane.successor = [10, 11, 12]
-        center_vertices = np.array([[5.0, 5.0], [5.4, 5.0], [5.7, 5.0], [5.9, 5.0], [5.98, 5.0], [6.0, 5.0]])
-        successor3 = ConversionLanelet(None, np.empty([6, 2]), center_vertices, np.empty([6, 2]), 12)
+        center_vertices = np.array(
+            [[5.0, 5.0], [5.4, 5.0], [5.7, 5.0], [5.9, 5.0], [5.98, 5.0], [6.0, 5.0]]
+        )
+        successor3 = ConversionLanelet(
+            None, np.empty([6, 2]), center_vertices, np.empty([6, 2]), 12
+        )
         add_lanelets_to_network(conversion_lanelet_network, [successor3])
         directions = conversion_lanelet_network.get_successor_directions(incoming_lane)
         self.assertDictEqual({10: "right", 11: "left", 12: "straight"}, directions)
@@ -787,10 +926,18 @@ class TestConversionLanelet(unittest.TestCase):
         # create conversion lanelet network and corresponding lanelets
         conversion_lanelet_network = ConversionLaneletNetwork()
         lanelet1 = ConversionLanelet(
-            None, np.empty([5, 2]), np.array([[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0]]), np.empty([5, 2]), 0
+            None,
+            np.empty([5, 2]),
+            np.array([[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0]]),
+            np.empty([5, 2]),
+            0,
         )
         lanelet2 = ConversionLanelet(
-            None, np.empty([5, 2]), np.array([[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5]]), np.empty([5, 2]), 1
+            None,
+            np.empty([5, 2]),
+            np.array([[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5]]),
+            np.empty([5, 2]),
+            1,
         )
 
         add_lanelets_to_network(conversion_lanelet_network, [lanelet1, lanelet2])
@@ -805,7 +952,11 @@ class TestConversionLanelet(unittest.TestCase):
         conversion_lanelet_network = ConversionLaneletNetwork()
 
         lanelet_1 = ConversionLanelet(
-            None, np.array([[4, 5], [5, 5]]), np.array([[4, 4], [5, 4]]), np.array([[4, 3], [5, 3]]), 0
+            None,
+            np.array([[4, 5], [5, 5]]),
+            np.array([[4, 4], [5, 4]]),
+            np.array([[4, 3], [5, 3]]),
+            0,
         )
         stop_line_1 = StopLine(np.array([5, 3]), np.array([5, 5]), None, None, None)
 
@@ -938,8 +1089,12 @@ class TestJointSplitTarget(unittest.TestCase):
         join_split_target._js_pairs = [jspair]
         join_split_target.adjacent_width(True)
 
-        self.assertEqual(adjacent_lanelet.calc_width_at_start(), join_split_target.adjacent_width(True))
-        self.assertEqual(adjacent_lanelet.calc_width_at_end(), join_split_target.adjacent_width(False))
+        self.assertEqual(
+            adjacent_lanelet.calc_width_at_start(), join_split_target.adjacent_width(True)
+        )
+        self.assertEqual(
+            adjacent_lanelet.calc_width_at_end(), join_split_target.adjacent_width(False)
+        )
 
     def test_add_adjacent_predecessor_or_successor(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
@@ -963,13 +1118,25 @@ class TestJointSplitTarget(unittest.TestCase):
         conversion_lanelet_network = ConversionLaneletNetwork()
 
         left_vertices = np.array(
-            [[456.37176199, 375.28599181], [456.6199314, 435.28795596], [457.65260563, 495.29380432]]
+            [
+                [456.37176199, 375.28599181],
+                [456.6199314, 435.28795596],
+                [457.65260563, 495.29380432],
+            ]
         )
         center_vertices = np.array(
-            [[458.24673901, 375.29527514], [458.49490842, 435.29723929], [459.52758265, 495.30308766]]
+            [
+                [458.24673901, 375.29527514],
+                [458.49490842, 435.29723929],
+                [459.52758265, 495.30308766],
+            ]
         )
         right_vertices = np.array(
-            [[460.12171603, 375.30455848], [460.36988543, 435.30652262], [461.40255967, 495.31237099]]
+            [
+                [460.12171603, 375.30455848],
+                [460.36988543, 435.30652262],
+                [461.40255967, 495.31237099],
+            ]
         )
 
         plane_group = ParametricLaneGroup()
@@ -989,7 +1156,9 @@ class TestJointSplitTarget(unittest.TestCase):
         plane_group.parametric_lanes.append(parametric_lane)
 
         lanelet = init_lanelet_empty_vertices_from_id(plane_group, "88.0.2.-1")
-        adjacent_lanelet = ConversionLanelet(plane_group, left_vertices, center_vertices, right_vertices, "88.0.3.-1")
+        adjacent_lanelet = ConversionLanelet(
+            plane_group, left_vertices, center_vertices, right_vertices, "88.0.3.-1"
+        )
 
         jspair = _JoinSplitPair(lanelet, adjacent_lanelet, [0, 95])
         # test with split
@@ -1002,9 +1171,15 @@ class TestJointSplitTarget(unittest.TestCase):
         true_new_lanelet = lanelet.parametric_lane_group.to_lanelet_with_mirroring(
             None, [3.75, 3.75], [0, 95], adjacent_lanelet
         )
-        self.assertListEqual(true_new_lanelet.left_vertices.tolist(), lanelet.left_vertices.tolist())
-        self.assertListEqual(true_new_lanelet.center_vertices.tolist(), lanelet.center_vertices.tolist())
-        self.assertListEqual(true_new_lanelet.right_vertices.tolist(), lanelet.right_vertices.tolist())
+        self.assertListEqual(
+            true_new_lanelet.left_vertices.tolist(), lanelet.left_vertices.tolist()
+        )
+        self.assertListEqual(
+            true_new_lanelet.center_vertices.tolist(), lanelet.center_vertices.tolist()
+        )
+        self.assertListEqual(
+            true_new_lanelet.right_vertices.tolist(), lanelet.right_vertices.tolist()
+        )
         # test with join
         join_split_target = _JoinSplitTarget(conversion_lanelet_network, lanelet, False, True)
 
@@ -1015,9 +1190,15 @@ class TestJointSplitTarget(unittest.TestCase):
         true_new_lanelet = lanelet.parametric_lane_group.to_lanelet_with_mirroring(
             None, [3.75, 3.75], [0, 95], adjacent_lanelet
         )
-        self.assertListEqual(true_new_lanelet.left_vertices.tolist(), lanelet.left_vertices.tolist())
-        self.assertListEqual(true_new_lanelet.center_vertices.tolist(), lanelet.center_vertices.tolist())
-        self.assertListEqual(true_new_lanelet.right_vertices.tolist(), lanelet.right_vertices.tolist())
+        self.assertListEqual(
+            true_new_lanelet.left_vertices.tolist(), lanelet.left_vertices.tolist()
+        )
+        self.assertListEqual(
+            true_new_lanelet.center_vertices.tolist(), lanelet.center_vertices.tolist()
+        )
+        self.assertListEqual(
+            true_new_lanelet.right_vertices.tolist(), lanelet.right_vertices.tolist()
+        )
 
     def test_move_borders_if_split_or_join_transformed(self):
         crs_from = CRS(
@@ -1029,13 +1210,25 @@ class TestJointSplitTarget(unittest.TestCase):
         conversion_lanelet_network = ConversionLaneletNetwork()
 
         left_vertices = np.array(
-            [[456.37176199, 375.28599181], [456.6199314, 435.28795596], [457.65260563, 495.29380432]]
+            [
+                [456.37176199, 375.28599181],
+                [456.6199314, 435.28795596],
+                [457.65260563, 495.29380432],
+            ]
         )
         center_vertices = np.array(
-            [[458.24673901, 375.29527514], [458.49490842, 435.29723929], [459.52758265, 495.30308766]]
+            [
+                [458.24673901, 375.29527514],
+                [458.49490842, 435.29723929],
+                [459.52758265, 495.30308766],
+            ]
         )
         right_vertices = np.array(
-            [[460.12171603, 375.30455848], [460.36988543, 435.30652262], [461.40255967, 495.31237099]]
+            [
+                [460.12171603, 375.30455848],
+                [460.36988543, 435.30652262],
+                [461.40255967, 495.31237099],
+            ]
         )
 
         plane_group = ParametricLaneGroup()
@@ -1055,7 +1248,9 @@ class TestJointSplitTarget(unittest.TestCase):
         plane_group.parametric_lanes.append(parametric_lane)
 
         lanelet = init_lanelet_empty_vertices_from_id(plane_group, "88.0.2.-1")
-        adjacent_lanelet = ConversionLanelet(plane_group, left_vertices, center_vertices, right_vertices, "88.0.3.-1")
+        adjacent_lanelet = ConversionLanelet(
+            plane_group, left_vertices, center_vertices, right_vertices, "88.0.3.-1"
+        )
 
         jspair = _JoinSplitPair(lanelet, adjacent_lanelet, [0, 95])
         # test with split
@@ -1071,15 +1266,27 @@ class TestJointSplitTarget(unittest.TestCase):
 
         np.testing.assert_almost_equal(
             true_new_lanelet.left_vertices,
-            np.array([transformer.transform(vert[0], vert[1]) for vert in lanelet.left_vertices.tolist()]),
+            np.array(
+                [transformer.transform(vert[0], vert[1]) for vert in lanelet.left_vertices.tolist()]
+            ),
         )
         np.testing.assert_almost_equal(
             true_new_lanelet.center_vertices,
-            np.array([transformer.transform(vert[0], vert[1]) for vert in lanelet.center_vertices.tolist()]),
+            np.array(
+                [
+                    transformer.transform(vert[0], vert[1])
+                    for vert in lanelet.center_vertices.tolist()
+                ]
+            ),
         )
         np.testing.assert_almost_equal(
             true_new_lanelet.right_vertices,
-            np.array([transformer.transform(vert[0], vert[1]) for vert in lanelet.right_vertices.tolist()]),
+            np.array(
+                [
+                    transformer.transform(vert[0], vert[1])
+                    for vert in lanelet.right_vertices.tolist()
+                ]
+            ),
         )
         # test with join
         join_split_target = _JoinSplitTarget(conversion_lanelet_network, lanelet, False, True)
@@ -1093,15 +1300,27 @@ class TestJointSplitTarget(unittest.TestCase):
         )
         np.testing.assert_almost_equal(
             true_new_lanelet.left_vertices,
-            np.array([transformer.transform(vert[0], vert[1]) for vert in lanelet.left_vertices.tolist()]),
+            np.array(
+                [transformer.transform(vert[0], vert[1]) for vert in lanelet.left_vertices.tolist()]
+            ),
         )
         np.testing.assert_almost_equal(
             true_new_lanelet.center_vertices,
-            np.array([transformer.transform(vert[0], vert[1]) for vert in lanelet.center_vertices.tolist()]),
+            np.array(
+                [
+                    transformer.transform(vert[0], vert[1])
+                    for vert in lanelet.center_vertices.tolist()
+                ]
+            ),
         )
         np.testing.assert_almost_equal(
             true_new_lanelet.right_vertices,
-            np.array([transformer.transform(vert[0], vert[1]) for vert in lanelet.right_vertices.tolist()]),
+            np.array(
+                [
+                    transformer.transform(vert[0], vert[1])
+                    for vert in lanelet.right_vertices.tolist()
+                ]
+            ),
         )
 
 
@@ -1152,6 +1371,12 @@ class TestJoinSplitPair(unittest.TestCase):
         true_new_lanelet.center_vertices = lanelet.center_vertices
         true_new_lanelet.right_vertices = lanelet.right_vertices
 
-        self.assertListEqual(true_new_lanelet.left_vertices.tolist(), new_lanelet.left_vertices.tolist())
-        self.assertListEqual(true_new_lanelet.center_vertices.tolist(), new_lanelet.center_vertices.tolist())
-        self.assertListEqual(true_new_lanelet.right_vertices.tolist(), new_lanelet.right_vertices.tolist())
+        self.assertListEqual(
+            true_new_lanelet.left_vertices.tolist(), new_lanelet.left_vertices.tolist()
+        )
+        self.assertListEqual(
+            true_new_lanelet.center_vertices.tolist(), new_lanelet.center_vertices.tolist()
+        )
+        self.assertListEqual(
+            true_new_lanelet.right_vertices.tolist(), new_lanelet.right_vertices.tolist()
+        )

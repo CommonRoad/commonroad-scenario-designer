@@ -104,7 +104,9 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_information_groupbox = QGroupBox()
         self.obstacle_information_groupbox.setLayout(self.layout_obstacle_information_groupbox)
         self.layout_obstacle_information_groupbox.insertRow(0, label_general)
-        self.layout_obstacle_information_groupbox.insertRow(1, "Static/Dynamic", self.obstacle_dyn_stat)
+        self.layout_obstacle_information_groupbox.insertRow(
+            1, "Static/Dynamic", self.obstacle_dyn_stat
+        )
         self.layout_obstacle_information_groupbox.insertRow(2, "Type", self.obstacle_type)
 
         self.shape_groupbox = QGroupBox()
@@ -165,10 +167,14 @@ class ObstacleToolboxUI(Toolbox):
 
         layout_obstacle_profile_state_vis_groupbox = QFormLayout()
         self.obstacle_profile_state_vis_groupbox = QGroupBox()
-        self.obstacle_profile_state_vis_groupbox.setLayout(layout_obstacle_profile_state_vis_groupbox)
+        self.obstacle_profile_state_vis_groupbox.setLayout(
+            layout_obstacle_profile_state_vis_groupbox
+        )
         layout_profile_vis_selection = QFormLayout()
         self.obstacle_profile_state_variable = QComboBox()
-        layout_profile_vis_selection.addRow("Visualized State:", self.obstacle_profile_state_variable)
+        layout_profile_vis_selection.addRow(
+            "Visualized State:", self.obstacle_profile_state_variable
+        )
         layout_obstacle_profile_state_vis_groupbox.addRow(layout_profile_vis_selection)
         layout_obstacle_profile_state_vis_groupbox.addWidget(self.toolbar_profile)
         layout_obstacle_profile_state_vis_groupbox.addWidget(self.canvas_profile)
@@ -186,11 +192,15 @@ class ObstacleToolboxUI(Toolbox):
         self.clear_obstacle_fields()
 
         self.selected_obstacle.clear()
-        self.selected_obstacle.addItems(["None"] + [str(item) for item in self.scenario_model.collect_obstacle_ids()])
+        self.selected_obstacle.addItems(
+            ["None"] + [str(item) for item in self.scenario_model.collect_obstacle_ids()]
+        )
         self.selected_obstacle.setCurrentIndex(0)
 
         self.selected_obstacle_profile.clear()
-        self.selected_obstacle_profile.addItems([str(item) for item in self.scenario_model.collect_obstacle_ids()])
+        self.selected_obstacle_profile.addItems(
+            [str(item) for item in self.scenario_model.collect_obstacle_ids()]
+        )
 
         self.init_obstacle_defaults()
 
@@ -212,7 +222,10 @@ class ObstacleToolboxUI(Toolbox):
                 lineEdit.setText("0")
             for lineEdit in self.vertices_y:
                 lineEdit.setText("0")
-        if self.obstacle_dyn_stat.currentText() == "Static" and not self.obstacle_shape.currentText() == "Polygon":
+        if (
+            self.obstacle_dyn_stat.currentText() == "Static"
+            and not self.obstacle_shape.currentText() == "Polygon"
+        ):
             self.obstacle_x_Position.setText("0.5")
             self.obstacle_y_Position.setText("0.5")
 
@@ -232,8 +245,12 @@ class ObstacleToolboxUI(Toolbox):
             self.obstacle_width.setText(str(obstacle.obstacle_shape.width))
             self.obstacle_length.setText(str(obstacle.obstacle_shape.length))
             if isinstance(obstacle, StaticObstacle):
-                self.obstacle_x_Position.setText(str(obstacle.initial_state.__getattribute__("position")[0]))
-                self.obstacle_y_Position.setText(str(obstacle.initial_state.__getattribute__("position")[1]))
+                self.obstacle_x_Position.setText(
+                    str(obstacle.initial_state.__getattribute__("position")[0])
+                )
+                self.obstacle_y_Position.setText(
+                    str(obstacle.initial_state.__getattribute__("position")[1])
+                )
                 self.obstacle_orientation.setText(
                     str(math.degrees(obstacle.initial_state.__getattribute__("orientation")))
                 )
@@ -248,8 +265,12 @@ class ObstacleToolboxUI(Toolbox):
 
             self.obstacle_radius.setText(str(obstacle.obstacle_shape.radius))
             if isinstance(obstacle, StaticObstacle):
-                self.obstacle_x_Position.setText(str(obstacle.initial_state.__getattribute__("position")[0]))
-                self.obstacle_y_Position.setText(str(obstacle.initial_state.__getattribute__("position")[1]))
+                self.obstacle_x_Position.setText(
+                    str(obstacle.initial_state.__getattribute__("position")[0])
+                )
+                self.obstacle_y_Position.setText(
+                    str(obstacle.initial_state.__getattribute__("position")[1])
+                )
 
         elif isinstance(obstacle.obstacle_shape, Polygon):
             if self.obstacle_shape.currentText() != "Polygon":
@@ -284,7 +305,9 @@ class ObstacleToolboxUI(Toolbox):
 
         self.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
         self.obstacle_profile_state_variable.clear()
-        state_variables = [var for var in obstacle.initial_state.attributes if var not in ["position", "time_step"]]
+        state_variables = [
+            var for var in obstacle.initial_state.attributes if var not in ["position", "time_step"]
+        ]
 
         if "position" in obstacle.initial_state.attributes:
             state_variables += ["x-position", "y-position"]
@@ -311,7 +334,10 @@ class ObstacleToolboxUI(Toolbox):
             for i in range(self.amount_vertices):
                 self.vertices_x[i].setText("")
                 self.vertices_y[i].setText("")
-        if self.obstacle_dyn_stat.currentText() == "Static" and self.obstacle_shape.currentText() != "Polygon":
+        if (
+            self.obstacle_dyn_stat.currentText() == "Static"
+            and self.obstacle_shape.currentText() != "Polygon"
+        ):
             self.obstacle_x_Position.setText("")
             self.obstacle_y_Position.setText("")
         if not self.default_color.isChecked():
@@ -399,11 +425,19 @@ class ObstacleToolboxUI(Toolbox):
             self.obstacle_y_Position.setAlignment(Qt.AlignmentFlag.AlignRight)
 
             if self.obstacle_shape.currentText() == "Rectangle":
-                self.layout_obstacle_information_groupbox.insertRow(4, "X-Position", self.obstacle_x_Position)
-                self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
+                self.layout_obstacle_information_groupbox.insertRow(
+                    4, "X-Position", self.obstacle_x_Position
+                )
+                self.layout_obstacle_information_groupbox.insertRow(
+                    5, "Y-Position", self.obstacle_y_Position
+                )
             elif self.obstacle_shape.currentText() == "Circle":
-                self.layout_obstacle_information_groupbox.insertRow(4, "X-Position", self.obstacle_x_Position)
-                self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
+                self.layout_obstacle_information_groupbox.insertRow(
+                    4, "X-Position", self.obstacle_x_Position
+                )
+                self.layout_obstacle_information_groupbox.insertRow(
+                    5, "Y-Position", self.obstacle_y_Position
+                )
             self.position_initialized = True
 
     def remove_position(self):
@@ -513,7 +547,9 @@ class ObstacleToolboxUI(Toolbox):
         sets default color for the color display square
         """
         if self.default_color.isChecked():
-            self.selected_color.setStyleSheet("QWidget { border:1px solid black; background-color: white}")
+            self.selected_color.setStyleSheet(
+                "QWidget { border:1px solid black; background-color: white}"
+            )
 
     def update_window(self):
         super().update_window()

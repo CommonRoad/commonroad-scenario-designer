@@ -115,8 +115,12 @@ class LaneletDrawParams(ElementDrawParams):
         lanelet_id, predecessor_id = location
 
         self._insert_common_lanelet_params(lanelet_id)
-        self._insert_vertex_marking_params(lanelet_id, left_start_vertex=True, right_start_vertex=True)
-        self._insert_vertex_marking_params(predecessor_id, left_end_vertex=True, right_end_vertex=True)
+        self._insert_vertex_marking_params(
+            lanelet_id, left_start_vertex=True, right_start_vertex=True
+        )
+        self._insert_vertex_marking_params(
+            predecessor_id, left_end_vertex=True, right_end_vertex=True
+        )
 
     def param_connections_successor(self, location: Tuple[int, int]):
         """
@@ -128,7 +132,9 @@ class LaneletDrawParams(ElementDrawParams):
 
         self._insert_common_lanelet_params(lanelet_id)
         self._insert_vertex_marking_params(lanelet_id, left_end_vertex=True, right_end_vertex=True)
-        self._insert_vertex_marking_params(successor_id, left_start_vertex=True, right_start_vertex=True)
+        self._insert_vertex_marking_params(
+            successor_id, left_start_vertex=True, right_start_vertex=True
+        )
 
     def param_polylines_left_same_dir_parallel_adj(self, location: Tuple[int, int]):
         """
@@ -186,7 +192,9 @@ class LaneletDrawParams(ElementDrawParams):
         self._insert_vertex_marking_params(
             lanelet_id, left_start_vertex=True, left_end_vertex=True, right_end_vertex=True
         )
-        self._insert_vertex_marking_params(adj_id, right_start_vertex=True, left_end_vertex=True, right_end_vertex=True)
+        self._insert_vertex_marking_params(
+            adj_id, right_start_vertex=True, left_end_vertex=True, right_end_vertex=True
+        )
 
     def param_connections_right_merging_adj(self, location: Tuple[int, int]):
         """
@@ -200,7 +208,9 @@ class LaneletDrawParams(ElementDrawParams):
         self._insert_vertex_marking_params(
             lanelet_id, left_start_vertex=True, left_end_vertex=True, right_end_vertex=True
         )
-        self._insert_vertex_marking_params(adj_id, left_start_vertex=True, left_end_vertex=True, right_end_vertex=True)
+        self._insert_vertex_marking_params(
+            adj_id, left_start_vertex=True, left_end_vertex=True, right_end_vertex=True
+        )
 
     def param_connections_left_forking_adj(self, location: Tuple[int, int]):
         """
@@ -514,7 +524,9 @@ class LaneletDrawParams(ElementDrawParams):
         self._draw_params[lanelet_id].facecolor = "lightcoral"
         self._draw_params[lanelet_id].fill_lanelet = True
 
-    def _insert_bound_params(self, lanelet_id: int, left_bound: bool = False, right_bound: bool = False):
+    def _insert_bound_params(
+        self, lanelet_id: int, left_bound: bool = False, right_bound: bool = False
+    ):
         """
         Inserts drawing params for polylines_left_same_dir_parallel_adj, polylines_right_same_dir_parallel_adj,
         polylines_left_opposite_dir_parallel_adj, and polylines_right_opposite_dir_parallel_adj.
@@ -527,7 +539,9 @@ class LaneletDrawParams(ElementDrawParams):
         mark_color = "red"
 
         self._draw_params[lanelet_id].left_bound_color = mark_color if left_bound else default_color
-        self._draw_params[lanelet_id].right_bound_color = mark_color if right_bound else default_color
+        self._draw_params[lanelet_id].right_bound_color = (
+            mark_color if right_bound else default_color
+        )
         self._draw_params[lanelet_id].draw_linewidth = 1.5
 
     def _insert_vertex_marking_params(
@@ -637,7 +651,9 @@ class TrafficSignDrawParams(ElementDrawParams):
 
         :param traffic_sign_id: Traffic sign ID.
         """
-        self._update_custom_draw_params(traffic_sign_id, {"mark_traffic_sign": True, "show_traffic_sign_id": True})
+        self._update_custom_draw_params(
+            traffic_sign_id, {"mark_traffic_sign": True, "show_traffic_sign_id": True}
+        )
 
 
 class TrafficLightDrawParams(ElementDrawParams):
@@ -710,7 +726,9 @@ class TrafficLightDrawParams(ElementDrawParams):
 
         :param traffic_light_id: Traffic light ID.
         """
-        self._update_custom_draw_params(traffic_light_id, {"mark_traffic_light": True, "show_traffic_light_id": True})
+        self._update_custom_draw_params(
+            traffic_light_id, {"mark_traffic_light": True, "show_traffic_light_id": True}
+        )
 
 
 class IntersectionDrawParams(ElementDrawParams):

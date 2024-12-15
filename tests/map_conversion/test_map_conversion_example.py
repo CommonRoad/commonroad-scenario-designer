@@ -18,7 +18,8 @@ class MapConversionExampleTests(unittest.TestCase):
         # call the execution of the example script
         exec(
             open(
-                Path(__file__).parent.parent.parent / "tutorials/conversion_examples/example_lanelet2_to_commonroad.py"
+                Path(__file__).parent.parent.parent
+                / "tutorials/conversion_examples/example_lanelet2_to_commonroad.py"
             ).read()
         )
 

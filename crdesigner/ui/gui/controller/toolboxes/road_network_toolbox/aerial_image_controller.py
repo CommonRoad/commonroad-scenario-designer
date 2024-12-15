@@ -50,16 +50,25 @@ class RequestRunnable(QRunnable):
 
 class AddAerialImageController:
     def __init__(
-        self, road_network_controller, scenario_model: ScenarioModel, road_network_toolbox_ui: RoadNetworkToolboxUI
+        self,
+        road_network_controller,
+        scenario_model: ScenarioModel,
+        road_network_toolbox_ui: RoadNetworkToolboxUI,
     ):
         self.scenario_model = scenario_model
         self.road_network_toolbox_ui = road_network_toolbox_ui
         self.road_network_controller = road_network_controller
 
     def connect_gui_aerial_image(self):
-        self.road_network_toolbox_ui.button_add_aerial_image.clicked.connect(lambda: self.show_aerial_image())
-        self.road_network_toolbox_ui.button_remove_aerial_image.clicked.connect(lambda: self.remove_aerial_image())
-        self.road_network_toolbox_ui.current_position.clicked.connect(lambda: self.show_aerial_image(True))
+        self.road_network_toolbox_ui.button_add_aerial_image.clicked.connect(
+            lambda: self.show_aerial_image()
+        )
+        self.road_network_toolbox_ui.button_remove_aerial_image.clicked.connect(
+            lambda: self.remove_aerial_image()
+        )
+        self.road_network_toolbox_ui.current_position.clicked.connect(
+            lambda: self.show_aerial_image(True)
+        )
 
     @logger.log
     def show_aerial_image(self, current_position: bool = False):
@@ -85,25 +94,43 @@ class AddAerialImageController:
             bounds = extract_plot_limits(self.scenario_model.get_lanelet_network())
             if (
                 self.scenario_model.get_current_scenario().location.geo_transformation is not None
-                and self.scenario_model.get_current_scenario().location.geo_transformation.x_translation != 0.0
+                and self.scenario_model.get_current_scenario().location.geo_transformation.x_translation
+                != 0.0
             ):
-                max_x = bounds[1] + self.scenario_model.get_current_scenario().location.geo_transformation.x_translation
-                min_x = bounds[0] + self.scenario_model.get_current_scenario().location.geo_transformation.x_translation
+                max_x = (
+                    bounds[1]
+                    + self.scenario_model.get_current_scenario().location.geo_transformation.x_translation
+                )
+                min_x = (
+                    bounds[0]
+                    + self.scenario_model.get_current_scenario().location.geo_transformation.x_translation
+                )
             else:
                 max_x = bounds[1]
                 min_x = bounds[0]
             if (
                 self.scenario_model.get_current_scenario().location.geo_transformation is not None
-                and self.scenario_model.get_current_scenario().location.geo_transformation.y_translation != 0.0
+                and self.scenario_model.get_current_scenario().location.geo_transformation.y_translation
+                != 0.0
             ):
-                min_y = bounds[2] + self.scenario_model.get_current_scenario().location.geo_transformation.y_translation
-                max_y = bounds[3] + self.scenario_model.get_current_scenario().location.geo_transformation.y_translation
+                min_y = (
+                    bounds[2]
+                    + self.scenario_model.get_current_scenario().location.geo_transformation.y_translation
+                )
+                max_y = (
+                    bounds[3]
+                    + self.scenario_model.get_current_scenario().location.geo_transformation.y_translation
+                )
             else:
                 min_y = bounds[2]
                 max_y = bounds[3]
-            transformer = self._create_transformer_aerial(self.scenario_model.get_current_scenario())
+            transformer = self._create_transformer_aerial(
+                self.scenario_model.get_current_scenario()
+            )
             if transformer is None:
-                self.road_network_controller.text_browser.append("The current Position cannot be displayed")
+                self.road_network_controller.text_browser.append(
+                    "The current Position cannot be displayed"
+                )
                 return
             north, west = transformer.transform(min_x, max_y)
             south, east = transformer.transform(max_x, min_y)
@@ -203,7 +230,9 @@ class AddAerialImageController:
             float(self.road_network_toolbox_ui.southern_bound.text()),
             float(self.road_network_toolbox_ui.eastern_bound.text()),
         )
-        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.show_aerial_image(True)
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.show_aerial_image(
+            True
+        )
 
     def _create_transformer_aerial(self, scenario: Scenario) -> Optional[Transformer]:
         """

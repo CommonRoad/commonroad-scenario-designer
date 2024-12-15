@@ -50,7 +50,8 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
 
         # translate scenario to center
         centroid = np.mean(
-            np.concatenate([la.center_vertices for la in self.scenario.lanelet_network.lanelets]), axis=0
+            np.concatenate([la.center_vertices for la in self.scenario.lanelet_network.lanelets]),
+            axis=0,
         )
         self.scenario.translate_rotate(-centroid, 0)
         planning_problem.translate_rotate(-centroid, 0)
@@ -76,7 +77,10 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
         # can we generate traffic light systems?
         if tls_lanelet_ids:
             self.assertTrue(
-                all(converter.auto_generate_traffic_light_system(lanelet_id) for lanelet_id in tls_lanelet_ids)
+                all(
+                    converter.auto_generate_traffic_light_system(lanelet_id)
+                    for lanelet_id in tls_lanelet_ids
+                )
             )
 
         simulation = SumoSimulation()
@@ -114,7 +118,11 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
             matches = [line for line in lines if keyword in line]
             err_str = "\n".join(matches)
             if len(matches) > 0:
-                warnings.warn(f"Simulation Error, {keyword} found {len(matches)} times in stderr:" + "\n" + err_str)
+                warnings.warn(
+                    f"Simulation Error, {keyword} found {len(matches)} times in stderr:"
+                    + "\n"
+                    + err_str
+                )
 
     @parameterized.expand(
         [

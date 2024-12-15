@@ -7,4 +7,6 @@ def create_size_policy_for_settings_elements():
     width. But as we want a unified appearance, we take the one of QSpinBox for QLineEdit, which is returned by
     this function.
     """
-    return QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed, QSizePolicy.ControlType.SpinBox)
+    return QSizePolicy(
+        QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed, QSizePolicy.ControlType.SpinBox
+    )

@@ -72,7 +72,9 @@ class MWindowController:
         self.pps_model = PlanningProblemSetModel()
 
         # init any objects here
-        self.scenario_saving_dialog = ScenarioSavingDialogController(self.scenario_model, self.pps_model)
+        self.scenario_saving_dialog = ScenarioSavingDialogController(
+            self.scenario_model, self.pps_model
+        )
         # scenario_model is given
 
         # call the setup methods in the service layer
@@ -83,7 +85,9 @@ class MWindowController:
         self.mwindow_ui.closeEvent = self.close_event
 
         self.animated_viewer_wrapper = AnimatedViewerWrapperController(
-            mwindow=self, scenario_model=self.scenario_model, scenario_saving_dialog=self.scenario_saving_dialog
+            mwindow=self,
+            scenario_model=self.scenario_model,
+            scenario_saving_dialog=self.scenario_saving_dialog,
         )
         self.mwindow_ui.animated_viewer_wrapper = self.animated_viewer_wrapper
         self.animated_viewer_wrapper.create_viewer_dock()
@@ -93,7 +97,9 @@ class MWindowController:
         self.mwindow_ui.crdesigner_console_wrapper = self.crdesigner_console_wrapper
 
         self.road_network_toolbox = RoadNetworkController(mwindow=self)
-        self.mwindow_ui.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.road_network_toolbox)
+        self.mwindow_ui.addDockWidget(
+            Qt.DockWidgetArea.LeftDockWidgetArea, self.road_network_toolbox
+        )
         self.mwindow_ui.road_network_toolbox = self.road_network_toolbox
 
         self.obstacle_toolbox = ObstacleController(mwindow=self)
@@ -101,7 +107,9 @@ class MWindowController:
         self.mwindow_ui.obstacle_toolbox = self.obstacle_toolbox
 
         self.map_converter_toolbox = MapConversionToolboxController(mwindow=self)
-        self.mwindow_ui.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.map_converter_toolbox)
+        self.mwindow_ui.addDockWidget(
+            Qt.DockWidgetArea.RightDockWidgetArea, self.map_converter_toolbox
+        )
         self.mwindow_ui.map_converter_toolbox = self.map_converter_toolbox
 
         self.scenario_toolbox = ScenarioToolboxController(mwindow=self)
@@ -130,14 +138,22 @@ class MWindowController:
             reply = self.mwindow_ui.ask_for_autosaved_file()
             if reply == QMessageBox.StandardButton.Save:
                 self.directory = QFileDialog.getExistingDirectory(
-                    self.scenario_saving_dialog.save_window, "Dir", options=QFileDialog.Option.ShowDirsOnly
+                    self.scenario_saving_dialog.save_window,
+                    "Dir",
+                    options=QFileDialog.Option.ShowDirsOnly,
                 )
                 if self.directory:
                     if os.path.exists(self.path_logging):
                         time = datetime.now()
-                        with open(self.path_logging, "r") as fp1, open(
-                            self.directory + "/logging_file_" + time.strftime("%d-%b-%y %H:%M:%S"), "w"
-                        ) as fp2:
+                        with (
+                            open(self.path_logging, "r") as fp1,
+                            open(
+                                self.directory
+                                + "/logging_file_"
+                                + time.strftime("%d-%b-%y %H:%M:%S"),
+                                "w",
+                            ) as fp2,
+                        ):
                             results = fp1.read()
                             fp2.write(results)
                 reply = self.mwindow_ui.ask_for_autosaved_file(False)
@@ -168,7 +184,9 @@ class MWindowController:
         """Function that makes sure the main window is in the center of screen."""
         screen = QGuiApplication.primaryScreen().availableGeometry()
         size = self.mwindow_ui.geometry()
-        self.mwindow_ui.move(int((screen.width() - size.width()) / 2), int((screen.height() - size.height()) / 2))
+        self.mwindow_ui.move(
+            int((screen.width() - size.width()) / 2), int((screen.height() - size.height()) / 2)
+        )
 
     # TODO: MODEL
     def store_scenario_service_layer(self):

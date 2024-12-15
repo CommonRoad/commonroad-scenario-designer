@@ -18,7 +18,9 @@ from commonroad.scenario.traffic_sign import (
 )
 
 
-def encode_road_section_lane_width_id(road_id: int, section_id: int, lane_id: int, width_id: int) -> str:
+def encode_road_section_lane_width_id(
+    road_id: int, section_id: int, lane_id: int, width_id: int
+) -> str:
     """Encodes a road section lane width with an ID.
 
     :param road_id: ID of road.
@@ -30,7 +32,9 @@ def encode_road_section_lane_width_id(road_id: int, section_id: int, lane_id: in
     return ".".join([str(road_id), str(section_id), str(lane_id), str(width_id)])
 
 
-def encode_mark_lane_width_id(road_id: int, section_id: int, lane_id: int, width_id: int, m_id: int) -> str:
+def encode_mark_lane_width_id(
+    road_id: int, section_id: int, lane_id: int, width_id: int, m_id: int
+) -> str:
     """Encodes a road section lane width with an ID.
 
     :param road_id: ID of road.

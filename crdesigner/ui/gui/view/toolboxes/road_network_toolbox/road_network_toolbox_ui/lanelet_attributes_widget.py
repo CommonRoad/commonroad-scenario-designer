@@ -39,12 +39,16 @@ class LaneletAttributesWidget:
 
         self.toolbox.lanelet_attributes_groupbox = QGroupBox()
         self.toolbox.layout_lanelet_attributes_groupbox = QFormLayout()
-        self.toolbox.lanelet_attributes_groupbox.setLayout(self.toolbox.layout_lanelet_attributes_groupbox)
+        self.toolbox.lanelet_attributes_groupbox.setLayout(
+            self.toolbox.layout_lanelet_attributes_groupbox
+        )
 
         self.toolbox.selected_lanelet_update = QComboBox()
         self.toolbox.button_remove_lanelet = QPushButton("Remove")
 
-        self.toolbox.layout_lanelet_attributes_groupbox.addRow("Selected Lanelet", self.toolbox.selected_lanelet_update)
+        self.toolbox.layout_lanelet_attributes_groupbox.addRow(
+            "Selected Lanelet", self.toolbox.selected_lanelet_update
+        )
         self.toolbox.layout_lanelet_attributes_groupbox.addRow(self.toolbox.button_remove_lanelet)
 
         self.add_attribute_fields()
@@ -71,16 +75,24 @@ class LaneletAttributesWidget:
         self.toolbox.selected_lanelet_start_position_y.setMaxLength(8)
         self.toolbox.selected_lanelet_start_position_y.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.toolbox.selected_button_start_position = PositionButton(
-            self.toolbox.selected_lanelet_start_position_x, self.toolbox.selected_lanelet_start_position_y, self.toolbox
+            self.toolbox.selected_lanelet_start_position_x,
+            self.toolbox.selected_lanelet_start_position_y,
+            self.toolbox,
         )
         self.toolbox.selected_lanelet_start_position = QGridLayout()
         self.toolbox.selected_lanelet_start_position.addWidget(QLabel("x: "), 1, 0)
-        self.toolbox.selected_lanelet_start_position.addWidget(self.toolbox.selected_lanelet_start_position_x, 1, 1)
+        self.toolbox.selected_lanelet_start_position.addWidget(
+            self.toolbox.selected_lanelet_start_position_x, 1, 1
+        )
         self.toolbox.selected_lanelet_start_position.addWidget(QLabel("[m]"), 1, 2)
         self.toolbox.selected_lanelet_start_position.addWidget(QLabel("y:"), 1, 3)
-        self.toolbox.selected_lanelet_start_position.addWidget(self.toolbox.selected_lanelet_start_position_y, 1, 4)
+        self.toolbox.selected_lanelet_start_position.addWidget(
+            self.toolbox.selected_lanelet_start_position_y, 1, 4
+        )
         self.toolbox.selected_lanelet_start_position.addWidget(QLabel("[m]"), 1, 5)
-        self.toolbox.selected_lanelet_start_position.addWidget(self.toolbox.selected_button_start_position, 1, 6)
+        self.toolbox.selected_lanelet_start_position.addWidget(
+            self.toolbox.selected_button_start_position, 1, 6
+        )
 
         self.toolbox.selected_lanelet_end_position_x = QLineEdit()
         self.toolbox.selected_lanelet_end_position_x.setValidator(self.toolbox.float_validator)
@@ -91,23 +103,39 @@ class LaneletAttributesWidget:
         self.toolbox.selected_lanelet_end_position_y.setMaxLength(8)
         self.toolbox.selected_lanelet_end_position_y.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.toolbox.selected_button_end_position = PositionButton(
-            self.toolbox.selected_lanelet_end_position_x, self.toolbox.selected_lanelet_end_position_y, self.toolbox
+            self.toolbox.selected_lanelet_end_position_x,
+            self.toolbox.selected_lanelet_end_position_y,
+            self.toolbox,
         )
         self.toolbox.selected_lanelet_end_position = QGridLayout()
         self.toolbox.selected_lanelet_end_position.addWidget(QLabel("x: "), 1, 0)
-        self.toolbox.selected_lanelet_end_position.addWidget(self.toolbox.selected_lanelet_end_position_x, 1, 1)
+        self.toolbox.selected_lanelet_end_position.addWidget(
+            self.toolbox.selected_lanelet_end_position_x, 1, 1
+        )
         self.toolbox.selected_lanelet_end_position.addWidget(QLabel("[m]"), 1, 2)
         self.toolbox.selected_lanelet_end_position.addWidget(QLabel("y:"), 1, 3)
-        self.toolbox.selected_lanelet_end_position.addWidget(self.toolbox.selected_lanelet_end_position_y, 1, 4)
+        self.toolbox.selected_lanelet_end_position.addWidget(
+            self.toolbox.selected_lanelet_end_position_y, 1, 4
+        )
         self.toolbox.selected_lanelet_end_position.addWidget(QLabel("[m]"), 1, 5)
-        self.toolbox.selected_lanelet_end_position.addWidget(self.toolbox.selected_button_end_position, 1, 6)
+        self.toolbox.selected_lanelet_end_position.addWidget(
+            self.toolbox.selected_button_end_position, 1, 6
+        )
 
         self.toolbox.selected_end_position_x_changed = False
         self.toolbox.selected_end_position_y_changed = False
-        self.toolbox.selected_lanelet_end_position_x.textChanged.connect(self.update_selected_length)
-        self.toolbox.selected_lanelet_end_position_y.textChanged.connect(self.update_selected_length)
-        self.toolbox.selected_lanelet_start_position_x.textChanged.connect(self.update_selected_length)
-        self.toolbox.selected_lanelet_start_position_y.textChanged.connect(self.update_selected_length)
+        self.toolbox.selected_lanelet_end_position_x.textChanged.connect(
+            self.update_selected_length
+        )
+        self.toolbox.selected_lanelet_end_position_y.textChanged.connect(
+            self.update_selected_length
+        )
+        self.toolbox.selected_lanelet_start_position_x.textChanged.connect(
+            self.update_selected_length
+        )
+        self.toolbox.selected_lanelet_start_position_y.textChanged.connect(
+            self.update_selected_length
+        )
 
         layout_attributes.addRow(self.toolbox.selected_lanelet_start_position)
         layout_attributes.addRow(self.toolbox.selected_lanelet_end_position)
@@ -200,7 +228,9 @@ class LaneletAttributesWidget:
 
         self.toolbox.selected_line_marking_stop_line = QComboBox()
         line_markings_stop_line = [
-            e.value for e in LineMarking if e.value not in [LineMarking.UNKNOWN.value, LineMarking.NO_MARKING.value]
+            e.value
+            for e in LineMarking
+            if e.value not in [LineMarking.UNKNOWN.value, LineMarking.NO_MARKING.value]
         ]
         self.toolbox.selected_line_marking_stop_line.addItems(line_markings_stop_line)
 
@@ -211,11 +241,17 @@ class LaneletAttributesWidget:
             self.toolbox.selected_stop_line_beginning
         )
         self.toolbox.selected_stop_line_beginning.setChecked(True)
-        self.toolbox.selected_stop_line_beginning.clicked.connect(lambda: self.adjust_selected_stop_line_position())
+        self.toolbox.selected_stop_line_beginning.clicked.connect(
+            lambda: self.adjust_selected_stop_line_position()
+        )
 
         self.toolbox.selected_stop_line_end = QRadioButton("end")
-        self.toolbox.connecting_radio_button_group_selected_stop_line.addButton(self.toolbox.selected_stop_line_end)
-        self.toolbox.selected_stop_line_end.clicked.connect(lambda: self.adjust_selected_stop_line_position())
+        self.toolbox.connecting_radio_button_group_selected_stop_line.addButton(
+            self.toolbox.selected_stop_line_end
+        )
+        self.toolbox.selected_stop_line_end.clicked.connect(
+            lambda: self.adjust_selected_stop_line_position()
+        )
 
         self.toolbox.selected_stop_line_select_position = QRadioButton("select pos")
         self.toolbox.connecting_radio_button_group_selected_stop_line.addButton(
@@ -227,12 +263,20 @@ class LaneletAttributesWidget:
         self.toolbox.selected_stop_line_select_position.setToolTip("select position")
 
         self.toolbox.selected_stop_line_position = QGridLayout()
-        self.toolbox.selected_stop_line_position.addWidget(self.toolbox.selected_stop_line_beginning, 1, 0)
-        self.toolbox.selected_stop_line_position.addWidget(self.toolbox.selected_stop_line_end, 1, 1)
-        self.toolbox.selected_stop_line_position.addWidget(self.toolbox.selected_stop_line_select_position, 1, 2)
+        self.toolbox.selected_stop_line_position.addWidget(
+            self.toolbox.selected_stop_line_beginning, 1, 0
+        )
+        self.toolbox.selected_stop_line_position.addWidget(
+            self.toolbox.selected_stop_line_end, 1, 1
+        )
+        self.toolbox.selected_stop_line_position.addWidget(
+            self.toolbox.selected_stop_line_select_position, 1, 2
+        )
         self.toolbox.selected_stop_line_select_position_checked_before = False
 
-        self.toolbox.layout_stop_line.addRow("Line marking", self.toolbox.selected_line_marking_stop_line)
+        self.toolbox.layout_stop_line.addRow(
+            "Line marking", self.toolbox.selected_line_marking_stop_line
+        )
         self.toolbox.layout_stop_line.addRow(self.toolbox.selected_stop_line_position)
 
         self.toolbox.selected_stop_line_box = CollapsibleCheckBox(
@@ -240,12 +284,19 @@ class LaneletAttributesWidget:
         )
 
         self.toolbox.line_marking_box = CollapsibleArrowBox(
-            "Line marking", layout_line_marking, layout_attributes, 6, self.toolbox.mwindow, self.toolbox
+            "Line marking",
+            layout_line_marking,
+            layout_attributes,
+            6,
+            self.toolbox.mwindow,
+            self.toolbox,
         )
 
     def adjust_selected_stop_line_position(self):
         if self.toolbox.selected_stop_line_select_position_checked_before:
-            self.toolbox.layout_stop_line.removeRow(self.toolbox.selected_lanelet_select_stop_line_position)
+            self.toolbox.layout_stop_line.removeRow(
+                self.toolbox.selected_lanelet_select_stop_line_position
+            )
             self.toolbox.button_selected_stop_line_start_position.remove()
             self.toolbox.button_selected_stop_line_end_position.remove()
 
@@ -268,10 +319,14 @@ class LaneletAttributesWidget:
             self.toolbox.selected_stop_line_end_y.setAlignment(Qt.AlignmentFlag.AlignRight)
 
             self.toolbox.button_selected_stop_line_start_position = PositionButton(
-                self.toolbox.selected_stop_line_start_x, self.toolbox.selected_stop_line_start_y, self.toolbox
+                self.toolbox.selected_stop_line_start_x,
+                self.toolbox.selected_stop_line_start_y,
+                self.toolbox,
             )
             self.toolbox.button_selected_stop_line_end_position = PositionButton(
-                self.toolbox.selected_stop_line_end_x, self.toolbox.selected_stop_line_end_y, self.toolbox
+                self.toolbox.selected_stop_line_end_x,
+                self.toolbox.selected_stop_line_end_y,
+                self.toolbox,
             )
 
             self.toolbox.selected_lanelet_select_stop_line_position = QGridLayout()
@@ -304,7 +359,9 @@ class LaneletAttributesWidget:
                 self.toolbox.button_selected_stop_line_end_position, 2, 7
             )
 
-            self.toolbox.layout_stop_line.addRow(self.toolbox.selected_lanelet_select_stop_line_position)
+            self.toolbox.layout_stop_line.addRow(
+                self.toolbox.selected_lanelet_select_stop_line_position
+            )
             self.toolbox.selected_stop_line_select_position_checked_before = True
         else:
             self.toolbox.selected_stop_line_select_position_checked_before = False
@@ -328,7 +385,9 @@ class LaneletAttributesWidget:
         self.toolbox.selected_adjacent_right_direction = QButtonGroup()
         self.toolbox.selected_adjacent_right_same_direction = QRadioButton("same direction")
         self.toolbox.selected_adjacent_right_same_direction.setChecked(True)
-        self.toolbox.selected_adjacent_right_direction.addButton(self.toolbox.selected_adjacent_right_same_direction)
+        self.toolbox.selected_adjacent_right_direction.addButton(
+            self.toolbox.selected_adjacent_right_same_direction
+        )
         self.toolbox.selected_adjacent_right_opposite_direction = QRadioButton("opposite direct.")
         self.toolbox.selected_adjacent_right_opposite_direction.setToolTip("opposite direction")
         self.toolbox.selected_adjacent_right_opposite_direction.setChecked(False)
@@ -348,11 +407,15 @@ class LaneletAttributesWidget:
         self.toolbox.selected_adjacent_left_direction = QButtonGroup()
         self.toolbox.selected_adjacent_left_same_direction = QRadioButton("same direction")
         self.toolbox.selected_adjacent_left_same_direction.setChecked(True)
-        self.toolbox.selected_adjacent_left_direction.addButton(self.toolbox.selected_adjacent_left_same_direction)
+        self.toolbox.selected_adjacent_left_direction.addButton(
+            self.toolbox.selected_adjacent_left_same_direction
+        )
         self.toolbox.selected_adjacent_left_opposite_direction = QRadioButton("opposite direct.")
         self.toolbox.selected_adjacent_left_opposite_direction.setToolTip("opposite direction")
         self.toolbox.selected_adjacent_left_opposite_direction.setChecked(False)
-        self.toolbox.selected_adjacent_left_direction.addButton(self.toolbox.selected_adjacent_left_opposite_direction)
+        self.toolbox.selected_adjacent_left_direction.addButton(
+            self.toolbox.selected_adjacent_left_opposite_direction
+        )
 
         self.toolbox.selected_adjacent_left_direction_line = QGridLayout()
         self.toolbox.selected_adjacent_left_direction_line.addWidget(
@@ -416,9 +479,15 @@ class LaneletAttributesWidget:
 
         layout_advanced.addRow("Lanelet Types:", self.toolbox.selected_lanelet_type)
         layout_advanced.addRow("Users Oneway:", self.toolbox.selected_road_user_oneway)
-        layout_advanced.addRow("Users Bidirectional:", self.toolbox.selected_road_user_bidirectional)
-        layout_advanced.addRow("Traffic Sign IDs:", self.toolbox.selected_lanelet_referenced_traffic_sign_ids)
-        layout_advanced.addRow("Traffic Light IDs:", self.toolbox.selected_lanelet_referenced_traffic_light_ids)
+        layout_advanced.addRow(
+            "Users Bidirectional:", self.toolbox.selected_road_user_bidirectional
+        )
+        layout_advanced.addRow(
+            "Traffic Sign IDs:", self.toolbox.selected_lanelet_referenced_traffic_sign_ids
+        )
+        layout_advanced.addRow(
+            "Traffic Light IDs:", self.toolbox.selected_lanelet_referenced_traffic_light_ids
+        )
 
         self.toolbox.advanced_button = CollapsibleArrowBox(
             "Advanced", layout_advanced, layout_attributes, 10, self.toolbox.mwindow, self.toolbox

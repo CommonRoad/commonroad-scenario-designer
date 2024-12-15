@@ -7,6 +7,8 @@ This module provides custom types for an easier type description:
 from typing import List, Optional, Tuple
 
 # type to store information about a road
-Road_info = Tuple[int, int, int, bool, Optional[List[str]], Optional[List[str]], Optional[List[str]]]
+Road_info = Tuple[
+    int, int, int, bool, Optional[List[str]], Optional[List[str]], Optional[List[str]]
+]
 # type to store information about assumptions made
 Assumption_info = Tuple[bool, bool, bool]

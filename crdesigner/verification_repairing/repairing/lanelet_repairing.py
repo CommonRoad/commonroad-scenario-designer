@@ -323,7 +323,9 @@ class LaneletRepairing(ElementRepairing):
         left_vertices = lanelet.left_vertices
 
         if np.array_equal(right_vertices[-1], left_vertices[-1]):
-            right_vertices[-1] = right_vertices[-1] + (right_vertices[-2] - left_vertices[-2]) * 0.01
+            right_vertices[-1] = (
+                right_vertices[-1] + (right_vertices[-2] - left_vertices[-2]) * 0.01
+            )
             left_vertices[-1] = left_vertices[-1] + (left_vertices[-2] - right_vertices[-2]) * 0.01
         if np.array_equal(right_vertices[0], left_vertices[0]):
             right_vertices[0] = right_vertices[0] + (right_vertices[1] - left_vertices[1]) * 0.01
@@ -646,7 +648,10 @@ class LaneletRepairing(ElementRepairing):
         :param location: ID of invalid lanelet.
         """
         lanelet = self._network.find_lanelet_by_id(location[0])
-        lanelet.right_vertices, lanelet.left_vertices = lanelet.left_vertices, lanelet.right_vertices
+        lanelet.right_vertices, lanelet.left_vertices = (
+            lanelet.left_vertices,
+            lanelet.right_vertices,
+        )
         lanelet.center_vertices = (lanelet.left_vertices + lanelet.right_vertices) / 2
 
     def repair_conflicting_lanelet_directions(self, location: Tuple[int, int]):
@@ -656,7 +661,8 @@ class LaneletRepairing(ElementRepairing):
         :param location: IDs of the two invalid lanelets.
         """
         logging.error(
-            "repair_conflicting_lanelet_directions: " "Cannot be repaired automatically. Please contact developers."
+            "repair_conflicting_lanelet_directions: "
+            "Cannot be repaired automatically. Please contact developers."
         )
 
     def _find_relevant_stop_line_signs(self, stop_line: StopLine) -> Set[TrafficSign]:
@@ -683,7 +689,9 @@ class LaneletRepairing(ElementRepairing):
             if self._regulatory_element_close_to_stop_line(light.position, stop_line)
         }
 
-    def _regulatory_element_close_to_stop_line(self, position: np.ndarray, stop_line: StopLine) -> bool:
+    def _regulatory_element_close_to_stop_line(
+        self, position: np.ndarray, stop_line: StopLine
+    ) -> bool:
         """
         Evaluates whether stop line is close to a given position.
 
@@ -691,7 +699,12 @@ class LaneletRepairing(ElementRepairing):
         :param stop_line: Stop line
         :return: Boolean indicating whether position is close to stop line
         """
-        return min(np.linalg.norm(stop_line.start - position), np.linalg.norm(stop_line.end - position)) < 10
+        return (
+            min(
+                np.linalg.norm(stop_line.start - position), np.linalg.norm(stop_line.end - position)
+            )
+            < 10
+        )
 
     def _optimal_vertice(
         self,
@@ -723,7 +736,10 @@ class LaneletRepairing(ElementRepairing):
         left_vertex = fst_vertices[left_i]
         right_vertex = snd_vertices[right_i]
 
-        opt_vertex = [(left_vertex[0] + right_vertex[0]) / 2, (left_vertex[1] + right_vertex[1]) / 2]
+        opt_vertex = [
+            (left_vertex[0] + right_vertex[0]) / 2,
+            (left_vertex[1] + right_vertex[1]) / 2,
+        ]
 
         # check if the vertex is 3d
         if len(left_vertex) == 3:
@@ -847,12 +863,16 @@ class LaneletRepairing(ElementRepairing):
         lanelet_vertices = lanelet.left_vertices
         pred_suc_vertices = pred_suc.left_vertices
 
-        self._optimal_vertice(lanelet_id, pred_suc_id, lanelet_vertices, pred_suc_vertices, is_pred, not is_pred)
+        self._optimal_vertice(
+            lanelet_id, pred_suc_id, lanelet_vertices, pred_suc_vertices, is_pred, not is_pred
+        )
 
         lanelet_vertices = lanelet.right_vertices
         pred_suc_vertices = pred_suc.right_vertices
 
-        self._optimal_vertice(lanelet_id, pred_suc_id, lanelet_vertices, pred_suc_vertices, is_pred, not is_pred)
+        self._optimal_vertice(
+            lanelet_id, pred_suc_id, lanelet_vertices, pred_suc_vertices, is_pred, not is_pred
+        )
 
     def _repair_possible_predecessor_successor(self, location: Tuple[int, int], is_pred: bool):
         """
@@ -897,7 +917,9 @@ class LaneletRepairing(ElementRepairing):
                 init_end_vertex = intersected_vertices[vert_i + 1]
 
                 init_line = np.array([intersected_vertices[vert_i], init_end_vertex])
-                successive_line = np.array([intersected_vertices[vert_j], intersected_vertices[vert_j + 1]])
+                successive_line = np.array(
+                    [intersected_vertices[vert_j], intersected_vertices[vert_j + 1]]
+                )
 
                 excluded_points = []
                 if vert_i + 1 == vert_j:
@@ -913,12 +935,16 @@ class LaneletRepairing(ElementRepairing):
 
                 intersected_vertices = np.array(new_vertices)
 
-        non_intersecting_vertices = fill_number_of_vertices(intersected_vertices, origin_vertices_size)
+        non_intersecting_vertices = fill_number_of_vertices(
+            intersected_vertices, origin_vertices_size
+        )
 
         orientation = compute_orientation_from_polyline(
             non_intersecting_vertices[:, :2]
         )  # function only works with 2d vertices
-        orientation_dif = [abs(orientation[i + 1] - orientation[i]) for i in range(len(orientation) - 1)]
+        orientation_dif = [
+            abs(orientation[i + 1] - orientation[i]) for i in range(len(orientation) - 1)
+        ]
         while np.isclose(np.max(orientation_dif), np.pi, 0.01):
             idx = np.argmax(orientation_dif)
             non_intersecting_vertices[idx + 1] = (
@@ -927,7 +953,9 @@ class LaneletRepairing(ElementRepairing):
             orientation = compute_orientation_from_polyline(
                 non_intersecting_vertices[:, :2]
             )  # function only works with 2d vertices
-            orientation_dif = [orientation[i + 1] - orientation[i] for i in range(len(orientation) - 1)]
+            orientation_dif = [
+                orientation[i + 1] - orientation[i] for i in range(len(orientation) - 1)
+            ]
 
         if is_left:
             lanelet.left_vertices = non_intersecting_vertices
@@ -988,10 +1016,16 @@ class LaneletRepairing(ElementRepairing):
             avg_vertices = avg_vertices[::-1]
         adjacency_vertices[:] = avg_vertices
 
-        self._optimal_vertice(lanelet_id, adjacency_id, lanelet_vertices, adjacency_vertices, True, is_same)
-        self._optimal_vertice(lanelet_id, adjacency_id, lanelet_vertices, adjacency_vertices, False, not is_same)
+        self._optimal_vertice(
+            lanelet_id, adjacency_id, lanelet_vertices, adjacency_vertices, True, is_same
+        )
+        self._optimal_vertice(
+            lanelet_id, adjacency_id, lanelet_vertices, adjacency_vertices, False, not is_same
+        )
 
-    def _repair_connections_adjacency(self, location: Tuple[int, int], is_left_adj: bool, is_merging_adj: bool):
+    def _repair_connections_adjacency(
+        self, location: Tuple[int, int], is_left_adj: bool, is_merging_adj: bool
+    ):
         """
         Repairs connections_left_merging_adj, connections_right_merging_adj, connections_left_forking_adj,
         and connections_right_forking_adj. The affected connection points are averaged and equalized to lanelet
@@ -1009,11 +1043,15 @@ class LaneletRepairing(ElementRepairing):
 
         fst_vertices = lanelet.left_vertices
         snd_vertices = adjacency.left_vertices
-        self._optimal_vertice(lanelet_id, adjacency_id, fst_vertices, snd_vertices, not is_start, not is_start)
+        self._optimal_vertice(
+            lanelet_id, adjacency_id, fst_vertices, snd_vertices, not is_start, not is_start
+        )
 
         fst_vertices = lanelet.right_vertices
         snd_vertices = adjacency.right_vertices
-        self._optimal_vertice(lanelet_id, adjacency_id, fst_vertices, snd_vertices, not is_start, not is_start)
+        self._optimal_vertice(
+            lanelet_id, adjacency_id, fst_vertices, snd_vertices, not is_start, not is_start
+        )
 
         if is_left_adj:
             fst_vertices = lanelet.left_vertices
@@ -1021,7 +1059,9 @@ class LaneletRepairing(ElementRepairing):
         else:
             fst_vertices = lanelet.right_vertices
             snd_vertices = adjacency.left_vertices
-        self._optimal_vertice(lanelet_id, adjacency_id, fst_vertices, snd_vertices, is_start, is_start)
+        self._optimal_vertice(
+            lanelet_id, adjacency_id, fst_vertices, snd_vertices, is_start, is_start
+        )
 
     def _repair_possible_adjacency(self, location: Tuple[int, int], is_left: bool, is_same: bool):
         """

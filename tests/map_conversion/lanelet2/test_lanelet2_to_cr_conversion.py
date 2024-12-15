@@ -47,7 +47,10 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
                         os.remove(os.path.join(dir_path, file))
 
         if file_path is None:
-            file_path = os.path.dirname(os.path.realpath(__file__)) + f"/../test_maps/lanelet2/{osm_file_name}.osm"
+            file_path = (
+                os.path.dirname(os.path.realpath(__file__))
+                + f"/../test_maps/lanelet2/{osm_file_name}.osm"
+            )
 
         with open(
             file_path,
@@ -71,7 +74,8 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         translated = "" if not translate else "_translated"
 
         cr_file_path = (
-            os.path.dirname(os.path.realpath(__file__)) + f"/../test_maps/lanelet2/{xml_output_name}{translated}.xml"
+            os.path.dirname(os.path.realpath(__file__))
+            + f"/../test_maps/lanelet2/{xml_output_name}{translated}.xml"
         )
         with open(
             cr_file_path,
@@ -87,7 +91,9 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
                 source="CommonRoad Scenario Designer",
                 tags={Tag.URBAN, Tag.HIGHWAY},
             )
-            writer.write_to_file(get_tmp_dir() + xml_output_name + translated + ".xml", OverwriteExistingFile.ALWAYS)
+            writer.write_to_file(
+                get_tmp_dir() + xml_output_name + translated + ".xml", OverwriteExistingFile.ALWAYS
+            )
 
             # set same date so this won't change the comparison
             date = time.strftime("%Y-%m-%d", time.localtime())
@@ -136,4 +142,6 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         lanelet2_converted_file_path = f"{get_tmp_dir()}{lanelet2_converted_file_name}.osm"
         etree.ElementTree(lanelet2).write(lanelet2_converted_file_path, pretty_print=True)
 
-        self.assertTrue(self.compare_maps(lanelet2_file_name, file_path=lanelet2_converted_file_path))
+        self.assertTrue(
+            self.compare_maps(lanelet2_file_name, file_path=lanelet2_converted_file_path)
+        )
