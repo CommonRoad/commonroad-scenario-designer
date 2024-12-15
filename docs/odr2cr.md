@@ -1,9 +1,8 @@
 # OpenDRIVE to CommonRoad Conversion
-
-This conversion allows you to convert a road network description from the
-`OpenDRIVE format <https://www.asam.net/standards/detail/opendrive/>`_ to
-the `CommonRoad format <https://gitlab.lrz.de/tum-cps/commonroad-sc
-enarios/blob/master/documentation/XML_commonRoad_2020a.pdf>`_ (Version 2020a).
+This conversion allows you to convert a road network description from
+[OpenDRIVE format](https://www.asam.net/standards/detail/opendrive/)
+to the
+[CommonRoad (Version 2020a) format](https://gitlab.lrz.de/tum-cps/commonroad-scenarios/blob/master/documentation/XML_commonRoad_2020a.pdf).
 Its theoretical background is detailed in our paper:
 M. Althoff, S. Urban, and M. Koschi, "Automatic Conversion of Road Networks from OpenDRIVE to Lanelets,"
 in Proc. of the IEEE International Conference on Service Operations and Logistics, and Informatics, 2018
@@ -11,69 +10,20 @@ in Proc. of the IEEE International Conference on Service Operations and Logistic
 
 Since the release of the paper, various updates have been implemented in the code to enhance the converter.
 
-Quick Start Guide
-*****************
+## Usage
+The CommonRoad to Lanelet2 conversion can be used via:
 
-Command Line Interface
-========================
+- command line interface
+- GUI
+- Python API
 
-Want to quickly convert an XODR file detailing a OpenDRIVE scenario
-to a XML file with a CommonRoad scenario?
-
-Use the command
-``crdesigner map-convert-opendrive -i input-file.xodr -o output-file.xml``.
-
-.. note::
-   You have to activate the Python environment in which the CommonRoad Scenario Designer is
-   installed before using the command line.
-
-For example, ``crdesigner map-convert-opendrive -i test.xodr -o new_converted_file_name.xml``
-produces a file called *new_converted_file_name.xml*
-
-.. note::
-   If no output file name is specified, the converted file will be called input-file.xml,
-   e.g., ``crdesigner map-convert-opendrive -i test.xodr`` produces a file called *test.xml*.
-
-You can also use the GUI to convert an OpenDRIVE file.
-The GUI can be started from command line with ``crdesigner`` or ``crdesigner gui``.
+For the relevant GUI commands execute
+``crdesigner --help``.
+Tutorials on how to use the Python APIs can be found in our
+[GitHub repository](https://github.com/CommonRoad/commonroad-scenario-designer/tree/develop/tutorials/conversion_examples).
 
 
-Python API
-==========================================
-
-.. code:: python
-
-    from pathlib import Path
-    from commonroad.scenario.scenario import Tag
-    from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
-    from commonroad.planning.planning_problem import PlanningProblemSet
-
-    from crdesigner.config.opendrive_config import open_drive_config
-    from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
-
-    input_path = ""
-    output_path = ""
-    config = open_drive_config
-    config.lanelet_types_backwards_compatible = False
-
-    # load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
-    scenario = opendrive_to_commonroad(Path(input_path))
-
-    # store converted file as CommonRoad scenario
-    writer = CRDesignerFileWriter(
-        scenario=scenario,
-        planning_problem_set=PlanningProblemSet(),
-        author="Sebastian Maierhofer",
-        affiliation="Technical University of Munich",
-        source="CommonRoad Scenario Designer",
-        tags={Tag.URBAN},
-    )
-    writer.write_to_file(output_path, OverwriteExistingFile.ALWAYS)
-
-
-Implementation Details
-**********************
-
+## Implementation Details
 Subsequently, the parsing of an OpenDrive file to a Python object,
 the converting to a network of ``ParametricLane`` object and the
 conversion from parametric lanes to lanelets is explained.
@@ -84,8 +34,7 @@ The three main types of formats are:
 - `Lanelet format`: Lanelets are atomic, interconnected, and drivable road segments. A lanelet is defined by its left and right bound, where each bound is represented by an array of points.Two lanelets are called longitudinally adjacent, if the left and right start points of one lanelet are identical with the corresponding final points of the next lanelet in driving direction. The longitudinal, left, right, and empty adjacencies form a road network that can be modeled as a directed graph.
 - `Parametric lanes`: In OpenDRIVE, lanes are merged by gradually reducing their width to zero or split by gradually increasing the width from zero. In a lanelet network, the end points have to coincide with starting points of another lanelet so that splitting and merging is realized. To conveniently perform the conversion of merging and splitting, the concept of parametric lanes is used. These eliminate the dependency of each lane on its inner neighbor by specifying the borders with respect to the reference path. The following parameters are required for parametric lanes: 1 ) offset specifying distance from the beginning of the reference path of the considered section, 2) path length of the parametric lane, 3) inner and outer borders specified as distances to the reference path varying along the reference path.
 
-Code Structure
-==============
+### Code Structure
 Subsequently, we provide a simplified overview about the code structure (the presented code
 structure is not complete)::
 
@@ -112,25 +61,14 @@ structure is not complete)::
 - `conversion_lanelet.py`: Module to enhance lanelet class with helper functions for access/manipulation of various objects especially lanelet_ids, borders, width of lanes (s_pos), concatenate lanes, and adjacent lanes so it can be used for conversion from the opendrive format.
 - `conversion_lanelet_network.py`: Module to enhance LaneletNetwork class so it can be used for conversion from the OpenDRIVE format and further enable it to modify its lanelets.
 
+![l2flowchart](assets/opendrive/opendrive_flow_chart.png)
 
-.. _fig.layout-opendrive:
-.. figure:: images/opendrive_flow_chart.png
-   :alt: Layout of the CommonRoad Scenario Designer.
-   :name: fig:workflow
-   :align: center
-
-   OpenDRIVE conversion flow chart.
-
-
-Parsing OpenDRIVE
-==================
-
+### Parsing OpenDRIVE
 Parsing the OpenDRIVE xodr file is straightforward. We mirror the OpenDRIVE document
 with a Python class in this package. The XML is parsed and from the results an OpenDRIVE object is created.
 
 
-Converting to Network of ParametricLanes
-========================================
+### Converting to Network of ParametricLanes
 Every width section in OpenDRIVE gets converted into a ParametricLane and
 in turn every lane section gets converted into a ParametricLaneGroup which consists of multiple ParametricLanes.
 ParametricLanes have a ParametricLaneBorderGroup which has references to the left and right border of the
@@ -148,12 +86,9 @@ Each reference border is a border again, until the last reference border, which 
 a PlaneView object. This PlaneView consists of the basic geometries which constitute the reference path.
 
 
-Converting ParametricLanes to Lanelets
-======================================
+###  Converting ParametricLanes to Lanelets
 
-Challenge: Splitting and joining lanelets
-------------------------------------------
-
+#### Challenge: Splitting and joining lanelets
 As detailed in Figure 6 of the accompanying paper, if a lanelet splits from
 another lanelet (merge in the paper) or joins into another lanelet, an additional
 border has to be created, because the end points of the splitting or joining lanelet
@@ -169,8 +104,6 @@ The difficulty in determining the parameters used to calculate the new border wa
 - The joining/splitting of a border could extend over multiple, successive lanelets.
 - The joining/splitting lanelet has to be adjacent all the time to the lanelet it joins into or splits from, respectively.
 
-Smaller issues
---------------
-
+#### Smaller issues
 - If lanelets have zero width everywhere, they are discarded.
 - If a lanelet has an adjacent neighbor, and the successor of this neighbor and the lanelets successor are adjacent too, the lanelets and their successors can be each merged into one lanelet in most circumstances.

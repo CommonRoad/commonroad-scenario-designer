@@ -6,6 +6,7 @@ to the
 
 # Usage
 The CommonRoad to Lanelet2 conversion can be used via
+
 - command line interface
 - GUI
 - Python API
@@ -38,7 +39,6 @@ dictionaries are used which save the node-lanelet relation, e.g.,
 
 To get a better understanding of the conversion process, a flowchart of the function that
 transforms the WayRelation (Lanelet2/OSM format) to the Lanelet (CommonRoad format) is given below:
-
 ![l2flowchart](assets/lanelet2/Way_rel_to_lanelet_FLOWCHART.png)
 
 Both left and right ways of the WayRelation object have to be of the same size.

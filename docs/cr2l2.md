@@ -7,6 +7,7 @@ to the
 ## Usage
 
 The CommonRoad to Lanelet2 conversion can be used via
+
 - command line interface
 - GUI
 - Python API
