@@ -2,9 +2,9 @@
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
 [![PyPI version fury.io](https://badge.fury.io/py/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
 [![PyPI download week](https://img.shields.io/pypi/dw/commonroad-scenario-designer.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
-[![PyPI download month](https://img.shields.io/pypi/dm/commonroad-scenario-designer.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/commonroad-scenario-designer/)  
-![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)  
-[![PyPI license](https://img.shields.io/pypi/l/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)  
+[![PyPI download month](https://img.shields.io/pypi/dm/commonroad-scenario-designer.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+[![PyPI license](https://img.shields.io/pypi/l/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
 
 This toolbox provides map converters for [OpenStreetMap](https://www.openstreetmap.de/karte.html) (OSM),
 [Lanelet](https://www.mrt.kit.edu/software/libLanelet/libLanelet.html) / [Lanelet2](https://github.com/fzi-forschungszentrum-informatik/Lanelet2),
@@ -24,8 +24,8 @@ CommonRoad maps and scenarios.
 |    CR Scenario Designer GUI    |                 `crdesigner/ui/gui`                  |    Multi-functional GUI for map conversion and scenario creation/editing.    |
 
 ## Prerequisites and Installation
-We have tested the toolbox with Python 3.8, 3.9, and 3.10.
-The toolbox should work under Linux, macOS, and Windows.
+We have tested the toolbox with Python 3.9, 3.10, and 3.11.
+The toolbox works under Linux.
 Below we present two ways of installing the CommonRoad Scenario Designer:
 - Only using the CommonRoad Scenario Designer, e.g.,the GUI or integrating the scenario designer APIs into your code
 - Developing code for the CommonRoad Scenario Designer

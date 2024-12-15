@@ -14,7 +14,8 @@ nav:
   - Introduction: index.md
   - GUI: gui.md
   - Conversions:
-    - Lanelet2: lanelet2.md
-    - OpenDRIVE: open_drive.md
-    - OSM: osm.md
-    - SUMO: sumo.md
+    - CommonRoad to Lanelet2: cr2l2.md
+    - Lanelet2 to CommonRoad: l22cr.md
+    - OpenDRIVE to CommonRoad: odr2cr.md
+    - OpenStreetMap to CommonRoad: osm2cr.md
+    - SUMO to CommonRoad: sumo2cr.md

@@ -1,5 +1,4 @@
-OpenDRIVE to CommonRoad Conversion
-##################################
+# OpenDRIVE to CommonRoad Conversion
 
 This conversion allows you to convert a road network description from the
 `OpenDRIVE format <https://www.asam.net/standards/detail/opendrive/>`_ to
