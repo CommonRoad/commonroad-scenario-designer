@@ -89,7 +89,9 @@ class SettingsUI:
         self.label_settings_directory.setObjectName("label_settings_directory")
         self.label_settings_directory.setText(settings.CUSTOM_SETTINGS_DIR)
         self.label_settings_directory.setMinimumSize(500, 40)
-        settings.get_attribute("CUSTOM_SETTINGS_DIR").subscribe(self.label_settings_directory.setText)
+        settings.get_attribute("CUSTOM_SETTINGS_DIR").subscribe(
+            self.label_settings_directory.setText
+        )
 
         # create directory selection layout
         self.frameLayout.addItem(spacer_fixed)
@@ -131,22 +133,42 @@ class SettingsUI:
         p = QtGui.QPalette()
 
         # set colors for settings window
-        p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.mwindow.colorscheme().background))
-        p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.mwindow.colorscheme().second_background))
-        p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.colorscheme().background))
-        p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.mwindow.colorscheme().color))
+        p.setColor(
+            QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.mwindow.colorscheme().background)
+        )
+        p.setColor(
+            QtGui.QPalette.ColorRole.Base,
+            QtGui.QColor(self.mwindow.colorscheme().second_background),
+        )
+        p.setColor(
+            QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.colorscheme().background)
+        )
+        p.setColor(
+            QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.mwindow.colorscheme().color)
+        )
         p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(self.mwindow.colorscheme().color))
-        p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.mwindow.colorscheme().color))
-        p.setColor(QtGui.QPalette.ColorRole.Link, QtGui.QColor(self.mwindow.colorscheme().background))
+        p.setColor(
+            QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.mwindow.colorscheme().color)
+        )
+        p.setColor(
+            QtGui.QPalette.ColorRole.Link, QtGui.QColor(self.mwindow.colorscheme().background)
+        )
 
         # set colors for tab bar
         self.settings.setPalette(p)
 
         # set colors for elements
-        p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.colorscheme().highlight))
+        p.setColor(
+            QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.colorscheme().highlight)
+        )
         # TODO Find solution in pyqt6
-        p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.mwindow.colorscheme().highlight_text))
-        p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.mwindow.colorscheme().highlight_text))
+        p.setColor(
+            QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.mwindow.colorscheme().highlight_text)
+        )
+        p.setColor(
+            QtGui.QPalette.ColorRole.ButtonText,
+            QtGui.QColor(self.mwindow.colorscheme().highlight_text),
+        )
 
         # set colors for buttons
         self.tabBar.setPalette(p)

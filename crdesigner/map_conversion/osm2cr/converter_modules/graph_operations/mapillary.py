@@ -56,7 +56,11 @@ def get_mappilary_traffic_signs(bbox: Bbox):
 
         feature_list = response["features"]
         signs = [
-            [feature["properties"]["value"], feature["geometry"]["coordinates"], feature["properties"]["direction"]]
+            [
+                feature["properties"]["value"],
+                feature["geometry"]["coordinates"],
+                feature["properties"]["direction"],
+            ]
             for feature in feature_list
         ]
         return signs
@@ -78,7 +82,9 @@ def add_mapillary_signs_to_graph(graph: Graph):
     """
 
     # graph bounds are not ordered as mapillary API expects it and need to be rearranged
-    bbox = Bbox(graph.bounds.lon_min, graph.bounds.lat_min, graph.bounds.lon_max, graph.bounds.lat_max)
+    bbox = Bbox(
+        graph.bounds.lon_min, graph.bounds.lat_min, graph.bounds.lon_max, graph.bounds.lat_max
+    )
     # retrieve traffic signs from given bbox
     signs = get_mappilary_traffic_signs(bbox)
     if signs is not None:

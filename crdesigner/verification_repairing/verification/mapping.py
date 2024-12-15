@@ -16,7 +16,10 @@ class Mapping(ABC):
     """
 
     def __init__(
-        self, network: LaneletNetwork, config: MapVerParams = MapVerParams(), scenario_id: ScenarioID = ScenarioID()
+        self,
+        network: LaneletNetwork,
+        config: MapVerParams = MapVerParams(),
+        scenario_id: ScenarioID = ScenarioID(),
     ):
         """
         Constructor.
@@ -26,7 +29,11 @@ class Mapping(ABC):
         :param scenario_id: ScenarioID.
         """
         self._complete_map_name = (
-            str(scenario_id.country_id) + "_" + str(scenario_id.map_name) + "-" + str(scenario_id.map_id)
+            str(scenario_id.country_id)
+            + "_"
+            + str(scenario_id.map_name)
+            + "-"
+            + str(scenario_id.map_id)
         )
         self._network = network
         self._config = config
@@ -74,12 +81,16 @@ class Preprocessing(ABC):
                 if lan.adj_left is not None:
                     adj = self._network.find_lanelet_by_id(lan.adj_left)
                     if adj is not None:
-                        left_adj_type = self.identify_adj_type(lan, adj, True, lan.adj_left_same_direction)
+                        left_adj_type = self.identify_adj_type(
+                            lan, adj, True, lan.adj_left_same_direction
+                        )
                 right_adj_type = None
                 if lan.adj_right is not None:
                     adj = self._network.find_lanelet_by_id(lan.adj_right)
                     if adj is not None:
-                        right_adj_type = self.identify_adj_type(lan, adj, False, lan.adj_right_same_direction)
+                        right_adj_type = self.identify_adj_type(
+                            lan, adj, False, lan.adj_right_same_direction
+                        )
 
                 self._adjacency_types.update({lan.lanelet_id: (left_adj_type, right_adj_type)})
 
@@ -97,10 +108,16 @@ class Preprocessing(ABC):
 
             id_count = 0
             for lanelet in self._network.lanelets:
-                for vertices in [lanelet.left_vertices, lanelet.right_vertices, lanelet.center_vertices]:
+                for vertices in [
+                    lanelet.left_vertices,
+                    lanelet.right_vertices,
+                    lanelet.center_vertices,
+                ]:
                     new_poly = True
                     for poly_id, polylines in self._similar_polylines.items():
-                        if len(polylines) > 0 and self.are_similar_polylines(vertices, polylines[0]):
+                        if len(polylines) > 0 and self.are_similar_polylines(
+                            vertices, polylines[0]
+                        ):
                             new_poly = False
                             polylines.append(vertices)
                             continue
@@ -212,7 +229,9 @@ class Preprocessing(ABC):
             adjs = []
             adj_id = lanelet.adj_left if is_left else lanelet.adj_right
 
-            valid_dir = lanelet.adj_left_same_direction if is_left else lanelet.adj_right_same_direction
+            valid_dir = (
+                lanelet.adj_left_same_direction if is_left else lanelet.adj_right_same_direction
+            )
             while adj_id is not None:
                 if adj_id in adjs:
                     break
@@ -233,7 +252,9 @@ class Preprocessing(ABC):
                     else:
                         adj_id = adj.adj_left
 
-                if (is_left and not adj.adj_left_same_direction) or (not is_left and not adj.adj_right_same_direction):
+                if (is_left and not adj.adj_left_same_direction) or (
+                    not is_left and not adj.adj_right_same_direction
+                ):
                     valid_dir = False
 
             adjacencies.update({lanelet.lanelet_id: adjs})

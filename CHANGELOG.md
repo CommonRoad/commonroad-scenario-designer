@@ -4,9 +4,12 @@
 
 ### Added
 - odr2cr: Left-hand drive consideration
+- pre-commit hook
 
 ### Changed
 - map-conversion: Interfaces can consider string and Path objects
+- mkdocs for docu
+- ruff for formatting
 
 ### Fixed
 - cr2sumo: Trajectory conversion assigned non-existent edges to routes
@@ -79,7 +82,7 @@
 - Adding existing obstacles again
 - Selecting obstacles with set-based prediction
 - Bug when editing curved lanelets in the canvas
-- lanelet2cr wrong final vertices assignment 
+- lanelet2cr wrong final vertices assignment
 - Deleting unreferenced traffic signs/lights after deleting lanelet
 - Map verification/repairing: Checking unique ID of traffic light cycle element
 - Consider x-, y-translation for cr2lanelet conversion (and vice versa)
@@ -172,7 +175,7 @@
 
 ### Changed
 - Default matplotlib area
-- Generalized traffic sign conversion 
+- Generalized traffic sign conversion
 - Lanelet2 to CommonRoad conversion: Generalize traffic sign conversion
 - Packaging using poetry
 
@@ -213,7 +216,7 @@
 
 ### Fixed
 - Preventing GUI crash when adding obstacle without existing scenario
-- Conversion of straight euler spiral 
+- Conversion of straight euler spiral
 - Floating point error in computation of Cartesian points of lane border in OpenDRIVE2CR conversion
 - Various small bug fixes
 

@@ -42,7 +42,15 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
         :return:
         """
         super().__init__(
-            scenario, planning_problem_set, author, affiliation, source, tags, location, decimal_precision, file_format
+            scenario,
+            planning_problem_set,
+            author,
+            affiliation,
+            source,
+            tags,
+            location,
+            decimal_precision,
+            file_format,
         )
         # map verification parameters
         self._mapver_params = MapVerParams()
@@ -86,11 +94,13 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
             proj_string_from = self._file_writer.scenario.location.geo_transformation.geo_reference
             # If no source projection is defined in the scenario location element, we should skip the projection
             if proj_string_from is not None:
-                self._file_writer.scenario, self._file_writer.planning_problem_set = project_scenario_and_pps(
-                    self._file_writer.scenario,
-                    self._file_writer.planning_problem_set,
-                    proj_string_from,
-                    target_projection,
+                self._file_writer.scenario, self._file_writer.planning_problem_set = (
+                    project_scenario_and_pps(
+                        self._file_writer.scenario,
+                        self._file_writer.planning_problem_set,
+                        proj_string_from,
+                        target_projection,
+                    )
                 )
 
         # check for verifying and repairing the scenario

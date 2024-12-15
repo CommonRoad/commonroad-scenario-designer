@@ -33,7 +33,9 @@ Path_T = Union[str, Path]
 
 
 def lanelet_to_commonroad(
-    input_file: Path_T, general_conf: general_config = general_config, lanelet2_conf: lanelet2_config = lanelet2_config
+    input_file: Path_T,
+    general_conf: general_config = general_config,
+    lanelet2_conf: lanelet2_config = lanelet2_config,
 ) -> Scenario:
     """
     Converts lanelet/lanelet2 file to CommonRoad
@@ -52,7 +54,9 @@ def lanelet_to_commonroad(
     return scenario
 
 
-def commonroad_to_lanelet(input_file: Path_T, output_name: str, config: lanelet2_config = lanelet2_config):
+def commonroad_to_lanelet(
+    input_file: Path_T, output_name: str, config: lanelet2_config = lanelet2_config
+):
     """
     Converts CommonRoad map to lanelet format
 
@@ -72,11 +76,15 @@ def commonroad_to_lanelet(input_file: Path_T, output_name: str, config: lanelet2
     l2osm = CR2LaneletConverter(config=config)
     osm = l2osm(scenario)
     with open(f"{output_name}", "wb") as file_out:
-        file_out.write(etree.tostring(osm, xml_declaration=True, encoding="UTF-8", pretty_print=True))
+        file_out.write(
+            etree.tostring(osm, xml_declaration=True, encoding="UTF-8", pretty_print=True)
+        )
 
 
 def opendrive_to_commonroad(
-    input_file: Path_T, general_conf: general_config = general_config, odr_conf: open_drive_config = open_drive_config
+    input_file: Path_T,
+    general_conf: general_config = general_config,
+    odr_conf: open_drive_config = open_drive_config,
 ) -> Scenario:
     """
     Converts OpenDRIVE file to CommonRoad
@@ -207,4 +215,6 @@ def opendrive_to_lanelet(
     l2osm = CR2LaneletConverter(config=lanelet2_config)
     osm = l2osm(scenario)
     with open(f"{output_file}", "wb") as file_out:
-        file_out.write(etree.tostring(osm, xml_declaration=True, encoding="UTF-8", pretty_print=True))
+        file_out.write(
+            etree.tostring(osm, xml_declaration=True, encoding="UTF-8", pretty_print=True)
+        )

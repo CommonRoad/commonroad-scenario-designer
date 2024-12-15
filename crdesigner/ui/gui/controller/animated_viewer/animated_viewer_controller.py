@@ -31,10 +31,18 @@ def extract_plot_limits(lanelet_network: LaneletNetwork) -> Optional[List[float]
     """
     margin = 50
     if len(lanelet_network.lanelets) > 0:
-        x_lanelet_left = [point[0] for lanelet in lanelet_network.lanelets for point in lanelet.left_vertices]
-        y_lanelet_left = [point[1] for lanelet in lanelet_network.lanelets for point in lanelet.left_vertices]
-        x_lanelet_right = [point[0] for lanelet in lanelet_network.lanelets for point in lanelet.right_vertices]
-        y_lanelet_right = [point[1] for lanelet in lanelet_network.lanelets for point in lanelet.right_vertices]
+        x_lanelet_left = [
+            point[0] for lanelet in lanelet_network.lanelets for point in lanelet.left_vertices
+        ]
+        y_lanelet_left = [
+            point[1] for lanelet in lanelet_network.lanelets for point in lanelet.left_vertices
+        ]
+        x_lanelet_right = [
+            point[0] for lanelet in lanelet_network.lanelets for point in lanelet.right_vertices
+        ]
+        y_lanelet_right = [
+            point[1] for lanelet in lanelet_network.lanelets for point in lanelet.right_vertices
+        ]
 
         x_min = min(x_lanelet_left + x_lanelet_right) - margin
         y_min = min(y_lanelet_left + y_lanelet_right) - margin
@@ -79,7 +87,9 @@ class AnimatedViewerController:
         :param config: [description], defaults to None
         :param planning_problem_set: des,
         """
-        self.dynamic.initial_parameter_config_done = False  # reset so that for any map the parameters are set correctly
+        self.dynamic.initial_parameter_config_done = (
+            False  # reset so that for any map the parameters are set correctly
+        )
         # safe here the original scenario -> this is needed for zooming in / out and for moving around
 
         self.original_lanelet_network = LaneletNetwork.create_from_lanelet_network(
@@ -107,7 +117,9 @@ class AnimatedViewerController:
             self.time_step.value = 0
 
         if new_file_added:
-            self.update_plot(clear_artists=True, new_file_added=new_file_added, plot_limits=plot_limits)
+            self.update_plot(
+                clear_artists=True, new_file_added=new_file_added, plot_limits=plot_limits
+            )
 
     def _init_animation(self):
         if not self.scenario_model.scenario_created():
@@ -139,9 +151,12 @@ class AnimatedViewerController:
             )
             warning_dialog.close()
 
-        assert start <= end, "<video/create_scenario_video> time_begin=%i needs to smaller than time_end=%i." % (
-            start,
-            end,
+        assert start <= end, (
+            "<video/create_scenario_video> time_begin=%i needs to smaller than time_end=%i."
+            % (
+                start,
+                end,
+            )
         )
 
         def draw_frame(draw_params):
@@ -165,7 +180,9 @@ class AnimatedViewerController:
         # Interval determines the duration of each frame in ms
         interval = 1000 * dt
         self.dynamic.clear_axes(keep_limits=True)
-        self.animation = FuncAnimation(self.dynamic.figure, draw_frame, blit=False, interval=interval, repeat=True)
+        self.animation = FuncAnimation(
+            self.dynamic.figure, draw_frame, blit=False, interval=interval, repeat=True
+        )
 
     def play(self):
         """plays the animation if existing"""
@@ -209,10 +226,13 @@ class AnimatedViewerController:
                 QMessageBox.about(
                     None,
                     "Information",
-                    "Exporting the video will take few minutes, please wait " "until process is finished!",
+                    "Exporting the video will take few minutes, please wait "
+                    "until process is finished!",
                 )
                 rnd.create_video(
-                    [self.scenario_model.get_current_scenario()], path, draw_params=self.dynamic.draw_params
+                    [self.scenario_model.get_current_scenario()],
+                    path,
+                    draw_params=self.dynamic.draw_params,
                 )
                 print("finished")
         except IOError as e:
@@ -297,7 +317,9 @@ class AnimatedViewerController:
         self.dynamic.draw_scenario(self.pps_model.get_selected_pp(), time_begin=time_begin)
 
         for lanelet in self.scenario_model.get_lanelets():
-            color, alpha, zorder, label = self.get_paint_parameters(lanelet, sel_lanelets, sel_intersection)
+            color, alpha, zorder, label = self.get_paint_parameters(
+                lanelet, sel_lanelets, sel_intersection
+            )
             if color == "gray":
                 continue
 
@@ -320,7 +342,9 @@ class AnimatedViewerController:
             self.dynamic.set_limits([x_lim[0], x_lim[1], y_lim[0], y_lim[1]])
             self.dynamic.draw_idle()
 
-    def get_paint_parameters(self, lanelet: Lanelet, selected_lanelets: Lanelet, selected_intersection: Intersection):
+    def get_paint_parameters(
+        self, lanelet: Lanelet, selected_lanelets: Lanelet, selected_intersection: Intersection
+    ):
         """
         Return the parameters for painting a lanelet regarding the selected lanelet.
         """
@@ -340,18 +364,24 @@ class AnimatedViewerController:
                     color = "purple"
                     alpha = 0.5
                     zorder = 10
-                    label = "{} predecessor and successor of {}".format(lanelet.lanelet_id, selected_lanelet.lanelet_id)
+                    label = "{} predecessor and successor of {}".format(
+                        lanelet.lanelet_id, selected_lanelet.lanelet_id
+                    )
 
                 elif lanelet.lanelet_id in selected_lanelet.predecessor:
                     color = "blue"
                     alpha = 0.5
                     zorder = 10
-                    label = "{} predecessor of {}".format(lanelet.lanelet_id, selected_lanelet.lanelet_id)
+                    label = "{} predecessor of {}".format(
+                        lanelet.lanelet_id, selected_lanelet.lanelet_id
+                    )
                 elif lanelet.lanelet_id in selected_lanelet.successor:
                     color = "green"
                     alpha = 0.5
                     zorder = 10
-                    label = "{} successor of {}".format(lanelet.lanelet_id, selected_lanelet.lanelet_id)
+                    label = "{} successor of {}".format(
+                        lanelet.lanelet_id, selected_lanelet.lanelet_id
+                    )
                 elif lanelet.lanelet_id == selected_lanelet.adj_left:
                     color = "yellow"
                     alpha = 0.5

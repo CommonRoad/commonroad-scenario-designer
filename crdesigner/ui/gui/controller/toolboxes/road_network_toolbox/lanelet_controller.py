@@ -25,7 +25,10 @@ from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_
 
 class AddLaneletController:
     def __init__(
-        self, road_network_controller, scenario_model: ScenarioModel, road_network_toolbox_ui: RoadNetworkToolboxUI
+        self,
+        road_network_controller,
+        scenario_model: ScenarioModel,
+        road_network_toolbox_ui: RoadNetworkToolboxUI,
     ):
         self.scenario_model = scenario_model
         self.road_network_toolbox_ui = road_network_toolbox_ui
@@ -35,19 +38,25 @@ class AddLaneletController:
     def lanelet_selection_changed(self):
         selected_lanelet = self.selected_lanelet()
         if selected_lanelet is not None:
-            self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
+            self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+                False
+            )
             self.road_network_controller.selection_changed_callback(sel_lanelets=selected_lanelet)
             self.lanelet_ui.update_lanelet_information(selected_lanelet)
 
     def connect_gui_lanelet(self):
         self.road_network_toolbox_ui.button_add_lanelet.clicked.connect(lambda: self.add_lanelet())
-        self.road_network_toolbox_ui.button_update_lanelet.clicked.connect(lambda: self.update_lanelet())
+        self.road_network_toolbox_ui.button_update_lanelet.clicked.connect(
+            lambda: self.update_lanelet()
+        )
         self.road_network_toolbox_ui.selected_lanelet_update.currentIndexChanged.connect(
             lambda: self.lanelet_selection_changed()
         )
 
         # Lanelet buttons
-        self.road_network_toolbox_ui.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
+        self.road_network_toolbox_ui.button_remove_lanelet.clicked.connect(
+            lambda: self.remove_lanelet()
+        )
         self.road_network_toolbox_ui.button_attach_to_other_lanelet.clicked.connect(
             lambda: self.attach_to_other_lanelet()
         )
@@ -71,14 +80,29 @@ class AddLaneletController:
             )
         )
 
-        self.road_network_toolbox_ui.button_create_adjacent.clicked.connect(lambda: self.create_adjacent())
-        self.road_network_toolbox_ui.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
-        self.road_network_toolbox_ui.button_rotate_lanelet.clicked.connect(lambda: self.rotate_lanelet())
-        self.road_network_toolbox_ui.button_translate_lanelet.clicked.connect(lambda: self.translate_lanelet())
-        self.road_network_toolbox_ui.button_merge_lanelets.clicked.connect(lambda: self.merge_with_successor())
+        self.road_network_toolbox_ui.button_create_adjacent.clicked.connect(
+            lambda: self.create_adjacent()
+        )
+        self.road_network_toolbox_ui.button_connect_lanelets.clicked.connect(
+            lambda: self.connect_lanelets()
+        )
+        self.road_network_toolbox_ui.button_rotate_lanelet.clicked.connect(
+            lambda: self.rotate_lanelet()
+        )
+        self.road_network_toolbox_ui.button_translate_lanelet.clicked.connect(
+            lambda: self.translate_lanelet()
+        )
+        self.road_network_toolbox_ui.button_merge_lanelets.clicked.connect(
+            lambda: self.merge_with_successor()
+        )
 
     @logger.log
-    def add_lanelet(self, lanelet_id: int = None, left_vertices: np.array = None, right_vertices: np.array = None):
+    def add_lanelet(
+        self,
+        lanelet_id: int = None,
+        left_vertices: np.array = None,
+        right_vertices: np.array = None,
+    ):
         """
         Adds a lanelet to the scenario based on the selected parameters by the user.
 
@@ -104,32 +128,53 @@ class AddLaneletController:
             self.road_network_controller.text_browser.append("Please select an adding option.")
             return
 
-        predecessors = [int(pre) for pre in self.road_network_toolbox_ui.predecessors.get_checked_items()]
-        successors = [int(suc) for suc in self.road_network_toolbox_ui.successors.get_checked_items()]
+        predecessors = [
+            int(pre) for pre in self.road_network_toolbox_ui.predecessors.get_checked_items()
+        ]
+        successors = [
+            int(suc) for suc in self.road_network_toolbox_ui.successors.get_checked_items()
+        ]
 
         place_at_position = self.road_network_toolbox_ui.place_at_position.isChecked()
-        connect_to_last_selection = self.road_network_toolbox_ui.connect_to_previous_selection.isChecked()
-        connect_to_predecessors_selection = self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked()
-        connect_to_successors_selection = self.road_network_toolbox_ui.connect_to_successors_selection.isChecked()
+        connect_to_last_selection = (
+            self.road_network_toolbox_ui.connect_to_previous_selection.isChecked()
+        )
+        connect_to_predecessors_selection = (
+            self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked()
+        )
+        connect_to_successors_selection = (
+            self.road_network_toolbox_ui.connect_to_successors_selection.isChecked()
+        )
 
         if connect_to_last_selection and self.road_network_controller.last_added_lanelet_id is None:
             self.road_network_controller.text_browser.append(
-                "__Warning__: Previously add lanelet does not exist anymore. " "Change lanelet adding option."
+                "__Warning__: Previously add lanelet does not exist anymore. "
+                "Change lanelet adding option."
             )
             return
         if connect_to_predecessors_selection and len(predecessors) == 0:
-            self.road_network_controller.text_browser.append("__Warning__: No predecessors are selected.")
+            self.road_network_controller.text_browser.append(
+                "__Warning__: No predecessors are selected."
+            )
             return
         if connect_to_successors_selection and len(successors) == 0:
-            self.road_network_controller.text_browser.append("__Warning__: No successors are selected.")
+            self.road_network_controller.text_browser.append(
+                "__Warning__: No successors are selected."
+            )
             return
 
         lanelet_start_pos_x = self.get_x_position_lanelet_start(False)
         lanelet_start_pos_y = self.get_y_position_lanelet_start(False)
 
-        lanelet_width = self.road_network_controller.get_float(self.road_network_toolbox_ui.lanelet_width)
-        line_marking_left = LineMarking(self.road_network_toolbox_ui.line_marking_left.currentText())
-        line_marking_right = LineMarking(self.road_network_toolbox_ui.line_marking_right.currentText())
+        lanelet_width = self.road_network_controller.get_float(
+            self.road_network_toolbox_ui.lanelet_width
+        )
+        line_marking_left = LineMarking(
+            self.road_network_toolbox_ui.line_marking_left.currentText()
+        )
+        line_marking_right = LineMarking(
+            self.road_network_toolbox_ui.line_marking_right.currentText()
+        )
         num_vertices = int(self.road_network_toolbox_ui.number_vertices.text())
         adjacent_left = (
             int(self.road_network_toolbox_ui.adjacent_left.currentText())
@@ -141,10 +186,16 @@ class AddLaneletController:
             if self.road_network_toolbox_ui.adjacent_right.currentText() != "None"
             else None
         )
-        adjacent_left_same_direction = self.road_network_toolbox_ui.adjacent_left_same_direction.isChecked()
-        adjacent_right_same_direction = self.road_network_toolbox_ui.adjacent_right_same_direction.isChecked()
+        adjacent_left_same_direction = (
+            self.road_network_toolbox_ui.adjacent_left_same_direction.isChecked()
+        )
+        adjacent_right_same_direction = (
+            self.road_network_toolbox_ui.adjacent_right_same_direction.isChecked()
+        )
         lanelet_type = {
-            LaneletType(ty) for ty in self.road_network_toolbox_ui.lanelet_type.get_checked_items() if ty != "None"
+            LaneletType(ty)
+            for ty in self.road_network_toolbox_ui.lanelet_type.get_checked_items()
+            if ty != "None"
         }
         user_one_way = {
             RoadUser(user)
@@ -158,7 +209,8 @@ class AddLaneletController:
         }
 
         traffic_signs = {
-            int(sign) for sign in self.road_network_toolbox_ui.lanelet_referenced_traffic_sign_ids.get_checked_items()
+            int(sign)
+            for sign in self.road_network_toolbox_ui.lanelet_referenced_traffic_sign_ids.get_checked_items()
         }
         traffic_lights = {
             int(light)
@@ -168,21 +220,35 @@ class AddLaneletController:
             if self.road_network_toolbox_ui.stop_line_beginning.isChecked():
                 stop_line_at_end = False
                 stop_line_at_beginning = True
-                stop_line_marking = LineMarking(self.road_network_toolbox_ui.line_marking_stop_line.currentText())
-                stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())
+                stop_line_marking = LineMarking(
+                    self.road_network_toolbox_ui.line_marking_stop_line.currentText()
+                )
+                stop_line = StopLine(
+                    np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set()
+                )
             elif self.road_network_toolbox_ui.stop_line_end.isChecked():
                 stop_line_at_end = True
                 stop_line_at_beginning = False
-                stop_line_marking = LineMarking(self.road_network_toolbox_ui.line_marking_stop_line.currentText())
-                stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())
+                stop_line_marking = LineMarking(
+                    self.road_network_toolbox_ui.line_marking_stop_line.currentText()
+                )
+                stop_line = StopLine(
+                    np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set()
+                )
         else:
             stop_line_at_end = False
             stop_line_at_beginning = False
             stop_line = None
 
-        lanelet_length = self.road_network_controller.get_float(self.road_network_toolbox_ui.lanelet_length)
-        lanelet_radius = self.road_network_controller.get_float(self.road_network_toolbox_ui.lanelet_radius)
-        lanelet_angle = np.deg2rad(self.road_network_controller.get_float(self.road_network_toolbox_ui.lanelet_angle))
+        lanelet_length = self.road_network_controller.get_float(
+            self.road_network_toolbox_ui.lanelet_length
+        )
+        lanelet_radius = self.road_network_controller.get_float(
+            self.road_network_toolbox_ui.lanelet_radius
+        )
+        lanelet_angle = np.deg2rad(
+            self.road_network_controller.get_float(self.road_network_toolbox_ui.lanelet_angle)
+        )
         add_curved_selection = self.road_network_toolbox_ui.curved_check_button.button.isChecked()
 
         if lanelet_id is None:
@@ -236,16 +302,24 @@ class AddLaneletController:
             )
 
         if connect_to_last_selection:
-            last_lanelet = self.scenario_model.find_lanelet_by_id(self.road_network_controller.last_added_lanelet_id)
+            last_lanelet = self.scenario_model.find_lanelet_by_id(
+                self.road_network_controller.last_added_lanelet_id
+            )
             lanelet.translate_rotate(
-                np.array([last_lanelet.center_vertices[-1][0], last_lanelet.center_vertices[-1][1]]), 0
+                np.array(
+                    [last_lanelet.center_vertices[-1][0], last_lanelet.center_vertices[-1][1]]
+                ),
+                0,
             )
             MapCreator.fit_to_predecessor(last_lanelet, lanelet)
         elif connect_to_predecessors_selection:
             if len(predecessors) > 0:
                 predecessor = self.scenario_model.find_lanelet_by_id(predecessors[0])
                 lanelet.translate_rotate(
-                    np.array([predecessor.center_vertices[-1][0], predecessor.center_vertices[-1][1]]), 0
+                    np.array(
+                        [predecessor.center_vertices[-1][0], predecessor.center_vertices[-1][1]]
+                    ),
+                    0,
                 )
                 MapCreator.fit_to_predecessor(predecessor, lanelet)
         elif connect_to_successors_selection:
@@ -262,7 +336,10 @@ class AddLaneletController:
             if not self.road_network_toolbox_ui.horizontal.isChecked():
                 if self.road_network_toolbox_ui.select_end_position.isChecked():
                     rotation_angle = math.degrees(
-                        math.asin((self.get_y_position_lanelet_end() - lanelet_start_pos_y) / lanelet_length)
+                        math.asin(
+                            (self.get_y_position_lanelet_end() - lanelet_start_pos_y)
+                            / lanelet_length
+                        )
                     )
                     # convert rotation_angle to positive angle since translate_rotate function only expects positive
                     # angle
@@ -295,7 +372,9 @@ class AddLaneletController:
 
         self.scenario_model.add_lanelet(lanelet)
         self.road_network_controller.initialize_road_network_toolbox()
-        self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
+        self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+            False
+        )
 
     @logger.log
     def update_lanelet(self, new_lanelet: Optional[Lanelet] = None):
@@ -319,7 +398,9 @@ class AddLaneletController:
         self.road_network_controller.updated_lanelet = True
         self.scenario_model.update_lanelet(selected_lanelet, new_lanelet)
         self.road_network_controller.set_default_road_network_list_information()
-        self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
+        self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+            False
+        )
 
     def update_lanelet_information(self, lanelet) -> Lanelet:
         """
@@ -330,13 +411,18 @@ class AddLaneletController:
          :return: Lanelet with the updsted params
         """
         if self.lanelet_ui.lanelet_has_constant_curvature(lanelet):
-            return self.add_editable_updated_lanelet(lanelet.lanelet_id, lanelet.left_vertices, lanelet.right_vertices)
+            return self.add_editable_updated_lanelet(
+                lanelet.lanelet_id, lanelet.left_vertices, lanelet.right_vertices
+            )
 
         lanelet = copy.deepcopy(lanelet)
         lanelet.predecessor = [
-            int(pre) for pre in self.road_network_toolbox_ui.selected_predecessors.get_checked_items()
+            int(pre)
+            for pre in self.road_network_toolbox_ui.selected_predecessors.get_checked_items()
         ]
-        lanelet.successor = [int(suc) for suc in self.road_network_toolbox_ui.selected_successors.get_checked_items()]
+        lanelet.successor = [
+            int(suc) for suc in self.road_network_toolbox_ui.selected_successors.get_checked_items()
+        ]
 
         lanelet.line_marking_left_vertices = LineMarking(
             self.road_network_toolbox_ui.selected_line_marking_left.currentText()
@@ -354,7 +440,9 @@ class AddLaneletController:
             if self.road_network_toolbox_ui.selected_adjacent_right.currentText() != "None"
             else None
         )
-        lanelet.adj_left_same_direction = self.road_network_toolbox_ui.selected_adjacent_left_same_direction.isChecked()
+        lanelet.adj_left_same_direction = (
+            self.road_network_toolbox_ui.selected_adjacent_left_same_direction.isChecked()
+        )
         lanelet.adj_right_same_direction = (
             self.road_network_toolbox_ui.selected_adjacent_right_same_direction.isChecked()
         )
@@ -390,14 +478,22 @@ class AddLaneletController:
                         self.road_network_toolbox_ui.selected_line_marking_stop_line.currentText()
                     )
                     lanelet.stop_line = StopLine(
-                        lanelet.left_vertices[0], lanelet.right_vertices[0], stop_line_marking, set(), set()
+                        lanelet.left_vertices[0],
+                        lanelet.right_vertices[0],
+                        stop_line_marking,
+                        set(),
+                        set(),
                     )
                 elif self.road_network_toolbox_ui.selected_stop_line_end.isChecked():
                     stop_line_marking = LineMarking(
                         self.road_network_toolbox_ui.selected_line_marking_stop_line.currentText()
                     )
                     lanelet.stop_line = StopLine(
-                        lanelet.left_vertices[-1], lanelet.right_vertices[-1], stop_line_marking, set(), set()
+                        lanelet.left_vertices[-1],
+                        lanelet.right_vertices[-1],
+                        stop_line_marking,
+                        set(),
+                        set(),
                     )
                 else:
                     stop_line_start_x = self.road_network_controller.get_float(
@@ -467,15 +563,26 @@ class AddLaneletController:
 
         :return: Lanelet to be added
         """
-        predecessors = [int(pre) for pre in self.road_network_toolbox_ui.selected_predecessors.get_checked_items()]
-        successors = [int(suc) for suc in self.road_network_toolbox_ui.selected_successors.get_checked_items()]
+        predecessors = [
+            int(pre)
+            for pre in self.road_network_toolbox_ui.selected_predecessors.get_checked_items()
+        ]
+        successors = [
+            int(suc) for suc in self.road_network_toolbox_ui.selected_successors.get_checked_items()
+        ]
 
         lanelet_start_pos_x = self.get_x_position_lanelet_start(True)
         lanelet_start_pos_y = self.get_y_position_lanelet_start(True)
 
-        lanelet_width = self.road_network_controller.get_float(self.road_network_toolbox_ui.selected_lanelet_width)
-        line_marking_left = LineMarking(self.road_network_toolbox_ui.selected_line_marking_left.currentText())
-        line_marking_right = LineMarking(self.road_network_toolbox_ui.selected_line_marking_right.currentText())
+        lanelet_width = self.road_network_controller.get_float(
+            self.road_network_toolbox_ui.selected_lanelet_width
+        )
+        line_marking_left = LineMarking(
+            self.road_network_toolbox_ui.selected_line_marking_left.currentText()
+        )
+        line_marking_right = LineMarking(
+            self.road_network_toolbox_ui.selected_line_marking_right.currentText()
+        )
         num_vertices = int(self.road_network_toolbox_ui.selected_number_vertices.text())
         adjacent_left = (
             int(self.road_network_toolbox_ui.selected_adjacent_left.currentText())
@@ -487,8 +594,12 @@ class AddLaneletController:
             if self.road_network_toolbox_ui.selected_adjacent_right.currentText() != "None"
             else None
         )
-        adjacent_left_same_direction = self.road_network_toolbox_ui.selected_adjacent_left_same_direction.isChecked()
-        adjacent_right_same_direction = self.road_network_toolbox_ui.selected_adjacent_right_same_direction.isChecked()
+        adjacent_left_same_direction = (
+            self.road_network_toolbox_ui.selected_adjacent_left_same_direction.isChecked()
+        )
+        adjacent_right_same_direction = (
+            self.road_network_toolbox_ui.selected_adjacent_right_same_direction.isChecked()
+        )
         lanelet_type = {
             LaneletType(ty)
             for ty in self.road_network_toolbox_ui.selected_lanelet_type.get_checked_items()
@@ -520,14 +631,18 @@ class AddLaneletController:
                 stop_line_marking = LineMarking(
                     self.road_network_toolbox_ui.selected_line_marking_stop_line.currentText()
                 )
-                stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())
+                stop_line = StopLine(
+                    np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set()
+                )
             elif self.road_network_toolbox_ui.selected_stop_line_end.isChecked():
                 stop_line_at_end = True
                 stop_line_at_beginning = False
                 stop_line_marking = LineMarking(
                     self.road_network_toolbox_ui.selected_line_marking_stop_line.currentText()
                 )
-                stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())
+                stop_line = StopLine(
+                    np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set()
+                )
             else:
                 stop_line_start_x = self.road_network_controller.get_float(
                     self.road_network_toolbox_ui.selected_stop_line_start_x
@@ -558,12 +673,20 @@ class AddLaneletController:
             stop_line_at_beginning = False
             stop_line = None
 
-        lanelet_length = self.road_network_controller.get_float(self.road_network_toolbox_ui.selected_lanelet_length)
-        lanelet_radius = self.road_network_controller.get_float(self.road_network_toolbox_ui.selected_lanelet_radius)
-        lanelet_angle = np.deg2rad(
-            self.road_network_controller.get_float(self.road_network_toolbox_ui.selected_lanelet_angle)
+        lanelet_length = self.road_network_controller.get_float(
+            self.road_network_toolbox_ui.selected_lanelet_length
         )
-        add_curved_selection = self.road_network_toolbox_ui.selected_curved_checkbox.button.isChecked()
+        lanelet_radius = self.road_network_controller.get_float(
+            self.road_network_toolbox_ui.selected_lanelet_radius
+        )
+        lanelet_angle = np.deg2rad(
+            self.road_network_controller.get_float(
+                self.road_network_toolbox_ui.selected_lanelet_angle
+            )
+        )
+        add_curved_selection = (
+            self.road_network_toolbox_ui.selected_curved_checkbox.button.isChecked()
+        )
 
         if stop_line is not None:
             stop_line_start = stop_line.start
@@ -620,7 +743,9 @@ class AddLaneletController:
 
         lanelet.translate_rotate(np.array([lanelet_start_pos_x, lanelet_start_pos_y]), 0)
 
-        rotation_angle = self._calc_angle(np.array([0, 1]), np.array([0, 0]), left_vertices[0], right_vertices[0])
+        rotation_angle = self._calc_angle(
+            np.array([0, 1]), np.array([0, 0]), left_vertices[0], right_vertices[0]
+        )
 
         initial_vertex = lanelet.center_vertices[0]
         lanelet.translate_rotate(np.array([0, 0]), np.deg2rad(rotation_angle))
@@ -652,7 +777,9 @@ class AddLaneletController:
         if selected_lanelet.lanelet_id == self.road_network_controller.last_added_lanelet_id:
             self.road_network_controller.last_added_lanelet_id = None
 
-        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+            False
+        )
 
         self.scenario_model.remove_lanelet(selected_lanelet.lanelet_id)
         self.road_network_controller.set_default_road_network_list_information()
@@ -678,7 +805,9 @@ class AddLaneletController:
             self.road_network_controller.text_browser.append("No lanelet selected for [2].")
             return
 
-        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+            False
+        )
 
         self.scenario_model.attach_to_other_lanelet(selected_lanelet_one, selected_lanelet_two)
         self.lanelet_ui.set_default_lanelet_operation_information()
@@ -714,14 +843,24 @@ class AddLaneletController:
             if (selected_lanelet.adj_left is not None and adjacent_left) or (
                 selected_lanelet.adj_right is not None and not adjacent_left
             ):
-                self.road_network_controller.text_browser.append("The Lanelet has already an adjacent Lanelet")
+                self.road_network_controller.text_browser.append(
+                    "The Lanelet has already an adjacent Lanelet"
+                )
                 return
 
-            self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
+            self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+                False
+            )
 
-            adjacent_same_direction = self.road_network_toolbox_ui.create_adjacent_same_direction_selection.isChecked()
+            adjacent_same_direction = (
+                self.road_network_toolbox_ui.create_adjacent_same_direction_selection.isChecked()
+            )
             lanelet_width = float(
-                str(np.linalg.norm(selected_lanelet.left_vertices[0] - selected_lanelet.right_vertices[0]))
+                str(
+                    np.linalg.norm(
+                        selected_lanelet.left_vertices[0] - selected_lanelet.right_vertices[0]
+                    )
+                )
             )
             line_marking_left = selected_lanelet.line_marking_left_vertices
             line_marking_right = selected_lanelet.line_marking_right_vertices
@@ -734,12 +873,14 @@ class AddLaneletController:
             stop_line = None
             if selected_lanelet.stop_line is not None:
                 stop_line_marking = selected_lanelet.stop_line.line_marking
-                if all(selected_lanelet.stop_line.start == selected_lanelet.left_vertices[0]) and all(
-                    selected_lanelet.stop_line.end == selected_lanelet.right_vertices[0]
-                ):
+                if all(
+                    selected_lanelet.stop_line.start == selected_lanelet.left_vertices[0]
+                ) and all(selected_lanelet.stop_line.end == selected_lanelet.right_vertices[0]):
                     # stop line at beginning
                     stop_line_at_end = False
-                    stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())
+                    stop_line = StopLine(
+                        np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set()
+                    )
                 elif all(
                     selected_lanelet.stop_line.start
                     == selected_lanelet.left_vertices[len(selected_lanelet.left_vertices) - 1]
@@ -748,7 +889,9 @@ class AddLaneletController:
                     == selected_lanelet.right_vertices[len(selected_lanelet.right_vertices) - 1]
                 ):
                     stop_line_at_end = True
-                    stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())
+                    stop_line = StopLine(
+                        np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set()
+                    )
                 else:
                     stop_line_start_x = selected_lanelet.stop_line.start[0]
                     stop_line_end_x = selected_lanelet.stop_line.end[0]
@@ -776,10 +919,14 @@ class AddLaneletController:
                         return
                     if predecessor.adj_left_same_direction:
                         predecessors.append(predecessor.adj_left)
-                        self.scenario_model.add_successor_to_lanelet(predecessor.adj_left, id_of_new_lanelet)
+                        self.scenario_model.add_successor_to_lanelet(
+                            predecessor.adj_left, id_of_new_lanelet
+                        )
                     else:
                         successors.append(predecessor.adj_left)
-                        self.scenario_model.add_predecessor_to_lanelet(predecessor.adj_left, id_of_new_lanelet)
+                        self.scenario_model.add_predecessor_to_lanelet(
+                            predecessor.adj_left, id_of_new_lanelet
+                        )
                 elif predecessor.adj_right is not None and not adjacent_left:
                     if predecessor.adj_right_same_direction != adjacent_same_direction:
                         self.road_network_controller.text_browser.append(
@@ -788,10 +935,14 @@ class AddLaneletController:
                         return
                     if predecessor.adj_right_same_direction:
                         predecessors.append(predecessor.adj_right)
-                        self.scenario_model.add_successor_to_lanelet(predecessor.adj_right, id_of_new_lanelet)
+                        self.scenario_model.add_successor_to_lanelet(
+                            predecessor.adj_right, id_of_new_lanelet
+                        )
                     else:
                         successors.append(predecessor.adj_right)
-                        self.scenario_model.add_predecessor_to_lanelet(predecessor.adj_right, id_of_new_lanelet)
+                        self.scenario_model.add_predecessor_to_lanelet(
+                            predecessor.adj_right, id_of_new_lanelet
+                        )
 
             for suc_id in selected_lanelet.successor:
                 successor = self.scenario_model.find_lanelet_by_id(int(suc_id))
@@ -803,10 +954,14 @@ class AddLaneletController:
                         return
                     if successor.adj_left_same_direction:
                         successors.append(successor.adj_left)
-                        self.scenario_model.add_predecessor_to_lanelet(successor.adj_left, id_of_new_lanelet)
+                        self.scenario_model.add_predecessor_to_lanelet(
+                            successor.adj_left, id_of_new_lanelet
+                        )
                     else:
                         predecessors.append(successor.adj_left)
-                        self.scenario_model.add_successor_to_lanelet(successor.adj_left, id_of_new_lanelet)
+                        self.scenario_model.add_successor_to_lanelet(
+                            successor.adj_left, id_of_new_lanelet
+                        )
                 elif successor.adj_right is not None and not adjacent_left:
                     if successor.adj_right_same_direction != adjacent_same_direction:
                         self.road_network_controller.text_browser.append(
@@ -815,10 +970,14 @@ class AddLaneletController:
                         return
                     if successor.adj_right_same_direction:
                         successors.append(successor.adj_right)
-                        self.scenario_model.add_predecessor_to_lanelet(successor.adj_right, id_of_new_lanelet)
+                        self.scenario_model.add_predecessor_to_lanelet(
+                            successor.adj_right, id_of_new_lanelet
+                        )
                     else:
                         predecessors.append(successor.adj_right)
-                        self.scenario_model.add_successor_to_lanelet(successor.adj_right, id_of_new_lanelet)
+                        self.scenario_model.add_successor_to_lanelet(
+                            successor.adj_right, id_of_new_lanelet
+                        )
 
             if adjacent_left:
                 adjacent_lanelet = MapCreator.create_adjacent_lanelet(
@@ -888,7 +1047,9 @@ class AddLaneletController:
             self.road_network_controller.text_browser.append("No lanelet selected for [2].")
             return
 
-        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+            False
+        )
 
         connected_lanelet = MapCreator.connect_lanelets(
             selected_lanelet_one, selected_lanelet_two, self.scenario_model.generate_object_id()
@@ -912,7 +1073,9 @@ class AddLaneletController:
         if selected_lanelet_one is None:
             return
 
-        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+            False
+        )
         rotation_angle = int(self.road_network_toolbox_ui.rotation_angle.text())
         self.scenario_model.rotate_lanelet(selected_lanelet_one.lanelet_id, rotation_angle)
         self.lanelet_ui.set_default_lanelet_operation_information()
@@ -930,9 +1093,15 @@ class AddLaneletController:
         if selected_lanelet_one is None:
             return
 
-        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
-        x_translation = self.road_network_controller.get_float(self.road_network_toolbox_ui.x_translation)
-        y_translation = self.road_network_controller.get_float(self.road_network_toolbox_ui.y_translation)
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+            False
+        )
+        x_translation = self.road_network_controller.get_float(
+            self.road_network_toolbox_ui.x_translation
+        )
+        y_translation = self.road_network_controller.get_float(
+            self.road_network_toolbox_ui.y_translation
+        )
         selected_lanelet_one.translate_rotate(np.array([x_translation, y_translation]), 0)
 
         self.scenario_model.translate_lanelet(selected_lanelet_one)
@@ -953,34 +1122,57 @@ class AddLaneletController:
             selected_lanelet = self.selected_lanelet()
             if selected_lanelet is None:
                 return None
-            return self.add_editable_updated_lanelet(0, selected_lanelet.left_vertices, selected_lanelet.right_vertices)
+            return self.add_editable_updated_lanelet(
+                0, selected_lanelet.left_vertices, selected_lanelet.right_vertices
+            )
 
-        predecessors = [int(pre) for pre in self.road_network_toolbox_ui.predecessors.get_checked_items()]
-        successors = [int(suc) for suc in self.road_network_toolbox_ui.successors.get_checked_items()]
+        predecessors = [
+            int(pre) for pre in self.road_network_toolbox_ui.predecessors.get_checked_items()
+        ]
+        successors = [
+            int(suc) for suc in self.road_network_toolbox_ui.successors.get_checked_items()
+        ]
 
         place_at_position = self.road_network_toolbox_ui.place_at_position.isChecked()
-        connect_to_last_selection = self.road_network_toolbox_ui.connect_to_previous_selection.isChecked()
-        connect_to_predecessors_selection = self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked()
-        connect_to_successors_selection = self.road_network_toolbox_ui.connect_to_successors_selection.isChecked()
+        connect_to_last_selection = (
+            self.road_network_toolbox_ui.connect_to_previous_selection.isChecked()
+        )
+        connect_to_predecessors_selection = (
+            self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked()
+        )
+        connect_to_successors_selection = (
+            self.road_network_toolbox_ui.connect_to_successors_selection.isChecked()
+        )
 
         if connect_to_last_selection and self.road_network_controller.last_added_lanelet_id is None:
             self.road_network_controller.text_browser.append(
-                "__Warning__: Previously add lanelet does not exist anymore. " "Change lanelet adding option."
+                "__Warning__: Previously add lanelet does not exist anymore. "
+                "Change lanelet adding option."
             )
             return None
         if connect_to_predecessors_selection and len(predecessors) == 0:
-            self.road_network_controller.text_browser.append("__Warning__: No predecessors are selected.")
+            self.road_network_controller.text_browser.append(
+                "__Warning__: No predecessors are selected."
+            )
             return None
         if connect_to_successors_selection and len(successors) == 0:
-            self.road_network_controller.text_browser.append("__Warning__: No successors are selected.")
+            self.road_network_controller.text_browser.append(
+                "__Warning__: No successors are selected."
+            )
             return None
 
         lanelet_start_pos_x = self.get_x_position_lanelet_start(False)
         lanelet_start_pos_y = self.get_y_position_lanelet_start(False)
 
-        lanelet_width = self.road_network_controller.get_float(self.road_network_toolbox_ui.lanelet_width)
-        line_marking_left = LineMarking(self.road_network_toolbox_ui.line_marking_left.currentText())
-        line_marking_right = LineMarking(self.road_network_toolbox_ui.line_marking_right.currentText())
+        lanelet_width = self.road_network_controller.get_float(
+            self.road_network_toolbox_ui.lanelet_width
+        )
+        line_marking_left = LineMarking(
+            self.road_network_toolbox_ui.line_marking_left.currentText()
+        )
+        line_marking_right = LineMarking(
+            self.road_network_toolbox_ui.line_marking_right.currentText()
+        )
         num_vertices = int(self.road_network_toolbox_ui.number_vertices.text())
         adjacent_left = (
             int(self.road_network_toolbox_ui.adjacent_left.currentText())
@@ -992,10 +1184,16 @@ class AddLaneletController:
             if self.road_network_toolbox_ui.adjacent_right.currentText() != "None"
             else None
         )
-        adjacent_left_same_direction = self.road_network_toolbox_ui.adjacent_left_same_direction.isChecked()
-        adjacent_right_same_direction = self.road_network_toolbox_ui.adjacent_right_same_direction.isChecked()
+        adjacent_left_same_direction = (
+            self.road_network_toolbox_ui.adjacent_left_same_direction.isChecked()
+        )
+        adjacent_right_same_direction = (
+            self.road_network_toolbox_ui.adjacent_right_same_direction.isChecked()
+        )
         lanelet_type = {
-            LaneletType(ty) for ty in self.road_network_toolbox_ui.lanelet_type.get_checked_items() if ty != "None"
+            LaneletType(ty)
+            for ty in self.road_network_toolbox_ui.lanelet_type.get_checked_items()
+            if ty != "None"
         }
         user_one_way = {
             RoadUser(user)
@@ -1009,7 +1207,8 @@ class AddLaneletController:
         }
 
         traffic_signs = {
-            int(sign) for sign in self.road_network_toolbox_ui.lanelet_referenced_traffic_sign_ids.get_checked_items()
+            int(sign)
+            for sign in self.road_network_toolbox_ui.lanelet_referenced_traffic_sign_ids.get_checked_items()
         }
         traffic_lights = {
             int(light)
@@ -1019,21 +1218,35 @@ class AddLaneletController:
             if self.road_network_toolbox_ui.stop_line_beginning.isChecked():
                 stop_line_at_end = False
                 stop_line_at_beginning = True
-                stop_line_marking = LineMarking(self.road_network_toolbox_ui.line_marking_stop_line.currentText())
-                stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())
+                stop_line_marking = LineMarking(
+                    self.road_network_toolbox_ui.line_marking_stop_line.currentText()
+                )
+                stop_line = StopLine(
+                    np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set()
+                )
             elif self.road_network_toolbox_ui.stop_line_end.isChecked():
                 stop_line_at_end = True
                 stop_line_at_beginning = False
-                stop_line_marking = LineMarking(self.road_network_toolbox_ui.line_marking_stop_line.currentText())
-                stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())
+                stop_line_marking = LineMarking(
+                    self.road_network_toolbox_ui.line_marking_stop_line.currentText()
+                )
+                stop_line = StopLine(
+                    np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set()
+                )
         else:
             stop_line_at_end = False
             stop_line_at_beginning = False
             stop_line = None
 
-        lanelet_length = self.road_network_controller.get_float(self.road_network_toolbox_ui.lanelet_length)
-        lanelet_radius = self.road_network_controller.get_float(self.road_network_toolbox_ui.lanelet_radius)
-        lanelet_angle = np.deg2rad(self.road_network_controller.get_float(self.road_network_toolbox_ui.lanelet_angle))
+        lanelet_length = self.road_network_controller.get_float(
+            self.road_network_toolbox_ui.lanelet_length
+        )
+        lanelet_radius = self.road_network_controller.get_float(
+            self.road_network_toolbox_ui.lanelet_radius
+        )
+        lanelet_angle = np.deg2rad(
+            self.road_network_controller.get_float(self.road_network_toolbox_ui.lanelet_angle)
+        )
 
         lanelet_id = 0
 
@@ -1062,16 +1275,24 @@ class AddLaneletController:
         )
 
         if connect_to_last_selection:
-            last_lanelet = self.scenario_model.find_lanelet_by_id(self.road_network_controller.last_added_lanelet_id)
+            last_lanelet = self.scenario_model.find_lanelet_by_id(
+                self.road_network_controller.last_added_lanelet_id
+            )
             lanelet.translate_rotate(
-                np.array([last_lanelet.center_vertices[-1][0], last_lanelet.center_vertices[-1][1]]), 0
+                np.array(
+                    [last_lanelet.center_vertices[-1][0], last_lanelet.center_vertices[-1][1]]
+                ),
+                0,
             )
             MapCreator.fit_to_predecessor(last_lanelet, lanelet)
         elif connect_to_predecessors_selection:
             if len(predecessors) > 0:
                 predecessor = self.scenario_model.find_lanelet_by_id(predecessors[0])
                 lanelet.translate_rotate(
-                    np.array([predecessor.center_vertices[-1][0], predecessor.center_vertices[-1][1]]), 0
+                    np.array(
+                        [predecessor.center_vertices[-1][0], predecessor.center_vertices[-1][1]]
+                    ),
+                    0,
                 )
                 MapCreator.fit_to_predecessor(predecessor, lanelet)
         elif connect_to_successors_selection:
@@ -1088,7 +1309,10 @@ class AddLaneletController:
             if not self.road_network_toolbox_ui.horizontal.isChecked():
                 if self.road_network_toolbox_ui.select_end_position.isChecked():
                     rotation_angle = math.degrees(
-                        math.asin((self.get_y_position_lanelet_end() - lanelet_start_pos_y) / lanelet_length)
+                        math.asin(
+                            (self.get_y_position_lanelet_end() - lanelet_start_pos_y)
+                            / lanelet_length
+                        )
                     )
                     # convert rotation_angle to positive angle since translate_rotate function only expects positive
                     # angle
@@ -1119,7 +1343,9 @@ class AddLaneletController:
         if selected_lanelet_one is None:
             return
 
-        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+            False
+        )
         self.scenario_model.merge_with_successor(selected_lanelet_one)
         self.lanelet_ui.set_default_lanelet_operation_information()
 
@@ -1135,7 +1361,9 @@ class AddLaneletController:
                 and self.road_network_toolbox_ui.lanelet_start_position_x.text()
                 and self.road_network_toolbox_ui.lanelet_start_position_x.text() != "-"
             ):
-                return float(self.road_network_toolbox_ui.lanelet_start_position_x.text().replace(",", "."))
+                return float(
+                    self.road_network_toolbox_ui.lanelet_start_position_x.text().replace(",", ".")
+                )
             else:
                 return 0
         else:
@@ -1143,7 +1371,11 @@ class AddLaneletController:
                 self.road_network_toolbox_ui.selected_lanelet_start_position_x.text()
                 and self.road_network_toolbox_ui.selected_lanelet_start_position_x.text() != "-"
             ):
-                return float(self.road_network_toolbox_ui.selected_lanelet_start_position_x.text().replace(",", "."))
+                return float(
+                    self.road_network_toolbox_ui.selected_lanelet_start_position_x.text().replace(
+                        ",", "."
+                    )
+                )
             else:
                 return 0
 
@@ -1159,7 +1391,9 @@ class AddLaneletController:
                 and self.road_network_toolbox_ui.lanelet_start_position_y.text()
                 and self.road_network_toolbox_ui.lanelet_start_position_y.text() != "-"
             ):
-                return float(self.road_network_toolbox_ui.lanelet_start_position_y.text().replace(",", "."))
+                return float(
+                    self.road_network_toolbox_ui.lanelet_start_position_y.text().replace(",", ".")
+                )
             else:
                 return 0
         else:
@@ -1167,7 +1401,11 @@ class AddLaneletController:
                 self.road_network_toolbox_ui.selected_lanelet_start_position_y.text()
                 and self.road_network_toolbox_ui.selected_lanelet_start_position_y.text() != "-"
             ):
-                return float(self.road_network_toolbox_ui.selected_lanelet_start_position_y.text().replace(",", "."))
+                return float(
+                    self.road_network_toolbox_ui.selected_lanelet_start_position_y.text().replace(
+                        ",", "."
+                    )
+                )
             else:
                 return 0
 
@@ -1182,7 +1420,9 @@ class AddLaneletController:
                 self.road_network_toolbox_ui.lanelet_end_position_x.text()
                 and self.road_network_toolbox_ui.lanelet_end_position_x.text() != "-"
             ):
-                return float(self.road_network_toolbox_ui.lanelet_end_position_x.text().replace(",", "."))
+                return float(
+                    self.road_network_toolbox_ui.lanelet_end_position_x.text().replace(",", ".")
+                )
             else:
                 return 0
         else:
@@ -1190,7 +1430,11 @@ class AddLaneletController:
                 self.road_network_toolbox_ui.selected_lanelet_end_position_x.text()
                 and self.road_network_toolbox_ui.selected_lanelet_end_position_x.text() != "-"
             ):
-                return float(self.road_network_toolbox_ui.selected_lanelet_end_position_x.text().replace(",", "."))
+                return float(
+                    self.road_network_toolbox_ui.selected_lanelet_end_position_x.text().replace(
+                        ",", "."
+                    )
+                )
             else:
                 return 0
 
@@ -1205,7 +1449,9 @@ class AddLaneletController:
                 self.road_network_toolbox_ui.lanelet_end_position_y.text()
                 and self.road_network_toolbox_ui.lanelet_end_position_y.text() != "-"
             ):
-                return float(self.road_network_toolbox_ui.lanelet_end_position_y.text().replace(",", "."))
+                return float(
+                    self.road_network_toolbox_ui.lanelet_end_position_y.text().replace(",", ".")
+                )
             else:
                 return 0
         else:
@@ -1213,7 +1459,11 @@ class AddLaneletController:
                 self.road_network_toolbox_ui.selected_lanelet_end_position_y.text()
                 and self.road_network_toolbox_ui.selected_lanelet_end_position_y.text() != "-"
             ):
-                return float(self.road_network_toolbox_ui.selected_lanelet_end_position_y.text().replace(",", "."))
+                return float(
+                    self.road_network_toolbox_ui.selected_lanelet_end_position_y.text().replace(
+                        ",", "."
+                    )
+                )
             else:
                 return 0
 
@@ -1272,7 +1522,10 @@ class AddLaneletController:
                 return None
 
         else:
-            if self.road_network_toolbox_ui.selected_lanelet_update.currentText() not in ["None", ""]:
+            if self.road_network_toolbox_ui.selected_lanelet_update.currentText() not in [
+                "None",
+                "",
+            ]:
                 selected_lanelet = self.scenario_model.find_lanelet_by_id(
                     int(self.road_network_toolbox_ui.selected_lanelet_update.currentText())
                 )

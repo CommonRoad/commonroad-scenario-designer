@@ -15,7 +15,9 @@ class Predicate(Expression):
     Class representing a predicate.
     """
 
-    def __init__(self, symbol: str, terms: List[Term], func: Optional[Callable] = None):  # [[Any, ...], bool] = None):
+    def __init__(
+        self, symbol: str, terms: List[Term], func: Optional[Callable] = None
+    ):  # [[Any, ...], bool] = None):
         """
         Constructor.
 
@@ -51,7 +53,14 @@ class Predicate(Expression):
         :return: String.
         """
         if self._symbol in ["=", "!=", "<", ">", "<=", ">="]:
-            string = "(" + self._terms[0].to_string() + " " + self._symbol + " " + self._terms[1].to_string()
+            string = (
+                "("
+                + self._terms[0].to_string()
+                + " "
+                + self._symbol
+                + " "
+                + self._terms[1].to_string()
+            )
         else:
             string = self._symbol + "("
             for i, term in enumerate(self._terms):
@@ -80,7 +89,9 @@ class Predicate(Expression):
         if self._symbol in model.predicate_funcs.keys():
             self._func = model.predicate_funcs[self._symbol]
         else:
-            warnings.warn("Unsuccessful initialization of function of predicate {}!".format(self._symbol))
+            warnings.warn(
+                "Unsuccessful initialization of function of predicate {}!".format(self._symbol)
+            )
 
         for term in self._terms:
             term.initialize(model)

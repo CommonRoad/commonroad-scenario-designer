@@ -69,13 +69,17 @@ class TrafficSignEncoder:
                     elif safe_eq(t_type, "BAN_CAR_TRUCK_BUS_MOTORCYCLE"):
                         self._set_ban_car_truck_bus_motorcycle(element, edge)
                     elif safe_eq(t_type, "TOWN_SIGN"):
-                        if isinstance(t_type, TrafficSignIDGermany) or isinstance(t_type, TrafficSignIDZamunda):
+                        if isinstance(t_type, TrafficSignIDGermany) or isinstance(
+                            t_type, TrafficSignIDZamunda
+                        ):
                             element = copy(element)
                             element._additional_values = [str(50 / 3.6)]
                             self._set_max_speed(element, edge)
                         # TODO: Implement speed limits for additional countries
                         else:
-                            raise NotImplementedError("TOWN_SIGN for this country is not implemented")
+                            raise NotImplementedError(
+                                "TOWN_SIGN for this country is not implemented"
+                            )
                     else:
                         raise NotImplementedError(f"Attribute {t_type} not implemented")
                 except NotImplementedError as e:
@@ -115,7 +119,11 @@ class TrafficSignEncoder:
             if edge in visited:
                 continue
             visited.add(edge)
-            if any(elem.traffic_sign_element_id == start_id for elem in self.edge_traffic_signs[edge] if edge != start):
+            if any(
+                elem.traffic_sign_element_id == start_id
+                for elem in self.edge_traffic_signs[edge]
+                if edge != start
+            ):
                 continue
             queue += edge.outgoing
             yield edge
@@ -145,7 +153,12 @@ class TrafficSignEncoder:
                 return curvatures[edge]
 
             curvature = (
-                np.max([compute_max_curvature_from_polyline(np.array(lane.shape)) for lane in edge.lanes])
+                np.max(
+                    [
+                        compute_max_curvature_from_polyline(np.array(lane.shape))
+                        for lane in edge.lanes
+                    ]
+                )
                 if edge.lanes
                 else float("-inf")
             )
@@ -198,7 +211,9 @@ class TrafficSignEncoder:
         edge.to_node.type = NodeType.PRIORITY_STOP
         for outgoing in [edge] + edge.outgoing:
             old_type = self.edge_types.types[outgoing.type_id]
-            new_type = self.edge_types.create_from_update_priority(old_type.id, max(old_type.priority - 1, 0))
+            new_type = self.edge_types.create_from_update_priority(
+                old_type.id, max(old_type.priority - 1, 0)
+            )
             outgoing.type_id = new_type.id
 
     def _set_right_before_left(self, element: TrafficSignElement, edge: Edge):
@@ -236,6 +251,8 @@ class TrafficSignEncoder:
             VehicleType.MOTORCYCLE,
             VehicleType.EVEHICLE,
         }
-        new_type = self.edge_types.create_from_update_allow(old_type.id, list(set(VehicleType) - disallow))
+        new_type = self.edge_types.create_from_update_allow(
+            old_type.id, list(set(VehicleType) - disallow)
+        )
         for successor in self._bfs_until(edge, element):
             successor.type_id = new_type.id

@@ -43,7 +43,8 @@ class TestParser(unittest.TestCase):
         formula = "A x1, x2 in D1, y1, y2 in D2. P(x1, x2, y1, y2)"
 
         self.assertEqual(
-            "A x1 in D1, x2 in D1, y1 in D2, y2 in D2. P(x1, x2, y1, y2)", Parser.parse(formula).to_string()
+            "A x1 in D1, x2 in D1, y1 in D2, y2 in D2. P(x1, x2, y1, y2)",
+            Parser.parse(formula).to_string(),
         )
 
     def test_atomic_expr(self):
@@ -100,7 +101,9 @@ class TestParser(unittest.TestCase):
         self.assertEqual("P(x) || x in f(1)", Parser.parse(formula).to_string())
 
         formula = "P(x, y, z) || x, y in D1, z in D2"
-        self.assertEqual("P(x, y, z) || x in D1, y in D1, z in D2", Parser.parse(formula).to_string())
+        self.assertEqual(
+            "P(x, y, z) || x in D1, y in D1, z in D2", Parser.parse(formula).to_string()
+        )
 
     def test_mixed_expr(self):
         formula = "(true & P(x)) | (A x in D. P(f(x)))"
@@ -110,4 +113,6 @@ class TestParser(unittest.TestCase):
         self.assertEqual("A x in D1. E y in D2. (P1(x) & P2(y))", Parser.parse(formula).to_string())
 
         formula = "((A x in D1. P1(x)) -> (C>=2 y in D2. P2(y))) & P3(z)"
-        self.assertEqual("((A x in D1. P1(x) -> C>=2 y in D2. P2(y)) & P3(z))", Parser.parse(formula).to_string())
+        self.assertEqual(
+            "((A x in D1. P1(x) -> C>=2 y in D2. P2(y)) & P3(z))", Parser.parse(formula).to_string()
+        )

@@ -116,12 +116,22 @@ class ConversionLanelet(Lanelet):
 
     @lanelet_type.setter
     def lanelet_type(self, value: str):
-        if value in ["urban", "country", "highway", "interstate", "parking", "sidewalk", "crosswalk"]:
-            self._lanelet_type = {LaneletType(value) if LaneletType(value) is not None else LaneletType.UNKNOWN}
+        if value in [
+            "urban",
+            "country",
+            "highway",
+            "interstate",
+            "parking",
+            "sidewalk",
+            "crosswalk",
+        ]:
+            self._lanelet_type = {
+                LaneletType(value) if LaneletType(value) is not None else LaneletType.UNKNOWN
+            }
         elif value in ["restricted", "mainCarriageWay", "intersection"]:
-            self._lanelet_type = {LaneletType(value) if LaneletType(value) is not None else LaneletType.UNKNOWN}.union(
-                self._default_lanelet_type
-            )
+            self._lanelet_type = {
+                LaneletType(value) if LaneletType(value) is not None else LaneletType.UNKNOWN
+            }.union(self._default_lanelet_type)
         elif value == "entry":
             self._lanelet_type = {LaneletType.ACCESS_RAMP}.union(self._default_lanelet_type)
         elif value == "exit":
@@ -449,4 +459,6 @@ class ConversionLanelet(Lanelet):
         :param compute_curvature: Boolean indicating whether curvature should be computed
         :return: Cartesian coordinates of point on inner border and tangential direction.
         """
-        return self.parametric_lane_group.calc_border(border, s_pos, width_offset, compute_curvature=compute_curvature)
+        return self.parametric_lane_group.calc_border(
+            border, s_pos, width_offset, compute_curvature=compute_curvature
+        )

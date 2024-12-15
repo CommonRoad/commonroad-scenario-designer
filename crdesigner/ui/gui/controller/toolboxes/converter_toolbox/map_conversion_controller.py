@@ -101,20 +101,30 @@ class MapConversionToolboxController(QDockWidget):
         self.converter_toolbox_ui.adjust_sections()
 
         if self.converter_toolbox_ui.open_drive.isChecked():
-            self.converter_toolbox_ui.button_convert_opendrive.clicked.connect(lambda: self.load_open_drive())
+            self.converter_toolbox_ui.button_convert_opendrive.clicked.connect(
+                lambda: self.load_open_drive()
+            )
         elif self.converter_toolbox_ui.lanelet.isChecked():
-            self.converter_toolbox_ui.button_convert_lanelet2_to_cr.clicked.connect(lambda: self.load_lanelet2())
+            self.converter_toolbox_ui.button_convert_lanelet2_to_cr.clicked.connect(
+                lambda: self.load_lanelet2()
+            )
             self.converter_toolbox_ui.button_convert_cr_to_lanelet2.clicked.connect(
                 lambda: self.convert_cr_to_lanelet2()
             )
         elif self.converter_toolbox_ui.osm.isChecked():
-            self.converter_toolbox_ui.button_start_osm_conversion.clicked.connect(lambda: self.convert_osm_to_cr())
+            self.converter_toolbox_ui.button_start_osm_conversion.clicked.connect(
+                lambda: self.convert_osm_to_cr()
+            )
             self.converter_toolbox_ui.button_start_osm_conversion_with_sumo_parser.clicked.connect(
                 lambda: self.convert_osm_to_cr_with_sumo()
             )
         elif self.converter_toolbox_ui.sumo.isChecked():
-            self.converter_toolbox_ui.button_convert_sumo_to_cr.clicked.connect(lambda: self.load_sumo())
-            self.converter_toolbox_ui.button_convert_cr_to_sumo.clicked.connect(lambda: self.convert_cr_to_sumo())
+            self.converter_toolbox_ui.button_convert_sumo_to_cr.clicked.connect(
+                lambda: self.load_sumo()
+            )
+            self.converter_toolbox_ui.button_convert_cr_to_sumo.clicked.connect(
+                lambda: self.convert_cr_to_sumo()
+            )
 
     def connect_gui_elements(self):
         """
@@ -191,11 +201,15 @@ class MapConversionToolboxController(QDockWidget):
                     print("__Warning__: {}.".format(e))
                     return
             else:
-                QMessageBox.warning(self, "Warning", "No file selected.", QMessageBox.StandardButton.Ok)
+                QMessageBox.warning(
+                    self, "Warning", "No file selected.", QMessageBox.StandardButton.Ok
+                )
 
                 return
         except ValueError as e:
-            QMessageBox.critical(self, "Warning", "Map unreadable: " + str(e), QMessageBox.StandardButton.Ok)
+            QMessageBox.critical(
+                self, "Warning", "Map unreadable: " + str(e), QMessageBox.StandardButton.Ok
+            )
 
         self.convert_with_spinner(self.convert_osm_to_cr_with_spinner)
 
@@ -236,7 +250,9 @@ class MapConversionToolboxController(QDockWidget):
             self.scenario_model.add_converted_scenario(osm_to_commonroad_using_sumo_)
 
         except ValueError as e:
-            QMessageBox.critical(None, "Warning", "Map unreadable: " + str(e), QMessageBox.StandardButton.Ok)
+            QMessageBox.critical(
+                None, "Warning", "Map unreadable: " + str(e), QMessageBox.StandardButton.Ok
+            )
             return
         self.osm_file = None
 
@@ -261,7 +277,9 @@ class MapConversionToolboxController(QDockWidget):
                 raise ValueError
             return True
         except ValueError:
-            self.converter_toolbox_ui.osm_loading_status.setText("Cannot download, invalid Coordinates")
+            self.converter_toolbox_ui.osm_loading_status.setText(
+                "Cannot download, invalid Coordinates"
+            )
             return False
 
     def download_osm_map(self) -> Optional[str]:
@@ -272,7 +290,12 @@ class MapConversionToolboxController(QDockWidget):
         """
         name = "openstreetmap_download" + ".osm"
         if not self.verify_osm_coordinate_input():
-            QMessageBox.critical(self, "Warning", "cannot download, coordinates invalid", QMessageBox.StandardButton.Ok)
+            QMessageBox.critical(
+                self,
+                "Warning",
+                "cannot download, coordinates invalid",
+                QMessageBox.StandardButton.Ok,
+            )
             return None
         else:
             download_around_map(
@@ -308,7 +331,9 @@ class MapConversionToolboxController(QDockWidget):
         self.text_browser.append(
             """Name: {}<br>Version: {}<br>Date: {}<br><br>OpenDRIVE
                 Version {}.{}""".format(
-                self.open_drive_file.header.name if self.open_drive_file.header.name else "<i>unset</i>",
+                self.open_drive_file.header.name
+                if self.open_drive_file.header.name
+                else "<i>unset</i>",
                 self.open_drive_file.header.version,
                 self.open_drive_file.header.date,
                 self.open_drive_file.header.revMajor,
@@ -339,7 +364,9 @@ class MapConversionToolboxController(QDockWidget):
             QMessageBox.warning(
                 self,
                 "OpenDRIVE error",
-                "There was an error during the loading of the selected OpenDRIVE file.\n\n{}".format(error_message),
+                "There was an error during the loading of the selected OpenDRIVE file.\n\n{}".format(
+                    error_message
+                ),
                 QMessageBox.StandardButton.Ok,
             )
             return
@@ -348,7 +375,9 @@ class MapConversionToolboxController(QDockWidget):
             QMessageBox.warning(
                 self,
                 "OpenDRIVE error",
-                "There was an error during the loading of the selected OpenDRIVE file.\n\n{}".format(error_message),
+                "There was an error during the loading of the selected OpenDRIVE file.\n\n{}".format(
+                    error_message
+                ),
                 QMessageBox.StandardButton.Ok,
             )
             return
@@ -401,7 +430,9 @@ class MapConversionToolboxController(QDockWidget):
         """
         try:
             if self.lanelet2_file is None:
-                QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.StandardButton.Ok)
+                QMessageBox.warning(
+                    None, "Warning", "No file selected.", QMessageBox.StandardButton.Ok
+                )
                 return
             scenario = self.lanelet2_to_cr_converter(self.lanelet2_file)
             self.lanelet2_file = None
@@ -419,7 +450,9 @@ class MapConversionToolboxController(QDockWidget):
             self.text_browser.append("Please stop the animation first.")
             return
 
-        directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Option.ShowDirsOnly)
+        directory = QFileDialog.getExistingDirectory(
+            self, "Dir", options=QFileDialog.Option.ShowDirsOnly
+        )
 
         if not self.scenario_model.scenario_created or directory == "":
             return
@@ -427,7 +460,9 @@ class MapConversionToolboxController(QDockWidget):
         l2osm = CR2LaneletConverter()
         osm = l2osm(self.scenario_model.get_current_scenario())
         with open(f"{path}", "wb") as file_out:
-            file_out.write(etree.tostring(osm, xml_declaration=True, encoding="UTF-8", pretty_print=True))
+            file_out.write(
+                etree.tostring(osm, xml_declaration=True, encoding="UTF-8", pretty_print=True)
+            )
         self.text_browser.append("Conversion from CommonRoad to Lanelet2 is done")
 
     @logger.log
@@ -462,7 +497,9 @@ class MapConversionToolboxController(QDockWidget):
             return
 
         if SUMO_AVAILABLE:
-            directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Option.ShowDirsOnly)
+            directory = QFileDialog.getExistingDirectory(
+                self, "Dir", options=QFileDialog.Option.ShowDirsOnly
+            )
             if not directory:
                 return
             self.sumo_simulation.convert(directory)

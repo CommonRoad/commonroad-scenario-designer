@@ -35,10 +35,14 @@ class LaneletOperationsWidget:
         self.toolbox.adjacent_left_right_button_group = QButtonGroup()
         self.toolbox.create_adjacent_left_selection = QRadioButton("Adjacent left")
         self.toolbox.create_adjacent_left_selection.setChecked(True)
-        self.toolbox.adjacent_left_right_button_group.addButton(self.toolbox.create_adjacent_left_selection)
+        self.toolbox.adjacent_left_right_button_group.addButton(
+            self.toolbox.create_adjacent_left_selection
+        )
         self.toolbox.create_adjacent_right_selection = QRadioButton("Adjacent right")
         self.toolbox.create_adjacent_left_selection.setChecked(False)
-        self.toolbox.adjacent_left_right_button_group.addButton(self.toolbox.create_adjacent_right_selection)
+        self.toolbox.adjacent_left_right_button_group.addButton(
+            self.toolbox.create_adjacent_right_selection
+        )
         self.toolbox.create_adjacent_same_direction_selection = QCheckBox("Adjacent same direction")
         self.toolbox.create_adjacent_same_direction_selection.setChecked(True)
         self.toolbox.button_create_adjacent = QPushButton("Create adjacent to [1]")
@@ -73,8 +77,12 @@ class LaneletOperationsWidget:
         lanelet_operations_layout = QFormLayout()
         lanelet_operations_selection_groupbox_layout = QFormLayout()
         lanelet_operations_selection_groupbox = QGroupBox()
-        lanelet_operations_selection_groupbox.setLayout(lanelet_operations_selection_groupbox_layout)
-        lanelet_operations_selection_groupbox_layout.addRow("[1] Selected lanelet", self.toolbox.selected_lanelet_one)
+        lanelet_operations_selection_groupbox.setLayout(
+            lanelet_operations_selection_groupbox_layout
+        )
+        lanelet_operations_selection_groupbox_layout.addRow(
+            "[1] Selected lanelet", self.toolbox.selected_lanelet_one
+        )
         lanelet_operations_selection_groupbox_layout.addRow(
             "[2] Previously selected", self.toolbox.selected_lanelet_two
         )
@@ -82,32 +90,53 @@ class LaneletOperationsWidget:
 
         lanelet_operations_adjacency_groupbox_layout = QFormLayout()
         lanelet_operations_adjacency_groupbox = QGroupBox()
-        lanelet_operations_adjacency_groupbox.setLayout(lanelet_operations_adjacency_groupbox_layout)
-        lanelet_operations_adjacency_groupbox_layout.addRow(
-            self.toolbox.create_adjacent_left_selection, self.toolbox.create_adjacent_right_selection
+        lanelet_operations_adjacency_groupbox.setLayout(
+            lanelet_operations_adjacency_groupbox_layout
         )
-        lanelet_operations_adjacency_groupbox_layout.addRow(self.toolbox.create_adjacent_same_direction_selection)
+        lanelet_operations_adjacency_groupbox_layout.addRow(
+            self.toolbox.create_adjacent_left_selection,
+            self.toolbox.create_adjacent_right_selection,
+        )
+        lanelet_operations_adjacency_groupbox_layout.addRow(
+            self.toolbox.create_adjacent_same_direction_selection
+        )
         lanelet_operations_adjacency_groupbox_layout.addRow(self.toolbox.button_create_adjacent)
         lanelet_operations_layout.addRow(lanelet_operations_adjacency_groupbox)
 
         lanelet_operations_rotation_groupbox_layout = QGridLayout()
         lanelet_operations_rotation_groupbox = QGroupBox()
         lanelet_operations_rotation_groupbox.setLayout(lanelet_operations_rotation_groupbox_layout)
-        lanelet_operations_rotation_groupbox_layout.addWidget(self.toolbox.button_rotate_lanelet, 0, 0)
+        lanelet_operations_rotation_groupbox_layout.addWidget(
+            self.toolbox.button_rotate_lanelet, 0, 0
+        )
         lanelet_operations_rotation_groupbox_layout.addWidget(self.toolbox.rotation_angle, 0, 1)
-        lanelet_operations_rotation_groupbox_layout.addWidget(self.toolbox.rotation_degree_label, 0, 2)
+        lanelet_operations_rotation_groupbox_layout.addWidget(
+            self.toolbox.rotation_degree_label, 0, 2
+        )
         lanelet_operations_layout.addRow(lanelet_operations_rotation_groupbox)
 
         lanelet_operations_translation_groupbox_layout = QGridLayout()
         lanelet_operations_translation_groupbox = QGroupBox()
-        lanelet_operations_translation_groupbox.setLayout(lanelet_operations_translation_groupbox_layout)
-        lanelet_operations_translation_groupbox_layout.addWidget(self.toolbox.button_translate_lanelet, 1, 0)
-        lanelet_operations_translation_groupbox_layout.addWidget(self.toolbox.translate_x_label, 1, 1)
+        lanelet_operations_translation_groupbox.setLayout(
+            lanelet_operations_translation_groupbox_layout
+        )
+        lanelet_operations_translation_groupbox_layout.addWidget(
+            self.toolbox.button_translate_lanelet, 1, 0
+        )
+        lanelet_operations_translation_groupbox_layout.addWidget(
+            self.toolbox.translate_x_label, 1, 1
+        )
         lanelet_operations_translation_groupbox_layout.addWidget(self.toolbox.x_translation, 1, 2)
-        lanelet_operations_translation_groupbox_layout.addWidget(self.toolbox.translate_x_unit_label, 1, 3)
-        lanelet_operations_translation_groupbox_layout.addWidget(self.toolbox.translate_y_label, 1, 4)
+        lanelet_operations_translation_groupbox_layout.addWidget(
+            self.toolbox.translate_x_unit_label, 1, 3
+        )
+        lanelet_operations_translation_groupbox_layout.addWidget(
+            self.toolbox.translate_y_label, 1, 4
+        )
         lanelet_operations_translation_groupbox_layout.addWidget(self.toolbox.y_translation, 1, 5)
-        lanelet_operations_translation_groupbox_layout.addWidget(self.toolbox.translate_y_unit_label, 1, 6)
+        lanelet_operations_translation_groupbox_layout.addWidget(
+            self.toolbox.translate_y_unit_label, 1, 6
+        )
         lanelet_operations_layout.addRow(lanelet_operations_translation_groupbox)
 
         lanelet_operations_layout.addRow(self.toolbox.button_attach_to_other_lanelet)

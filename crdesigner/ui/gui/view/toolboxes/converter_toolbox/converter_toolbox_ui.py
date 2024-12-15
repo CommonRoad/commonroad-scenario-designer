@@ -112,7 +112,9 @@ class MapConversionToolboxUI(Toolbox):
 
     def init_osm(self):
         self.button_start_osm_conversion = QPushButton("Convert OSM to CommonRoad")
-        self.button_start_osm_conversion_with_sumo_parser = QPushButton("Convert OSM to CommonRoad using Sumo Parser")
+        self.button_start_osm_conversion_with_sumo_parser = QPushButton(
+            "Convert OSM to CommonRoad using Sumo Parser"
+        )
         self.button_start_osm_conversion_with_sumo_parser.setToolTip(
             "The conversion follows the route : \nOsm -> OpenDrive -> CR\nUseful for densed crossing"
         )
@@ -155,8 +157,12 @@ class MapConversionToolboxUI(Toolbox):
             self.layout_osm_range_groupbox = QFormLayout()
             self.osm_range_groupbox = QGroupBox()
             self.osm_range_groupbox.setLayout(self.layout_osm_range_groupbox)
-            self.layout_osm_range_groupbox.addRow("Latitude:", self.osm_conversion_coordinate_latitude)
-            self.layout_osm_range_groupbox.addRow("Longitude:", self.osm_conversion_coordinate_longitude)
+            self.layout_osm_range_groupbox.addRow(
+                "Latitude:", self.osm_conversion_coordinate_latitude
+            )
+            self.layout_osm_range_groupbox.addRow(
+                "Longitude:", self.osm_conversion_coordinate_longitude
+            )
             self.layout_osm_range_groupbox.addRow("Range:", self.osm_download_map_range)
             self.layout_con_groupbox.insertRow(4, self.osm_range_groupbox)
         else:

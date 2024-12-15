@@ -190,7 +190,12 @@ def get_middle_point(
         vector1 = edge_waypoints[-1] - edge_waypoints[-2]
     else:
         raise ValueError("edge is not at node 1")
-    vector1 = vector1 / np.linalg.norm(vector1) * np.linalg.norm(start_point - end_point) * config.BEZIER_PARAMETER
+    vector1 = (
+        vector1
+        / np.linalg.norm(vector1)
+        * np.linalg.norm(start_point - end_point)
+        * config.BEZIER_PARAMETER
+    )
     middle_point = start_point + vector1
     return middle_point
 
@@ -236,7 +241,9 @@ def get_nodes(at_start: bool, edge: GraphEdge, segment: Lane) -> Tuple[GraphNode
     return node1, node2
 
 
-def find_lanes_to_extend(edge: GraphEdge, current_segments: Set[Lane], at_start: bool) -> List[Lane]:
+def find_lanes_to_extend(
+    edge: GraphEdge, current_segments: Set[Lane], at_start: bool
+) -> List[Lane]:
     """
     finds lanes of an edge which are consecutive with current_segments
 
@@ -256,7 +263,9 @@ def find_lanes_to_extend(edge: GraphEdge, current_segments: Set[Lane], at_start:
     return current_lanes
 
 
-def create_new_lanes(current_lanes: List[Lane], current_segments: Set[Lane], at_start: bool) -> List[Lane]:
+def create_new_lanes(
+    current_lanes: List[Lane], current_segments: Set[Lane], at_start: bool
+) -> List[Lane]:
     """
     creates new link segments for the segment
 
@@ -331,7 +340,9 @@ def create_new_lanes(current_lanes: List[Lane], current_segments: Set[Lane], at_
     return new_lanes
 
 
-def set_waypoints_of_lanes(edge: GraphEdge, new_lanes: List[Lane], waypoints: List[np.ndarray]) -> None:
+def set_waypoints_of_lanes(
+    edge: GraphEdge, new_lanes: List[Lane], waypoints: List[np.ndarray]
+) -> None:
     """
     sets waypoints of new created link segments
 

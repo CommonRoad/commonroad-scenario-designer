@@ -39,7 +39,9 @@ class Nary(Expression, ABC):
         """
         string = "("
         for i, expr in enumerate(self._exprs):
-            string += expr.to_string() + (" " + self._symbol + " " if i < len(self._exprs) - 1 else ")")
+            string += expr.to_string() + (
+                " " + self._symbol + " " if i < len(self._exprs) - 1 else ")"
+            )
         return string
 
     def initialize(self, model: Context):

@@ -102,7 +102,9 @@ class Lane:
         :param other: the other lane
         :return: True if lanes intersect, else False
         """
-        result = bool(self.successors & other.successors) or bool(self.predecessors & other.predecessors)
+        result = bool(self.successors & other.successors) or bool(
+            self.predecessors & other.predecessors
+        )
         return result
 
     def get_node(self, start: bool) -> GraphNode:
@@ -143,7 +145,9 @@ class Lane:
                 # do not copy bounds of faulty length
                 left_bound = None
         if left_bound is None:
-            left_bound, _ = geometry.create_tilted_parallels(self.waypoints, self.width1 / 2, self.width2 / 2)
+            left_bound, _ = geometry.create_tilted_parallels(
+                self.waypoints, self.width1 / 2, self.width2 / 2
+            )
         right_bound = None
         if self.adjacent_right is not None and not self.intersects(self.adjacent_right):
             assert self.adjacent_right_direction_equal is not None
@@ -155,7 +159,9 @@ class Lane:
                 # do not copy bounds of faulty length
                 right_bound = None
         if right_bound is None:
-            _, right_bound = geometry.create_tilted_parallels(self.waypoints, self.width1 / 2, self.width2 / 2)
+            _, right_bound = geometry.create_tilted_parallels(
+                self.waypoints, self.width1 / 2, self.width2 / 2
+            )
         assert left_bound is not None
         assert right_bound is not None
         self.left_bound = left_bound

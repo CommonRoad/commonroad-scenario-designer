@@ -26,10 +26,18 @@ class ToolBarController:
         self.tool_bar_ui.action_save.triggered.connect(lambda: file_save(self.mwindow))
 
         # Toolboxes
-        self.tool_bar_ui.action_road_network_toolbox.triggered.connect(lambda: self._road_network_toolbox_show())
-        self.tool_bar_ui.action_obstacle_toolbox.triggered.connect(lambda: self._obstacle_toolbox_show())
-        self.tool_bar_ui.action_converter_toolbox.triggered.connect(lambda: self._map_converter_toolbox_show())
-        self.tool_bar_ui.action_scenario_toolbox.triggered.connect(lambda: self._scenario_toolbox_show())
+        self.tool_bar_ui.action_road_network_toolbox.triggered.connect(
+            lambda: self._road_network_toolbox_show()
+        )
+        self.tool_bar_ui.action_obstacle_toolbox.triggered.connect(
+            lambda: self._obstacle_toolbox_show()
+        )
+        self.tool_bar_ui.action_converter_toolbox.triggered.connect(
+            lambda: self._map_converter_toolbox_show()
+        )
+        self.tool_bar_ui.action_scenario_toolbox.triggered.connect(
+            lambda: self._scenario_toolbox_show()
+        )
 
         # Undo / Redo
         self.tool_bar_ui.action_redo.triggered.connect(lambda: self.mwindow.scenario_model.redo())
@@ -39,13 +47,19 @@ class ToolBarController:
         self.tool_bar_ui.button_play_pause.triggered.connect(
             lambda: self.play_pause_animation(open_cr_file=(lambda mw: open_commonroad_file(mw)))
         )
-        self.tool_bar_ui.slider.valueChanged.connect(lambda value: self._time_step_change(value=value))
+        self.tool_bar_ui.slider.valueChanged.connect(
+            lambda value: self._time_step_change(value=value)
+        )
         self.tool_bar_ui.slider.sliderPressed.connect(lambda: self._detect_slider_clicked())
         self.tool_bar_ui.slider.sliderReleased.connect(lambda: self._detect_slider_release())
 
-        self.mwindow.animated_viewer_wrapper.cr_viewer.time_step.subscribe(self.tool_bar_ui.slider.setValue)
+        self.mwindow.animated_viewer_wrapper.cr_viewer.time_step.subscribe(
+            self.tool_bar_ui.slider.setValue
+        )
         self.tool_bar_ui.edit.textChanged.connect(lambda: self._time_step_set())
-        self.tool_bar_ui.action_save_video.triggered.connect(lambda: self._save_video(open_commonroad_file))
+        self.tool_bar_ui.action_save_video.triggered.connect(
+            lambda: self._save_video(open_commonroad_file)
+        )
 
         # Lanelet Operations
         self.tool_bar_ui.drawing_mode.triggered.connect(
@@ -59,9 +73,13 @@ class ToolBarController:
         self.tool_bar_ui.merge_lanelet.triggered.connect(lambda: self._merge_lanelets())
 
         # Cropp Map
-        self.tool_bar_ui.crop_map.triggered.connect(lambda: self._crop_map(self.tool_bar_ui.crop_map.isChecked()))
+        self.tool_bar_ui.crop_map.triggered.connect(
+            lambda: self._crop_map(self.tool_bar_ui.crop_map.isChecked())
+        )
 
-        self.tool_bar_ui.cancel_edit_vertices.triggered.connect(lambda: self._cancel_edit_vertices())
+        self.tool_bar_ui.cancel_edit_vertices.triggered.connect(
+            lambda: self._cancel_edit_vertices()
+        )
 
     def _road_network_toolbox_show(self):
         """
@@ -128,7 +146,9 @@ class ToolBarController:
         else:
             self.mwindow.animated_viewer_wrapper.cr_viewer.pause()
             self.mwindow.crdesigner_console_wrapper.text_browser.append("Pause the animation")
-            self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(QIcon(":/icons/play.png"))
+            self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(
+                QIcon(":/icons/play.png")
+            )
             self.mwindow.play_activated = False
             self.mwindow_ui.play_activated = False
 
@@ -176,10 +196,13 @@ class ToolBarController:
                 messbox.close()
         else:
             self.mwindow.crdesigner_console_wrapper.text_browser.append(
-                "Save video for scenario with ID " + str(self.mwindow.scenario_model.get_scenario_id())
+                "Save video for scenario with ID "
+                + str(self.mwindow.scenario_model.get_scenario_id())
             )
             self.mwindow.animated_viewer_wrapper.cr_viewer.save_animation()
-            self.mwindow.crdesigner_console_wrapper.text_browser.append("Saving the video finished.")
+            self.mwindow.crdesigner_console_wrapper.text_browser.append(
+                "Saving the video finished."
+            )
 
     @logger.log
     def _split_lanelet(self, is_checked):

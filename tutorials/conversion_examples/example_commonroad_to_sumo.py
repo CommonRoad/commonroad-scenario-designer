@@ -44,7 +44,9 @@ if SUMO_AVAILABLE:
 # -------------------- Option 3: SUMO conversion APIs with Traffic Simulation and Video Creation -----------------------
 
 # translate scenario to center
-centroid = np.mean(np.concatenate([la.center_vertices for la in scenario.lanelet_network.lanelets]), axis=0)
+centroid = np.mean(
+    np.concatenate([la.center_vertices for la in scenario.lanelet_network.lanelets]), axis=0
+)
 scenario.translate_rotate(-centroid, 0)
 planning_problem.translate_rotate(-centroid, 0)
 
@@ -91,4 +93,8 @@ CRDesignerFileWriter(
 )
 
 print("creating video (this may take some time)")
-create_video(simulation.commonroad_scenarios_all_time_steps(), output_folder, trajectory_pred=simulation.ego_vehicles)
+create_video(
+    simulation.commonroad_scenarios_all_time_steps(),
+    output_folder,
+    trajectory_pred=simulation.ego_vehicles,
+)

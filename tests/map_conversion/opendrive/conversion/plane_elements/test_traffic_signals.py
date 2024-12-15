@@ -113,7 +113,11 @@ class TestTrafficSignals(unittest.TestCase):
     def test_get_traffic_signals(self):
         generate_unique_id(0)
         # true stop line
-        line = StopLine(np.array([2.828427818, 4.242640225]), np.array([2.828427818, 4.242640225]), LineMarking.SOLID)
+        line = StopLine(
+            np.array([2.828427818, 4.242640225]),
+            np.array([2.828427818, 4.242640225]),
+            LineMarking.SOLID,
+        )
         # true traffic light
         position = np.array(
             [
@@ -133,7 +137,9 @@ class TestTrafficSignals(unittest.TestCase):
         # noinspection PyTypeChecker
         sign = TrafficSign(1, list([element]), None, position, virtual=False)
         # get the traffic lights, signs and stop lines from the road
-        traffic_lights, traffic_signs, stop_lines = assign_traffic_signals_to_road(self.roadStraightLine, {}, {})
+        traffic_lights, traffic_signs, stop_lines = assign_traffic_signals_to_road(
+            self.roadStraightLine, {}, {}
+        )
         # check if the extracted traffic elements are equal to the true objects
         self.assertTrue(stop_lines[0].__eq__(line))
         self.assertTrue(traffic_lights[0].__eq__(traffic_light))
@@ -155,12 +161,20 @@ class TestTrafficSignals(unittest.TestCase):
         signal.t = 2.5
         pos_calc, tangent, _, _ = road.plan_view.calc(signal.s, compute_curvature=False)
         position = np.array(
-            [pos_calc[0] + signal.t * np.cos(tangent + np.pi / 2), pos_calc[1] + signal.t * np.sin(tangent + np.pi / 2)]
+            [
+                pos_calc[0] + signal.t * np.cos(tangent + np.pi / 2),
+                pos_calc[1] + signal.t * np.sin(tangent + np.pi / 2),
+            ]
         )
-        position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal, position, tangent)
+        position_1, position_2 = calculate_stop_line_position(
+            road.lanes.lane_sections, signal, position, tangent
+        )
 
         true_pos_2 = np.array(
-            [position[0] - 0 * np.cos(tangent + np.pi / 2), position[1] - 0 * np.sin(tangent + np.pi) / 2]
+            [
+                position[0] - 0 * np.cos(tangent + np.pi / 2),
+                position[1] - 0 * np.sin(tangent + np.pi) / 2,
+            ]
         )
         true_pos_1 = position
         self.assertIsNone(np.testing.assert_almost_equal(true_pos_1, position_1))
@@ -194,14 +208,18 @@ class TestTrafficSignals(unittest.TestCase):
         self.roadMultipleLaneSections.lanes.lane_sections.append(lane_section2)
 
         # construct ground truth / expected value
-        pos_at_s, tangent, _, _ = self.roadMultipleLaneSections.plan_view.calc(self.signals[0].s, False, False)
+        pos_at_s, tangent, _, _ = self.roadMultipleLaneSections.plan_view.calc(
+            self.signals[0].s, False, False
+        )
         true_first_pos = np.array(
             [
                 pos_at_s[0] + self.signals[0].t * np.cos(tangent + np.pi / 2),
                 pos_at_s[1] + self.signals[0].t * np.sin(tangent + np.pi / 2),
             ]
         )
-        total_width = 5.0 + 0.09822 * self.signals[0].s ** 2 - 0.0051843 * self.signals[0].s ** 3 + 5.22
+        total_width = (
+            5.0 + 0.09822 * self.signals[0].s ** 2 - 0.0051843 * self.signals[0].s ** 3 + 5.22
+        )
         true_second_pos = np.array(
             [
                 true_first_pos[0] - total_width * np.cos(tangent + np.pi / 2),
@@ -211,7 +229,10 @@ class TestTrafficSignals(unittest.TestCase):
 
         # get actual value
         first_pos, second_pos = calculate_stop_line_position(
-            self.roadMultipleLaneSections.lanes.lane_sections, self.signals[0], true_first_pos, tangent
+            self.roadMultipleLaneSections.lanes.lane_sections,
+            self.signals[0],
+            true_first_pos,
+            tangent,
         )
 
         np.testing.assert_almost_equal(true_first_pos, first_pos)

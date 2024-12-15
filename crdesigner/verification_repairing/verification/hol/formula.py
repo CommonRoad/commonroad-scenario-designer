@@ -50,7 +50,13 @@ class Formula:
     Class representing a formula.
     """
 
-    def __init__(self, formula_id: str, expr: Expression, free_vars: List[Variable], free_var_domains: List[Domain]):
+    def __init__(
+        self,
+        formula_id: str,
+        expr: Expression,
+        free_vars: List[Variable],
+        free_var_domains: List[Domain],
+    ):
         """
         Constructor.
 
@@ -123,7 +129,10 @@ class Formula:
         # initializes domains of free variables
         for domain in self._free_var_domains:
             if isinstance(domain, FixedDomain):
-                if domain.domain_id in model.domain_vals.keys() or domain.domain_id == DomainName.ALL_ELEMENTS.value:
+                if (
+                    domain.domain_id in model.domain_vals.keys()
+                    or domain.domain_id == DomainName.ALL_ELEMENTS.value
+                ):
                     domain.values = model.domain_vals[domain.domain_id]
             elif isinstance(domain, DynamicDomain):
                 if domain.domain_id in model.function_funcs.keys():
@@ -141,7 +150,12 @@ class Formula:
         for i, (var, domain) in enumerate(zip(self._free_vars, self._free_var_domains)):
             if i == 0:
                 string += " || "
-            string += var.name + " in " + domain.to_string() + (", " if i < len(self._free_vars) - 1 else "")
+            string += (
+                var.name
+                + " in "
+                + domain.to_string()
+                + (", " if i < len(self._free_vars) - 1 else "")
+            )
 
         return string
 

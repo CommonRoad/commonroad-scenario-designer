@@ -24,7 +24,11 @@ def unequal(val_0: Any, val_1: Any) -> bool:
     :param val_1: Second value.
     :return: Boolean indicates whether the first value is unequal to the second value.
     """
-    if isinstance(val_0, Lanelet) or isinstance(val_0, TrafficSign) or isinstance(val_0, TrafficLight):
+    if (
+        isinstance(val_0, Lanelet)
+        or isinstance(val_0, TrafficSign)
+        or isinstance(val_0, TrafficLight)
+    ):
         return val_0 is not val_1
     else:
         return val_0 != val_1

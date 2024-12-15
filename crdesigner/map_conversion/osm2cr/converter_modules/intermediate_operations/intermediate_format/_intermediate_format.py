@@ -187,7 +187,11 @@ class IntermediateFormat:
 
         # if 3 successors we assume the directions
         if len(sorted_angels) == 3:
-            directions = {sorted_keys[0]: "left", sorted_keys[1]: "through", sorted_keys[2]: "right"}
+            directions = {
+                sorted_keys[0]: "left",
+                sorted_keys[1]: "through",
+                sorted_keys[2]: "right",
+            }
 
         # if 2 successors we assume that they both cannot have the same direction
         if len(sorted_angels) == 2:
@@ -290,7 +294,9 @@ class IntermediateFormat:
                         else:
                             # TODO implement unknown direction keys
                             try:
-                                incoming_element[direction].extend([s.id for s in incoming_lane.successors])
+                                incoming_element[direction].extend(
+                                    [s.id for s in incoming_lane.successors]
+                                )
                             except KeyError:
                                 print("unknown intersection direction key: " + direction)
                                 # calculate the direction for each successor
@@ -340,15 +346,20 @@ class IntermediateFormat:
 
         :return: CommonRoad Scenario
         """
-        location_kwargs = dict(gps_latitude=self.center_point[0], gps_longitude=self.center_point[1])
+        location_kwargs = dict(
+            gps_latitude=self.center_point[0], gps_longitude=self.center_point[1]
+        )
         location = Location(
-            geo_transformation=GeoTransformation(geo_reference=general_config.proj_string_cr), **location_kwargs
+            geo_transformation=GeoTransformation(geo_reference=general_config.proj_string_cr),
+            **location_kwargs,
         )
 
         scenario = Scenario(
             general_config.time_step_size,
             ScenarioID(
-                country_id=general_config.country_id, map_name=general_config.map_name, map_id=general_config.map_id
+                country_id=general_config.country_id,
+                map_name=general_config.map_name,
+                map_id=general_config.map_id,
             ),
             location=location,
         )
@@ -397,7 +408,12 @@ class IntermediateFormat:
         intersections = IntermediateFormat.get_intersections(graph)
 
         return IntermediateFormat(
-            nodes, edges, graph.center_point, traffic_signs, traffic_lights, intersections=intersections
+            nodes,
+            edges,
+            graph.center_point,
+            traffic_signs,
+            traffic_lights,
+            intersections=intersections,
         )
 
     @staticmethod
@@ -416,7 +432,9 @@ class IntermediateFormat:
         crossed_lane_network = crossed_interm.to_commonroad_scenario().lanelet_network
         crossings = dict()
         for crossed_lanelet in crossed_lane_network.lanelets:
-            crossing_lanelet_ids = crossing_lane_network.find_lanelet_by_shape(crossed_lanelet.polygon)
+            crossing_lanelet_ids = crossing_lane_network.find_lanelet_by_shape(
+                crossed_lanelet.polygon
+            )
             crossings[crossed_lanelet.lanelet_id] = set(crossing_lanelet_ids)
         return crossings
 

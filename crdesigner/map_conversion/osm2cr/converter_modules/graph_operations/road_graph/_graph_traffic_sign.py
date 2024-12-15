@@ -14,7 +14,9 @@ if TYPE_CHECKING:
 
 
 class GraphTrafficSign:
-    def __init__(self, sign: Dict, node: GraphNode = None, edges: List = [], direction: float = None):
+    def __init__(
+        self, sign: Dict, node: GraphNode = None, edges: List = [], direction: float = None
+    ):
         self.sign = sign
         self.node = node
         self.edges = edges

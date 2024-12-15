@@ -27,7 +27,6 @@ else:
 
 
 class FormulaVisitor(ParseTreeVisitor):
-
     def visitFormula(self, ctx: FormulaParser.FormulaContext):
         expr = self.visit(ctx.expr())
 
@@ -53,7 +52,7 @@ class FormulaVisitor(ParseTreeVisitor):
         return Implication(left_expr, right_expr)
 
     def visitXor(self, ctx: FormulaParser.XorContext):
-        symbols = ['^', 'xor', 'XOR']
+        symbols = ["^", "xor", "XOR"]
         if ctx.op is None or ctx.op.text not in symbols:
             return self.visitChildren(ctx)
 
@@ -65,7 +64,7 @@ class FormulaVisitor(ParseTreeVisitor):
         return Xor(exprs)
 
     def visitOr(self, ctx: FormulaParser.OrContext):
-        symbols = ['|', 'or', 'OR']
+        symbols = ["|", "or", "OR"]
         if ctx.op is None or ctx.op.text not in symbols:
             return self.visitChildren(ctx)
 
@@ -77,7 +76,7 @@ class FormulaVisitor(ParseTreeVisitor):
         return Or(exprs)
 
     def visitAnd(self, ctx: FormulaParser.AndContext):
-        symbols = ['&', 'and', 'AND']
+        symbols = ["&", "and", "AND"]
         if ctx.op is None or ctx.op.text not in symbols:
             return self.visitChildren(ctx)
 
@@ -118,9 +117,9 @@ class FormulaVisitor(ParseTreeVisitor):
         expr = self.visit(ctx.right)
         vars, domains = self.visit(ctx.dv)
 
-        if ctx.cop.text == '<=':
+        if ctx.cop.text == "<=":
             count_type = Counting.CountType.LESS_EQUAL
-        elif ctx.cop.text == '=':
+        elif ctx.cop.text == "=":
             count_type = Counting.CountType.EQUAL
         else:
             count_type = Counting.CountType.GREATER_EQUAL
@@ -134,6 +133,7 @@ class FormulaVisitor(ParseTreeVisitor):
         right_term = self.visit(ctx.right)
 
         return Predicate(ctx.op.text, [left_term, right_term])
+
     def visitVarTerm(self, ctx: FormulaParser.VarTermContext):
         return Variable(ctx.te.text)
 
@@ -149,7 +149,7 @@ class FormulaVisitor(ParseTreeVisitor):
     def visitTermsSignature(self, ctx: FormulaParser.TermsSignatureContext):
         terms = []
         for child in ctx.children:
-            if child.getText() == ',' or child.getText() == ')':
+            if child.getText() == "," or child.getText() == ")":
                 continue
             terms.append(self.visit(child))
 
@@ -160,9 +160,9 @@ class FormulaVisitor(ParseTreeVisitor):
         next_domain = False
         num_vars = 0
         for child in ctx.children:
-            if child.getText() == ',':
+            if child.getText() == ",":
                 continue
-            if child.getText() == 'in':
+            if child.getText() == "in":
                 next_domain = True
                 continue
 
@@ -188,7 +188,7 @@ class FormulaVisitor(ParseTreeVisitor):
         return DynamicDomain(name, func)
 
     def visitStringConst(self, ctx: FormulaParser.StringConstContext):
-        return Constant(ctx.val.text.replace('"', ''))
+        return Constant(ctx.val.text.replace('"', ""))
 
     def visitIntConst(self, ctx: FormulaParser.IntConstContext):
         return Constant(int(ctx.val.text))

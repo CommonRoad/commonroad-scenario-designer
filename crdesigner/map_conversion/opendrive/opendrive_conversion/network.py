@@ -204,7 +204,9 @@ class Network:
             self._extract_road_speed_limit(road)
 
             # The reference border is the baseline for the whole road
-            reference_border = OpenDriveConverter.create_reference_border(road.plan_view, road.lanes.lane_offsets)
+            reference_border = OpenDriveConverter.create_reference_border(
+                road.plan_view, road.lanes.lane_offsets
+            )
 
             # Extracting signals, signs and stop lines from each road
             traffic_lights, traffic_signs, stop_lines = assign_traffic_signals_to_road(
@@ -292,7 +294,9 @@ class Network:
         """
         for road_object in road.objects:
             if road_object.name == "StopLine":
-                position, tangent, _, _ = road.plan_view.calc(road_object.s, compute_curvature=False)
+                position, tangent, _, _ = road.plan_view.calc(
+                    road_object.s, compute_curvature=False
+                )
                 position = np.array(
                     [
                         position[0] + road_object.t * np.cos(tangent + np.pi / 2),
@@ -354,7 +358,10 @@ class Network:
                 self._link_index.clean_intersections(parametric_lane.id_)
                 continue  # skip also for general lanelet generation
             lanelet = parametric_lane.to_lanelet(
-                self._config.error_tolerance, self._config.min_delta_s, transformer, parametric_lane.driving_direction
+                self._config.error_tolerance,
+                self._config.min_delta_s,
+                transformer,
+                parametric_lane.driving_direction,
             )
             lanelet.predecessor = self._link_index.get_predecessors(parametric_lane.id_)
             lanelet.successor = self._link_index.get_successors(parametric_lane.id_)
@@ -414,7 +421,8 @@ class Network:
         drivable_lanelets = [
             lanelet.lanelet_id
             for lanelet in lanelet_network.lanelets
-            if lanelet.lanelet_type not in [{LaneletType.BICYCLE_LANE}, {LaneletType.SIDEWALK}, {LaneletType.BORDER}]
+            if lanelet.lanelet_type
+            not in [{LaneletType.BICYCLE_LANE}, {LaneletType.SIDEWALK}, {LaneletType.BORDER}]
         ]
 
         # for all lanelets with no predecessor and no traffic sign, add a virtual sign to the lanelet
@@ -439,7 +447,9 @@ class Network:
                     already_has_sign = True
                     break
             if not already_has_sign:
-                self.add_virtual_traffic_sign(lanelet_network.find_lanelet_by_id(lanelet), lanelet_network)
+                self.add_virtual_traffic_sign(
+                    lanelet_network.find_lanelet_by_id(lanelet), lanelet_network
+                )
 
         self.find_lane_speed_changes(drivable_lanelets, lanelet_network)
         self.reference_traffic_signs_with_equal_speed(drivable_lanelets, lanelet_network)
@@ -475,7 +485,9 @@ class Network:
                     intersection.crossings.add(crosswalk.lanelet_id)
                     break
 
-    def reference_traffic_signs_with_equal_speed(self, lanelets: List[int], lanelet_network: ConversionLaneletNetwork):
+    def reference_traffic_signs_with_equal_speed(
+        self, lanelets: List[int], lanelet_network: ConversionLaneletNetwork
+    ):
         """If there are multiple lanelets that all have an equal lane speed, finds the first traffic sign of any
         predecessor with the same speed and references it for all lanelets.
 
@@ -487,7 +499,9 @@ class Network:
             visited.append(lane)
             lane = lanelet_network.find_lanelet_by_id(lane)
             speeds = [
-                lanelet_network.find_lanelet_by_id(pred).speed for pred in lane.predecessor if lane.speed is not None
+                lanelet_network.find_lanelet_by_id(pred).speed
+                for pred in lane.predecessor
+                if lane.speed is not None
             ]
             if not speeds == [] and speeds.count(speeds[0]) == len(speeds):
                 # lane speeds are all the same, find first sign with equal speed
@@ -534,7 +548,9 @@ class Network:
                             break
                     break
 
-    def find_lane_speed_changes(self, lanelets: List[int], lanelet_network: ConversionLaneletNetwork):
+    def find_lane_speed_changes(
+        self, lanelets: List[int], lanelet_network: ConversionLaneletNetwork
+    ):
         """Iteratively finds changes in lane speed between a lanelet and its predecessors. If there is a change, a
         virtual speed sign is added to the lanelet.
 
@@ -554,7 +570,11 @@ class Network:
                 # Only extend lanelets by unique predecessors, if we have not already visisted them
                 if pred not in visited:
                     lanelets.extend(
-                        [p for p in lanelet_network.find_lanelet_by_id(pred).predecessor if p not in lanelets]
+                        [
+                            p
+                            for p in lanelet_network.find_lanelet_by_id(pred).predecessor
+                            if p not in lanelets
+                        ]
                     )
 
     def get_traffic_sign_with_equal_speed(
@@ -586,13 +606,17 @@ class Network:
                     return sign
         return None
 
-    def add_virtual_traffic_sign(self, lanelet: ConversionLanelet, network: ConversionLaneletNetwork):
+    def add_virtual_traffic_sign(
+        self, lanelet: ConversionLanelet, network: ConversionLaneletNetwork
+    ):
         """Adds a virtual traffic sign to a lanelet.
 
         :param lanelet: Lanelet to add virtual traffic signal to.
         :param network: The lanelet network to which the lanelet belongs to.
         """
-        traffic_sign_enum = utils.get_traffic_sign_enum_from_country(utils.get_signal_country(self._country_ID))
+        traffic_sign_enum = utils.get_traffic_sign_enum_from_country(
+            utils.get_signal_country(self._country_ID)
+        )
         element_id = traffic_sign_enum.MAX_SPEED
         additional_values = [str(float(lanelet.speed))]
         traffic_sign_element = TrafficSignElement(
@@ -609,7 +633,9 @@ class Network:
         lanelet.add_traffic_sign_to_lanelet(traffic_sign.traffic_sign_id)
 
     def export_commonroad_scenario(
-        self, g_config: GeneralConfig = general_config, od_config: OpenDriveConfig = open_drive_config
+        self,
+        g_config: GeneralConfig = general_config,
+        od_config: OpenDriveConfig = open_drive_config,
     ):
         """Export a full CommonRoad scenario
 
@@ -633,7 +659,7 @@ class Network:
                 if self._config.proj_string_odr is not None
                 else None
             ),
-            **location_kwargs
+            **location_kwargs,
         )
 
         scenario_id = ScenarioID(
@@ -644,7 +670,11 @@ class Network:
 
         scenario = Scenario(dt=g_config.time_step_size, scenario_id=scenario_id, location=location)
 
-        scenario.add_objects(self.export_lanelet_network(transformer=transformer, filter_types=od_config.filter_types))
+        scenario.add_objects(
+            self.export_lanelet_network(
+                transformer=transformer, filter_types=od_config.filter_types
+            )
+        )
 
         return scenario
 
@@ -685,7 +715,9 @@ class LinkIndex:
         for road in opendrive.roads:
             for lane_section in road.lanes.lane_sections:
                 for lane in lane_section.all_lanes:
-                    parametric_lane_id = encode_road_section_lane_width_id(road.id, lane_section.idx, lane.id, -1)
+                    parametric_lane_id = encode_road_section_lane_width_id(
+                        road.id, lane_section.idx, lane.id, -1
+                    )
 
                     # Not the last lane section? > Next lane section in same road
                     if lane_section.idx < road.lanes.get_last_lane_section_idx():
@@ -693,11 +725,16 @@ class LinkIndex:
                             road.id, lane_section.idx + 1, lane.link.successorId, -1
                         )
 
-                        self.add_link(parametric_lane_id, successor_id, lane.id >= 0, road.driving_direction)
+                        self.add_link(
+                            parametric_lane_id, successor_id, lane.id >= 0, road.driving_direction
+                        )
 
                     # Last lane section! > Next road in first lane section
                     # Try to get next road
-                    elif road.link.successor is not None and road.link.successor.elementType != "junction":
+                    elif (
+                        road.link.successor is not None
+                        and road.link.successor.elementType != "junction"
+                    ):
                         next_road = opendrive.getRoad(road.link.successor.element_id)
 
                         if next_road is not None:
@@ -713,7 +750,12 @@ class LinkIndex:
                                     lane.link.successorId,
                                     -1,
                                 )
-                            self.add_link(parametric_lane_id, successor_id, lane.id >= 0, road.driving_direction)
+                            self.add_link(
+                                parametric_lane_id,
+                                successor_id,
+                                lane.id >= 0,
+                                road.driving_direction,
+                            )
 
                     # Not first lane section? > Previous lane section in same road
                     if lane_section.idx > 0:
@@ -721,11 +763,16 @@ class LinkIndex:
                             road.id, lane_section.idx - 1, lane.link.predecessorId, -1
                         )
 
-                        self.add_link(predecessor_id, parametric_lane_id, lane.id >= 0, road.driving_direction)
+                        self.add_link(
+                            predecessor_id, parametric_lane_id, lane.id >= 0, road.driving_direction
+                        )
 
                     # First lane section! > Previous road
                     # Try to get previous road
-                    elif road.link.predecessor is not None and road.link.predecessor.elementType != "junction":
+                    elif (
+                        road.link.predecessor is not None
+                        and road.link.predecessor.elementType != "junction"
+                    ):
                         prevRoad = opendrive.getRoad(road.link.predecessor.element_id)
 
                         if prevRoad is not None:
@@ -741,10 +788,19 @@ class LinkIndex:
                                     lane.link.predecessorId,
                                     -1,
                                 )
-                            self.add_link(predecessor_id, parametric_lane_id, lane.id >= 0, road.driving_direction)
+                            self.add_link(
+                                predecessor_id,
+                                parametric_lane_id,
+                                lane.id >= 0,
+                                road.driving_direction,
+                            )
 
     def add_intersection_link(
-        self, parametric_lane_id: str, successor: str, reverse: bool = False, driving_direction: bool = True
+        self,
+        parametric_lane_id: str,
+        successor: str,
+        reverse: bool = False,
+        driving_direction: bool = True,
     ):
         """
         Similar to add_link, adds successors only in an intersection_dict.
@@ -770,7 +826,13 @@ class LinkIndex:
         if successor not in self._intersection_dict[parametric_lane_id]:
             self._intersection_dict[parametric_lane_id].append(successor)
 
-    def add_link(self, parametric_lane_id: str, successor: str, reverse: bool = False, driving_direction: bool = True):
+    def add_link(
+        self,
+        parametric_lane_id: str,
+        successor: str,
+        reverse: bool = False,
+        driving_direction: bool = True,
+    ):
         """Adds links to a parametric lane.
 
         :param parametric_lane_id: The ID of the lane to which to add link.
@@ -824,14 +886,22 @@ class LinkIndex:
                             connecting_road.id, 0, lane_link.toId, -1
                         )
                         self.add_link(
-                            incoming_road_id, connecting_road_id, lane_link.toId > 0, incoming_road.driving_direction
+                            incoming_road_id,
+                            connecting_road_id,
+                            lane_link.toId > 0,
+                            incoming_road.driving_direction,
                         )
                         self.add_intersection_link(
-                            incoming_road_id, connecting_road_id, lane_link.toId > 0, incoming_road.driving_direction
+                            incoming_road_id,
+                            connecting_road_id,
+                            lane_link.toId > 0,
+                            incoming_road.driving_direction,
                         )
 
                     else:
-                        incoming_road_id = encode_road_section_lane_width_id(incoming_road.id, 0, lane_link.fromId, -1)
+                        incoming_road_id = encode_road_section_lane_width_id(
+                            incoming_road.id, 0, lane_link.fromId, -1
+                        )
                         connecting_road_id = encode_road_section_lane_width_id(
                             connecting_road.id,
                             connecting_road.lanes.get_last_lane_section_idx(),
@@ -839,10 +909,16 @@ class LinkIndex:
                             -1,
                         )
                         self.add_link(
-                            incoming_road_id, connecting_road_id, lane_link.toId < 0, incoming_road.driving_direction
+                            incoming_road_id,
+                            connecting_road_id,
+                            lane_link.toId < 0,
+                            incoming_road.driving_direction,
                         )
                         self.add_intersection_link(
-                            incoming_road_id, connecting_road_id, lane_link.toId < 0, incoming_road.driving_direction
+                            incoming_road_id,
+                            connecting_road_id,
+                            lane_link.toId < 0,
+                            incoming_road.driving_direction,
                         )
             # Extracting opendrive junction links to formulate CommonRoad intersections
             self._intersections.append(self._intersection_dict)

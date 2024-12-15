@@ -32,7 +32,9 @@ class TestGeometry(unittest.TestCase):
         heading = 1.2
         curvature = 1
 
-        arc = Arc(start_position=start_position, heading=heading, length=length, curvature=curvature)
+        arc = Arc(
+            start_position=start_position, heading=heading, length=length, curvature=curvature
+        )
 
         np.testing.assert_equal(start_position, arc.start_position)
         self.assertEqual(length, arc.length)
@@ -48,7 +50,11 @@ class TestGeometry(unittest.TestCase):
         true_spiral = EulerSpiral.create_from_length_and_curvature(length, curv_start, curv_end)
 
         spiral = Spiral(
-            start_position=start_position, heading=heading, length=length, curv_start=curv_start, curv_end=curv_end
+            start_position=start_position,
+            heading=heading,
+            length=length,
+            curv_start=curv_start,
+            curv_end=curv_end,
         )
 
         np.testing.assert_equal(start_position, spiral.start_position)
@@ -67,7 +73,9 @@ class TestGeometry(unittest.TestCase):
         c = 1
         d = 5
 
-        poly3 = Poly3(start_position=start_position, heading=heading, length=length, a=a, b=b, c=c, d=d)
+        poly3 = Poly3(
+            start_position=start_position, heading=heading, length=length, a=a, b=b, c=c, d=d
+        )
 
         np.testing.assert_equal(start_position, poly3.start_position)
         self.assertEqual(heading, poly3.heading)
@@ -156,7 +164,9 @@ class TestGeometry(unittest.TestCase):
         heading = 3
         curvature = 1
 
-        arc = Arc(start_position=start_position, heading=heading, length=length, curvature=curvature)
+        arc = Arc(
+            start_position=start_position, heading=heading, length=length, curvature=curvature
+        )
         result = arc.calc_position(s_pos=2)
         expected_pos = np.array([-0.100044283, -0.273654682])
 
@@ -174,7 +184,9 @@ class TestGeometry(unittest.TestCase):
         c = 1
         d = 5
 
-        poly3 = Poly3(start_position=start_position, heading=heading, length=length, a=a, b=b, c=c, d=d)
+        poly3 = Poly3(
+            start_position=start_position, heading=heading, length=length, a=a, b=b, c=c, d=d
+        )
         result = poly3.calc_position(s_pos=2)
         expected_pos = np.array([-45.74131696, 25.7066814])
 
@@ -337,7 +349,11 @@ class TestGeometry(unittest.TestCase):
         )
         self.assertEqual(2.8, result)
         result2 = calc_next_s(
-            s_current=s_current, curvature=curvature, error_tolerance=error_tolerance_s, min_delta_s=0.6, s_max=s_max
+            s_current=s_current,
+            curvature=curvature,
+            error_tolerance=error_tolerance_s,
+            min_delta_s=0.6,
+            s_max=s_max,
         )
         self.assertAlmostEqual(2.7302967433, result2)
         result3 = calc_next_s(
@@ -349,7 +365,11 @@ class TestGeometry(unittest.TestCase):
         )
         self.assertAlmostEqual(2.7402967433, result3)
         result4 = calc_next_s(
-            s_current=s_current, curvature=curvature, error_tolerance=error_tolerance_s, min_delta_s=0.6, s_max=2
+            s_current=s_current,
+            curvature=curvature,
+            error_tolerance=error_tolerance_s,
+            min_delta_s=0.6,
+            s_max=2,
         )
         self.assertAlmostEqual(2, result4)
 

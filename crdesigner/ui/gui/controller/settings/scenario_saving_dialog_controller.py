@@ -56,14 +56,30 @@ class ScenarioSavingDialogController:
 
     def connect_gui_elements(self):
         """Connect the GUI elements with the corresponding methods."""
-        self.save_window.country.currentTextChanged.connect(lambda: self.update_scenario_meta_data())
-        self.save_window.scenario_scene_name.textChanged.connect(lambda: self.update_scenario_meta_data())
-        self.save_window.scenario_scene_id.valueChanged.connect(lambda: self.update_scenario_meta_data())
-        self.save_window.scenario_config_id.valueChanged.connect(lambda: self.update_scenario_meta_data())
-        self.save_window.prediction_type.currentTextChanged.connect(lambda: self.update_scenario_meta_data())
-        self.save_window.scenario_prediction_id.valueChanged.connect(lambda: self.update_scenario_meta_data())
-        self.save_window.cooperative_scenario.stateChanged.connect(lambda: self.update_scenario_meta_data())
-        self.save_window.geo_reference.currentTextChanged.connect(lambda: self.change_geo_reference())
+        self.save_window.country.currentTextChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.save_window.scenario_scene_name.textChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.save_window.scenario_scene_id.valueChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.save_window.scenario_config_id.valueChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.save_window.prediction_type.currentTextChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.save_window.scenario_prediction_id.valueChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.save_window.cooperative_scenario.stateChanged.connect(
+            lambda: self.update_scenario_meta_data()
+        )
+        self.save_window.geo_reference.currentTextChanged.connect(
+            lambda: self.change_geo_reference()
+        )
 
         self.save_window.button_directory.clicked.connect(lambda: self.select_directory())
         self.save_window.button_save.clicked.connect(lambda: self.save_scenario())
@@ -90,20 +106,32 @@ class ScenarioSavingDialogController:
             else 1
         )
         self.save_window.cooperative_scenario.setChecked(
-            self.current_scenario.scenario_id.cooperative if self.current_scenario.scenario_id.cooperative else False
+            self.current_scenario.scenario_id.cooperative
+            if self.current_scenario.scenario_id.cooperative
+            else False
         )
         self.save_window.country.setCurrentText(self.current_scenario.scenario_id.country_id)
         self.save_window.scenario_scene_id.setValue(self.current_scenario.scenario_id.map_id)
         self.save_window.scenario_scene_name.setText(self.current_scenario.scenario_id.map_name)
-        self.save_window.prediction_type.setCurrentText(self.current_scenario.scenario_id.obstacle_behavior)
+        self.save_window.prediction_type.setCurrentText(
+            self.current_scenario.scenario_id.obstacle_behavior
+        )
         self.save_window.scenario_prediction_id.setValue(
-            self.current_scenario.scenario_id.prediction_id if self.current_scenario.scenario_id.prediction_id else 1
+            self.current_scenario.scenario_id.prediction_id
+            if self.current_scenario.scenario_id.prediction_id
+            else 1
         )
 
         if self.current_scenario.location:
-            self.save_window.scenario_geo_anme_id.setText(str(self.current_scenario.location.geo_name_id))
-            self.save_window.scenario_latitude.setText(str(self.current_scenario.location.gps_latitude))
-            self.save_window.scenario_longitude.setText(str(self.current_scenario.location.gps_longitude))
+            self.save_window.scenario_geo_anme_id.setText(
+                str(self.current_scenario.location.geo_name_id)
+            )
+            self.save_window.scenario_latitude.setText(
+                str(self.current_scenario.location.gps_latitude)
+            )
+            self.save_window.scenario_longitude.setText(
+                str(self.current_scenario.location.gps_longitude)
+            )
             if self.current_scenario.location.environment:
                 self.save_window.scenario_time_of_day.setCurrentText(
                     self.current_scenario.location.environment.time_of_day.value
@@ -114,14 +142,19 @@ class ScenarioSavingDialogController:
                 self.save_window.scenario_underground.setCurrentText(
                     self.current_scenario.location.environment.underground.value
                 )
-                self.save_window.scenario_time_hour.setValue(self.current_scenario.location.environment.time.hours)
-                self.save_window.scenario_time_minute.setValue(self.current_scenario.location.environment.time.minutes)
+                self.save_window.scenario_time_hour.setValue(
+                    self.current_scenario.location.environment.time.hours
+                )
+                self.save_window.scenario_time_minute.setValue(
+                    self.current_scenario.location.environment.time.minutes
+                )
             else:
                 self.init_scenario_location_default()
 
             if self.current_scenario.location.geo_transformation:
                 if self.current_scenario.location.geo_transformation.geo_reference in [
-                    self.save_window.geo_reference.itemText(i) for i in range(self.save_window.geo_reference.count())
+                    self.save_window.geo_reference.itemText(i)
+                    for i in range(self.save_window.geo_reference.count())
                 ]:
                     self.save_window.geo_reference.setCurrentText(
                         self.current_scenario.location.geo_transformation.geo_reference
@@ -165,7 +198,11 @@ class ScenarioSavingDialogController:
 
     def change_geo_reference(self):
         reference = self.save_window.geo_reference.currentText()
-        if reference in [gui_config.utm_default, gui_config.pseudo_mercator, gui_config.lanelet2_default]:
+        if reference in [
+            gui_config.utm_default,
+            gui_config.pseudo_mercator,
+            gui_config.lanelet2_default,
+        ]:
             self.save_window.geo_reference.setEditable(False)
         else:
             self.save_window.geo_reference.setEditable(True)
@@ -211,11 +248,15 @@ class ScenarioSavingDialogController:
             filename = DIR_AUTOSAVE + "/autosave" + ".xml"
             if self.current_pps is None:
                 writer.write_scenario_to_file(
-                    filename, OverwriteExistingFile.ALWAYS, verify_repair_scenario=gui_config.verify_repair_scenario
+                    filename,
+                    OverwriteExistingFile.ALWAYS,
+                    verify_repair_scenario=gui_config.verify_repair_scenario,
                 )
             else:
                 writer.write_to_file(
-                    filename, OverwriteExistingFile.ALWAYS, verify_repair_scenario=gui_config.verify_repair_scenario
+                    filename,
+                    OverwriteExistingFile.ALWAYS,
+                    verify_repair_scenario=gui_config.verify_repair_scenario,
                 )
             sys.stdout = original_stdout
             sys.stderr = original_stderr
