@@ -30,7 +30,7 @@ This code of this conversion take some points into account:
 
 To get a better understanding of the conversion process, a flowchart of the function that transforms the lanelet
 (CommonRoad format) to the WayRelation (Lanelet2/OSM format) is given below:
-![l2flowchart](assets/lanelet2/Lanelet_to_way_rel_FLOWCHART.png)
+![](assets/lanelet2/Lanelet_to_way_rel_FLOWCHART.png)
 
 The function takes a lanelet as an input and creates nodes based on those lanelet's vertices.
 As the nodes form right and left ways, the function checks if those ways already exist.

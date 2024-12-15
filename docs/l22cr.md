@@ -34,12 +34,22 @@ A few comments on the conversion:
 dictionaries are used which save the node-lanelet relation, e.g.,
 "Node is first left node of which lanelet" (first_left_nodes[node_id] = lanelet_id).
 - Same for lanelet predecessor relationship.
-- If lanelets in OSM share a common way, they are adjacent to each other. As a way can have only one direction, and if it is shared by lanelets having opposite driving directions, the vertices of one boundary of one of the two lanelet have to be reversed after conversion. This boundary is by default the left boundary considering the right-driving system in most of the world. You can set it to right by using the argument "left_driving_system=True" when calling the Converter.
-- Lanelets can be adjacent without sharing a common way, because two ways can describe the same trajectory, but with a different number of nodes. This converter can still compare two vertices which resulted from converting two possible adjacent ways to the CommonRoad lanelet format and determine if the corresponding lanelets are adjacent. However, this is computationally quite intensive and is thus disabled by default (enable it with "--adjacencies" in the command line tool or setting "detect_adjacencies=True" when calling the converter.)
+- If lanelets in OSM share a common way, they are adjacent to each other.
+As a way can have only one direction, and if it is shared by lanelets having opposite driving directions,
+the vertices of one boundary of one of the two lanelet have to be reversed after conversion.
+This boundary is by default the left boundary considering the right-driving system in most of the world.
+You can set it to right by using the argument "left_driving_system=True" when calling the Converter.
+- Lanelets can be adjacent without sharing a common way, because two ways can describe the same trajectory,
+but with a different number of nodes.
+This converter can still compare two vertices which resulted from converting two possible adjacent ways
+to the CommonRoad lanelet format and determine if the corresponding lanelets are adjacent.
+However, this is computationally quite intensive and is thus disabled by
+default (enable it with "--adjacencies" in the command line tool or setting "detect_adjacencies=True"
+when calling the converter.)
 
 To get a better understanding of the conversion process, a flowchart of the function that
 transforms the WayRelation (Lanelet2/OSM format) to the Lanelet (CommonRoad format) is given below:
-![l2flowchart](assets/lanelet2/Way_rel_to_lanelet_FLOWCHART.png)
+![](assets/lanelet2/Way_rel_to_lanelet_FLOWCHART.png)
 
 Both left and right ways of the WayRelation object have to be of the same size.
 If not, the function tries to fix the issue by resizing one of the ways, raising an error in case of a failure.
