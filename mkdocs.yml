@@ -19,3 +19,6 @@ nav:
     - OpenDRIVE to CommonRoad: odr2cr.md
     - OpenStreetMap to CommonRoad: osm2cr.md
     - SUMO: sumo.md
+  - API Reference :
+      - "Map Conversion Interface" : map_conversion_interface_api.md
+      - "Map Verification and Repairing" : map_verification_api.md
