@@ -18,4 +18,4 @@ nav:
     - Lanelet2 to CommonRoad: l22cr.md
     - OpenDRIVE to CommonRoad: odr2cr.md
     - OpenStreetMap to CommonRoad: osm2cr.md
-    - SUMO to CommonRoad: sumo2cr.md
+    - SUMO: sumo.md
