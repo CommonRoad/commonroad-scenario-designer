@@ -20,6 +20,7 @@
 - Check for qt6 so that map conversions work under Ubuntu 20.04
 - GUI: Adding traffic signs to lanelet did not work due to changes in commonroad-io
 - osm2cr: Lanelet line markings were always set to 'no_marking' although the line markings are unkown
+- GUI: rounding error identification of straight lanelets
 
 ## [0.8.2] - 2024-07-22
 
