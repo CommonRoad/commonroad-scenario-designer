@@ -21,6 +21,10 @@
 - GUI: Adding traffic signs to lanelet did not work due to changes in commonroad-io
 - osm2cr: Lanelet line markings were always set to 'no_marking' although the line markings are unkown
 - GUI: rounding error identification of straight lanelets
+- GUI: visualization of maps from set-based scenarios (playing scenario not working yet)
+
+### Removed
+- Curvilinear coordinate system helper function implementations from SUMO conversion
 
 ## [0.8.2] - 2024-07-22
 

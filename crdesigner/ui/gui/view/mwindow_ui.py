@@ -1,5 +1,6 @@
 import logging
 
+from commonroad.common.util import Interval
 from PyQt6 import QtGui
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
@@ -51,7 +52,10 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         logging.info("update_max_step")
         value = value if value > -1 else self.animated_viewer_wrapper.cr_viewer.max_timestep
         self.top_bar.toolbar_wrapper.tool_bar_ui.label2.setText(" / " + str(value))
-        self.top_bar.toolbar_wrapper.tool_bar_ui.slider.setMaximum(value)
+        if isinstance(value, Interval):
+            self.top_bar.toolbar_wrapper.tool_bar_ui.slider.setMaximum(value.end)
+        else:
+            self.top_bar.toolbar_wrapper.tool_bar_ui.slider.setMaximum(value)
 
     def update_toolbox_scenarios(self):
         """Redirect to the service layer."""

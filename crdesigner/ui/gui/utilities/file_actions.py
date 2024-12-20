@@ -1,7 +1,7 @@
 import logging
 import os
 
-from commonroad.common.util import FileFormat
+from commonroad.common.util import FileFormat, Interval
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario
 from PyQt6.QtGui import QIcon
@@ -110,7 +110,10 @@ def update_max_step(mwindow, value: int = -1):
     logging.info("update_max_step")
     value = value if value > -1 else mwindow.animated_viewer_wrapper.cr_viewer.max_timestep
     mwindow.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.label2.setText(" / " + str(value))
-    mwindow.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.slider.setMaximum(value)
+    if isinstance(value, Interval):
+        mwindow.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.slider.setMaximum(value.end)
+    else:
+        mwindow.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.slider.setMaximum(value)
 
 
 def close_window(mwindow):

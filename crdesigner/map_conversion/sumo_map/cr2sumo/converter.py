@@ -30,8 +30,11 @@ try:
     import commonroad_dc.pycrccosy
     from commonroad_dc.costs.route_matcher import LaneletRouteMatcher
     from commonroad_dc.geometry.util import (
+        chaikins_corner_cutting,
         compute_curvature_from_polyline,
+        compute_polyline_length,
         resample_polyline,
+        resample_polyline_with_length_check,
     )
 except ImportError:
     warnings.warn(
@@ -2087,52 +2090,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         def create_coordinate_system_from_polyline(
             polyline,
         ) -> commonroad_dc.pycrccosy.CurvilinearCoordinateSystem:
-            def compute_polyline_length(polyline: np.ndarray) -> float:
-                """
-                Computes the path length s of a given polyline
-                :param polyline: The polyline
-                :return: The path length of the polyline
-                """
-                assert (
-                    isinstance(polyline, np.ndarray)
-                    and polyline.ndim == 2
-                    and len(polyline[:, 0]) > 2
-                ), "Polyline malformed for path length computation p={}".format(polyline)
-
-                distance_between_points = np.diff(polyline, axis=0)
-                # noinspection PyTypeChecker
-                return np.sum(np.sqrt(np.sum(distance_between_points**2, axis=1)))
-
-            def resample_polyline_with_length_check(polyline):
-                length = np.linalg.norm(polyline[-1] - polyline[0])
-                if length > 2.0:
-                    polyline = resample_polyline(polyline, 1.0)
-                else:
-                    polyline = resample_polyline(polyline, length / 10.0)
-
-                return polyline
-
-            def chaikins_corner_cutting2(coords, refinements=2):
-                coords = np.array(coords)
-
-                for _ in range(refinements):
-                    L = coords.repeat(2, axis=0)
-                    R = np.empty_like(L)
-                    R[0] = L[0]
-                    R[2::2] = L[1:-1:2]
-                    R[1:-1:2] = L[2::2]
-                    R[-1] = L[-1]
-                    coords = L * 0.75 + R * 0.25
-
-                return coords
-
             polyline = resample_polyline_with_length_check(polyline)
 
             abs_curvature = abs(compute_curvature_from_polyline(polyline))
             max_curvature = max(abs_curvature)
             infinite_loop_counter = 0
             while max_curvature > 0.1:
-                polyline = np.array(chaikins_corner_cutting2(polyline))
+                polyline = np.array(chaikins_corner_cutting(polyline))
 
                 length = compute_polyline_length(polyline)
                 if length > 10:
