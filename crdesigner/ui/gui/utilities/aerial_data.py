@@ -92,7 +92,9 @@ def validate_bing_key() -> bool:
         "}".format(bingMapsKey)
     )
 
-    headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0"}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0"
+    }
 
     with requests.session() as s:
         # load cookies otherwise an HTTP error occurs
@@ -148,7 +150,6 @@ def get_tile(quadkey: str) -> JpegImageFile:
             sub_domain = bing_maps_api_response["imageUrlSubdomains"][0]
             request = request.replace("{subdomain}", sub_domain)
             request = request.replace("{quadkey}", quadkey)
-            print(request)
             tile = urlopen(request).read()
             image = Image.open(BytesIO(tile))
             store_tile(quadkey, image)

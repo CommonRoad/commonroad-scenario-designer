@@ -19,7 +19,9 @@ def merge(to_merge: List[int], scenario: Scenario) -> Tuple[Scenario, int]:
     merged_lanelet._traffic_lights = {t for lanelet in lanelets for t in lanelet.traffic_lights}
 
     lanelet_network._lanelets = {
-        la.lanelet_id: la for la in lanelet_network.lanelets + [merged_lanelet] if la.lanelet_id not in to_merge
+        la.lanelet_id: la
+        for la in lanelet_network.lanelets + [merged_lanelet]
+        if la.lanelet_id not in to_merge
     }
     to_merge = set(to_merge)
 
@@ -40,9 +42,9 @@ def merge(to_merge: List[int], scenario: Scenario) -> Tuple[Scenario, int]:
 
             def update_incoming():
                 if merged_lanelet.lanelet_id in incoming.incoming_lanelets:
-                    incoming._incoming_lanelets = incoming.incoming_lanelets - {merged_lanelet.lanelet_id} | set(
-                        merged_lanelet.predecessor
-                    )
+                    incoming._incoming_lanelets = incoming.incoming_lanelets - {
+                        merged_lanelet.lanelet_id
+                    } | set(merged_lanelet.predecessor)
 
             if to_merge & set(incoming.incoming_lanelets):
                 incoming._incoming_lanelets = set(update(incoming.incoming_lanelets))

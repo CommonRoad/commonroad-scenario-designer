@@ -12,7 +12,9 @@ class Function(Term):
     Class representing a function.
     """
 
-    def __init__(self, name: str, terms: List[Term], func: Optional[Callable] = None):  # [[Any, ...], Any] = None):
+    def __init__(
+        self, name: str, terms: List[Term], func: Optional[Callable] = None
+    ):  # [[Any, ...], Any] = None):
         """
         Constructor.
 
@@ -61,7 +63,9 @@ class Function(Term):
         if self._name in model.function_funcs.keys():
             self._func = model.function_funcs[self._name]
         else:
-            warnings.warn("Unsuccessful initialization of function of term function {}!".format(self._name))
+            warnings.warn(
+                "Unsuccessful initialization of function of term function {}!".format(self._name)
+            )
 
         for term in self._terms:
             term.initialize(model)

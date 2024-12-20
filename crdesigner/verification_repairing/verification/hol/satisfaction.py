@@ -57,7 +57,7 @@ class HOLVerificationChecker(VerificationChecker):
         for formula in config.formula_manager.formulas:
             for formula_id in formula_ids:
                 if formula_id.value == formula.formula_id:
-                    logging.info(f"HOL::check_validity: {formula_id}")
+                    logging.debug(f"HOL::check_validity: {formula_id}")
                     self._solve_formula(formula, model)
 
         manager_results.append(self._invalid_states)

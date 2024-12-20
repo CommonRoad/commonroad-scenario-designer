@@ -197,9 +197,13 @@ class MapCreator:
         center_vert = []
         right_vert = []
         for i in range(num_vertices):
-            left_vert.append([np.cos(i * angle_div) * radius_left, np.sin(i * angle_div) * radius_left])
+            left_vert.append(
+                [np.cos(i * angle_div) * radius_left, np.sin(i * angle_div) * radius_left]
+            )
             center_vert.append([np.cos(i * angle_div) * radius, np.sin(i * angle_div) * radius])
-            right_vert.append([np.cos(i * angle_div) * radius_right, np.sin(i * angle_div) * radius_right])
+            right_vert.append(
+                [np.cos(i * angle_div) * radius_right, np.sin(i * angle_div) * radius_right]
+            )
 
         left_vertices = np.array(left_vert)
         center_vertices = np.array(center_vert)
@@ -288,8 +292,12 @@ class MapCreator:
         if base_lanelet.adj_left is None and create_adj_left:
             diff_left_vert_right_vert = base_lanelet.right_vertices - base_lanelet.left_vertices
             norm_left = np.array([np.linalg.norm(diff_left_vert_right_vert, axis=1)])
-            left_vertices = base_lanelet.left_vertices - (diff_left_vert_right_vert / norm_left.T) * width
-            center_vertices = base_lanelet.left_vertices - (diff_left_vert_right_vert / norm_left.T) * width / 2
+            left_vertices = (
+                base_lanelet.left_vertices - (diff_left_vert_right_vert / norm_left.T) * width
+            )
+            center_vertices = (
+                base_lanelet.left_vertices - (diff_left_vert_right_vert / norm_left.T) * width / 2
+            )
             right_vertices = base_lanelet.left_vertices
             adjacent_right = base_lanelet.lanelet_id
             adjacent_right_same_direction = same_direction
@@ -301,8 +309,12 @@ class MapCreator:
             diff_left_vert_right_vert = base_lanelet.right_vertices - base_lanelet.left_vertices
             norm_left = np.array([np.linalg.norm(diff_left_vert_right_vert, axis=1)])
             left_vertices = base_lanelet.right_vertices
-            center_vertices = base_lanelet.right_vertices + (diff_left_vert_right_vert / norm_left.T) * width / 2
-            right_vertices = base_lanelet.right_vertices + (diff_left_vert_right_vert / norm_left.T) * width
+            center_vertices = (
+                base_lanelet.right_vertices + (diff_left_vert_right_vert / norm_left.T) * width / 2
+            )
+            right_vertices = (
+                base_lanelet.right_vertices + (diff_left_vert_right_vert / norm_left.T) * width
+            )
             adjacent_right = None
             adjacent_right_same_direction = None
             adjacent_left = base_lanelet.lanelet_id
@@ -383,10 +395,18 @@ class MapCreator:
         @param successor: Lanelet which should be attached to the predecessor lanelet.
         """
 
-        len_suc = np.round(np.linalg.norm(successor.center_vertices[0] - successor.center_vertices[-1]), 2)
-        len_pred = np.round(np.linalg.norm(predecessor.center_vertices[0] - predecessor.center_vertices[-1]), 2)
-        wid_suc = np.round(np.linalg.norm(successor.left_vertices[0] - successor.right_vertices[0]), 2)
-        wid_pred = np.round(np.linalg.norm(predecessor.left_vertices[0] - predecessor.right_vertices[0]), 2)
+        len_suc = np.round(
+            np.linalg.norm(successor.center_vertices[0] - successor.center_vertices[-1]), 2
+        )
+        len_pred = np.round(
+            np.linalg.norm(predecessor.center_vertices[0] - predecessor.center_vertices[-1]), 2
+        )
+        wid_suc = np.round(
+            np.linalg.norm(successor.left_vertices[0] - successor.right_vertices[0]), 2
+        )
+        wid_pred = np.round(
+            np.linalg.norm(predecessor.left_vertices[0] - predecessor.right_vertices[0]), 2
+        )
         same_length_width = len_suc == len_pred and wid_suc == wid_pred
 
         if (
@@ -400,7 +420,9 @@ class MapCreator:
             successor._right_vertices = predecessor.right_vertices
 
         if same_length_width:
-            factor = np.linalg.norm(successor.left_vertices[0, :] - successor.right_vertices[0, :]) / np.linalg.norm(
+            factor = np.linalg.norm(
+                successor.left_vertices[0, :] - successor.right_vertices[0, :]
+            ) / np.linalg.norm(
                 (predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])
             )
 
@@ -448,7 +470,10 @@ class MapCreator:
         successor.translate_rotate(trans, 0)
         if (
             not MapCreator.lanelet_is_straight(predecessor)
-            and (np.round(predecessor.left_vertices[-1], 5) != np.round(successor.left_vertices[0], 5)).any()
+            and (
+                np.round(predecessor.left_vertices[-1], 5)
+                != np.round(successor.left_vertices[0], 5)
+            ).any()
         ):
             ang *= -2
             successor.translate_rotate(np.array([0, 0]), ang)
@@ -468,10 +493,18 @@ class MapCreator:
         pred_straight = MapCreator.lanelet_is_straight(predecessor)
         suc_straight = MapCreator.lanelet_is_straight(successor)
 
-        len_suc = np.round(np.linalg.norm(successor.center_vertices[0] - successor.center_vertices[-1]), 2)
-        len_pred = np.round(np.linalg.norm(predecessor.center_vertices[0] - predecessor.center_vertices[-1]), 2)
-        wid_suc = np.round(np.linalg.norm(successor.left_vertices[0] - successor.right_vertices[0]), 2)
-        wid_pred = np.round(np.linalg.norm(predecessor.left_vertices[0] - predecessor.right_vertices[0]), 2)
+        len_suc = np.round(
+            np.linalg.norm(successor.center_vertices[0] - successor.center_vertices[-1]), 2
+        )
+        len_pred = np.round(
+            np.linalg.norm(predecessor.center_vertices[0] - predecessor.center_vertices[-1]), 2
+        )
+        wid_suc = np.round(
+            np.linalg.norm(successor.left_vertices[0] - successor.right_vertices[0]), 2
+        )
+        wid_pred = np.round(
+            np.linalg.norm(predecessor.left_vertices[0] - predecessor.right_vertices[0]), 2
+        )
         same_length_width = len_suc == len_pred and wid_suc == wid_pred
 
         if pred_straight and suc_straight and same_length_width:
@@ -508,7 +541,10 @@ class MapCreator:
 
         if (
             not suc_straight
-            and (np.round(predecessor.left_vertices[-1], 5) != np.round(successor.left_vertices[0], 5)).any()
+            and (
+                np.round(predecessor.left_vertices[-1], 5)
+                != np.round(successor.left_vertices[0], 5)
+            ).any()
             and same_length_width
         ):
             ang *= -2
@@ -920,7 +956,11 @@ class MapCreator:
         new_traffic_lights = []
         light_ids = [set()] * 4
         # TODO compute first occurrences
-        if add_traffic_signs and "YIELD" in country_signs._member_names_ and "PRIORITY" in country_signs._member_names_:
+        if (
+            add_traffic_signs
+            and "YIELD" in country_signs._member_names_
+            and "PRIORITY" in country_signs._member_names_
+        ):
             yield_sign = TrafficSignElement(country_signs.YIELD)
             priority_sign = TrafficSignElement(country_signs.PRIORITY)
             sign_priority_one = TrafficSign(
@@ -1268,7 +1308,11 @@ class MapCreator:
         sign_ids = [set()] * 4
         light_ids = [set()] * 4
         # TODO compute first occurrences
-        if add_traffic_signs and "YIELD" in country_signs._member_names_ and "PRIORITY" in country_signs._member_names_:
+        if (
+            add_traffic_signs
+            and "YIELD" in country_signs._member_names_
+            and "PRIORITY" in country_signs._member_names_
+        ):
             yield_sign = TrafficSignElement(country_signs.YIELD)
             priority_sign = TrafficSignElement(country_signs.PRIORITY)
             sign_priority_one = TrafficSign(
@@ -1428,7 +1472,9 @@ class MapCreator:
                 print("Error: Successor lanelet must belong to intersection")
                 return
 
-            factor = np.linalg.norm(successor.left_vertices[0, :] - successor.right_vertices[0, :]) / np.linalg.norm(
+            factor = np.linalg.norm(
+                successor.left_vertices[0, :] - successor.right_vertices[0, :]
+            ) / np.linalg.norm(
                 (predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])
             )
 
@@ -1483,7 +1529,9 @@ class MapCreator:
             )
 
             # Linear length along the line:
-            distance_center = np.cumsum(np.sqrt(np.sum(np.diff(center_vertices, axis=0) ** 2, axis=1)))
+            distance_center = np.cumsum(
+                np.sqrt(np.sum(np.diff(center_vertices, axis=0) ** 2, axis=1))
+            )
             distance_center = np.insert(distance_center, 0, 0) / distance_center[-1]
 
             # Linear distance between points
@@ -1517,7 +1565,9 @@ class MapCreator:
             f = np.array([f])
             e = e / f.T
 
-            distance2 = np.cumsum(np.sqrt(np.sum(np.diff(interpolated_center, axis=0) ** 2, axis=1)))
+            distance2 = np.cumsum(
+                np.sqrt(np.sum(np.diff(interpolated_center, axis=0) ** 2, axis=1))
+            )
             distance2 = np.insert(distance2, 0, 0) / distance2[-1]
             distance2 = np.array([distance2])
 

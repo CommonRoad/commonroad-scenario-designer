@@ -101,8 +101,10 @@ class MapConversionToolboxUI(Toolbox):
             self.init_sumo()
 
     def init_open_drive(self):
-        self.button_convert_opendrive = QPushButton("Convert OpenDRIVE to CommonRoad")
-        self.layout_con_groupbox.insertRow(1, self.button_convert_opendrive)
+        self.button_convert_opendrive2cr = QPushButton("Convert OpenDRIVE to CommonRoad")
+        self.layout_con_groupbox.insertRow(1, self.button_convert_opendrive2cr)
+        self.button_convert_cr2opendrive = QPushButton("Convert CommonRoad to OpenDRIVE")
+        self.layout_con_groupbox.insertRow(2, self.button_convert_cr2opendrive)
 
     def init_lanelet(self):
         self.button_convert_lanelet2_to_cr = QPushButton("Convert Lanelet/Lanelet2 to CommonRoad")
@@ -112,7 +114,9 @@ class MapConversionToolboxUI(Toolbox):
 
     def init_osm(self):
         self.button_start_osm_conversion = QPushButton("Convert OSM to CommonRoad")
-        self.button_start_osm_conversion_with_sumo_parser = QPushButton("Convert OSM to CommonRoad using Sumo Parser")
+        self.button_start_osm_conversion_with_sumo_parser = QPushButton(
+            "Convert OSM to CommonRoad using Sumo Parser"
+        )
         self.button_start_osm_conversion_with_sumo_parser.setToolTip(
             "The conversion follows the route : \nOsm -> OpenDrive -> CR\nUseful for densed crossing"
         )
@@ -155,8 +159,12 @@ class MapConversionToolboxUI(Toolbox):
             self.layout_osm_range_groupbox = QFormLayout()
             self.osm_range_groupbox = QGroupBox()
             self.osm_range_groupbox.setLayout(self.layout_osm_range_groupbox)
-            self.layout_osm_range_groupbox.addRow("Latitude:", self.osm_conversion_coordinate_latitude)
-            self.layout_osm_range_groupbox.addRow("Longitude:", self.osm_conversion_coordinate_longitude)
+            self.layout_osm_range_groupbox.addRow(
+                "Latitude:", self.osm_conversion_coordinate_latitude
+            )
+            self.layout_osm_range_groupbox.addRow(
+                "Longitude:", self.osm_conversion_coordinate_longitude
+            )
             self.layout_osm_range_groupbox.addRow("Range:", self.osm_download_map_range)
             self.layout_con_groupbox.insertRow(4, self.osm_range_groupbox)
         else:
@@ -170,7 +178,8 @@ class MapConversionToolboxUI(Toolbox):
 
     def remove_fields(self):
         if self.chosen_method == "open_drive":
-            self.layout_con_groupbox.removeRow(self.button_convert_opendrive)
+            self.layout_con_groupbox.removeRow(self.button_convert_opendrive2cr)
+            self.layout_con_groupbox.removeRow(self.button_convert_cr2opendrive)
         elif self.chosen_method == "lanelet":
             self.layout_con_groupbox.removeRow(self.button_convert_lanelet2_to_cr)
             self.layout_con_groupbox.removeRow(self.button_convert_cr_to_lanelet2)

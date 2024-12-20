@@ -86,9 +86,13 @@ class GraphNode:
         result = 0.0
         for edge in self.edges:
             if edge.node1 == self:
-                distance = np.linalg.norm(edge.get_interpolated_waypoints()[0] - self.get_cooridnates())
+                distance = np.linalg.norm(
+                    edge.get_interpolated_waypoints()[0] - self.get_cooridnates()
+                )
             elif edge.node2 == self:
-                distance = np.linalg.norm(edge.get_interpolated_waypoints()[-1] - self.get_cooridnates())
+                distance = np.linalg.norm(
+                    edge.get_interpolated_waypoints()[-1] - self.get_cooridnates()
+                )
             else:
                 raise ValueError("Graph is malformed")
             result = max(result, distance)
@@ -131,7 +135,9 @@ class GraphNode:
             elif edge.node2 == self:
                 edge.waypoints[-1].set_position(position)
             else:
-                raise ValueError("malformed graph, node has edges assigned to it, which start elsewhere")
+                raise ValueError(
+                    "malformed graph, node has edges assigned to it, which start elsewhere"
+                )
 
     def add_traffic_sign(self, sign: GraphTrafficSign):
         for edge in self.edges:

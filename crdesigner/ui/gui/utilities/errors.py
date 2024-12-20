@@ -1,5 +1,3 @@
-""" """
-
 from PyQt6.QtWidgets import QMessageBox, QWidget
 
 
@@ -17,12 +15,18 @@ def _message(
 
 
 def error(
-    widget: QWidget, text: str, buttons=QMessageBox.StandardButton.Ok, default_button=QMessageBox.StandardButton.Ok
+    widget: QWidget,
+    text: str,
+    buttons=QMessageBox.StandardButton.Ok,
+    default_button=QMessageBox.StandardButton.Ok,
 ) -> QMessageBox.StandardButton:
     return _message(widget, "Error", text, buttons, default_button)
 
 
 def warning(
-    widget: QWidget, text: str, buttons=QMessageBox.StandardButton.Ok, default_button=QMessageBox.StandardButton.Ok
+    widget: QWidget,
+    text: str,
+    buttons=QMessageBox.StandardButton.Ok,
+    default_button=QMessageBox.StandardButton.Ok,
 ) -> QMessageBox.StandardButton:
     return _message(widget, "Warning", text, buttons, default_button)

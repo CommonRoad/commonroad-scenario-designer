@@ -3,10 +3,22 @@ import subprocess
 
 from commonroad.scenario.scenario import Scenario
 from lxml import etree
-from PyQt6.QtWidgets import QMessageBox
 
-from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
-from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
+try:
+    # required for Ubuntu 20.04 since there a system library is too old for pyqt6 and the import fails
+    # when not importing this, one can still use the map conversion
+    from PyQt6.QtWidgets import QMessageBox
+
+    pyqt_available = True
+except (ImportError, RuntimeError):
+    pyqt_available = False
+
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.network import (
+    Network,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import (
+    parse_opendrive,
+)
 
 
 def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
@@ -16,10 +28,10 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
     :param net_file: path of .net.xml file
     :param verbose: Boolean indicating whether status should be printed to console
 
-    :return: commonroad map file
+    :return: CommonRoad map file
     """
-    if net_file is None:
-        QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.Ok)
+    if net_file is None and pyqt_available:
+        QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.StandardButton.Ok)
         return
     assert isinstance(net_file, str)
 
@@ -31,12 +43,20 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
 
     # convert to OpenDRIVE file using netconvert
     subprocess.check_output(
-        ["netconvert", "-s", net_file, "--opendrive-output", opendrive_file, "--junctions.scurve-stretch", "1.0"]
+        [
+            "netconvert",
+            "-s",
+            net_file,
+            "--opendrive-output",
+            opendrive_file,
+            "--junctions.scurve-stretch",
+            "1.0",
+        ]
     )
     if verbose:
         print("converted to OpenDrive (.xodr)")
 
-    # convert to commonroad using opendrive2lanelet
+    # convert to CommonRoad using opendrive2lanelet
     # import, parse and convert OpenDRIVE file
     with open(opendrive_file, "r") as fi:
         open_drive = parse_opendrive(etree.parse(fi).getroot())

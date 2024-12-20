@@ -47,7 +47,14 @@ class Lanelet2Parser:
                     )
                     break
             else:
-                osm.add_node(Node(node.get("id"), node.get("lat"), node.get("lon"), autoware=self.config.autoware))
+                osm.add_node(
+                    Node(
+                        node.get("id"),
+                        node.get("lat"),
+                        node.get("lon"),
+                        autoware=self.config.autoware,
+                    )
+                )
 
         for way in self.xml.xpath("//way[@id]"):
             node_ids = [nd.get("ref") for nd in way.xpath("./nd")]
@@ -68,8 +75,14 @@ class Lanelet2Parser:
                     for tag in way_rel.xpath("./tag[@k and @v]")
                     if tag.get("k") in self.config.allowed_tags
                 }
-                regulatory_elements = list(way_rel.xpath("./member[@role='regulatory_element']/@ref"))
-                osm.add_way_relation(WayRelation(way_rel.get("id"), left_way, right_way, tag_dict, regulatory_elements))
+                regulatory_elements = list(
+                    way_rel.xpath("./member[@role='regulatory_element']/@ref")
+                )
+                osm.add_way_relation(
+                    WayRelation(
+                        way_rel.get("id"), left_way, right_way, tag_dict, regulatory_elements
+                    )
+                )
             except IndexError:
                 print(
                     f"Lanelet relation {way_rel.attrib.get('id')} has either no left or no right way! "
@@ -86,12 +99,18 @@ class Lanelet2Parser:
             }
             osm.add_multipolygon(Multipolygon(multipolygon.get("id"), outer_list, tag_dict))
 
-        for reg_element_rel in self.xml.xpath("//relation/tag[@v='regulatory_element' and @k='type']/.."):
+        for reg_element_rel in self.xml.xpath(
+            "//relation/tag[@v='regulatory_element' and @k='type']/.."
+        ):
             # returns the parent element if there is another tag inside that is the right of way tag
-            for right_of_way_rel in reg_element_rel.xpath("./tag[@v='right_of_way' and @k='subtype']/.."):
+            for right_of_way_rel in reg_element_rel.xpath(
+                "./tag[@v='right_of_way' and @k='subtype']/.."
+            ):
                 try:
                     yield_lanelets = right_of_way_rel.xpath("./member[@role='yield']/@ref")
-                    right_of_way_lanelets = right_of_way_rel.xpath("./member[@role='right_of_way']/@ref")
+                    right_of_way_lanelets = right_of_way_rel.xpath(
+                        "./member[@role='right_of_way']/@ref"
+                    )
                     traffic_signs = right_of_way_rel.xpath("./member[@role='refers']/@ref")
                     # Reference line is optional
                     # defaults to last line of yield lanelets
@@ -123,7 +142,9 @@ class Lanelet2Parser:
                 traffic_sign_id = TrafficSignIDGermany.MAX_SPEED
                 osm.add_speed_limit_sign(speed_limit_id, speed, traffic_sign_id)
 
-            for traffic_light in reg_element_rel.xpath("./tag[@v='traffic_light' and @k='subtype']/.."):
+            for traffic_light in reg_element_rel.xpath(
+                "./tag[@v='traffic_light' and @k='subtype']/.."
+            ):
                 traffic_lights = traffic_light.xpath("./member[@role='refers']/@ref")
                 ref_lines = traffic_light.xpath("./member[@role='ref_line']/@ref")
                 tag_dict = {
@@ -134,7 +155,10 @@ class Lanelet2Parser:
 
                 osm.add_regulatory_element(
                     RegulatoryElement(
-                        traffic_light.get("id"), ref_line=ref_lines, refers=traffic_lights, tag_dict=tag_dict
+                        traffic_light.get("id"),
+                        ref_line=ref_lines,
+                        refers=traffic_lights,
+                        tag_dict=tag_dict,
                     )
                 )
 

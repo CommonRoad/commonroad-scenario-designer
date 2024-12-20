@@ -25,7 +25,11 @@ class GroupsHandler:
     groups: List[SpecificationGroup] = dataclasses.field(
         default_factory=lambda: [
             SpecificationGroup(
-                priority=0, formulas=[LaneletFormulaID.LEFT_RIGHT_BOUNDARY_ASSIGNMENT, GeneralFormulaID.UNIQUE_ID]
+                priority=0,
+                formulas=[
+                    LaneletFormulaID.LEFT_RIGHT_BOUNDARY_ASSIGNMENT,
+                    GeneralFormulaID.UNIQUE_ID,
+                ],
             ),
             SpecificationGroup(
                 priority=1,

@@ -8,7 +8,7 @@ import warnings
 from typing import List, Set
 
 import numpy as np
-from commonroad.scenario.lanelet import Lanelet, LaneletType
+from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking
 
 from crdesigner.common.config.osm_config import osm_config as config
 
@@ -106,6 +106,8 @@ class Edge:
             traffic_signs=self.traffic_signs,
             traffic_lights=self.traffic_lights,
             lanelet_type={LaneletType(self.edge_type)},
+            line_marking_left_vertices=LineMarking.UNKNOWN,
+            line_marking_right_vertices=LineMarking.UNKNOWN,
         )
         self.is_valid(lanelet)
         return lanelet

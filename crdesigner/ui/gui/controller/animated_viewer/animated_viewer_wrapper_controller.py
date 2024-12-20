@@ -22,7 +22,9 @@ class AnimatedViewerWrapperController:
         self.pps_model = mwindow.pps_model
         self.pps_model.subscribe(self.update_scenario)
 
-        self.cr_viewer = AnimatedViewerController(mwindow, self.viewer_callback, self.scenario_model)
+        self.cr_viewer = AnimatedViewerController(
+            mwindow, self.viewer_callback, self.scenario_model
+        )
         self.scenario_saving_dialog = scenario_saving_dialog
 
         # handle to the toolboxes and the console for the viewer callback
@@ -58,7 +60,9 @@ class AnimatedViewerWrapperController:
         self.mwindow.setCentralWidget(self.viewer_dock)
 
     @logger.log
-    def viewer_callback(self, selected_object: Union[Lanelet, Obstacle], output: str, temporary_positions=None):
+    def viewer_callback(
+        self, selected_object: Union[Lanelet, Obstacle], output: str, temporary_positions=None
+    ):
         """
         Callback when the user clicks a lanelet, an obstacle or a position inside the scenario visualization.
         @return: returns draw_temporary_position which indicates whether temporary position should be drawn afterwards
@@ -79,7 +83,9 @@ class AnimatedViewerWrapperController:
                 str(selected_object.obstacle_id)
             )
         elif isinstance(selected_object, PosB):
-            for button in self.mwindow.road_network_toolbox.road_network_toolbox_ui.position_buttons:
+            for (
+                button
+            ) in self.mwindow.road_network_toolbox.road_network_toolbox_ui.position_buttons:
                 if button.button_pressed:
                     temporary_positions[id(button)] = (
                         float(selected_object.x_position),

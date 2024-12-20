@@ -130,7 +130,9 @@ class TrafficSignRepairing(ElementRepairing):
                 sign = traffic_sign_element
 
         for additional_value in sign.additional_values:
-            if not additional_value.isnumeric() or (additional_value.isnumeric() and int(additional_value) < 0):
+            if not additional_value.isnumeric() or (
+                additional_value.isnumeric() and int(additional_value) < 0
+            ):
                 sign.additional_values.remove(additional_value)
 
     def repair_maximal_distance_from_lanelet(self, location: Tuple[int]):

@@ -31,7 +31,12 @@ cli = typer.Typer(help="Toolbox for Map Conversion and Scenario Creation for Aut
 
 
 def store_scenario(
-    sc: Scenario, output_file: str, force_overwrite: bool, author: str, affiliation: str, tags: Optional[List[str]]
+    sc: Scenario,
+    output_file: str,
+    force_overwrite: bool,
+    author: str,
+    affiliation: str,
+    tags: Optional[List[str]],
 ):
     """
     Stores CommonRoad scenario converted via CLI.
@@ -62,16 +67,23 @@ def store_scenario(
 def main(
     ctx: typer.Context,
     input_file: Annotated[Optional[Path], typer.Option(help="Path to OpenDRIVE map")] = None,
-    output_file: Annotated[Optional[Path], typer.Option(help="Path where CommonRoad map should be stored")] = None,
-    force_overwrite: Annotated[bool, typer.Option(help="Overwrite existing CommonRoad file")] = False,
+    output_file: Annotated[
+        Optional[Path], typer.Option(help="Path where CommonRoad map should be stored")
+    ] = None,
+    force_overwrite: Annotated[
+        bool, typer.Option(help="Overwrite existing CommonRoad file")
+    ] = False,
     author: Annotated[str, typer.Option(..., help="Your name")] = "",
     affiliation: Annotated[
-        str, typer.Option(..., help="Your affiliation, e.g., university, research institute, company")
+        str,
+        typer.Option(..., help="Your affiliation, e.g., university, research institute, company"),
     ] = "",
     tags: Annotated[Optional[List[str]], typer.Option(help="Tags for the created map")] = None,
 ):
-    if ctx.invoked_subcommand is None:
+    if ctx.invoked_subcommand is None and input_file is not None:
         start_gui(input_file.name)
+    elif ctx.invoked_subcommand is None and input_file is None:
+        start_gui()
     else:
         # copied from commonroad-dataset-converter
         frame = inspect.currentframe()
@@ -96,7 +108,11 @@ def verify_map(ctx: typer.Context):
     if not valid:
         writer = CRDesignerFileWriter(scenario=sc, planning_problem_set=pp)
 
-        file_path = str(ctx.obj["output_file"]) if ctx.obj["output_file"] is not None else str(ctx.obj["input_file"])
+        file_path = (
+            str(ctx.obj["output_file"])
+            if ctx.obj["output_file"] is not None
+            else str(ctx.obj["input_file"])
+        )
 
         if not ctx.obj["force_overwrite"]:
             file_path = (
@@ -130,13 +146,23 @@ def odrcr(ctx: typer.Context):
 @cli.command()
 def lanelet2cr(
     ctx: typer.Context,
-    proj: Annotated[Optional[str], typer.Option(..., help="Overwrite existing CommonRoad file")] = None,
+    proj: Annotated[
+        Optional[str], typer.Option(..., help="Overwrite existing CommonRoad file")
+    ] = None,
     adjacencies: Annotated[
         bool,
-        typer.Option(..., help="Detect left and right adjacencies of " "lanelets if they do not share a common way"),
+        typer.Option(
+            ...,
+            help="Detect left and right adjacencies of "
+            "lanelets if they do not share a common way",
+        ),
     ] = True,
     left_driving: Annotated[
-        bool, typer.Option(..., help="set to true if map describes a left driving " "system, e.g., in Great Britain")
+        bool,
+        typer.Option(
+            ...,
+            help="set to true if map describes a left driving " "system, e.g., in Great Britain",
+        ),
     ] = False,
 ):
     config_lanelet2 = lanelet2_config
@@ -158,9 +184,13 @@ def lanelet2cr(
 @cli.command()
 def crlanelet2(
     ctx: typer.Context,
-    proj: Annotated[Optional[str], typer.Option(..., help="Overwrite existing CommonRoad file")] = None,
+    proj: Annotated[
+        Optional[str], typer.Option(..., help="Overwrite existing CommonRoad file")
+    ] = None,
     autoware: Annotated[bool, typer.Option(..., help="Overwrite existing CommonRoad file")] = False,
-    local_coordinates: Annotated[bool, typer.Option(..., help="Overwrite existing CommonRoad file")] = False,
+    local_coordinates: Annotated[
+        bool, typer.Option(..., help="Overwrite existing CommonRoad file")
+    ] = False,
 ):
     config = lanelet2_config
     if proj is not None:

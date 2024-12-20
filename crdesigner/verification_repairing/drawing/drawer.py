@@ -22,7 +22,11 @@ class Drawer(ABC):
         :param scenario_id: Scenario ID.
         """
         self._complete_map_name = (
-            str(scenario_id.country_id) + "_" + str(scenario_id.map_name) + "-" + str(scenario_id.map_id)
+            str(scenario_id.country_id)
+            + "_"
+            + str(scenario_id.map_name)
+            + "-"
+            + str(scenario_id.map_id)
         )
         self._network = network
 
@@ -49,12 +53,16 @@ class Drawer(ABC):
                 first_occurrence = list(occurrences)[0]
                 rightmost_lanelet = self._network.find_lanelet_by_id(first_occurrence)
                 while rightmost_lanelet.adj_right is not None:
-                    rightmost_lanelet = self._network.find_lanelet_by_id(rightmost_lanelet.adj_right)
+                    rightmost_lanelet = self._network.find_lanelet_by_id(
+                        rightmost_lanelet.adj_right
+                    )
                 position = rightmost_lanelet.right_vertices[0]
         return position
 
     @staticmethod
-    def _plot_point(point: np.ndarray, ax: Axes, color: str = "r+", zorder: int = 50, marker: str = "o"):
+    def _plot_point(
+        point: np.ndarray, ax: Axes, color: str = "r+", zorder: int = 50, marker: str = "o"
+    ):
         """
         Plots a point in map.
 
@@ -112,7 +120,9 @@ class Drawer(ABC):
         :param point: Point
         :param ax: Axes used by renderer
         """
-        circle = plt.Circle((point[0], point[1]), radius, ec=ec, fill=fill, zorder=zorder, linewidth=linewidth)
+        circle = plt.Circle(
+            (point[0], point[1]), radius, ec=ec, fill=fill, zorder=zorder, linewidth=linewidth
+        )
         ax.add_artist(circle)
 
     @staticmethod
@@ -133,12 +143,19 @@ class Drawer(ABC):
         :param ax: Axes uses by renderer
         """
         text = plt.text(
-            point[0], point[1], txt, color=color, bbox=dict(facecolor=facecolor, edgecolor=edgecolor), zorder=zorder
+            point[0],
+            point[1],
+            txt,
+            color=color,
+            bbox=dict(facecolor=facecolor, edgecolor=edgecolor),
+            zorder=zorder,
         )
         ax.add_artist(text)
 
     @staticmethod
-    def _plot_legend(artists: list, ax: Axes, size: int = 15, loc: str = "lower left", zorder: int = 90):
+    def _plot_legend(
+        artists: list, ax: Axes, size: int = 15, loc: str = "lower left", zorder: int = 90
+    ):
         """
         Draws a legend which contains information about the used special symbols
         indicating invalid states in the map.

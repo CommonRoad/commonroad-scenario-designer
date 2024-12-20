@@ -50,7 +50,9 @@ class TrafficSignWidget:
         self.toolbox.traffic_sign_element_label = QLabel("Traffic Sign Elements:")
         self.toolbox.traffic_sign_element_table = QTableWidget()
         self.toolbox.traffic_sign_element_table.setColumnCount(2)
-        self.toolbox.traffic_sign_element_table.setHorizontalHeaderLabels(["Traffic Sign ID", "Additional Value"])
+        self.toolbox.traffic_sign_element_table.setHorizontalHeaderLabels(
+            ["Traffic Sign ID", "Additional Value"]
+        )
         self.toolbox.traffic_sign_element_table.resizeColumnsToContents()
         self.toolbox.traffic_sign_element_table.setColumnWidth(0, 180)
         self.toolbox.traffic_sign_element_table.setMaximumHeight(100)
@@ -83,11 +85,14 @@ class TrafficSignWidget:
         traffic_sign_information_layout.addRow(traffic_sign_position)
 
         traffic_sign_information_layout.addRow(self.toolbox.traffic_sign_virtual_selection)
-        traffic_sign_information_layout.addRow("Referenced lanelets", self.toolbox.referenced_lanelets_traffic_sign)
+        traffic_sign_information_layout.addRow(
+            "Referenced lanelets", self.toolbox.referenced_lanelets_traffic_sign
+        )
         traffic_sign_information_layout.addRow(self.toolbox.traffic_sign_element_label)
         traffic_sign_information_layout.addRow(self.toolbox.traffic_sign_element_table)
         traffic_sign_information_layout.addRow(
-            self.toolbox.button_add_traffic_sign_element, self.toolbox.button_remove_traffic_sign_element
+            self.toolbox.button_add_traffic_sign_element,
+            self.toolbox.button_remove_traffic_sign_element,
         )
         traffic_sign_layout.addRow(self.toolbox.button_add_traffic_sign)
         traffic_sign_layout.addRow("Selected Traffic Sign", self.toolbox.selected_traffic_sign)

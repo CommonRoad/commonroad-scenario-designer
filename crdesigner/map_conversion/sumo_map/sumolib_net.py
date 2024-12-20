@@ -30,7 +30,11 @@ def set_allowed_changes(xml_node: ET.Element, obj: Union["Connection", "Lane"]):
 
 class NetLocation:
     def __init__(
-        self, net_offset: np.ndarray, conv_boundary: np.ndarray, orig_boundary: np.ndarray, proj_parameter: str
+        self,
+        net_offset: np.ndarray,
+        conv_boundary: np.ndarray,
+        orig_boundary: np.ndarray,
+        proj_parameter: str,
     ):
         assert net_offset.shape == (2,)
         self.net_offset = net_offset
@@ -115,10 +119,16 @@ def sumo_net_from_xml(file: str) -> Net:
                 net.types[elem.attrib["id"]] = EdgeType(
                     id=elem.attrib["id"],
                     allow=_get_default(
-                        elem.attrib, "allow", None, lambda allow: [VehicleType(a) for a in allow.split(" ")]
+                        elem.attrib,
+                        "allow",
+                        None,
+                        lambda allow: [VehicleType(a) for a in allow.split(" ")],
                     ),
                     disallow=_get_default(
-                        elem.attrib, "disallow", None, lambda disallow: [VehicleType(a) for a in disallow.split(" ")]
+                        elem.attrib,
+                        "disallow",
+                        None,
+                        lambda disallow: [VehicleType(a) for a in disallow.split(" ")],
                     ),
                     discard=_get_default(elem.attrib, "discard", False, lambda d: bool(int(x))),
                     num_lanes=_get_default(elem.attrib, "num_lanes", -1, int),
@@ -142,11 +152,15 @@ def sumo_net_from_xml(file: str) -> Net:
                 program.add_phase(
                     Phase(
                         duration=_get_default(phase.attrib, "duration", 0.0, float),
-                        state=_get_default(phase.attrib, "state", [], lambda state: [SignalState(s) for s in state]),
+                        state=_get_default(
+                            phase.attrib, "state", [], lambda state: [SignalState(s) for s in state]
+                        ),
                         min_dur=_get_default(phase.attrib, "minDur", None, int),
                         max_dur=_get_default(phase.attrib, "maxDur", None, int),
                         name=_get_default(phase.attrib, "name"),
-                        next=_get_default(phase.attrib, "next", None, lambda n: [int(i) for i in n.split(" ")]),
+                        next=_get_default(
+                            phase.attrib, "next", None, lambda n: [int(i) for i in n.split(" ")]
+                        ),
                     )
                 )
 
@@ -167,10 +181,16 @@ def sumo_net_from_xml(file: str) -> Net:
                 coord=np.array([x, y, z] if z is not None else [x, y]),
                 shape=_get_default(elem.attrib, "shape", None, from_shape_string),
                 inc_lanes=_get_default(
-                    elem.attrib, "incLanes", None, lambda inc_lanes: inc_lanes.split(" ") if inc_lanes else None
+                    elem.attrib,
+                    "incLanes",
+                    None,
+                    lambda inc_lanes: inc_lanes.split(" ") if inc_lanes else None,
                 ),
                 int_lanes=_get_default(
-                    elem.attrib, "intLanes", None, lambda int_lanes: int_lanes.split(" ") if int_lanes else None
+                    elem.attrib,
+                    "intLanes",
+                    None,
+                    lambda int_lanes: int_lanes.split(" ") if int_lanes else None,
                 ),
             )
             for request in elem:
@@ -180,9 +200,17 @@ def sumo_net_from_xml(file: str) -> Net:
                     JunctionRequest(
                         index=_get_default(request.attrib, "index", 0, int),
                         response=_get_default(
-                            request.attrib, "response", [], lambda response: [bool(int(bit)) for bit in response]
+                            request.attrib,
+                            "response",
+                            [],
+                            lambda response: [bool(int(bit)) for bit in response],
                         ),
-                        foes=_get_default(request.attrib, "foes", [], lambda foes: [bool(int(bit)) for bit in foes]),
+                        foes=_get_default(
+                            request.attrib,
+                            "foes",
+                            [],
+                            lambda foes: [bool(int(bit)) for bit in foes],
+                        ),
                         cont=_get_default(request.attrib, "cont", 0, int),
                     )
                 )
@@ -211,10 +239,16 @@ def sumo_net_from_xml(file: str) -> Net:
                     length=_get_default(lane.attrib, "length", None, float),
                     width=_get_default(lane.attrib, "width", None, float),
                     allow=_get_default(
-                        lane.attrib, "allow", None, lambda allow: [VehicleType(a) for a in allow.split(" ")]
+                        lane.attrib,
+                        "allow",
+                        None,
+                        lambda allow: [VehicleType(a) for a in allow.split(" ")],
                     ),
                     disallow=_get_default(
-                        lane.attrib, "disallow", None, lambda disallow: [VehicleType(a) for a in disallow.split(" ")]
+                        lane.attrib,
+                        "disallow",
+                        None,
+                        lambda disallow: [VehicleType(a) for a in disallow.split(" ")],
                     ),
                     shape=_get_default(lane.attrib, "shape", None, from_shape_string),
                 )
@@ -225,8 +259,12 @@ def sumo_net_from_xml(file: str) -> Net:
             c = Connection(
                 from_edge=from_edge,
                 to_edge=to_edge,
-                from_lane=_get_default(elem.attrib, "fromLane", map=lambda idx: from_edge.lanes[int(idx)]),
-                to_lane=_get_default(elem.attrib, "toLane", map=lambda idx: to_edge.lanes[int(idx)]),
+                from_lane=_get_default(
+                    elem.attrib, "fromLane", map=lambda idx: from_edge.lanes[int(idx)]
+                ),
+                to_lane=_get_default(
+                    elem.attrib, "toLane", map=lambda idx: to_edge.lanes[int(idx)]
+                ),
                 direction=_get_default(elem.attrib, "dir", map=ConnectionDirection),
                 tls=_get_default(elem.attrib, "tl", map=lambda tls: net.tlss[tls]),
                 tl_link=_get_default(elem.attrib, "linkIndex", map=int),
@@ -463,7 +501,9 @@ class Junction(Node):
         super().__init__(id, junction_type, coord, shape, inc_lanes, int_lanes)
         self.id = id
         self.type = junction_type
-        assert coord.shape == (2,) or coord.shape == (3,), f"Coord has to have two or three values, was {coord}"
+        assert coord.shape == (2,) or coord.shape == (
+            3,
+        ), f"Coord has to have two or three values, was {coord}"
         self.coord = coord
         self.shape = shape
         self.inc_lanes = inc_lanes
@@ -751,7 +791,9 @@ class Lane:
     def id(self) -> str:
         return f"{self._edge.id}_{self.index}"
 
-    def _set_allow_disallow(self, allow: Optional[List["VehicleType"]], disallow: Optional[List["VehicleType"]]):
+    def _set_allow_disallow(
+        self, allow: Optional[List["VehicleType"]], disallow: Optional[List["VehicleType"]]
+    ):
         if allow is not None and disallow is not None:
             assert set(allow).isdisjoint(set(disallow))
             self._allow = allow
@@ -839,7 +881,9 @@ class Lane:
         return xmin, ymin, xmax, ymax
 
     def getClosestLanePosAndDist(self, point, perpendicular=False):
-        return sumolib.geomhelper.polygon.OffsetAndDistanceToPoint(point, self.getShape(), perpendicular)
+        return sumolib.geomhelper.polygon.OffsetAndDistanceToPoint(
+            point, self.getShape(), perpendicular
+        )
 
     @property
     def index(self) -> int:
@@ -938,7 +982,9 @@ def from_shape_string(shape: str) -> np.ndarray:
     :param shape:
     :return:
     """
-    return np.asarray([[float(c) for c in coords.split(",")] for coords in shape.split(" ")], dtype=float)
+    return np.asarray(
+        [[float(c) for c in coords.split(",")] for coords in shape.split(" ")], dtype=float
+    )
 
 
 @unique
@@ -1099,7 +1145,9 @@ class Connection:
     @change_left_forbidden.setter
     def change_left_forbidden(self, change_left_forbidden):
         self._change_left_allowed = (
-            set(VehicleType) - set(change_left_forbidden) if change_left_forbidden is not None else set(VehicleType)
+            set(VehicleType) - set(change_left_forbidden)
+            if change_left_forbidden is not None
+            else set(VehicleType)
         )
 
     @property
@@ -1113,7 +1161,9 @@ class Connection:
     @change_right_forbidden.setter
     def change_right_forbidden(self, change_right_forbidden):
         self._change_right_allowed = (
-            set(VehicleType) - set(change_right_forbidden) if change_right_forbidden is not None else set(VehicleType)
+            set(VehicleType) - set(change_right_forbidden)
+            if change_right_forbidden is not None
+            else set(VehicleType)
         )
 
     @property
@@ -1122,7 +1172,9 @@ class Connection:
 
     @change_left_allowed.setter
     def change_left_allowed(self, change_left_allowed):
-        self._change_left_allowed = set(change_left_allowed) if change_left_allowed is not None else set(VehicleType)
+        self._change_left_allowed = (
+            set(change_left_allowed) if change_left_allowed is not None else set(VehicleType)
+        )
 
     @property
     def change_right_allowed(self) -> Set["VehicleType"]:
@@ -1130,7 +1182,9 @@ class Connection:
 
     @change_right_allowed.setter
     def change_right_allowed(self, change_right_allowed):
-        self._change_right_allowed = set(change_right_allowed) if change_right_allowed is not None else set(VehicleType)
+        self._change_right_allowed = (
+            set(change_right_allowed) if change_right_allowed is not None else set(VehicleType)
+        )
 
     def to_xml(self) -> str:
         """
@@ -1353,7 +1407,9 @@ class EdgeType:
         return cls(
             id=root.get("id"),
             allow=get_map("allow", lambda sp: [str_to_vehicle_type(s) for s in sp.split(" ")], []),
-            disallow=get_map("disallow", lambda sp: [str_to_vehicle_type(s) for s in sp.split(" ")], []),
+            disallow=get_map(
+                "disallow", lambda sp: [str_to_vehicle_type(s) for s in sp.split(" ")], []
+            ),
             discard=get_map("discard", _str_to_bool, False),
             num_lanes=get_map("numLanes", int, -1),
             oneway=get_map("oneway", _str_to_bool, False),
@@ -1400,7 +1456,9 @@ class EdgeTypes:
         root = ET.fromstring(xml)
         types: Dict[str, EdgeType] = {}
         for edge_type in root.iter("type"):
-            types[edge_type.get("id")] = EdgeType.from_xml(ET.tostring(edge_type, encoding="unicode"))
+            types[edge_type.get("id")] = EdgeType.from_xml(
+                ET.tostring(edge_type, encoding="unicode")
+            )
         return cls(types)
 
     def to_xml(self) -> str:
@@ -1439,12 +1497,16 @@ class EdgeTypes:
     def create_from_update_oneway(self, old_id: str, oneway: bool) -> Optional[EdgeType]:
         return self._create_from_update(old_id, "oneway", oneway)
 
-    def create_from_update_allow(self, old_id: str, allow: List["VehicleType"]) -> Optional[EdgeType]:
+    def create_from_update_allow(
+        self, old_id: str, allow: List["VehicleType"]
+    ) -> Optional[EdgeType]:
         new_type = self._create_from_update(old_id, "allow", allow)
         # setattr(new_type, "disallow", list(set(new_type.disallow) - set(new_type.allow)))
         return new_type
 
-    def create_from_update_disallow(self, old_id: str, disallow: List["VehicleType"]) -> Optional[EdgeType]:
+    def create_from_update_disallow(
+        self, old_id: str, disallow: List["VehicleType"]
+    ) -> Optional[EdgeType]:
         new_type = self._create_from_update(old_id, "disallow", disallow)
         # setattr(new_type, "allow", list(set(new_type.allow) - set(new_type.disallow)))
         return new_type

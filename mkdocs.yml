@@ -1,0 +1,24 @@
+site_name: CommonRoad Scenario Designer
+theme:
+  name: material
+  logo: assets/commonroad_white150.png
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: sphinx
+  - search
+
+nav:
+  - Introduction: index.md
+  - GUI: gui.md
+  - Conversions:
+    - CommonRoad to Lanelet2: cr2l2.md
+    - Lanelet2 to CommonRoad: l22cr.md
+    - OpenDRIVE to CommonRoad: odr2cr.md
+    - OpenStreetMap to CommonRoad: osm2cr.md
+    - SUMO: sumo.md
+  - API Reference :
+      - "Map Conversion Interface" : map_conversion_interface_api.md
+      - "Map Verification and Repairing" : map_verification_api.md

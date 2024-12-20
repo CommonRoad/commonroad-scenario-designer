@@ -417,7 +417,9 @@ class ScenarioToolboxUI(Toolbox):
         self.goal_states_list_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.goal_states_list_list_table_row_count = self.goal_states_list_table.rowCount()
         self.goal_states_list_table.setColumnCount(4)
-        self.goal_states_list_table.setHorizontalHeaderLabels(["Time", "Position", "Orientation", "Velocity"])
+        self.goal_states_list_table.setHorizontalHeaderLabels(
+            ["Time", "Position", "Orientation", "Velocity"]
+        )
         self.goal_states_list_table.setColumnWidth(0, 80)
         self.goal_states_list_table.setColumnWidth(1, 80)
         self.goal_states_list_table.setColumnWidth(2, 80)
@@ -561,7 +563,9 @@ class ScenarioToolboxUI(Toolbox):
         self.goal_states_shape_layout.addRow(self.button_goal_state_position_add_shape)
         self.goal_states_shape_layout.addRow(self.button_goal_state_position_remove_shape)
         self.goal_states_shape_layout.addRow(self.button_goal_state_position_update_shape)
-        self.goal_states_shape_layout.insertRow(11, QLabel("Shape:"), self.goal_states_shape_selector)
+        self.goal_states_shape_layout.insertRow(
+            11, QLabel("Shape:"), self.goal_states_shape_selector
+        )
 
         self.layout_goal_state_information_groupbox.insertRow(12, self.goal_states_shape_widget)
 
@@ -623,7 +627,9 @@ class ScenarioToolboxUI(Toolbox):
 
         self.goal_states_lanelet_list_table = QTableWidget()
         self.goal_states_lanelet_list_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.goal_states_lanelet_list_table_row_count = self.goal_states_lanelet_list_table.rowCount()
+        self.goal_states_lanelet_list_table_row_count = (
+            self.goal_states_lanelet_list_table.rowCount()
+        )
         self.goal_states_lanelet_list_table.setColumnCount(1)
         self.goal_states_lanelet_list_table.setHorizontalHeaderLabels(["Lanelet"])
         self.goal_states_lanelet_list_table.setColumnWidth(0, 350)
@@ -642,8 +648,12 @@ class ScenarioToolboxUI(Toolbox):
         self.goal_states_lanelet_layout.addRow(self.button_goal_state_position_remove_lanelet)
 
         layout_goal_states_lanelet_layout_add = QGridLayout()
-        layout_goal_states_lanelet_layout_add.addWidget(self.goal_state_position_lanelet_update, 1, 1)
-        layout_goal_states_lanelet_layout_add.addWidget(self.button_goal_state_position_add_lanelet, 1, 2)
+        layout_goal_states_lanelet_layout_add.addWidget(
+            self.goal_state_position_lanelet_update, 1, 1
+        )
+        layout_goal_states_lanelet_layout_add.addWidget(
+            self.button_goal_state_position_add_lanelet, 1, 2
+        )
         goal_states_lanelet_add_widget = QWidget()
         goal_states_lanelet_add_widget.setLayout(layout_goal_states_lanelet_layout_add)
         self.goal_states_lanelet_layout.addRow(goal_states_lanelet_add_widget)

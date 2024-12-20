@@ -56,7 +56,9 @@ class CombinedEdge:
             raise ValueError("edge must be of type GraphEdge or CombinedEdge")
 
 
-def find_edges_to_combine(edges: List[GraphEdge], node: GraphNode) -> List[Union[GraphEdge, CombinedEdge]]:
+def find_edges_to_combine(
+    edges: List[GraphEdge], node: GraphNode
+) -> List[Union[GraphEdge, CombinedEdge]]:
     """
     finds edges which can be combined and returns updated list of edges
 
@@ -90,7 +92,9 @@ def find_edges_to_combine(edges: List[GraphEdge], node: GraphNode) -> List[Union
     return result
 
 
-def get_incomings_outgoings(edge: Union[GraphEdge, CombinedEdge], node: GraphNode) -> Tuple[List[Lane], List[Lane]]:
+def get_incomings_outgoings(
+    edge: Union[GraphEdge, CombinedEdge], node: GraphNode
+) -> Tuple[List[Lane], List[Lane]]:
     """
     returns the incoming and outgoing lanes of an edge at a node
 
@@ -584,7 +588,9 @@ def merge_left(incoming: List[Lane], outgoing: List[Lane]) -> bool:
         and len(incoming) >= 1
         and (
             "left" in incoming[-1].turnlane
-            or any([p.turnlane in ("merge_to_left", "slight_left") for p in incoming[-1].predecessors])
+            or any(
+                [p.turnlane in ("merge_to_left", "slight_left") for p in incoming[-1].predecessors]
+            )
         )
     ):
         merge_at_left = False

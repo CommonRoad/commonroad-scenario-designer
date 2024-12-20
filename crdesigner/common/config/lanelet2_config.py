@@ -18,11 +18,15 @@ class Lanelet2Config(BaseConfig):
     )
 
     autoware = Attribute(
-        False, "Autoware", "Boolean indicating whether the conversion " "should be autoware compatible"
+        False,
+        "Autoware",
+        "Boolean indicating whether the conversion " "should be autoware compatible",
     )
 
     use_local_coordinates = Attribute(
-        False, "Use local coordinates", "Boolean indicating whether local coordinates should be added"
+        False,
+        "Use local coordinates",
+        "Boolean indicating whether local coordinates should be added",
     )
 
     supported_countries = [TrafficSignIDGermany, TrafficSignIDZamunda, TrafficSignIDUsa]
@@ -34,7 +38,17 @@ class Lanelet2Config(BaseConfig):
     }
 
     supported_lanelet2_subtypes = Attribute(
-        ["urban", "country", "highway", "interstate", "busLane", "bicycleLane", "exitRamp", "sidewalk", "crosswalk"],
+        [
+            "urban",
+            "country",
+            "highway",
+            "interstate",
+            "busLane",
+            "bicycleLane",
+            "exitRamp",
+            "sidewalk",
+            "crosswalk",
+        ],
         "Supported lanelet2 subtypes",
         "Lanelet2 subtypes that are available in commonroad",
     )
@@ -43,10 +57,14 @@ class Lanelet2Config(BaseConfig):
 
     # lanelet2cr
     node_distance_tolerance = Attribute(
-        0.01, "Node distance tolerance", "Value of the tolerance (in meters) for which we mark nodes as equal"
+        0.01,
+        "Node distance tolerance",
+        "Value of the tolerance (in meters) for which we mark nodes as equal",
     )
 
-    priority_signs = Attribute(["PRIORITY", "RIGHT_OF_WAY"], "Priority signs", "List of priority signs")
+    priority_signs = Attribute(
+        ["PRIORITY", "RIGHT_OF_WAY"], "Priority signs", "List of priority signs"
+    )
 
     adjacent_way_distance_tolerance = Attribute(
         0.05, "Adjacent way distance tolerance", "Threshold indicating adjacent way"
@@ -57,7 +75,9 @@ class Lanelet2Config(BaseConfig):
     left_driving = Attribute(False, "Left Driving", "Map describes left driving system")
 
     adjacencies = Attribute(
-        True, "Adjacencies", "Detect left and right adjacencies of lanelets if they do not share a common way"
+        True,
+        "Adjacencies",
+        "Detect left and right adjacencies of lanelets if they do not share a common way",
     )
 
     translate = Attribute(
@@ -70,7 +90,8 @@ class Lanelet2Config(BaseConfig):
     allowed_tags = Attribute(
         ["type", "subtype", "one_way", "virtual", "location", "bicycle", "highway"],
         "Allowed Tags",
-        "Lanelet tags which are considered for conversion. " "Lanelets with other tags are not converted.",
+        "Lanelet tags which are considered for conversion. "
+        "Lanelets with other tags are not converted.",
     )
 
     eps2_values = Attribute(
@@ -88,13 +109,15 @@ class Lanelet2Config(BaseConfig):
     chaikins_initial_refinements = Attribute(
         5,
         "Initial CCS Refinements",
-        "Number of initial refinements of chaikins corner cutting algorithms " "for curvilinear coordinate system.",
+        "Number of initial refinements of chaikins corner cutting algorithms "
+        "for curvilinear coordinate system.",
     )
 
     chaikins_repeated_refinements = Attribute(
         10,
         "Max. Polyline Resampling Step",
-        "Number of repeated refinements of chaikins corner cutting algorithms " "for curvilinear coordinate system.",
+        "Number of repeated refinements of chaikins corner cutting algorithms "
+        "for curvilinear coordinate system.",
     )
 
     resampling_initial_step = Attribute(

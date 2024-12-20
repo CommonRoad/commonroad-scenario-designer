@@ -131,7 +131,9 @@ def is_correct_left_right_boundary_assignment(lanelet: Lanelet) -> bool:
     :param lanelet: Lanelet.
     :return: Boolean indicates whether the two boundaries should be swapped.
     """
-    return not _wrong_left_right_boundary_side(lanelet.center_vertices, lanelet.left_vertices, lanelet.right_vertices)
+    return not _wrong_left_right_boundary_side(
+        lanelet.center_vertices, lanelet.left_vertices, lanelet.right_vertices
+    )
 
 
 def _wrong_left_right_boundary_side(
@@ -158,15 +160,23 @@ def _wrong_left_right_boundary_side(
             ccs = CurvilinearCoordinateSystem(
                 center_vertices, eps2=eps, max_polyline_resampling_step=max_polyline_resampling_step
             )
-            left = np.array([ccs.convert_to_curvilinear_coords(vert[0], vert[1])[1] for vert in left_vertices])
-            right = np.array([ccs.convert_to_curvilinear_coords(vert[0], vert[1])[1] for vert in right_vertices])
+            left = np.array(
+                [ccs.convert_to_curvilinear_coords(vert[0], vert[1])[1] for vert in left_vertices]
+            )
+            right = np.array(
+                [ccs.convert_to_curvilinear_coords(vert[0], vert[1])[1] for vert in right_vertices]
+            )
             break
         except Exception:
-            center_vertices = chaikins_corner_cutting(center_vertices, config.chaikins_repeated_refinements)
+            center_vertices = chaikins_corner_cutting(
+                center_vertices, config.chaikins_repeated_refinements
+            )
             center_vertices = resample_polyline(center_vertices, config.resampling_repeated_step)
             continue
 
-    return sum(left - right > 0) / len(left) < config.perc_vert_wrong_side
+    # >= since we use the function also for the lanelet2cr conversion where it might be
+    # that start/ending vertices of forks/merges match
+    return sum(left - right >= 0) / len(left) < config.perc_vert_wrong_side
 
 
 def has_predecessor(lanelet_0: Lanelet, lanelet_1: Lanelet) -> bool:
@@ -240,8 +250,12 @@ def is_polyline_self_intersection(polyline: np.ndarray):
     :return: Boolean indicates whether the polyline intersects itself.
     """
     line = [(x, y, z[0]) if z else (x, y) for x, y, *z in polyline]
-    orientation = compute_orientation_from_polyline(polyline[:, :2])  # function does not support 3d vertices
-    orientation_dif = [abs(orientation[i + 1] - orientation[i]) for i in range(len(orientation) - 1)]
+    orientation = compute_orientation_from_polyline(
+        polyline[:, :2]
+    )  # function does not support 3d vertices
+    orientation_dif = [
+        abs(orientation[i + 1] - orientation[i]) for i in range(len(orientation) - 1)
+    ]
     line_string = LineString(line)
 
     # shapely does not detect all cases of self-intersections:

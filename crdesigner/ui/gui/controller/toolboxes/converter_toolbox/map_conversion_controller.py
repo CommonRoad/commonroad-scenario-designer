@@ -8,14 +8,20 @@ from PyQt6.QtWidgets import QDockWidget, QFileDialog, QMainWindow, QMessageBox
 
 from crdesigner.common.config.osm_config import osm_config
 from crdesigner.common.logging import logger
+from crdesigner.common.sumo_available import SUMO_AVAILABLE
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
 from crdesigner.map_conversion.map_conversion_interface import (
     osm_to_commonroad_using_sumo,
 )
-from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
-from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
+from crdesigner.map_conversion.opendrive.cr2odr.converter import Converter
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.network import (
+    Network,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import (
+    parse_opendrive,
+)
 from crdesigner.map_conversion.osm2cr.converter_modules import converter
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import (
     convert_to_scenario,
@@ -27,7 +33,6 @@ from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloade
     download_around_map,
 )
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.util import select_local_file
 from crdesigner.ui.gui.utilities.waitingspinnerwidget import QtWaitingSpinner
 from crdesigner.ui.gui.view.toolboxes.converter_toolbox.converter_toolbox_ui import (
@@ -101,20 +106,33 @@ class MapConversionToolboxController(QDockWidget):
         self.converter_toolbox_ui.adjust_sections()
 
         if self.converter_toolbox_ui.open_drive.isChecked():
-            self.converter_toolbox_ui.button_convert_opendrive.clicked.connect(lambda: self.load_open_drive())
+            self.converter_toolbox_ui.button_convert_opendrive2cr.clicked.connect(
+                lambda: self.load_open_drive()
+            )
+            self.converter_toolbox_ui.button_convert_cr2opendrive.clicked.connect(
+                lambda: self.convert_cr2opendrive()
+            )
         elif self.converter_toolbox_ui.lanelet.isChecked():
-            self.converter_toolbox_ui.button_convert_lanelet2_to_cr.clicked.connect(lambda: self.load_lanelet2())
+            self.converter_toolbox_ui.button_convert_lanelet2_to_cr.clicked.connect(
+                lambda: self.load_lanelet2()
+            )
             self.converter_toolbox_ui.button_convert_cr_to_lanelet2.clicked.connect(
                 lambda: self.convert_cr_to_lanelet2()
             )
         elif self.converter_toolbox_ui.osm.isChecked():
-            self.converter_toolbox_ui.button_start_osm_conversion.clicked.connect(lambda: self.convert_osm_to_cr())
+            self.converter_toolbox_ui.button_start_osm_conversion.clicked.connect(
+                lambda: self.convert_osm_to_cr()
+            )
             self.converter_toolbox_ui.button_start_osm_conversion_with_sumo_parser.clicked.connect(
                 lambda: self.convert_osm_to_cr_with_sumo()
             )
         elif self.converter_toolbox_ui.sumo.isChecked():
-            self.converter_toolbox_ui.button_convert_sumo_to_cr.clicked.connect(lambda: self.load_sumo())
-            self.converter_toolbox_ui.button_convert_cr_to_sumo.clicked.connect(lambda: self.convert_cr_to_sumo())
+            self.converter_toolbox_ui.button_convert_sumo_to_cr.clicked.connect(
+                lambda: self.load_sumo()
+            )
+            self.converter_toolbox_ui.button_convert_cr_to_sumo.clicked.connect(
+                lambda: self.convert_cr_to_sumo()
+            )
 
     def connect_gui_elements(self):
         """
@@ -191,11 +209,15 @@ class MapConversionToolboxController(QDockWidget):
                     print("__Warning__: {}.".format(e))
                     return
             else:
-                QMessageBox.warning(self, "Warning", "No file selected.", QMessageBox.StandardButton.Ok)
+                QMessageBox.warning(
+                    self, "Warning", "No file selected.", QMessageBox.StandardButton.Ok
+                )
 
                 return
         except ValueError as e:
-            QMessageBox.critical(self, "Warning", "Map unreadable: " + str(e), QMessageBox.StandardButton.Ok)
+            QMessageBox.critical(
+                self, "Warning", "Map unreadable: " + str(e), QMessageBox.StandardButton.Ok
+            )
 
         self.convert_with_spinner(self.convert_osm_to_cr_with_spinner)
 
@@ -236,7 +258,9 @@ class MapConversionToolboxController(QDockWidget):
             self.scenario_model.add_converted_scenario(osm_to_commonroad_using_sumo_)
 
         except ValueError as e:
-            QMessageBox.critical(None, "Warning", "Map unreadable: " + str(e), QMessageBox.StandardButton.Ok)
+            QMessageBox.critical(
+                None, "Warning", "Map unreadable: " + str(e), QMessageBox.StandardButton.Ok
+            )
             return
         self.osm_file = None
 
@@ -261,7 +285,9 @@ class MapConversionToolboxController(QDockWidget):
                 raise ValueError
             return True
         except ValueError:
-            self.converter_toolbox_ui.osm_loading_status.setText("Cannot download, invalid Coordinates")
+            self.converter_toolbox_ui.osm_loading_status.setText(
+                "Cannot download, invalid Coordinates"
+            )
             return False
 
     def download_osm_map(self) -> Optional[str]:
@@ -272,7 +298,12 @@ class MapConversionToolboxController(QDockWidget):
         """
         name = "openstreetmap_download" + ".osm"
         if not self.verify_osm_coordinate_input():
-            QMessageBox.critical(self, "Warning", "cannot download, coordinates invalid", QMessageBox.StandardButton.Ok)
+            QMessageBox.critical(
+                self,
+                "Warning",
+                "cannot download, coordinates invalid",
+                QMessageBox.StandardButton.Ok,
+            )
             return None
         else:
             download_around_map(
@@ -308,7 +339,9 @@ class MapConversionToolboxController(QDockWidget):
         self.text_browser.append(
             """Name: {}<br>Version: {}<br>Date: {}<br><br>OpenDRIVE
                 Version {}.{}""".format(
-                self.open_drive_file.header.name if self.open_drive_file.header.name else "<i>unset</i>",
+                self.open_drive_file.header.name
+                if self.open_drive_file.header.name
+                else "<i>unset</i>",
                 self.open_drive_file.header.version,
                 self.open_drive_file.header.date,
                 self.open_drive_file.header.revMajor,
@@ -339,7 +372,9 @@ class MapConversionToolboxController(QDockWidget):
             QMessageBox.warning(
                 self,
                 "OpenDRIVE error",
-                "There was an error during the loading of the selected OpenDRIVE file.\n\n{}".format(error_message),
+                "There was an error during the loading of the selected OpenDRIVE file.\n\n{}".format(
+                    error_message
+                ),
                 QMessageBox.StandardButton.Ok,
             )
             return
@@ -348,11 +383,33 @@ class MapConversionToolboxController(QDockWidget):
             QMessageBox.warning(
                 self,
                 "OpenDRIVE error",
-                "There was an error during the loading of the selected OpenDRIVE file.\n\n{}".format(error_message),
+                "There was an error during the loading of the selected OpenDRIVE file.\n\n{}".format(
+                    error_message
+                ),
                 QMessageBox.StandardButton.Ok,
             )
             return
         self.convert_with_spinner(self.convert_open_drive_to_cr)
+
+    @logger.log
+    def convert_cr2opendrive(self):
+        """
+        Converts the currently loaded CR map to OpenDRIVE.
+        """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
+        directory = QFileDialog.getExistingDirectory(
+            self, "Dir", options=QFileDialog.Option.ShowDirsOnly
+        )
+
+        if not self.scenario_model.scenario_created or directory == "":
+            return
+        output_path = directory + "/" + str(self.scenario_model.get_scenario_id()) + ".xodr"
+        crodr_converter = Converter(self.scenario_model.get_current_scenario())
+        crodr_converter.convert(str(output_path))
+        self.text_browser.append("Conversion from CommonRoad to OpenDRIVE is finished.")
 
     @logger.log
     def load_lanelet2(self):
@@ -401,7 +458,9 @@ class MapConversionToolboxController(QDockWidget):
         """
         try:
             if self.lanelet2_file is None:
-                QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.StandardButton.Ok)
+                QMessageBox.warning(
+                    None, "Warning", "No file selected.", QMessageBox.StandardButton.Ok
+                )
                 return
             scenario = self.lanelet2_to_cr_converter(self.lanelet2_file)
             self.lanelet2_file = None
@@ -419,7 +478,9 @@ class MapConversionToolboxController(QDockWidget):
             self.text_browser.append("Please stop the animation first.")
             return
 
-        directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Option.ShowDirsOnly)
+        directory = QFileDialog.getExistingDirectory(
+            self, "Dir", options=QFileDialog.Option.ShowDirsOnly
+        )
 
         if not self.scenario_model.scenario_created or directory == "":
             return
@@ -427,7 +488,9 @@ class MapConversionToolboxController(QDockWidget):
         l2osm = CR2LaneletConverter()
         osm = l2osm(self.scenario_model.get_current_scenario())
         with open(f"{path}", "wb") as file_out:
-            file_out.write(etree.tostring(osm, xml_declaration=True, encoding="UTF-8", pretty_print=True))
+            file_out.write(
+                etree.tostring(osm, xml_declaration=True, encoding="UTF-8", pretty_print=True)
+            )
         self.text_browser.append("Conversion from CommonRoad to Lanelet2 is done")
 
     @logger.log
@@ -462,7 +525,9 @@ class MapConversionToolboxController(QDockWidget):
             return
 
         if SUMO_AVAILABLE:
-            directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Option.ShowDirsOnly)
+            directory = QFileDialog.getExistingDirectory(
+                self, "Dir", options=QFileDialog.Option.ShowDirsOnly
+            )
             if not directory:
                 return
             self.sumo_simulation.convert(directory)

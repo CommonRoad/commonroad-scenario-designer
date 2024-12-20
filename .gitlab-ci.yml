@@ -19,19 +19,12 @@ default:
   - coverage report -m || true
 
 
-# static_check
-formatting_check:
+pre_commit:
   stage: style_check
+  before_script:
+    - pip install pre-commit
   script:
-    - pip install "black~=24.1.1" "isort~=5.13.1"
-    - black --check .
-    - isort --check-only .
-
-lint_flake8:
-  stage: style_check
-  script:
-    - pip install "flake8~=6.1.0"
-    - flake8 ./tests ./crdesigner ./docs ./tutorials
+    - pre-commit run --all-files --show-diff-on-failure
 
 build_and_test_python:
   image : python:$PYTHON_VERSIONS
@@ -72,30 +65,34 @@ build_and_test_with_coverage:
         path : coverage.xml
   needs : [ ]
 
-pages:
-  # Push the latest documentation of the development branch to the GitLab Pages
-  # at https://cps.pages.gitlab.lrz.de/commonroad-scenario-designer/
-  stage: deploy
+pages :
+  # push the latest documentation of the main branch to the Gitlab pages.
+  # available at https://cps.pages.gitlab.lrz.de/commonroad/commonroad-template
+  stage : deploy
   when: manual
   only :
     - master
-  script:
-    - cd docs/source && sphinx-build -b html . ../../public
-  artifacts:
-    paths:
-      - public
-  environment:
-    name: Gitlab Pages
-    url: https://cps.pages.gitlab.lrz.de/commonroad-scenario-designer/
+  publish : site
+  script :
+    - poetry install --with docs
+    - mkdocs build
+  artifacts :
+    paths :
+      - site
+  environment :
+    name : Gitlab Pages
+    url : https://cps.pages.gitlab.lrz.de/commonroad-scenario-designer/
+
 
 build_pages:
   # Push the latest documentation of the development branch to the GitLab Pages at gitlab artifacts
   stage: deploy
   script:
-    - cd docs/source && sphinx-build -b html . ../../public
+    - poetry install --with docs
+    - mkdocs build
   artifacts:
-    paths:
-      - public
+    paths :
+      - site
   needs: []
 
 push_to_internal_pipy_registry:

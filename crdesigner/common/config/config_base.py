@@ -4,7 +4,15 @@ from typing import Callable, Dict, Generic, List, Optional, Tuple, Type, TypeVar
 
 import yaml
 from PyQt6.QtCore import QObject, pyqtSignal
-from PyQt6.QtWidgets import QMessageBox
+
+try:
+    # required for Ubuntu 20.04 since there a system library is too old for pyqt6 and the import fails
+    # when not importing this, one can still use the map conversion
+    from PyQt6.QtWidgets import QMessageBox
+
+    pyqt_available = True
+except (ImportError, RuntimeError):
+    pyqt_available = False
 
 from crdesigner.ui.gui.utilities.custom_yaml import add_custom_interval_interpreter
 
@@ -75,7 +83,9 @@ class Attribute(Generic[T], QObject):
         :param value: The value to set the attribute to.
         """
         if not isinstance(value, self.value_type) and value is not None:
-            raise TypeError(f"Expected type {self.value_type} for attribute {self.display_name}, got {type(value)}")
+            raise TypeError(
+                f"Expected type {self.value_type} for attribute {self.display_name}, got {type(value)}"
+            )
         if self.options is not None:
             if value not in self.options:
                 self._warning_wrong_setting()
@@ -136,15 +146,16 @@ class Attribute(Generic[T], QObject):
         self.value = copy.deepcopy(self.last_saved)
 
     def _warning_wrong_setting(self):
-        warning_dialog = QMessageBox()
-        warning_dialog.warning(
-            None,
-            "Warning",
-            f"Setting {self.display_name} contains invalid value!",
-            QMessageBox.StandardButton.Ok,
-            QMessageBox.StandardButton.Ok,
-        )
-        warning_dialog.close()
+        if pyqt_available:
+            warning_dialog = QMessageBox()
+            warning_dialog.warning(
+                None,
+                "Warning",
+                f"Setting {self.display_name} contains invalid value!",
+                QMessageBox.StandardButton.Ok,
+                QMessageBox.StandardButton.Ok,
+            )
+            warning_dialog.close()
         self.reset()
 
 

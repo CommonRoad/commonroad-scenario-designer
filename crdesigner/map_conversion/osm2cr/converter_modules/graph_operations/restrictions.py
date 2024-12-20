@@ -39,7 +39,12 @@ def parse_restriction(restriction: str) -> Optional[Set[str]]:
 
 class Restriction:
     def __init__(
-        self, from_edge_id: int, via_element_id: int, via_element_type: str, to_edge_id: int, restriction: str
+        self,
+        from_edge_id: int,
+        via_element_id: int,
+        via_element_type: str,
+        to_edge_id: int,
+        restriction: str,
     ):
         """
         :param from_edge_id: id of the edge the restriction starts

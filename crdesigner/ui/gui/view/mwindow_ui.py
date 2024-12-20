@@ -6,8 +6,8 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
 
 from crdesigner.common.config.gui_config import ColorSchema, gui_config
+from crdesigner.common.sumo_available import SUMO_AVAILABLE
 from crdesigner.ui.gui.resources.MainWindow import Ui_mainWindow
-from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 
 if SUMO_AVAILABLE:
     pass
@@ -73,12 +73,16 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
     def update_window(self):
         p = QtGui.QPalette()
         p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.colorscheme().background))
-        p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.colorscheme().second_background))
+        p.setColor(
+            QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.colorscheme().second_background)
+        )
         p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.colorscheme().background))
         p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.colorscheme().color))
         p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(self.colorscheme().color))
         p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.colorscheme().color))
-        p.setColor(QtGui.QPalette.ColorRole.AlternateBase, QtGui.QColor(self.colorscheme().background))
+        p.setColor(
+            QtGui.QPalette.ColorRole.AlternateBase, QtGui.QColor(self.colorscheme().background)
+        )
         self.setPalette(p)
 
         self.road_network_toolbox.road_network_toolbox_ui.update_window()
@@ -87,7 +91,10 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         self.scenario_toolbox.scenario_toolbox_ui.update_window()
         self.animated_viewer_wrapper.update_window()
         self.menubar.setStyleSheet(
-            "background-color: " + self.colorscheme().second_background + "; color: " + self.colorscheme().color
+            "background-color: "
+            + self.colorscheme().second_background
+            + "; color: "
+            + self.colorscheme().color
         )
 
     def close_window(self) -> bool:
@@ -104,9 +111,13 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
 
         p = QtGui.QPalette()
         p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.colorscheme().background))
-        p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.colorscheme().second_background))
+        p.setColor(
+            QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.colorscheme().second_background)
+        )
         p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.colorscheme().highlight))
-        p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.colorscheme().highlight_text))
+        p.setColor(
+            QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.colorscheme().highlight_text)
+        )
         p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(self.colorscheme().color))
         p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.colorscheme().color))
         message_box.setPalette(p)
@@ -128,7 +139,9 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
             QMessageBox.Icon.Warning,
             "Warning",
             "Do you want to restore the last project? \n \n Do you want to save the logging file?",
-            buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Save | QMessageBox.StandardButton.No,
+            buttons=QMessageBox.StandardButton.Yes
+            | QMessageBox.StandardButton.Save
+            | QMessageBox.StandardButton.No,
             parent=self,
         )
 
@@ -137,9 +150,13 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
 
         p = QtGui.QPalette()
         p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.colorscheme().background))
-        p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.colorscheme().second_background))
+        p.setColor(
+            QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.colorscheme().second_background)
+        )
         p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.colorscheme().highlight))
-        p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.colorscheme().highlight_text))
+        p.setColor(
+            QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.colorscheme().highlight_text)
+        )
         p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(self.colorscheme().color))
         p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.colorscheme().color))
         message_box.setPalette(p)

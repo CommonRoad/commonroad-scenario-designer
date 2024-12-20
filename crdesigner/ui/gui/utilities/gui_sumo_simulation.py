@@ -3,23 +3,15 @@ import uuid
 
 from commonroad.scenario.scenario import Scenario
 
+from crdesigner.common.sumo_available import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.errors import error
 from crdesigner.ui.gui.utilities.util import Observable
 
-# try to import sumo functionality
-try:
+if SUMO_AVAILABLE:
     from sumocr.interface.sumo_simulation import SumoSimulation
 
     from crdesigner.map_conversion.sumo_map.config import SumoConfig
     from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
-
-    SUMO_AVAILABLE = True
-except ImportError:
-    logging.warning(
-        "Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
-        "The GUI and other map conversions should work."
-    )
-    SUMO_AVAILABLE = False
 
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import QThread
@@ -134,17 +126,19 @@ class SUMOSimulation(QFrame):
         simulates the current scenario and returns the simulated version
         """
         if not self._scenario:
-            error(self, "No Scenario loaded, load a valid commonroad scenario to simulate")
+            error(self, "No Scenario loaded, load a valid CommonRoad scenario to simulate")
             return False
 
         self.waiting_msg = WaitingDialog()
-        self.worker: ConversionWorker = ConversionWorker(self._scenario, self._config, output_folder)
+        self.worker: ConversionWorker = ConversionWorker(
+            self._scenario, self._config, output_folder
+        )
         self.worker.finished.connect(self.simulation_done)
         self.worker.start()
 
         # show Info box, telling user to wait for the simulation to finish
         # self.waiting_msg.information(self, "SUMO Simulation", "Simulating...",
-        #                              QMessageBox.Ok)
+        #                              QMessageBox.StandardButton.Ok)
         self.waiting_msg.exec()
 
         return True
@@ -154,17 +148,19 @@ class SUMOSimulation(QFrame):
         simulates the current scenario and returns the simulated version
         """
         if not self._scenario:
-            error(self, "No Scenario loaded, load a valid commonroad scenario to simulate")
+            error(self, "No Scenario loaded, load a valid CommonRoad scenario to simulate")
             return False
 
         self.waiting_msg = WaitingDialog()
-        self.worker: SimulationWorker = SimulationWorker(self._scenario, self._config, self._output_folder)
+        self.worker: SimulationWorker = SimulationWorker(
+            self._scenario, self._config, self._output_folder
+        )
         self.worker.finished.connect(self.simulation_done)
         self.worker.start()
 
         # show Info box, telling user to wait for the simulation to finish
         # self.waiting_msg.information(self, "SUMO Simulation", "Simulating...",
-        #                              QMessageBox.Ok)
+        #                             QMessageBox.StandardButton.Ok)
         self.waiting_msg.exec()
 
         return True

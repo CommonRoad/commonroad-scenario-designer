@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.8.3] - 2024-12-20
+
+### Added
+- odr2cr: Left-hand drive consideration
+- pre-commit hook
+- CommonRoad to OpenDRIVE conversion
+
+### Changed
+- map-conversion: Interfaces can consider string and Path objects
+- mkdocs for docu
+- ruff for formatting
+
+### Fixed
+- cr2sumo: Trajectory conversion assigned non-existent edges to routes
+- osm2cr: Intersection incoming elements did not reference any incoming lanelets
+- Command line interface: Providing no input path
+- Scenario fails to be opened, if any of the dynamic obstacles does not contain a prediction
+- GUI: wrong usage of button
+- Check for qt6 so that map conversions work under Ubuntu 20.04
+- GUI: Adding traffic signs to lanelet did not work due to changes in commonroad-io
+- osm2cr: Lanelet line markings were always set to 'no_marking' although the line markings are unkown
+- GUI: rounding error identification of straight lanelets
+
 ## [0.8.2] - 2024-07-22
 
 ### Added
@@ -9,6 +32,7 @@
 - cr2lanelet: Lane change property tags
 - odr2cr: Road speed limit conversion
 - odr2cr: Option to neglect projection by setting `config.proj_string_odr = None`
+
 
 ### Changed
 - odr2cr: Warning instead of failure in case of not supported road object type
@@ -38,13 +62,13 @@
 - cr2lanelet: Static height for traffic lights (1.2m) until official height support in CommonRoad
 - cr2lanelet: Regulatory element to corresponding way relation for lanes (required by autoware)
 - Option to display the aerial image of the current position
-- By default, if no lbdv creditials are stored, the open source credentials are used
+- By default, if no lbdv credentials are stored, the open source credentials are used
 - File reader that optionally verifies and repairs the road network
 - Option for the scenario designer file reader and writer to project the scenario
 - Possibility to change the geo reference and translate the scenario
 - Integrated map verification/repairing error visualization
 - Separate obstacle profile widget within obstacle toolbox
-- Multiple obstacle profiles visualizable
+- Multiple obstacle profiles can be visualized
 - Direct conversion from OpenDRIVE to Lanelet2
 
 ### Changed
@@ -60,7 +84,7 @@
 - Adding existing obstacles again
 - Selecting obstacles with set-based prediction
 - Bug when editing curved lanelets in the canvas
-- lanelet2cr wrong final vertices assignment 
+- lanelet2cr wrong final vertices assignment
 - Deleting unreferenced traffic signs/lights after deleting lanelet
 - Map verification/repairing: Checking unique ID of traffic light cycle element
 - Consider x-, y-translation for cr2lanelet conversion (and vice versa)
@@ -153,7 +177,7 @@
 
 ### Changed
 - Default matplotlib area
-- Generalized traffic sign conversion 
+- Generalized traffic sign conversion
 - Lanelet2 to CommonRoad conversion: Generalize traffic sign conversion
 - Packaging using poetry
 
@@ -194,7 +218,7 @@
 
 ### Fixed
 - Preventing GUI crash when adding obstacle without existing scenario
-- Conversion of straight euler spiral 
+- Conversion of straight euler spiral
 - Floating point error in computation of Cartesian points of lane border in OpenDRIVE2CR conversion
 - Various small bug fixes
 
