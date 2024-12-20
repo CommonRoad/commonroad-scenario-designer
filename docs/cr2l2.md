@@ -12,7 +12,7 @@ The CommonRoad to Lanelet2 conversion can be used via
 - GUI
 - Python API
 
-For the relevant GUI commands execute
+For the relevant command line commands execute
 ``crdesigner --help``.
 Tutorials on how to use the Python APIs can be found in our
 [GitHub repository](https://github.com/CommonRoad/commonroad-scenario-designer/tree/develop/tutorials/conversion_examples).

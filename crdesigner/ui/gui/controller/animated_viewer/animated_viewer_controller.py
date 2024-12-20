@@ -234,7 +234,6 @@ class AnimatedViewerController:
                     path,
                     draw_params=self.dynamic.draw_params,
                 )
-                print("finished")
         except IOError as e:
             QMessageBox.critical(
                 self,

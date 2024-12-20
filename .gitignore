@@ -124,3 +124,4 @@ ENV/
 /tutorials/conversion_examples/example_files/opendrive/opendrive-1.xml
 /tests/map_conversion/test_maps/osm/ped_crossing.osm.xodr
 /tutorials/conversion_examples/example_files/osm/test_ped_crossing.xml
+/tutorials/conversion_examples/example_files/opendrive/ZAM_Over-1_1.odr

@@ -571,8 +571,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     and veh_length > self.conf.veh_params["length"]["passenger"]
                 ):
                     disallow.append(veh_class)
-                    # print("{} disallowed on lanelet {}, allowed max_vehicle_length={}".format(veh_class, lanelet_id,
-                    #                                                                           max_vehicle_length))
         return disallow
 
     def _get_speeds_list(self):

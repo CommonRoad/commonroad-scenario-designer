@@ -207,14 +207,14 @@ class TestCR2LaneletConverter(unittest.TestCase):
         lanelet.user_bidirectional = {RoadUser.VEHICLE}
         cr1._convert_lanelet(lanelet)
         last_way_relation = list(cr1.osm.way_relations)[-1]
-        print(cr1.osm.way_relations[last_way_relation].tag_dict)
+
         self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict["one_way:vehicle"], "no")
 
         # other vehicles are bidirectional users
         lanelet.user_bidirectional = {RoadUser.BUS, RoadUser.CAR, RoadUser.PRIORITY_VEHICLE}
         cr1._convert_lanelet(lanelet)
         last_way_relation = list(cr1.osm.way_relations)[-1]
-        print(cr1.osm.way_relations[last_way_relation].tag_dict)
+
         self.assertEqual(
             cr1.osm.way_relations[last_way_relation].tag_dict["one_way:vehicle:bus"], "no"
         )
@@ -229,7 +229,7 @@ class TestCR2LaneletConverter(unittest.TestCase):
         lanelet.user_bidirectional = {RoadUser.BICYCLE, RoadUser.PEDESTRIAN}
         cr1._convert_lanelet(lanelet)
         last_way_relation = list(cr1.osm.way_relations)[-1]
-        print(cr1.osm.way_relations[last_way_relation].tag_dict)
+
         self.assertEqual(
             cr1.osm.way_relations[last_way_relation].tag_dict["one_way:pedestrian"], "no"
         )

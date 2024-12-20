@@ -11,13 +11,13 @@ in Proc. of the IEEE International Conference on Service Operations and Logistic
 Since the release of the paper, various updates have been implemented in the code to enhance the converter.
 
 ## Usage
-The CommonRoad to Lanelet2 conversion can be used via:
+The OpenDRIVE to CommonRoad conversion can be used via:
 
 - command line interface
 - GUI
 - Python API
 
-For the relevant GUI commands execute
+For the relevant command line commands execute
 ``crdesigner --help``.
 Tutorials on how to use the Python APIs can be found in our
 [GitHub repository](https://github.com/CommonRoad/commonroad-scenario-designer/tree/develop/tutorials/conversion_examples).

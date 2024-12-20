@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<OpenDRIVE>
+    <header revMajor="1" revMinor="6" version="1.0" name="ZAM_Lanelet-1_1_T-1" date="2022-11-30T22:20:46.321802" north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00" west="0.0000000000000000e+00">
+    </header>
+    <road name="" length="1.0000000000000000e+01" id="21" junction="-1">
+        <link/>
+        <type s="0.0000000000000000e+00" type="town"/>
+        <planView>
+            <geometry s="0.0000000000000000e+00" x="0.0000000000000000e+00" y="1.5000000000000000e+00" hdg="0.0000000000000000e+00" length="1.0000000000000000e+00">
+                <line/>
+            </geometry>
+            <geometry s="1.0000000000000000e+00" x="1.0000000000000000e+00" y="1.5000000000000000e+00" hdg="0.0000000000000000e+00" length="1.0000000000000000e+00">
+                <line/>
+            </geometry>
+            <geometry s="2.0000000000000000e+00" x="2.0000000000000000e+00" y="1.5000000000000000e+00" hdg="0.0000000000000000e+00" length="1.0000000000000000e+00">
+                <line/>
+            </geometry>
+            <geometry s="3.0000000000000000e+00" x="3.0000000000000000e+00" y="1.5000000000000000e+00" hdg="0.0000000000000000e+00" length="1.0000000000000000e+00">
+                <line/>
+            </geometry>
+            <geometry s="4.0000000000000000e+00" x="4.0000000000000000e+00" y="1.5000000000000000e+00" hdg="0.0000000000000000e+00" length="1.0000000000000000e+00">
+                <line/>
+            </geometry>
+            <geometry s="5.0000000000000000e+00" x="5.0000000000000000e+00" y="1.5000000000000000e+00" hdg="0.0000000000000000e+00" length="1.0000000000000000e+00">
+                <line/>
+            </geometry>
+            <geometry s="6.0000000000000000e+00" x="6.0000000000000000e+00" y="1.5000000000000000e+00" hdg="0.0000000000000000e+00" length="1.0000000000000000e+00">
+                <line/>
+            </geometry>
+            <geometry s="7.0000000000000000e+00" x="7.0000000000000000e+00" y="1.5000000000000000e+00" hdg="0.0000000000000000e+00" length="1.0000000000000000e+00">
+                <line/>
+            </geometry>
+            <geometry s="8.0000000000000000e+00" x="8.0000000000000000e+00" y="1.5000000000000000e+00" hdg="0.0000000000000000e+00" length="1.0000000000000000e+00">
+                <line/>
+            </geometry>
+            <geometry s="9.0000000000000000e+00" x="9.0000000000000000e+00" y="1.5000000000000000e+00" hdg="0.0000000000000000e+00" length="1.0000000000000000e+00">
+                <line/>
+            </geometry>
+        </planView>
+        <elevationProfile/>
+        <lateralProfile/>
+        <lanes>
+            <laneSection s="0.0000000000000000e+00">
+                <center>
+                    <lane id="0" type="driving" level="false">
+                        <link/>
+                        <roadMark sOffset="0.0000000000000000e+00" type="solid" weight="standard" color="standard" width="1.3000000000000000e-01"/>
+                    </lane>
+                </center>
+                <left/>
+                <right>
+                    <lane id="-1" type="driving" level="false">
+                        <link/>
+                        <width sOffset="0.0000000000000000e+00" a="2.9999999999999996e+00" b="-3.1401849173675501e-17" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+                        <roadMark sOffset="0.0000000000000000e+00" type="solid" weight="standard" color="standard" width="1.3000000000000000e-01"/>
+                    </lane>
+                </right>
+            </laneSection>
+        </lanes>
+        <objects/>
+        <signals/>
+    </road>
+</OpenDRIVE>

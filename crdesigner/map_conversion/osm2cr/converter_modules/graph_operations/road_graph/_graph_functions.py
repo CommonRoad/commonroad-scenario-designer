@@ -164,7 +164,6 @@ def set_points(predecessor: Lane, successor: Lane) -> List[np.ndarray]:
     )
     total_distance = np.linalg.norm(p1 - p4)
     if not (distance_to_points > 1 or distance_to_points / total_distance > 0.1):
-        # print("found something")
         pass
     if a1 > 0 and a2 > 0 and (distance_to_points > 1 or distance_to_points / total_distance > 0.1):
         waypoints = geometry.evaluate_bezier(np.array([p1, intersection_point, p4]), n)
