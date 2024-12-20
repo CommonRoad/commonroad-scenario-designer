@@ -16,8 +16,13 @@ from crdesigner.common.sumo_available import SUMO_AVAILABLE
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
-from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
-from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
+from crdesigner.map_conversion.opendrive.cr2odr.converter import Converter
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.network import (
+    Network,
+)
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import (
+    parse_opendrive,
+)
 
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.config import SumoConfig
@@ -69,8 +74,10 @@ def commonroad_to_lanelet(
         scenario, _ = crdesigner_reader.open()
 
     except etree.XMLSyntaxError as xml_error:
-        print(f"SyntaxError: {xml_error}")
-        print("There was an error during the loading of the selected CommonRoad file.\n")
+        logging.error(
+            f"SyntaxError: {xml_error}.\n"
+            f"There was an error during the loading of the selected CommonRoad file."
+        )
         return
 
     l2osm = CR2LaneletConverter(config=config)
@@ -127,8 +134,10 @@ def commonroad_to_sumo(input_file: Path_T, output_file: Path_T):
         crdesigner_reader = CRDesignerFileReader(input_file)
         scenario, _ = crdesigner_reader.open()
     except etree.XMLSyntaxError as xml_error:
-        print(f"SyntaxError: {xml_error}")
-        print("There was an error during the loading of the selected CommonRoad file.\n")
+        logging.error(
+            f"SyntaxError: {xml_error}.\n"
+            f"There was an error during the loading of the selected CommonRoad file."
+        )
         return
 
     if SUMO_AVAILABLE:
@@ -182,7 +191,7 @@ def osm_to_commonroad_using_sumo(input_file: Path_T) -> Optional[Scenario]:
             ]
         )
     except Exception as e:
-        print("__Warning__: {}.".format(e))
+        logging.error(format(e))
         return None
     return opendrive_to_commonroad(Path(opendrive_file))
 
@@ -218,3 +227,13 @@ def opendrive_to_lanelet(
         file_out.write(
             etree.tostring(osm, xml_declaration=True, encoding="UTF-8", pretty_print=True)
         )
+
+
+def commonroad_to_opendrive(input_file: Path, output_file: Path):
+    """
+    Converts CommonRoad file to OpenDRIVE file and stores it
+    @param input_file: Path to CommonRoad file
+    @param output_file: Path where OpenDRIVE file to be stored
+    """
+    converter = Converter(str(input_file))
+    converter.convert(str(output_file))

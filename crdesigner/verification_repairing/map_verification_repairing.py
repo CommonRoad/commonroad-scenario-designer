@@ -139,7 +139,7 @@ def verify_and_repair_map(
     map_verification = initial_map_verification(verification_result, str(complete_map_name), config)
 
     verification_time, repairing_time = 0.0, 0.0
-    logging.info(f"Validating map {complete_map_name} with hol solver")
+    logging.info(f"Validating map {complete_map_name}.")
 
     groups_handler = GroupsHandler()
 
@@ -153,7 +153,7 @@ def verify_and_repair_map(
     group_i = 0
     while groups_handler.is_next_group():
         group = groups_handler.next_group()
-        logging.info(f"Verifying group number {group_i}")
+        logging.debug(f"Verifying group number {group_i}")
         final_formulas = list(set(org_config.verification.formulas).intersection(set(group)))
         if not final_formulas:
             continue
@@ -263,7 +263,7 @@ def verify_and_repair_map(
             file_format=config.evaluation.file_format,
         )
 
-    logging.info(f"Validating map {complete_map_name} finished with hol solver")
+    logging.info(f"Validating map {complete_map_name} finished.")
 
     return network, verification_result
 

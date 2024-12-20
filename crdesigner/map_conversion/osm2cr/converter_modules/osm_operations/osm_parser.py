@@ -365,7 +365,6 @@ def parse_file(
     # custom bounds were originally used this way.
     # Now they are used for sublayer extraction
     # custom_bounds = read_custom_bounds(root)
-    # print("bounds", bounds, "custom_bounds", custom_bounds)
     road_ids, road_lats, road_lons = extract_lat_lon(road_nodes)
     crossing_ids, crossing_lats, crossing_lons = (
         extract_lat_lon(crossing_nodes) if len(crossing_nodes) > 0 else ([], [], [])
@@ -863,7 +862,7 @@ def roads_to_graph(
     if additional_nodes is not None:
         for node in additional_nodes:
             nodes[node.id] = node
-            logging.info("added crossing point", node)
+    #            logging.info("added crossing point", node)
     edges = get_graph_edges_from_road(roads, nodes, road_points, bounds, transformer)
     graph_traffic_signs = get_graph_traffic_signs(nodes, edges, traffic_signs)
     graph_traffic_lights = get_graph_traffic_lights(nodes, traffic_lights)

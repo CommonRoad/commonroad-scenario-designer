@@ -5,7 +5,7 @@ to the
 [CommonRoad (Version 2020a) format](https://gitlab.lrz.de/tum-cps/commonroad-scenarios/blob/master/documentation/XML_commonRoad_2020a.pdf).
 
 ## Usage
-The CommonRoad to Lanelet2 conversion can be used via
+The Lanelet2 to CommonRoad conversion can be used via
 
 - command line interface
 - GUI

@@ -150,7 +150,6 @@ def get_tile(quadkey: str) -> JpegImageFile:
             sub_domain = bing_maps_api_response["imageUrlSubdomains"][0]
             request = request.replace("{subdomain}", sub_domain)
             request = request.replace("{quadkey}", quadkey)
-            print(request)
             tile = urlopen(request).read()
             image = Image.open(BytesIO(tile))
             store_tile(quadkey, image)

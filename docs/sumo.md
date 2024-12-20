@@ -5,13 +5,13 @@ traffic simulator which is able to simulate traffic
 participants, given a road network in its own graph like format of nodes and edges.
 
 ## Usage
-The CommonRoad to Lanelet2 conversion can be used via:
+The SUMO conversions can be used via:
 
 - command line interface
 - GUI
 - Python API
 
-For the relevant GUI commands execute
+For the relevant command line commands execute
 ``crdesigner --help``.
 Tutorials on how to use the Python APIs can be found in our
 [GitHub repository](https://github.com/CommonRoad/commonroad-scenario-designer/tree/develop/tutorials/conversion_examples).

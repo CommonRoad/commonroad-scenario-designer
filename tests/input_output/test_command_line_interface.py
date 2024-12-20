@@ -17,7 +17,7 @@ class TestCommandLineInterface(unittest.TestCase):
                 "crdesigner",
                 "--input-file",
                 os.path.dirname(os.path.realpath(__file__))
-                + "/../map_conversion/test_maps/opendrive/poly3_and_border_record.xodr",
+                + "/../map_conversion/test_maps/odr2cr/poly3_and_border_record.xodr",
                 "--output-file",
                 self.output_path + "/opendrive_command_line.xml",
                 "--tags",

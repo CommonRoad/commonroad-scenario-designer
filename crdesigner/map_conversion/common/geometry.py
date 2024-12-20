@@ -611,9 +611,7 @@ def get_lon_lat_constants(origin):
 
 def lon_lat_to_cartesian(waypoint: np.ndarray, origin: np.ndarray) -> np.ndarray:
     lon_constant, lat_constant = get_lon_lat_constants(origin)
-    # print("constants: ", lon_constant, lat_constant)
     diff = waypoint - origin
-    # print(diff)
     lon_d, lat_d = diff[1], diff[0]
     x = lon_constant * lon_d
     y = lat_constant * lat_d
@@ -663,7 +661,6 @@ def pre_filter_points(lines: List[List[np.ndarray]]) -> List[List[np.ndarray]]:
     if len(result[0]) == 2:
         for line in result:
             line.insert(1, (line[0] + line[1]) / 2)
-    # print("pre filtered {}% of points".format(100 - len(result[0]) * 100 / len(lines[0])))
     return result
 
 

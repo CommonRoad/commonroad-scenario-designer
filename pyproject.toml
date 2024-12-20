@@ -62,6 +62,8 @@ kdtree = "^0.16"
 pandas = "^2.0.2"
 requests = "^2.31.0 "
 eclipse-sumo = "^1.19.0"
+pyclothoids = "^0.1.5"
+# asam-qc-opendrive = { version = "^1.0", python = "^3.10" }
 
 [tool.poetry.group.dev]
 optional = true

@@ -725,15 +725,15 @@ class Lanelet2CRConverter:
             traffic_sign_found = False
             tsid = TrafficSignIDZamunda.STOP  # default sign
             for country in supported_country_list:
-                for countrySign in country:
-                    if countrySign.value == filtered_traffic_sign_type_name:
+                for country_sign in country:
+                    if country_sign.value == filtered_traffic_sign_type_name:
                         # traffic sign ID 252 is replaced by 260
                         if (
                             country is TrafficSignIDGermany or country is TrafficSignIDZamunda
-                        ) and countrySign.value == "252":
+                        ) and country_sign.value == "252":
                             tsid = country("260")
                         else:
-                            tsid = country(countrySign.value)
+                            tsid = country(country_sign.value)
                         traffic_sign_found = True
                 if traffic_sign_found:
                     break

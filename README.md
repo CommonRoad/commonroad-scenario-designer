@@ -5,6 +5,7 @@
 [![PyPI download month](https://img.shields.io/pypi/dm/commonroad-scenario-designer.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
 [![PyPI license](https://img.shields.io/pypi/l/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
+
 This toolbox provides map converters for [OpenStreetMap](https://www.openstreetmap.de/karte.html) (OSM),
 [Lanelet](https://www.mrt.kit.edu/software/libLanelet/libLanelet.html) / [Lanelet2](https://github.com/fzi-forschungszentrum-informatik/Lanelet2),
 [OpenDRIVE](https://www.asam.net/standards/detail/opendrive/), and [SUMO](https://sumo.dlr.de/docs/index.html) to the [CommonRoad](https://commonroad.in.tum.de/)
@@ -14,7 +15,7 @@ CommonRoad maps and scenarios.
 
 |              Tool              |                         Path                         |                                Functionality                                 |
 |:------------------------------:|:----------------------------------------------------:|:----------------------------------------------------------------------------:|
-|        OpenDRIVE => CR         |        `crdesigner/map_conversion/opendrive`         |                   Conversion from OpenDRIVE to CommonRoad.                   |
+|        OpenDRIVE <=> CR        |        `crdesigner/map_conversion/opendrive`         |           Conversion from OpenDRIVE to CommonRoad and vice versa.            |
 |    Lanelet/Lanelet2 <=> CR     |         `crdesigner/map_conversion/lanelet2`         | Conversion from Lanelet2 to CommonRoad <br /> and from CommonRoad to Lanelet |
 |           OSM => CR            |          `crdesigner/map_conversion/osm2cr`          |                      Conversion from OSM to CommonRoad.                      |
 |          SUMO <=> CR           |         `crdesigner/map_conversion/sumo_map`         |              Conversion from SUMO to CommonRoad and vice versa.              |
@@ -172,9 +173,10 @@ If you want to contribute to the toolbox, you can also post it in the [forum](ht
 ## Authors
 Responsible: Sebastian Maierhofer, Sebastian Mair
 Contribution (in alphabetic order by last name): Daniel Asch, Hamza Begic, Mohamed Bouhali, Florian Braunmiller,
-Tim Dang, Setenay Eryasar, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Tom Irion, Aaron Kaefer, Anton Kluge,
+Tim Dang, Setenay Eryasar, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke,
+Julian Hohenadel, Tom Irion, Aaron Kaefer, Anton Kluge,
 David Le, Gustaf Lindgren, Sarra Ben Mohamed, Benjamin Orthen, Luisa Ortner, Louis Pröbstle, Benedikt Reinhard,
-Maximilian Rieger, Til Stotz, Stefan Urban, Max Winklhofer
+Maximilian Rieger, Nikolaos Sotirakis, Til Stotz, Stefan Urban, Max Winklhofer
 
 ## Credits
 We gratefully acknowledge partial financial support by
