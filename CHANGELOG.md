@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.8.3]
+## [0.8.3] - 2024-12-20
 
 ### Added
 - odr2cr: Left-hand drive consideration

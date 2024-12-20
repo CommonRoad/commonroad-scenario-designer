@@ -163,7 +163,7 @@ The titles of module pages have to be set manually!
 The full documentation of the API and introducing examples can also be found [here](https://cps.pages.gitlab.lrz.de/commonroad/commonroad-scenario-designer/).
 
 ## Changelog
-A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).
+A detailed overview about the changes in each version is provided in the [Changelog](https://github.com/CommonRoad/commonroad-scenario-designer/blob/master/CHANGELOG.md).
 
 ## Bug and feature reporting
 This release (v0.9.3) is still a BETA version.
