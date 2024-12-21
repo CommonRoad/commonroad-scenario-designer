@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.4] - 2024-12-21
+
+### Changed
+- Update required commonroad-io version
+
 ## [0.8.3] - 2024-12-20
 
 ### Added
