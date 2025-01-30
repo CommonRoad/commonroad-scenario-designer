@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.5] - 2025-XX-XX
+
+### Fixed
+- settings window empty
+
 ## [0.8.4] - 2024-12-21
 
 ### Changed
