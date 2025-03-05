@@ -395,10 +395,9 @@ class Lanelet2CRConverter:
         # Retain traffic light IDs for Autoware
         if self._config.autoware:
             _highest_traffic_light_id = str(0)
-            for way in osm.ways:
-                if osm.ways[way].tag_dict.get("type") == "traffic_light":
-                    if way > _highest_traffic_light_id:
-                        _highest_traffic_light_id = way
+            for tl_id in osm.traffic_light_relations:
+                if tl_id > _highest_traffic_light_id:
+                    _highest_traffic_light_id = tl_id
             generate_unique_id(int(_highest_traffic_light_id))
 
         speed_limits = {}
@@ -548,16 +547,6 @@ class Lanelet2CRConverter:
         """
         # create a TrafficLight element (CR format) from the traffic light way (L2 format\<)
         # id,cycle,position,offset,direction,active
-        # for autoware, the traffic light id is retained
-        if self._config.autoware:
-            new_id = int(traffic_light_way.id_)
-            active = False
-            cycle_list = [TrafficLightCycleElement(TrafficLightState.INACTIVE, 5)]
-
-        else:
-            new_id = generate_unique_id()
-            active = True
-            cycle_list = _append_traffic_light_cycles(traffic_light_way)
 
         # TL in L2 format is represented with 3 nodes, we will take the one in the middle
         node = self.osm.nodes[traffic_light_way.nodes[1]]
@@ -586,17 +575,38 @@ class Lanelet2CRConverter:
                     # for that the "new_lanelet_ids" dict is used that is sent to this function
                     wr_lanelets.add(new_lanelet_ids[wr])
 
-        # create the traffic light
-        traffic_light = TrafficLight(
-            new_id,
-            position,
-            TrafficLightCycle(cycle_list, 1),
-            active=active,
-            direction=TrafficLightDirection.STRAIGHT,
-        )
+        # retain traffic light id for autoware
+        if self._config.autoware:
+            cycle_list = [TrafficLightCycleElement(TrafficLightState.INACTIVE, 5)]
 
-        # add the traffic light to our lanelet network
-        self.lanelet_network.add_traffic_light(traffic_light, wr_lanelets)
+            # create for each traffic_light_relation element a traffic light and retain relation id
+            for re_id in traffic_light_relations:
+                traffic_light = TrafficLight(
+                    re_id,
+                    position,
+                    TrafficLightCycle(cycle_list, 1),
+                    active=False,
+                    direction=TrafficLightDirection.STRAIGHT,
+                )
+
+                # add the traffic light to our lanelet network
+                self.lanelet_network.add_traffic_light(traffic_light, wr_lanelets)
+
+        else:
+            new_id = generate_unique_id()
+            cycle_list = _append_traffic_light_cycles(traffic_light_way)
+
+            # create the traffic light
+            traffic_light = TrafficLight(
+                new_id,
+                position,
+                TrafficLightCycle(cycle_list, 1),
+                active=True,
+                direction=TrafficLightDirection.STRAIGHT,
+            )
+
+            # add the traffic light to our lanelet network
+            self.lanelet_network.add_traffic_light(traffic_light, wr_lanelets)
 
     def _right_of_way_to_traffic_sign(
         self, right_of_way_rel: RegulatoryElement, new_lanelet_ids: Dict[str, int]

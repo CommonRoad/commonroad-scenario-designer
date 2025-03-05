@@ -727,8 +727,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         # test that the id of the traffic light is retained after conversion
         traffic_light: TrafficLight = l2cr.lanelet_network.traffic_lights[0]
-        tl_after_id = int(traffic_light.traffic_light_id)
-        self.assertEqual(tl_after_id, 1)
+        self.assertEqual(int(traffic_light.traffic_light_id), int(tl_way_relation.id_))
 
         # testing the active state of the traffic light
         tl_active_state = traffic_light.active
