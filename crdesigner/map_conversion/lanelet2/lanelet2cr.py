@@ -56,8 +56,6 @@ from crdesigner.map_conversion.lanelet2.lanelet2 import (
 from crdesigner.verification_repairing.verification.hol.functions.predicates.lanelet_predicates import (
     _wrong_left_right_boundary_side,
 )
-import matplotlib.pyplot as plt
-from shapely.plotting import plot_polygon, plot_line
 
 date_strftime_format = "%d-%b-%y %H:%M:%S"
 message_format = "%(asctime)s - %(levelname)s - %(message)s"
@@ -568,8 +566,6 @@ class Lanelet2CRConverter:
                 if ref == traffic_light_way.id_:
                     traffic_light_relations.append(tl_relation)
 
-        stop_line: StopLine = None
-        logging.info("NEW")
         # now go through the lanelets and find the relation, which would match the traffic light and the lanelet
         wr_lanelets = set()
         for wr in self.osm.way_relations:
@@ -591,27 +587,13 @@ class Lanelet2CRConverter:
                             # initialize stop line
                             stop_line = StopLine(start=start, end=end, traffic_light_ref={re},
                                                  line_marking=LineMarking.SOLID)
+                            # add stop line to the lanelet
+                            lanelet = self.lanelet_network.find_lanelet_by_id(new_lanelet_ids[wr])
+                            lanelet.stop_line = stop_line
 
         # retain traffic light id for autoware
         if self._config.autoware:
             cycle_list = [TrafficLightCycleElement(TrafficLightState.INACTIVE, 5)]
-
-            logging.info("WR lanelets: {}".format(wr_lanelets))
-            logging.info("Stop line: {}".format(stop_line))
-            if stop_line is not None:
-                for la_id in wr_lanelets:
-                    la = self.lanelet_network.find_lanelet_by_id(la_id)
-
-                    fig, ax = plt.subplots()
-                    plot_polygon(la.polygon.shapely_object, ax=ax, alpha=0.3, edgecolor='black')
-                    plot_line(LineString([stop_line.start, stop_line.end]), ax=ax, color='red')
-                    plt.show()
-                    if la.polygon.shapely_object.contains(LineString([stop_line.start, stop_line.end])):
-                        la.stop_line = stop_line
-                        logging.info("Lanelet2CRConverter: Stop line added to lanelet {}".format(la.lanelet_id))
-                        logging.info("Traffic light ref of stop line: {}".format(s.traffic_light_ref))
-                    else:
-                        logging.info("NOOOOOOOOOOOOOOOOOOOOO")
 
             # create for each traffic_light_relation element a traffic light and retain relation id
             for re_id in traffic_light_relations:
