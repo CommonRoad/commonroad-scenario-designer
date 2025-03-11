@@ -5,6 +5,9 @@
 ### Fixed
 - settings window empty
 
+### Changed
+- use new CLCS instead of version in drivability-checker
+
 ## [0.8.4] - 2024-12-21
 
 ### Changed
