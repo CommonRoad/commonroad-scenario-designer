@@ -21,30 +21,10 @@ import matplotlib.colors as mcolors
 import networkx as nx
 import numpy as np
 import sumolib
-from commonroad.scenario.intersection import Intersection
-from commonroad.visualization.mp_renderer import MPRenderer
-from matplotlib import pyplot as plt
-from shapely.geometry import LineString, Point
-
-try:
-    import commonroad_dc.pycrccosy
-    from commonroad_dc.costs.route_matcher import LaneletRouteMatcher
-    from commonroad_dc.geometry.util import (
-        compute_curvature_from_polyline,
-        resample_polyline,
-    )
-except ImportError:
-    warnings.warn(
-        "Unable to import commonroad_dc.pycrccosy, converting static scenario into interactive is not supported!"
-    )
-except TypeError:
-    warnings.warn(
-        "Unable to import commonroad_dc.pycrccosy, converting static scenario into interactive is not supported!"
-    )
-
 from commonroad.common.solution import VehicleType as VehicleTypeParam
 from commonroad.common.util import Interval
 from commonroad.prediction.prediction import TrajectoryPrediction
+from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.lanelet import (
     Lanelet,
     LaneletNetwork,
@@ -62,6 +42,16 @@ from commonroad.scenario.traffic_light import (
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficSign
 from commonroad.scenario.traffic_sign_interpreter import TrafficSignInterpreter
 from commonroad.scenario.trajectory import State
+from commonroad.visualization.mp_renderer import MPRenderer
+from commonroad_clcs.clcs import CurvilinearCoordinateSystem
+from commonroad_clcs.config import CLCSParams
+from commonroad_clcs.util import (
+    compute_curvature_from_polyline,
+    resample_polyline,
+)
+from commonroad_dc.costs.route_matcher import LaneletRouteMatcher
+from matplotlib import pyplot as plt
+from shapely.geometry import LineString, Point
 from sumocr.scenario.abstract_scenario_wrapper import AbstractScenarioWrapper
 
 from crdesigner.common.file_reader import CRDesignerFileReader
@@ -2084,7 +2074,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         def create_coordinate_system_from_polyline(
             polyline,
-        ) -> commonroad_dc.pycrccosy.CurvilinearCoordinateSystem:
+        ) -> CurvilinearCoordinateSystem:
             def compute_polyline_length(polyline: np.ndarray) -> float:
                 """
                 Computes the path length s of a given polyline
@@ -2146,7 +2136,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 if infinite_loop_counter > 20:
                     break
 
-            return commonroad_dc.pycrccosy.CurvilinearCoordinateSystem(polyline)
+            return CurvilinearCoordinateSystem(polyline, CLCSParams())
 
         def get_long_dist(ccosy, position):
             try:

@@ -7,6 +7,7 @@ from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import ScenarioID
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
+from commonroad_clcs.util import compute_orientation_from_polyline
 from shapely.geometry import LineString, Point
 from shapely.ops import nearest_points
 
@@ -18,11 +19,6 @@ from crdesigner.verification_repairing.repairing.tools.geometry_tools import (
     fill_number_of_vertices,
     insert_vertices,
 )
-
-try:
-    from commonroad_dc.geometry.util import compute_orientation_from_polyline
-except ModuleNotFoundError:
-    logging.error("MapVerification: Please install CommonRoad Drivability Checker manually!")
 
 
 class LaneletRepairing(ElementRepairing):
