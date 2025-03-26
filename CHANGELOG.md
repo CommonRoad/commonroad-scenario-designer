@@ -4,6 +4,7 @@
 
 ### Fixed
 - settings window empty
+- github actions static code evaluation and python versions
 
 ### Changed
 - use new CLCS instead of version in drivability-checker
