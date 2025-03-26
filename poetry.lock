@@ -596,7 +596,7 @@ shapely = ">=1.6.4"
 
 [[package]]
 name = "commonroad-io"
-version = "2024.2"
+version = "2024.3"
 description = "Python tool to read, write, and visualize CommonRoad scenarios and solutions for automated vehicles."
 optional = false
 python-versions = "^3.9"
@@ -622,8 +622,8 @@ tqdm = ">=4.64"
 [package.source]
 type = "git"
 url = "https://github.com/commonroad/commonroad-io"
-reference = "release-2024-3"
-resolved_reference = "897f0f979fa9267da23f3b185c6fc4d97a505270"
+reference = "HEAD"
+resolved_reference = "bdfab5ccc14d1362050d565c88f2a98d6cabdf67"
 
 [[package]]
 name = "commonroad-vehicle-models"
@@ -5056,4 +5056,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9,<3.12"
-content-hash = "753d425c6827450f3233677d17f45549bd7609171e350eecaa2302135b0e25c8"
+content-hash = "f2e751a13162d14f6076dce3d7585b193f8cefdcbffd4c81fb938f544fa6b4a0"
