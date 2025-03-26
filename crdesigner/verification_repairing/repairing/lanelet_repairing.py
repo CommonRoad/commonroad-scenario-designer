@@ -20,7 +20,7 @@ from crdesigner.verification_repairing.repairing.tools.geometry_tools import (
 )
 
 try:
-    from commonroad_dc.geometry.util import compute_orientation_from_polyline
+    from commonroad_clcs.clcs import compute_orientation_from_polyline
 except ModuleNotFoundError:
     logging.error("MapVerification: Please install CommonRoad Drivability Checker manually!")
 

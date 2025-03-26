@@ -6,18 +6,11 @@ import numpy as np
 from commonroad.scenario.lanelet import Lanelet, StopLine
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
+from commonroad_clcs.pycrccosy.Util import chaikins_corner_cutting, resample_polyline
+from commonroad_clcs.pycrccosy import CurvilinearCoordinateSystem
+from commonroad_clcs.clcs import compute_orientation_from_polyline
 from shapely import LineString
 from similaritymeasures import similaritymeasures
-
-try:
-    from commonroad_dc.geometry.geometry import CurvilinearCoordinateSystem
-    from commonroad_dc.geometry.util import (
-        chaikins_corner_cutting,
-        compute_orientation_from_polyline,
-        resample_polyline,
-    )
-except ModuleNotFoundError:
-    logging.error("MapVerification: Please install CommonRoad Drivability Checker manually.")
 
 from crdesigner.common.config.lanelet2_config import Lanelet2Config
 
