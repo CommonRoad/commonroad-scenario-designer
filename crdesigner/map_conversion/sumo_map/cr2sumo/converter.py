@@ -24,24 +24,14 @@ import numpy as np
 import sumolib
 from commonroad.scenario.intersection import Intersection
 from commonroad.visualization.mp_renderer import MPRenderer
+from commonroad_clcs import pycrccosy
+from commonroad_clcs.clcs import compute_curvature_from_polyline_python
+from commonroad_clcs.pycrccosy.Util import resample_polyline
 from matplotlib import pyplot as plt
 from shapely.geometry import LineString, Point
 
-try:
-    import commonroad_dc.pycrccosy
-    from commonroad_dc.costs.route_matcher import LaneletRouteMatcher
-    from commonroad_dc.geometry.util import (
-        compute_curvature_from_polyline,
-        resample_polyline,
-    )
-except ImportError:
-    warnings.warn(
-        "Unable to import commonroad_dc.pycrccosy, converting static scenario into interactive is not supported!"
-    )
-except TypeError:
-    warnings.warn(
-        "Unable to import commonroad_dc.pycrccosy, converting static scenario into interactive is not supported!"
-    )
+import commonroad_clcs.pycrccosy
+from commonroad_dc.costs.route_matcher import LaneletRouteMatcher
 
 from commonroad.common.solution import VehicleType as VehicleTypeParam
 from commonroad.common.util import Interval
@@ -1944,7 +1934,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 sorted_indices = np.argsort(orientation_differences)
                 return list(lanelet_id_list[sorted_indices])
 
-        def create_coordinate_system_from_polyline(polyline) -> commonroad_dc.pycrccosy.CurvilinearCoordinateSystem:
+        def create_coordinate_system_from_polyline(polyline) -> pycrccosy.CurvilinearCoordinateSystem:
             def compute_polyline_length(polyline: np.ndarray) -> float:
                 """
                 Computes the path length s of a given polyline
@@ -1984,7 +1974,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             polyline = resample_polyline_with_length_check(polyline)
 
-            abs_curvature = abs(compute_curvature_from_polyline(polyline))
+            abs_curvature = abs(compute_curvature_from_polyline_python(polyline))
             max_curvature = max(abs_curvature)
             infinite_loop_counter = 0
             while max_curvature > 0.1:
@@ -1996,7 +1986,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 else:
                     polyline = resample_polyline(polyline, length / 10.0)
 
-                abs_curvature = abs(compute_curvature_from_polyline(polyline))
+                abs_curvature = abs(compute_curvature_from_polyline_python(polyline))
                 max_curvature = max(abs_curvature)
 
                 infinite_loop_counter += 1
@@ -2004,7 +1994,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 if infinite_loop_counter > 20:
                     break
 
-            return commonroad_dc.pycrccosy.CurvilinearCoordinateSystem(polyline)
+            return pycrccosy.CurvilinearCoordinateSystem(polyline)
 
         def get_long_dist(ccosy, position):
             try:
