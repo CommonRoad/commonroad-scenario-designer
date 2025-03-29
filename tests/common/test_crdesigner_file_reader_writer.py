@@ -45,15 +45,15 @@ class TestCRDesignerFileReader(unittest.TestCase):
         self.assertNotEqual(scenario, repaired_scenario)
         self.assertEqual(repaired_scenario, verify_and_repair_scenario(scenario)[0])
 
-        # opening it with the different projection
+        # opening it with the same projection
         projected_scenario = self.crdesigner_reader.open(
-            target_projection="+proj=utm +zone=30 +ellps=WGS84"
+            target_projection=scenario.lanelet_network.location.geo_transformation.geo_reference
         )[0]
         # scenarios should be the same as the proj_string is the same
         self.assertEqual(projected_scenario, scenario)
 
         # opening it with the different projection
-        projected_scenario = crdesigner_reader.open(
+        projected_scenario = self.crdesigner_reader.open(
             target_projection="+proj=utm +zone=30 +ellps=WGS84"
         )[0]
         # scenarios should not be the same as the projections are different
