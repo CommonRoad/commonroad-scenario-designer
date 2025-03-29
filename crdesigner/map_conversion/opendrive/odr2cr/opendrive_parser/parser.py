@@ -100,7 +100,9 @@ def parse_opendrive(file_path: Path, odr_conf: open_drive_config = open_drive_co
         root_node = etree.parse(file_in)
 
         for elem in root_node.getiterator():
-            if not (isinstance(elem, etree._Comment) or isinstance(elem, etree._ProcessingInstruction)):
+            if not (
+                isinstance(elem, etree._Comment) or isinstance(elem, etree._ProcessingInstruction)
+            ):
                 elem.tag = etree.QName(elem).localname
         etree.cleanup_namespaces(root_node)
 
@@ -148,7 +150,9 @@ def parse_opendrive_road_link(new_road: Road, opendrive_road_link: etree.Element
         )
 
     for neighbor in opendrive_road_link.findall("neighbor"):
-        new_neighbor = RoadLinkNeighbor(neighbor.get("side"), neighbor.get("elementId"), neighbor.get("direction"))
+        new_neighbor = RoadLinkNeighbor(
+            neighbor.get("side"), neighbor.get("elementId"), neighbor.get("direction")
+        )
 
         new_road.link.neighbors.append(new_neighbor)
 
@@ -185,13 +189,17 @@ def defaultval(val: Optional[str], name: str, default: str = "0") -> str:
     """
     default = str(default)
     if val is None:
-        warnings.warn("Parser could not find value for " + name + ", " + default + " is used per default.")
+        warnings.warn(
+            "Parser could not find value for " + name + ", " + default + " is used per default."
+        )
         return default
     else:
         return val
 
 
-def parse_opendrive_road_geometry(new_road: Road, road_geometry: etree.ElementTree, offset: Dict[str, str]):
+def parse_opendrive_road_geometry(
+    new_road: Road, road_geometry: etree.ElementTree, offset: Dict[str, str]
+):
     """
     Parse OpenDRIVE road geometry and appends it to road object.
 
@@ -200,19 +208,28 @@ def parse_opendrive_road_geometry(new_road: Road, road_geometry: etree.ElementTr
     :param offset: Offset defined in OpenDRIVE.
     """
     start_coord = np.array(
-        [float(road_geometry.get("x")) - float(offset["x"]), float(road_geometry.get("y")) - float(offset["y"])]
+        [
+            float(road_geometry.get("x")) - float(offset["x"]),
+            float(road_geometry.get("y")) - float(offset["y"]),
+        ]
     )
 
     if road_geometry.find("line") is not None:
         new_road.plan_view.add_line(
-            start_coord, float(road_geometry.get("hdg")) - float(offset["hdg"]), float(road_geometry.get("length"))
+            start_coord,
+            float(road_geometry.get("hdg")) - float(offset["hdg"]),
+            float(road_geometry.get("length")),
         )
 
     elif road_geometry.find("spiral") is not None:
-        curv_start = float(defaultval(road_geometry.find("spiral").get("curvStart"), "spiral.curvStart"))
+        curv_start = float(
+            defaultval(road_geometry.find("spiral").get("curvStart"), "spiral.curvStart")
+        )
         curv_end = float(defaultval(road_geometry.find("spiral").get("curvEnd"), "spiral.curvEnd"))
         if np.isclose(curv_start, curv_end):
-            raise AttributeError("Curvature at the start and at the end of a spiral must be different")
+            raise AttributeError(
+                "Curvature at the start and at the end of a spiral must be different"
+            )
         new_road.plan_view.add_spiral(
             start_coord,
             float(road_geometry.get("hdg")) - float(offset["hdg"]),
@@ -268,7 +285,9 @@ def parse_opendrive_road_geometry(new_road: Road, road_geometry: etree.ElementTr
         raise Exception("invalid xml")
 
 
-def parse_opendrive_road_elevation_profile(new_road: Road, road_elevation_profile: etree.ElementTree):
+def parse_opendrive_road_elevation_profile(
+    new_road: Road, road_elevation_profile: etree.ElementTree
+):
     """
     Parse OpenDRIVE road elevation profile and appends it to road object.
 
@@ -348,7 +367,9 @@ def parse_opendrive_road_lane_offset(new_road: Road, lane_offset: etree.ElementT
     new_road.lanes.lane_offsets.append(new_lane_offset)
 
 
-def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane_section: etree.ElementTree):
+def parse_opendrive_road_lane_section(
+    new_road: Road, lane_section_id: int, lane_section: etree.ElementTree
+):
     """
     Parse OpenDRIVE road lane section and appends it to road object.
 
@@ -454,7 +475,11 @@ def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane
             # Access
             for _access in lane.findall("access"):
                 new_lane.access += [
-                    [str(_access.get("restriction")), str(_access.get("rule")), float(_access.get("sOffset"))]
+                    [
+                        str(_access.get("restriction")),
+                        str(_access.get("rule")),
+                        float(_access.get("sOffset")),
+                    ]
                 ]
             # Lane Height
             # TODO implementation
@@ -487,10 +512,13 @@ def parse_opendrive_road_signal(new_road: Road, road_signal: etree.ElementTree):
     if road_signal.find("validity") is not None:
         new_signal.validity_from = road_signal.find("validity").get("fromLane")
         new_signal.validity_to = road_signal.find("validity").get("toLane")
-    if road_signal.find("userData") is not None and road_signal.find("userData").find("vectorSignal") is not None:
-        new_signal.signal_id = road_signal.find("userData") is not None and road_signal.find("userData").find(
-            "vectorSignal"
-        ).get("signalId")
+    if (
+        road_signal.find("userData") is not None
+        and road_signal.find("userData").find("vectorSignal") is not None
+    ):
+        new_signal.signal_id = road_signal.find("userData") is not None and road_signal.find(
+            "userData"
+        ).find("vectorSignal").get("signalId")
 
     new_road.add_signal(new_signal)
 
@@ -505,7 +533,9 @@ def parse_opendrive_road_signal_reference(new_road: Road, road_signal_reference:
     new_signal_reference = SignalReference()
     new_signal_reference.id = road_signal_reference.get("id")
     new_signal_reference.s = road_signal_reference.get("s")  # position along the reference curve
-    new_signal_reference.t = road_signal_reference.get("t")  # position away from the reference curve
+    new_signal_reference.t = road_signal_reference.get(
+        "t"
+    )  # position away from the reference curve
     new_signal_reference.orientation = road_signal_reference.get("orientation")
     if road_signal_reference.find("validity") is not None:
         new_signal_reference.validity_from = road_signal_reference.find("validity").get("fromLane")
@@ -515,8 +545,13 @@ def parse_opendrive_road_signal_reference(new_road: Road, road_signal_reference:
         and road_signal_reference.find("userData").find("vectorSignal") is not None
     ):
         if road_signal_reference.find("userData").find("vectorSignal").get("signalId") is not None:
-            new_signal_reference.signal_id = road_signal_reference.find("userData").find("vectorSignal").get("signalId")
-        if road_signal_reference.find("userData").find("vectorSignal").get("turnRelation") is not None:
+            new_signal_reference.signal_id = (
+                road_signal_reference.find("userData").find("vectorSignal").get("signalId")
+            )
+        if (
+            road_signal_reference.find("userData").find("vectorSignal").get("turnRelation")
+            is not None
+        ):
             new_signal_reference.turn_relation = (
                 road_signal_reference.find("userData").find("vectorSignal").get("turnRelation")
             )
@@ -619,7 +654,9 @@ def parse_opendrive_road_object(new_road: Road, obj: etree.ElementTree):
     corners = []
     if obj.find("outlines") is not None:
         outlines = obj.find("outlines").findall("outline")
-    elif obj.find("outline") is not None:  # based on the OpenDRIVE specification outline should be within outlines;
+    elif (
+        obj.find("outline") is not None
+    ):  # based on the OpenDRIVE specification outline should be within outlines;
         # probably a bug in a previous RoadRunner version
         outlines = [obj.find("outline")]
     else:
@@ -627,7 +664,9 @@ def parse_opendrive_road_object(new_road: Road, obj: etree.ElementTree):
 
     if len(outlines) > 0:
         if len(outlines) > 1:
-            logging.warning("We do not support outlines consisting of several shapes at the moment.")
+            logging.warning(
+                "We do not support outlines consisting of several shapes at the moment."
+            )
         for corner_local in outlines[0].findall("cornerLocal"):
             if corner_local is not None:
                 corner = ObjectOutlineCorner()
@@ -692,7 +731,9 @@ def calculate_lane_section_lengths(new_road: Road):
 
         # All but the last lane section end at the succeeding one
         else:
-            lane_section.length = new_road.lanes.lane_sections[lane_section.idx + 1].sPos - lane_section.sPos
+            lane_section.length = (
+                new_road.lanes.lane_sections[lane_section.idx + 1].sPos - lane_section.sPos
+            )
 
     # OpenDRIVE does not provide lane width lengths by itself, calculate them by ourselves
     for lane_section in new_road.lanes.lane_sections:

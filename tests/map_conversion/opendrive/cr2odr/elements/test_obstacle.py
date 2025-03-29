@@ -28,7 +28,9 @@ class TestObstacle(unittest.TestCase):
             yaw_rate=0.0,
             slip_angle=0.0,
         )
-        self.obstacle = OpenDRIVEObstacle(ObstacleType.UNKNOWN, [self.lanelet.lanelet_id], self.shape, self.state)
+        self.obstacle = OpenDRIVEObstacle(
+            ObstacleType.UNKNOWN, [self.lanelet.lanelet_id], self.shape, self.state
+        )
 
     def test_initialization(self):
         # Testing initialization is correct
@@ -64,7 +66,9 @@ class TestObstacle(unittest.TestCase):
     def test_set_polygon(self):
         # Testing with Polygon as shape
         obstacle = self.obstacle
-        polygon = Polygon(vertices=np.array([[0.0, 0.0], [2.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.0, 0.0]]))
+        polygon = Polygon(
+            vertices=np.array([[0.0, 0.0], [2.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.0, 0.0]])
+        )
         obstacle.set_polygon(polygon)
         etree_vertices = list(obstacle.outline)
         self.assertEqual(len(polygon.vertices) - 1, len(etree_vertices))

@@ -67,14 +67,22 @@ def open_path(mwindow, path_str: str):
             # we assume that all 3 files are in the same folder
             filename_scenario = path
             filename_dynamic = path.parent / (path.stem[:-3] + ".pb")
-            filename_map = path.parent / (path.stem.split("-")[0] + "-" + path.stem.split("_")[2] + ".pb")
+            filename_map = path.parent / (
+                path.stem.split("-")[0] + "-" + path.stem.split("_")[2] + ".pb"
+            )
 
             commonroad_reader = CRDesignerFileReader(
-                filename_map=filename_map, filename_scenario=filename_scenario, filename_dynamic=filename_dynamic
+                filename_map=filename_map,
+                filename_scenario=filename_scenario,
+                filename_dynamic=filename_dynamic,
             )
             scenario, pps, _ = commonroad_reader.open_all()
         # protobuf map
-        elif "-SC" not in path.stem and path.stem.split("/")[-1].count("_") == 1 and ".xml" != path.suffix:
+        elif (
+            "-SC" not in path.stem
+            and path.stem.split("/")[-1].count("_") == 1
+            and ".xml" != path.suffix
+        ):
             commonroad_reader = CRDesignerFileReader(filename_map=path)
             scenario.replace_lanelet_network(commonroad_reader.open_map()[0])
         # protobuf dynamic
@@ -87,8 +95,12 @@ def open_path(mwindow, path_str: str):
             # we need both map and dynamic path for the open_map_dynamic() function
             # we assume that both files are in the same folder
             filename_dynamic = path
-            filename_map = path.parent / (path.stem.split("_")[0] + "_" + path.stem.split("_")[1] + ".pb")
-            commonroad_reader = CRDesignerFileReader(filename_map=filename_map, filename_dynamic=filename_dynamic)
+            filename_map = path.parent / (
+                path.stem.split("_")[0] + "_" + path.stem.split("_")[1] + ".pb"
+            )
+            commonroad_reader = CRDesignerFileReader(
+                filename_map=filename_map, filename_dynamic=filename_dynamic
+            )
             scenario = commonroad_reader.open_map_dynamic()
         elif ".xml" == path.suffix:
             commonroad_reader = CRDesignerFileReader(filename_2020a=path)
@@ -100,7 +112,8 @@ def open_path(mwindow, path_str: str):
         QMessageBox.warning(
             mwindow.mwindow_ui,
             "CommonRoad opening error",
-            "There was an error during the loading of the selected CommonRoad file.\n\n" + "Syntax Error: {}".format(e),
+            "There was an error during the loading of the selected CommonRoad file.\n\n"
+            + "Syntax Error: {}".format(e),
             QMessageBox.StandardButton.Ok,
         )
         return

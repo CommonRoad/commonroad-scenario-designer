@@ -62,7 +62,9 @@ class Road:
 
     link_map: LinkMap_T = {}
 
-    def __init__(self, lane_list: List[Lanelet], number_of_lanes: int, root: etree.Element, junction_id: int) -> None:
+    def __init__(
+        self, lane_list: List[Lanelet], number_of_lanes: int, root: etree.Element, junction_id: int
+    ) -> None:
         """
         This function let class road to initialize the object with lane_list, number_of_lanes, root etree element,
         current lanelet, junction_id and converts the CommonRoad roads into OpenDRIVE roads.
@@ -109,14 +111,21 @@ class Road:
                 self.center,
                 self.center.shape[0] - 1,
                 np.array(
-                    [self.center[-1][0] - np.cos(self.hdg[-1]) * 0.01, self.center[-1][1] - np.sin(self.hdg[-1]) * 0.01]
+                    [
+                        self.center[-1][0] - np.cos(self.hdg[-1]) * 0.01,
+                        self.center[-1][1] - np.sin(self.hdg[-1]) * 0.01,
+                    ]
                 ),
                 0,
             )
             if self.hdg[-1] != 0.0
             else self.center
         )
-        self.hdg = np.insert(self.hdg, self.hdg.shape[0] - 1, self.hdg[-1]) if self.hdg[-1] != 0.0 else self.hdg
+        self.hdg = (
+            np.insert(self.hdg, self.hdg.shape[0] - 1, self.hdg[-1])
+            if self.hdg[-1] != 0.0
+            else self.hdg
+        )
 
         for i in range(0, number_of_lanes):
             Road.cr_id_to_od[lane_list[i].lanelet_id] = Road.counting
@@ -173,7 +182,11 @@ class Road:
             raise ValueError("Relation must be either successor or predecessor")
 
     def add_simple_linkage(
-        self, links: Dict[str, List[int]], len_succ: int, len_pred: int, lane_2_lane: Dict[str, Dict[int, List[int]]]
+        self,
+        links: Dict[str, List[int]],
+        len_succ: int,
+        len_pred: int,
+        lane_2_lane: Dict[str, Dict[int, List[int]]],
     ) -> None:
         """
         This function add successor/predecessor child element to link parent element and
@@ -249,7 +262,9 @@ class Road:
             ]:
                 cur_type = GeometryType.LINE
             # previously arc or start and curvature stays constant
-            elif np.isclose(curv[last_idx], curv[cur_idx], open_drive_config.curvature_threshold) and cur_type in [
+            elif np.isclose(
+                curv[last_idx], curv[cur_idx], open_drive_config.curvature_threshold
+            ) and cur_type in [
                 GeometryType.ARC,
                 GeometryType.NONE,
             ]:
@@ -258,10 +273,16 @@ class Road:
             elif (
                 cur_idx == 1
                 and not np.isclose(
-                    curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], open_drive_config.curvature_dif_threshold
+                    curv_dif[cur_idx - 1],
+                    curv_dif[cur_idx - 2],
+                    open_drive_config.curvature_dif_threshold,
                 )
                 or cur_idx > 1
-                and np.isclose(curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], open_drive_config.curvature_dif_threshold)
+                and np.isclose(
+                    curv_dif[cur_idx - 1],
+                    curv_dif[cur_idx - 2],
+                    open_drive_config.curvature_dif_threshold,
+                )
                 and cur_type in [GeometryType.SPIRAL, GeometryType.NONE]
             ):
                 cur_type = GeometryType.SPIRAL
@@ -274,7 +295,9 @@ class Road:
             ]:
                 switch = GeometryType.LINE
             # previously no arc and curvature stays constant -> switch to arc
-            elif np.isclose(curv[last_idx], curv[cur_idx], open_drive_config.curvature_threshold) and cur_type not in [
+            elif np.isclose(
+                curv[last_idx], curv[cur_idx], open_drive_config.curvature_threshold
+            ) and cur_type not in [
                 GeometryType.ARC,
                 GeometryType.NONE,
             ]:
@@ -293,7 +316,12 @@ class Road:
         return float(arc_length[-1])
 
     def print_geometry(
-        self, path_length: np.array, end_idx: int, geo_type: GeometryType, curv: np.array, start_idx: int
+        self,
+        path_length: np.array,
+        end_idx: int,
+        geo_type: GeometryType,
+        curv: np.array,
+        start_idx: int,
     ):
         this_length = path_length[end_idx] - path_length[start_idx]
         if geo_type == GeometryType.LINE:
@@ -348,7 +376,14 @@ class Road:
 
     # xodr for spirals
     def print_spiral(
-        self, s: float, x: float, y: float, hdg: float, length: float, curv_start: float, curv_end: float
+        self,
+        s: float,
+        x: float,
+        y: float,
+        hdg: float,
+        length: float,
+        curv_start: float,
+        curv_end: float,
     ) -> None:
         """
         This function print spiral on OpenDrive file.
@@ -371,11 +406,15 @@ class Road:
         geometry.set(config.LENGTH_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, length))
 
         spiral = etree.SubElement(geometry, config.SPIRAL_TAG)
-        spiral.set(config.GEOMETRY_CURV_START_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, curv_start))
+        spiral.set(
+            config.GEOMETRY_CURV_START_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, curv_start)
+        )
         spiral.set(config.GEOMETRY_CURV_END_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, curv_end))
 
     # xodr for arcs
-    def print_arc(self, s: float, x: float, y: float, hdg: float, length: float, curvature: float) -> None:
+    def print_arc(
+        self, s: float, x: float, y: float, hdg: float, length: float, curvature: float
+    ) -> None:
         """
         This function print arc on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
@@ -406,7 +445,9 @@ class Road:
         :param sig: Traffic sign
         """
         signal = etree.SubElement(self.signals, config.SIGNAL_TAG)
-        signal.set(config.GEOMETRY_S_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, sig.s))
+        signal.set(
+            config.GEOMETRY_S_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, sig.s)
+        )
         signal.set(config.SIGNAL_T_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, sig.t))
         signal.set(config.ID_TAG, sig.id)
         signal.set(config.NAME_TAG, sig.name)
@@ -431,7 +472,9 @@ class Road:
         :param sig_ref: Traffic sign reference
         """
         signal_ref = etree.SubElement(self.signals, config.SIGNAL_REFERENCE_TAG)
-        signal_ref.set(config.GEOMETRY_S_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, sig_ref.s))
+        signal_ref.set(
+            config.GEOMETRY_S_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, sig_ref.s)
+        )
         signal_ref.set(config.SIGNAL_T_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, sig_ref.t))
         signal_ref.set(config.ID_TAG, sig_ref.id)
         signal_ref.set(config.SIGNAL_ORIENTATION_TAG, sig_ref.orientation)
@@ -470,13 +513,17 @@ class Road:
 
             # lanelets to the right should get a negative id
             if lane_id <= 0:
-                self.lane_help(lane_id - 1, config.LANE_SECTION_DRIVING_TAG, 0, right, width_list, dist_list)
+                self.lane_help(
+                    lane_id - 1, config.LANE_SECTION_DRIVING_TAG, 0, right, width_list, dist_list
+                )
                 Road.lanelet_to_lane[self.lane_list[i].lanelet_id] = lane_id - 1
                 self.inner_links[self.lane_list[i].lanelet_id] = lane_id - 1
 
             # lanelets to the left should get a positive id -> opposite driving direction
             else:
-                self.lane_help(lane_id, config.LANE_SECTION_DRIVING_TAG, 0, left, width_list, dist_list)
+                self.lane_help(
+                    lane_id, config.LANE_SECTION_DRIVING_TAG, 0, left, width_list, dist_list
+                )
                 Road.lanelet_to_lane[self.lane_list[i].lanelet_id] = lane_id
                 self.inner_links[self.lane_list[i].lanelet_id] = lane_id
 

@@ -184,21 +184,21 @@ class FormulaLexer(Lexer):
     modeNames = [ "DEFAULT_MODE" ]
 
     literalNames = [ "<INVALID>",
-            "'.'", "','", "')'", "'('", "'->'", "'<->'", "'in'", "'='", 
+            "'.'", "','", "')'", "'('", "'->'", "'<->'", "'in'", "'='",
             "'!='", "'<'", "'>'", "'<='", "'>='", "'||'" ]
 
     symbolicNames = [ "<INVALID>",
-            "TRUE", "FALSE", "NOT", "UNIVERSAL", "EXISTENTIAL", "COUNTING", 
-            "AND", "OR", "XOR", "IMPL", "EQ", "IN", "EQUAL", "UNEQUAL", 
-            "LESS", "GREATER", "LESS_EQUAL", "GREATER_EQUAL", "WITH", "PREDICATE", 
-            "VAR", "FUNCTION", "FIXED_DOMAIN", "WS", "STR_VALUE", "INT_VALUE", 
+            "TRUE", "FALSE", "NOT", "UNIVERSAL", "EXISTENTIAL", "COUNTING",
+            "AND", "OR", "XOR", "IMPL", "EQ", "IN", "EQUAL", "UNEQUAL",
+            "LESS", "GREATER", "LESS_EQUAL", "GREATER_EQUAL", "WITH", "PREDICATE",
+            "VAR", "FUNCTION", "FIXED_DOMAIN", "WS", "STR_VALUE", "INT_VALUE",
             "FLOAT_VALUE" ]
 
-    ruleNames = [ "T__0", "T__1", "T__2", "T__3", "TRUE", "FALSE", "NOT", 
-                  "UNIVERSAL", "EXISTENTIAL", "COUNTING", "AND", "OR", "XOR", 
-                  "IMPL", "EQ", "IN", "EQUAL", "UNEQUAL", "LESS", "GREATER", 
-                  "LESS_EQUAL", "GREATER_EQUAL", "WITH", "LOWER_ALPHA_UNDERSCORE", 
-                  "UPPER_ALPHA_UNDERSCORE", "PREDICATE", "VAR", "FUNCTION", 
+    ruleNames = [ "T__0", "T__1", "T__2", "T__3", "TRUE", "FALSE", "NOT",
+                  "UNIVERSAL", "EXISTENTIAL", "COUNTING", "AND", "OR", "XOR",
+                  "IMPL", "EQ", "IN", "EQUAL", "UNEQUAL", "LESS", "GREATER",
+                  "LESS_EQUAL", "GREATER_EQUAL", "WITH", "LOWER_ALPHA_UNDERSCORE",
+                  "UPPER_ALPHA_UNDERSCORE", "PREDICATE", "VAR", "FUNCTION",
                   "FIXED_DOMAIN", "WS", "STR_VALUE", "INT_VALUE", "FLOAT_VALUE" ]
 
     grammarFileName = "Formula.g4"
@@ -209,5 +209,3 @@ class FormulaLexer(Lexer):
         self._interp = LexerATNSimulator(self, self.atn, self.decisionsToDFA, PredictionContextCache())
         self._actions = None
         self._predicates = None
-
-

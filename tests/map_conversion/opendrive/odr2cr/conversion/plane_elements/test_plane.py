@@ -30,14 +30,20 @@ class TestParametricLaneBorderGroup(unittest.TestCase):
         outer_border.width_coefficient_offsets.append(0.0)
         outer_border_offset = 15.0
 
-        group = ParametricLaneBorderGroup(inner_border, inner_border_offset, outer_border, outer_border_offset)
+        group = ParametricLaneBorderGroup(
+            inner_border, inner_border_offset, outer_border, outer_border_offset
+        )
 
         self.assertListEqual(inner_border.width_coefficients, group.inner_border.width_coefficients)
-        self.assertListEqual(inner_border.width_coefficient_offsets, group.inner_border.width_coefficient_offsets)
+        self.assertListEqual(
+            inner_border.width_coefficient_offsets, group.inner_border.width_coefficient_offsets
+        )
         self.assertEqual(inner_border.ref_offset, group.inner_border.ref_offset)
         self.assertEqual(inner_border_offset, group.inner_border_offset)
         self.assertListEqual(outer_border.width_coefficients, group.outer_border.width_coefficients)
-        self.assertListEqual(outer_border.width_coefficient_offsets, group.outer_border.width_coefficient_offsets)
+        self.assertListEqual(
+            outer_border.width_coefficient_offsets, group.outer_border.width_coefficient_offsets
+        )
         self.assertEqual(outer_border.ref_offset, group.outer_border.ref_offset)
         self.assertEqual(outer_border_offset, group.outer_border_offset)
 
@@ -61,7 +67,9 @@ class TestParametricLaneBorderGroup(unittest.TestCase):
 
         group = ParametricLaneBorderGroup(inner_border, 0.0, outer_border, 0.0)
         # test that selecting inner/outer border works correctly and outputs correct parameters
-        coords, tan, curv, max_geo_len = group.calc_border_position("inner", 20.0, 0.0, False, False, True)
+        coords, tan, curv, max_geo_len = group.calc_border_position(
+            "inner", 20.0, 0.0, False, False, True
+        )
         true_inner_coords = [20.808, 21.588]
         true_inner_tan = 2.2
         true_inner_curv = (0.16, 0.001)
@@ -71,7 +79,9 @@ class TestParametricLaneBorderGroup(unittest.TestCase):
         self.assertEqual(true_inner_tan, tan)
         self.assertEqual(true_inner_geo_len, max_geo_len)
 
-        coords, tan, curv, max_geo_len = group.calc_border_position("outer", 20.0, 0.0, False, False, True)
+        coords, tan, curv, max_geo_len = group.calc_border_position(
+            "outer", 20.0, 0.0, False, False, True
+        )
         true_outer_coords = [22.951, 23.148]
         true_outer_tan = 2.2
         true_outer_curv = (0.16, 0.001)
@@ -81,7 +91,9 @@ class TestParametricLaneBorderGroup(unittest.TestCase):
         self.assertEqual(true_outer_tan, tan)
         self.assertEqual(true_outer_geo_len, max_geo_len)
         # test that calling the function with any other string than inner/outer raises a ValueError
-        self.assertRaises(ValueError, group.calc_border_position, "foo", 20.0, 0.0, False, False, True)
+        self.assertRaises(
+            ValueError, group.calc_border_position, "foo", 20.0, 0.0, False, False, True
+        )
 
     def test_get_width_coefficients(self):
         inner_border = Border()
@@ -169,14 +181,20 @@ class TestParametricLane(unittest.TestCase):
         group = ParametricLaneBorderGroup(inner_border, 0.0, outer_border, 10.0)
         parametric_lane = ParametricLane("114.0.-1.0", "restricted", group, 6.0, None, "right")
         # geometry is line
-        coords, tan, curv, len = parametric_lane.calc_border("inner", 0, width_offset=0.0, compute_curvature=False)
+        coords, tan, curv, len = parametric_lane.calc_border(
+            "inner", 0, width_offset=0.0, compute_curvature=False
+        )
         self.assertListEqual([26.11, 26.11], coords.tolist())
         # geometry is spiral
-        coords, tan, curv, len = parametric_lane.calc_border("inner", 47, width_offset=0.0, compute_curvature=False)
+        coords, tan, curv, len = parametric_lane.calc_border(
+            "inner", 47, width_offset=0.0, compute_curvature=False
+        )
         np.testing.assert_almost_equal(coords.tolist(), [59.404, 59.404], 3)
 
         # test with length == border_pos, so is_last_pos is True
-        coords, tan, curv, len = parametric_lane.calc_border("inner", 6.0, width_offset=0.0, compute_curvature=False)
+        coords, tan, curv, len = parametric_lane.calc_border(
+            "inner", 6.0, width_offset=0.0, compute_curvature=False
+        )
         np.testing.assert_almost_equal(coords.tolist(), [30.353, 30.352], 3)
 
     def test_calc_width(self):
@@ -243,7 +261,9 @@ class TestParametricLane(unittest.TestCase):
         # test on straight-line geometry of the initialised lane
         # function should create three vertices: start, middle and end
         parametric_lane.length = 46.911
-        left, right = parametric_lane.calc_vertices(error_tolerance=0.2, min_delta_s=0.3, transformer=transformer)
+        left, right = parametric_lane.calc_vertices(
+            error_tolerance=0.2, min_delta_s=0.3, transformer=transformer
+        )
 
         # test for calculating the vertices without sampling
         self.assertEqual(94, len(left))
@@ -268,7 +288,9 @@ class TestParametricLane(unittest.TestCase):
 
         # test that parametric lane with length < 0 returns empty lists
         parametric_lane.length = -1
-        left, right = parametric_lane.calc_vertices(error_tolerance=0.2, min_delta_s=0.3, transformer=transformer)
+        left, right = parametric_lane.calc_vertices(
+            error_tolerance=0.2, min_delta_s=0.3, transformer=transformer
+        )
         self.assertListEqual([], left.tolist())
         self.assertListEqual([], right.tolist())
 

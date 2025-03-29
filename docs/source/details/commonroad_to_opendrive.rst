@@ -1,4 +1,4 @@
-.. 
+..
   Normally, there are no heading levels assigned to certain characters as the structure is
   determined from the succession of headings. However, this convention is used in Python’s
   Style Guide for documenting which you may follow:
@@ -15,7 +15,7 @@ CommonRoad to OpenDRIVE Conversion
 
 This conversion allows you to convert a road network description from the
 `CommonRoad format <https://gitlab.lrz.de/tum-cps/commonroad-sc
-enarios/blob/master/documentation/XML_commonRoad_2020a.pdf>`_ (Version 2020a) 
+enarios/blob/master/documentation/XML_commonRoad_2020a.pdf>`_ (Version 2020a)
 to the `OpenDRIVE format <https://www.asam.net/standards/detail/opendrive/>`_
 
 
@@ -68,7 +68,7 @@ Python APIs
 
 	scenario, successors, ids = data.initialize()
 	converter = Converter(input_file, scenario, successors, ids)
-	converter.convert(output_file) 
+	converter.convert(output_file)
 
 
 Implementation Details
@@ -104,7 +104,7 @@ structure is not complete)::
 
    CommonRoad to OpenDRIVE conversion flow chart.
 
-Create Scenario Object  
+Create Scenario Object
 ======================
 The CommonRoad xml file is passed to the Dataloader class
 in which the file is read and converted to the corresponding scenario object
@@ -112,7 +112,7 @@ using the CommonRoadFileReader.
 Additionally, the dataloader prepares intersections and creates a dictionary with lanelet IDs
 that keep track of already converted lanelet.
 
-Convert Scenario Object to OpenDRIVE File 
+Convert Scenario Object to OpenDRIVE File
 =========================================
 In order to convert scenario object to OpenDRIVE file, various elements have to be created
 and linked together which are explained below in detail:
@@ -127,28 +127,28 @@ The road network is explored in a breadth-first fashion.
 
 Checking correctness of road construction
 -----------------------------------------
-We need to check whether all lanelets have been added to the road network or not. 
+We need to check whether all lanelets have been added to the road network or not.
 If it is not added, an error is raised as this particular lanelet is not added to the road network and the user is informed to check algorithm or provided road network.
 
 
 Create linkMap where all linkage information is stored
 ------------------------------------------------------
 A linkmap consist of ids of a road and it links. For each road and its links,
-a data structure is created to store its corresponding successor and predessor. 
+a data structure is created to store its corresponding successor and predessor.
 Each link consist of ids of a lanelet and corresponding lane successor and lane predessor.
-For each lanelet, a data structure is created to store its corresponding lane successor 
+For each lanelet, a data structure is created to store its corresponding lane successor
 and lane predessor. Finally, all information are stored as merged linkage.
 Also, the stored information are linked with the road ID and stored as road linkage.
 
 
 Add junction and link road to junction
 --------------------------------------
-The intersection of lane net consists of intersection incoming elements. 
-For every intersection incoming elment, all successors are obtained.  
-Road id of successors with the CommonRoad id are transformed to successors 
+The intersection of lane net consists of intersection incoming elements.
+For every intersection incoming elment, all successors are obtained.
+Road id of successors with the CommonRoad id are transformed to successors
 with their OpenDrive id.
 All incoming lanes should be on the same road in OpenDRIVE.
-For every successor road, connection element are created and 
+For every successor road, connection element are created and
 are linked with the lanelink accordingly to OpenDRIVE.
 
 
@@ -165,11 +165,11 @@ Then for every lanelet, first we check whether traffic sign exists or not on it.
 If exists, every traffic sign with corresponding lanelet id is stored  as list
 on previously defined data dictionary.
 
-Also for traffic lights, we first check the existence of traffic light on every lanelet. 
+Also for traffic lights, we first check the existence of traffic light on every lanelet.
 If exists, every traffic light with corresponding lanelet id is stored  as list
-on data dictionary. 
+on data dictionary.
 
-Similarly, for stoplines, we first check the existence of stopline on every lanelet. 
+Similarly, for stoplines, we first check the existence of stopline on every lanelet.
 If exists, every stopline with corresponding lanelet id is stored  as list
 on data dictionary.
 

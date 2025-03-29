@@ -353,7 +353,9 @@ class Converter:
             if non_empty:
                 if len(data["stop_lines"]) > 0:
                     if self.traffic_elements.get(link_map[lanelet.lanelet_id]):
-                        data["stop_lines"] = self.traffic_elements[link_map[lanelet.lanelet_id]]["stop_lines"]
+                        data["stop_lines"] = self.traffic_elements[link_map[lanelet.lanelet_id]][
+                            "stop_lines"
+                        ]
 
                 self.traffic_elements[link_map[lanelet.lanelet_id]] = data
 
@@ -400,7 +402,9 @@ class Converter:
         junction_id = -1
 
         if lanelet.lanelet_id in self.inter_successors:
-            junction_id = self.lane_net.map_inc_lanelets_to_intersections[lanelet.predecessor[0]].intersection_id
+            junction_id = self.lane_net.map_inc_lanelets_to_intersections[
+                lanelet.predecessor[0]
+            ].intersection_id
 
         road = Road(road_lanes, len(road_lanes), self.writer.root, junction_id)
 
@@ -432,7 +436,9 @@ class Converter:
         """
         for lanelet in self.lane_net.lanelets:
             if self.id_dict.get(lanelet.lanelet_id) is None:
-                raise RuntimeError(f"Lanelet {lanelet.lanelet_id} not visited! Check your algorithm.")
+                raise RuntimeError(
+                    f"Lanelet {lanelet.lanelet_id} not visited! Check your algorithm."
+                )
 
     def construct_junctions(self):
         """
@@ -531,7 +537,9 @@ class Converter:
             if lane.lanelet_id in frontier:
                 frontier.remove(lane.lanelet_id)
 
-    def extend_road(self, current: Lanelet, road_lanes: List[Lanelet], left: bool, append: bool) -> List[Lanelet]:
+    def extend_road(
+        self, current: Lanelet, road_lanes: List[Lanelet], left: bool, append: bool
+    ) -> List[Lanelet]:
         """
         This function extend road left and right, returns all lanes from right to left.
 

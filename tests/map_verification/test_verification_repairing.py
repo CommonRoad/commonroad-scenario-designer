@@ -19,7 +19,9 @@ from crdesigner.verification_repairing.verification.hol.satisfaction import (
 class TestAll(unittest.TestCase):
     def verify(self, formula_ids: List[FormulaID]):
         for sc_name in self.network_names:
-            sc, _ = CRDesignerFileReader(str(self.network_path) + "/test_maps/" + sc_name + ".xml").open()
+            sc, _ = CRDesignerFileReader(
+                str(self.network_path) + "/test_maps/" + sc_name + ".xml"
+            ).open()
             config = MapVerParams()
             config.verification.formulas = formula_ids
             sc, _ = verify_and_repair_scenario(sc, config)
@@ -59,7 +61,10 @@ class TestAll(unittest.TestCase):
             10,
             len(
                 collect_scenario_paths(
-                    Path(f"{os.path.dirname(os.path.realpath(__file__))}/../map_verification/test_maps"), subdir=False
+                    Path(
+                        f"{os.path.dirname(os.path.realpath(__file__))}/../map_verification/test_maps"
+                    ),
+                    subdir=False,
                 )
             ),
         )
@@ -68,7 +73,10 @@ class TestAll(unittest.TestCase):
             13,
             len(
                 collect_scenario_paths(
-                    Path(f"{os.path.dirname(os.path.realpath(__file__))}/../map_verification/test_maps"), subdir=True
+                    Path(
+                        f"{os.path.dirname(os.path.realpath(__file__))}/../map_verification/test_maps"
+                    ),
+                    subdir=True,
                 )
             ),
         )

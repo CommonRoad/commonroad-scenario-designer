@@ -81,17 +81,27 @@ class Junction:
                 lane_offset = lanelet_to_lane[num]
                 for lane_suc in inc_lane.successor:
                     if map_road_to_lane_link.get(id_to_road[lane_suc]) is None:
-                        map_road_to_lane_link[id_to_road[lane_suc]] = [(lane_offset, lanelet_to_lane[lane_suc])]
+                        map_road_to_lane_link[id_to_road[lane_suc]] = [
+                            (lane_offset, lanelet_to_lane[lane_suc])
+                        ]
                     else:
-                        map_road_to_lane_link[id_to_road[lane_suc]].append((lane_offset, lanelet_to_lane[lane_suc]))
+                        map_road_to_lane_link[id_to_road[lane_suc]].append(
+                            (lane_offset, lanelet_to_lane[lane_suc])
+                        )
 
             # create connection element for every successor road
             for connect in inc_suc:
                 connection = etree.SubElement(junction, config.JUNCTION_CONNECTION_TAG)
                 connection.set(config.ID_TAG, str.format(config.ID_FORMAT_PATTERN, connection_num))
                 connection_num += 1
-                connection.set(config.JUNCTION_INCOMING_ROAD_TAG, str.format(config.ID_FORMAT_PATTERN, road_number))
-                connection.set(config.JUNCTION_CONNECTING_ROAD_TAG, str.format(config.ID_FORMAT_PATTERN, connect))
+                connection.set(
+                    config.JUNCTION_INCOMING_ROAD_TAG,
+                    str.format(config.ID_FORMAT_PATTERN, road_number),
+                )
+                connection.set(
+                    config.JUNCTION_CONNECTING_ROAD_TAG,
+                    str.format(config.ID_FORMAT_PATTERN, connect),
+                )
                 connection.set(config.CONTACT_POINT_TAG, config.START_TAG)  # todo?
                 road = Road.roads[connect]
                 road.road.set(config.JUNCTION_TAG, str.format(config.ID_FORMAT_PATTERN, self.id))
@@ -99,5 +109,7 @@ class Junction:
                 # link them with laneLink, accordingly to OpenDrive
                 for inc, out in map_road_to_lane_link[connect]:
                     lane_link = etree.SubElement(connection, config.JUNCTION_LANE_LINK_TAG)
-                    lane_link.set(config.JUNCTION_FROM_TAG, str.format(config.ID_FORMAT_PATTERN, inc))
+                    lane_link.set(
+                        config.JUNCTION_FROM_TAG, str.format(config.ID_FORMAT_PATTERN, inc)
+                    )
                     lane_link.set(config.JUNCTION_TO_TAG, str.format(config.ID_FORMAT_PATTERN, out))

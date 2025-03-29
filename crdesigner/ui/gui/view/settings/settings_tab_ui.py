@@ -141,7 +141,9 @@ class SettingsTabUI:
         checkbox.setChecked(attribute.value)
 
         # Connect the checkbox to the attribute
-        checkbox.stateChanged.connect(lambda value: attribute.set_value(value == QtCore.Qt.CheckState.Checked.value))
+        checkbox.stateChanged.connect(
+            lambda value: attribute.set_value(value == QtCore.Qt.CheckState.Checked.value)
+        )
         attribute.subscribe(lambda value: checkbox.setChecked(value))
 
         # Add label and checkbox to the layout
@@ -188,8 +190,12 @@ class SettingsTabUI:
         dropdown.setSizePolicy(create_size_policy_for_settings_elements())
 
         # Connect the dropdown to the attribute
-        dropdown.currentIndexChanged.connect(lambda value: attribute.set_value(attribute.options[value]))
-        attribute.subscribe(lambda value: dropdown.setCurrentIndex(attribute.options.index(attribute.value)))
+        dropdown.currentIndexChanged.connect(
+            lambda value: attribute.set_value(attribute.options[value])
+        )
+        attribute.subscribe(
+            lambda value: dropdown.setCurrentIndex(attribute.options.index(attribute.value))
+        )
 
         # Add label and dropdown to the layout
         self._insert_in_hbox(attribute, column, hbox, label, dropdown)
@@ -229,7 +235,9 @@ class SettingsTabUI:
         textbox.setMinimumWidth(self.widthm)  # adjust the value as per your requirement
 
         # Connect the textbox to the attribute
-        textbox.textChanged.connect(lambda: attribute.set_value(_extract_list(textbox.toPlainText())))
+        textbox.textChanged.connect(
+            lambda: attribute.set_value(_extract_list(textbox.toPlainText()))
+        )
         attribute.subscribe(lambda value: textbox.setText(",".join([str(e) for e in value])))
 
         # Add label and textbox to the layout
@@ -337,25 +345,39 @@ class SettingsTabUI:
                         {_name: _state == QtCore.Qt.CheckState.Checked.value}
                     )
                 )
-                attribute.subscribe(lambda _value, _name=name, _iw=input_widget: _iw.setChecked(_value[_name]))
+                attribute.subscribe(
+                    lambda _value, _name=name, _iw=input_widget: _iw.setChecked(_value[_name])
+                )
 
             elif isinstance(value, int):
                 input_widget = QSpinBox(dialog)
                 input_widget.setValue(value)
-                input_widget.valueChanged.connect(lambda _value, _name=name: attribute.value.update({_name: _value}))
-                attribute.subscribe(lambda _value, _name=name, _iw=input_widget: _iw.setValue(_value[_name]))
+                input_widget.valueChanged.connect(
+                    lambda _value, _name=name: attribute.value.update({_name: _value})
+                )
+                attribute.subscribe(
+                    lambda _value, _name=name, _iw=input_widget: _iw.setValue(_value[_name])
+                )
 
             elif isinstance(value, float):
                 input_widget = QDoubleSpinBox(dialog)
                 input_widget.setValue(value)
-                input_widget.valueChanged.connect(lambda _value, _name=name: attribute.value.update({_name: _value}))
-                attribute.subscribe(lambda _value, _name=name, _iw=input_widget: _iw.setValue(_value[_name]))
+                input_widget.valueChanged.connect(
+                    lambda _value, _name=name: attribute.value.update({_name: _value})
+                )
+                attribute.subscribe(
+                    lambda _value, _name=name, _iw=input_widget: _iw.setValue(_value[_name])
+                )
 
             elif isinstance(value, str):
                 input_widget = QLineEdit(dialog)
                 input_widget.setText(value)
-                input_widget.textChanged.connect(lambda _value, _name=name: attribute.value.update({_name: _value}))
-                attribute.subscribe(lambda _value, _name=name, _iw=input_widget: _iw.setText(_value[_name]))
+                input_widget.textChanged.connect(
+                    lambda _value, _name=name: attribute.value.update({_name: _value})
+                )
+                attribute.subscribe(
+                    lambda _value, _name=name, _iw=input_widget: _iw.setText(_value[_name])
+                )
 
             else:
                 continue
@@ -365,7 +387,8 @@ class SettingsTabUI:
         # Create button box
         button_box = QtWidgets.QDialogButtonBox(QtCore.Qt.Orientation.Horizontal)
         button_box.setStandardButtons(
-            QtWidgets.QDialogButtonBox.StandardButton.Cancel | QtWidgets.QDialogButtonBox.StandardButton.Ok
+            QtWidgets.QDialogButtonBox.StandardButton.Cancel
+            | QtWidgets.QDialogButtonBox.StandardButton.Ok
         )
         button_box.setObjectName("button_box")
 

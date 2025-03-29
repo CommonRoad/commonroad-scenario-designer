@@ -118,15 +118,21 @@ class Writer:
         self.road.set(config.NAME_TAG, "")
 
         # road length - TODO this needs to be stored in the road object
-        self.road.set(config.LENGTH_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, 10))  # road.length))
+        self.road.set(
+            config.LENGTH_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, 10)
+        )  # road.length))
 
         # road id - TODO this needs to be stored in the road object
         self.road.set(config.ID_TAG, str.format(config.ID_FORMAT_PATTERN, 100))  # road.counting))
 
         # road junction - TODO this needs to be stored in the road object
-        self.road.set(config.JUNCTION_TAG, str.format(config.ID_FORMAT_PATTERN, -1))  # road.junction))
+        self.road.set(
+            config.JUNCTION_TAG, str.format(config.ID_FORMAT_PATTERN, -1)
+        )  # road.junction))
 
-    def print_line(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64) -> None:
+    def print_line(
+        self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64
+    ) -> None:
         """
         This function add geometry child element with various attribute to planView parent element and
         then add line child element to geometry parent element
@@ -174,11 +180,19 @@ class Writer:
         geometry.set(config.LENGTH_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, length))
 
         spiral = etree.SubElement(geometry, config.SPIRAL_TAG)
-        spiral.set(config.GEOMETRY_CURV_START_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, curv_start))
+        spiral.set(
+            config.GEOMETRY_CURV_START_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, curv_start)
+        )
         spiral.set(config.GEOMETRY_CURV_END_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, curv_end))
 
     def print_arc(
-        self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64, curvature: np.float64
+        self,
+        s: np.float64,
+        x: np.float64,
+        y: np.float64,
+        hdg: np.float64,
+        length: np.float64,
+        curvature: np.float64,
     ) -> None:
         """
         This function add geometry child element with various attribute to planView parent element and

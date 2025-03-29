@@ -32,7 +32,14 @@ class Counting(FirstOrder):
         LESS_EQUAL = "<="
         GREATER_EQUAL = ">="
 
-    def __init__(self, expr: Expression, vars: List[Variable], domains: List[Domain], count_type: CountType, num: int):
+    def __init__(
+        self,
+        expr: Expression,
+        vars: List[Variable],
+        domains: List[Domain],
+        count_type: CountType,
+        num: int,
+    ):
         """
         Constructor.
 
@@ -88,7 +95,10 @@ class Counting(FirstOrder):
             if self._expr.evaluate():
                 true_count += 1
 
-            if Counting.CountType.LESS_EQUAL == self._count_type or Counting.CountType.EQUAL == self._count_type:
+            if (
+                Counting.CountType.LESS_EQUAL == self._count_type
+                or Counting.CountType.EQUAL == self._count_type
+            ):
                 if true_count > self._num:
                     return False
             else:

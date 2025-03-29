@@ -110,7 +110,10 @@ def convert_scenarios(
         )
     )
     map_paths += list(
-        filter(lambda sc_path: any([dir_dupl in str(sc_path) for dir_dupl in duplicated_dirs]), scenarios_paths)
+        filter(
+            lambda sc_path: any([dir_dupl in str(sc_path) for dir_dupl in duplicated_dirs]),
+            scenarios_paths,
+        )
     )
 
     func = partial(convert_single_map, odr_path, convert_back)
@@ -128,7 +131,13 @@ def convert_single_map(conversion_path_odr: Path, convert_back: bool, path_cr: P
     """
     scenario, planning_problem_set = CommonRoadFileReader(path_cr).open()
     scenario_id = scenario.scenario_id
-    network_id = str(scenario_id.country_id) + "_" + str(scenario_id.map_name) + "-" + str(scenario_id.map_id)
+    network_id = (
+        str(scenario_id.country_id)
+        + "_"
+        + str(scenario_id.map_name)
+        + "-"
+        + str(scenario_id.map_id)
+    )
     converter: Optional[Converter] = None
     output_name = conversion_path_odr / f"{network_id}.odr"
     if not conversion_path_odr.exists():
@@ -157,7 +166,9 @@ def convert_single_map(conversion_path_odr: Path, convert_back: bool, path_cr: P
         ]
         config = MapVerParams()
         config.verification.formulas = formulas
-        scenario.replace_lanelet_network(verify_and_repair_map(scenario.lanelet_network, config, scenario_id)[0])
+        scenario.replace_lanelet_network(
+            verify_and_repair_map(scenario.lanelet_network, config, scenario_id)[0]
+        )
 
         converter = Converter(scenario)
         converter.convert(str(output_name))
@@ -165,7 +176,9 @@ def convert_single_map(conversion_path_odr: Path, convert_back: bool, path_cr: P
     except Exception as e:
         if converter is not None:
             converter.reset_converter()
-        logging.error(f"cr2odr conversion of {path_cr} was unsuccessful: {str(e)}\n{traceback.format_exc()}")
+        logging.error(
+            f"cr2odr conversion of {path_cr} was unsuccessful: {str(e)}\n{traceback.format_exc()}"
+        )
     try:
         if convert_back:
             scenario_new = opendrive_to_commonroad(output_name)
@@ -180,17 +193,23 @@ def convert_single_map(conversion_path_odr: Path, convert_back: bool, path_cr: P
     except Exception as e:
         if converter is not None:
             converter.reset_converter()
-        logging.error(f"odr2cr conversion of {path_cr} was unsuccessful: {str(e)}\n{traceback.format_exc()}")
+        logging.error(
+            f"odr2cr conversion of {path_cr} was unsuccessful: {str(e)}\n{traceback.format_exc()}"
+        )
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert CommonRoad maps to OpenDRIVE.")
-    parser.add_argument("--num_threads", type=int, help="Number of threads", default=1, required=False)
+    parser.add_argument(
+        "--num_threads", type=int, help="Number of threads", default=1, required=False
+    )
     parser.add_argument(
         "--input_path",
         type=Path,
         help="Path to CommonRoad maps",
-        default=Path("/media/sebastian/TUM/06_code/scenarios/commonroad/scenarios_2020a/hand-crafted"),
+        default=Path(
+            "/media/sebastian/TUM/06_code/scenarios/commonroad/scenarios_2020a/hand-crafted"
+        ),
         required=False,
     )
     parser.add_argument(

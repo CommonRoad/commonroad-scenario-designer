@@ -112,7 +112,13 @@ class Predecessor:
         self.contactPoint = contact_point
 
     def __str__(self):
-        return str(self._elementType) + " with id " + str(self._elementId) + " contact at " + str(self._contactPoint)
+        return (
+            str(self._elementType)
+            + " with id "
+            + str(self._elementId)
+            + " contact at "
+            + str(self._contactPoint)
+        )
 
     @property
     def elementType(self) -> str:

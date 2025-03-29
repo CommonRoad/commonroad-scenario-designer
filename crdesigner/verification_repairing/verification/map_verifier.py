@@ -55,7 +55,9 @@ class MapVerifier:
         """
         if self._config.evaluation.partitioned and pymetis_imported:
             if not pymetis_imported:
-                logging.error("MapVerifier::verify: pymetis could not be imported for partitioning.")
+                logging.error(
+                    "MapVerifier::verify: pymetis could not be imported for partitioning."
+                )
             invalid_states = self._partitioned_verify()
         else:
             invalid_states = self._unpartitioned_verify()
@@ -100,15 +102,21 @@ class MapVerifier:
             if self._config.verification.formulas is None:
                 formula_ids = extract_formula_ids_by_type(formula_type)
             else:
-                formula_ids = filter_formula_ids_by_type(self._config.verification.formulas, formula_type)
+                formula_ids = filter_formula_ids_by_type(
+                    self._config.verification.formulas, formula_type
+                )
             formula_ids = [
-                formula for formula in formula_ids if formula not in self._config.verification.excluded_formulas
+                formula
+                for formula in formula_ids
+                if formula not in self._config.verification.excluded_formulas
             ]
 
             if not formula_ids:
                 continue
 
-            partition, draw_file_name = MapVerifier._create_partitioning(formula_type, self._network, self._config)
+            partition, draw_file_name = MapVerifier._create_partitioning(
+                formula_type, self._network, self._config
+            )
 
             # if self._config.evaluation.partition_draw_dir is not None:
             #     drawer = PartitionDrawer(self._network)
@@ -133,7 +141,9 @@ class MapVerifier:
                         p.join()
                     processes.clear()
 
-                p = Process(target=valid_checker.check_validity, args=(self._config.verification, results))
+                p = Process(
+                    target=valid_checker.check_validity, args=(self._config.verification, results)
+                )
                 processes.append(p)
                 p.start()
 
@@ -223,7 +233,9 @@ class MapVerifier:
         return mapping
 
     @staticmethod
-    def _create_verifier(mapping: HOLMapping, formula_ids: List[FormulaID]) -> HOLVerificationChecker:
+    def _create_verifier(
+        mapping: HOLMapping, formula_ids: List[FormulaID]
+    ) -> HOLVerificationChecker:
         """
         Creates for the solver a corresponding validity checker.
 

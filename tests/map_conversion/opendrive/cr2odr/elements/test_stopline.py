@@ -14,8 +14,12 @@ class TestStopLine(unittest.TestCase):
     def initialize_stop_line(self):
         # Initialize simple LaneletNetwork
         lanelet_id = 1000
-        self.stop_line = Stop_line(start=np.array([0, 0]), end=np.array([0, 1]), line_marking=LineMarking.SOLID)
-        self.lanelet = MapCreator.create_straight(2, 8, 9, lanelet_id, set(), stop_line=self.stop_line)
+        self.stop_line = Stop_line(
+            start=np.array([0, 0]), end=np.array([0, 1]), line_marking=LineMarking.SOLID
+        )
+        self.lanelet = MapCreator.create_straight(
+            2, 8, 9, lanelet_id, set(), stop_line=self.stop_line
+        )
 
         self.network = LaneletNetwork()
         self.network.add_lanelet(self.lanelet)

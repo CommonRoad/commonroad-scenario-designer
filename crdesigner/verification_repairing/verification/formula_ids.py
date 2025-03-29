@@ -102,9 +102,19 @@ class IntersectionFormulaID(enum.Enum):
 
 
 FormulaID = Union[
-    LaneletFormulaID, TrafficSignFormulaID, TrafficLightFormulaID, IntersectionFormulaID, GeneralFormulaID
+    LaneletFormulaID,
+    TrafficSignFormulaID,
+    TrafficLightFormulaID,
+    IntersectionFormulaID,
+    GeneralFormulaID,
 ]
-FormulaTypes = [LaneletFormulaID, TrafficSignFormulaID, TrafficLightFormulaID, IntersectionFormulaID, GeneralFormulaID]
+FormulaTypes = [
+    LaneletFormulaID,
+    TrafficSignFormulaID,
+    TrafficLightFormulaID,
+    IntersectionFormulaID,
+    GeneralFormulaID,
+]
 
 
 def extract_formula_id(string: str) -> Union[None, FormulaID]:
@@ -165,7 +175,9 @@ def extract_formula_ids_by_type(formula_type: enum.EnumMeta) -> List[FormulaID]:
     return formula_ids_of_type
 
 
-def filter_formula_ids_by_type(formula_ids: List[FormulaID], formula_type: enum.EnumMeta) -> List[FormulaID]:
+def filter_formula_ids_by_type(
+    formula_ids: List[FormulaID], formula_type: enum.EnumMeta
+) -> List[FormulaID]:
     """
     Filters the IDs of formulas by a specific formula type.
 

@@ -71,11 +71,17 @@ class TestLinkIndex(unittest.TestCase):
 
     def test_remove(self):
         link_index = LinkIndex()
-        link_index._successors = {"88.0.4.-1": ["79.0.-1.-1", "79.0.-2.-1"], "100.0.0.0": ["101.0.0.0"]}
+        link_index._successors = {
+            "88.0.4.-1": ["79.0.-1.-1", "79.0.-2.-1"],
+            "100.0.0.0": ["101.0.0.0"],
+        }
         link_index.remove("88.0.4.-1")
         self.assertDictEqual({"100.0.0.0": ["101.0.0.0"]}, link_index._successors)
 
     def test_get_predecessors(self):
         link_index = LinkIndex()
-        link_index._successors = {"88.0.4.-1": ["79.0.-1.-1", "79.0.-2.-1"], "100.0.0.0": ["79.0.-1.-1"]}
+        link_index._successors = {
+            "88.0.4.-1": ["79.0.-1.-1", "79.0.-2.-1"],
+            "100.0.0.0": ["79.0.-1.-1"],
+        }
         self.assertListEqual(["88.0.4.-1", "100.0.0.0"], link_index.get_predecessors("79.0.-1.-1"))

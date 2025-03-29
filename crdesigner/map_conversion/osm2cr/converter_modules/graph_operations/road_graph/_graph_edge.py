@@ -50,7 +50,15 @@ class GraphEdge:
         :param speedlimit: speed limit on the edge
         :param roadtype: type of road the edge represents
         """
-        nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward = lane_info
+        (
+            nr_of_lanes,
+            forward_lanes,
+            backward_lanes,
+            oneway,
+            turnlanes,
+            turnlanes_forward,
+            turnlanes_backward,
+        ) = lane_info
         lane_nr_assumed, lanes_assumed, oneway_assumed = assumptions
         self.id: int = id
         self.node1: GraphNode = node1
@@ -324,14 +332,18 @@ class GraphEdge:
                         self.waypoints[index].get_array(),
                         self.waypoints[index + 1].get_array(),
                     )
-                    p2 = geometry.get_inner_bezier_point(self.waypoints[index - 1].get_array(), p1, p4, d)
+                    p2 = geometry.get_inner_bezier_point(
+                        self.waypoints[index - 1].get_array(), p1, p4, d
+                    )
                     p3 = p4 + (p1 - p4) * d
                 else:
                     segment_points = []
                     for i in range(4):
                         segment_points.append(self.waypoints[index + i - 1])
                     segment_points = [x.get_array() for x in segment_points]
-                    p1, p2, p3, p4 = geometry.get_bezier_points_of_segment(np.array(segment_points), d)
+                    p1, p2, p3, p4 = geometry.get_bezier_points_of_segment(
+                        np.array(segment_points), d
+                    )
                 n = max(int(np.linalg.norm(p1 - p4) / point_distance), 2)
                 result += geometry.evaluate_bezier(np.array([p1, p2, p3, p4]), n)
             if save:

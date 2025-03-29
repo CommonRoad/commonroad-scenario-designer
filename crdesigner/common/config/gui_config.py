@@ -49,7 +49,9 @@ def validate_bing_key(key) -> bool:
         return True
 
     req = f"http://dev.virtualearth.net/REST/V1/Imagery/Metadata/Aerial?output=json&include=ImageryProviders&key={key}"
-    headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0"}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0"
+    }
     try:
         with requests.session() as s:
             # load cookies otherwise an HTTP error occurs
@@ -134,10 +136,16 @@ class GuiConfig(BaseConfig):
     )
     LEGEND: Attribute = Attribute(True, "Legend")
     # The key to access bing maps
-    BING_MAPS_KEY: Attribute = Attribute(value="", display_name="Bing maps key", validation=validate_bing_key)
+    BING_MAPS_KEY: Attribute = Attribute(
+        value="", display_name="Bing maps key", validation=validate_bing_key
+    )
     # Username and password to access LDBV maps
-    LDBV_USERNAME: Attribute = Attribute(value="", display_name="LDBV username", validation=validate_ldbv_credentials)
-    LDBV_PASSWORD: Attribute = Attribute(value="", display_name="LDBV password", validation=validate_ldbv_credentials)
+    LDBV_USERNAME: Attribute = Attribute(
+        value="", display_name="LDBV username", validation=validate_ldbv_credentials
+    )
+    LDBV_PASSWORD: Attribute = Attribute(
+        value="", display_name="LDBV password", validation=validate_ldbv_credentials
+    )
 
     # projects the lane-network in a way that aligns well with aerial images
     pseudo_mercator = Attribute(pseudo_mercator, "Pseudo Mercator")
@@ -230,7 +238,9 @@ class GuiConfig(BaseConfig):
         """
         return self.DRAW_DYNAMIC_OBSTACLES
 
-    def get_undetailed_params(self, lanelet_count: int = 0, traffic_sign_count: int = 0) -> Optional[LaneletParams]:
+    def get_undetailed_params(
+        self, lanelet_count: int = 0, traffic_sign_count: int = 0
+    ) -> Optional[LaneletParams]:
         """
         If the detailed display is enables checks if the scenario should be shown undetailed to gain performance.
 
@@ -255,7 +265,9 @@ class GuiConfig(BaseConfig):
                 draw_line_markings=False,
             )
 
-    def resize_lanelet_network_when_zoom(self, lanelet_count: int, traffic_sign_count: int, x: float, y: float) -> bool:
+    def resize_lanelet_network_when_zoom(
+        self, lanelet_count: int, traffic_sign_count: int, x: float, y: float
+    ) -> bool:
         """
         Checks wether the lanelet network should be resizued based if the lanelet is big or the zoom level
 
@@ -310,7 +322,10 @@ class GuiConfig(BaseConfig):
     def sub_curved(self, method_to_sub=None):
         for list_layout in gui_config.LAYOUT:
             for attribute in list_layout:
-                if isinstance(attribute, Attribute) and attribute.display_name == "Enable editing of curved lanelets":
+                if (
+                    isinstance(attribute, Attribute)
+                    and attribute.display_name == "Enable editing of curved lanelets"
+                ):
                     attribute.subscribe(method_to_sub)
                     return
 

@@ -93,11 +93,21 @@ class MenuBarUI:
         # add menu 'Help'
         self.menu_help = self.menu_bar.addMenu("Help")
         self.open_web_action = self.create_action(
-            text="Open CR Web", icon="", checkable=False, slot=open_cr_web, tip="Open CommonRoad Website", shortcut=None
+            text="Open CR Web",
+            icon="",
+            checkable=False,
+            slot=open_cr_web,
+            tip="Open CommonRoad Website",
+            shortcut=None,
         )
         self.menu_help.addAction(self.open_web_action)
         self.open_forum_action = self.create_action(
-            text="Open Forum", icon="", checkable=False, slot=open_cr_forum, tip="Open CommonRoad Forum", shortcut=None
+            text="Open Forum",
+            icon="",
+            checkable=False,
+            slot=open_cr_forum,
+            tip="Open CommonRoad Forum",
+            shortcut=None,
         )
         self.menu_help.addAction(self.open_forum_action)
 

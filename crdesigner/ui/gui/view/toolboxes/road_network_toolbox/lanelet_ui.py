@@ -15,7 +15,9 @@ from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_
 
 
 class AddLaneletUI:
-    def __init__(self, scenario_model: ScenarioModel, road_network_toolbox_ui: RoadNetworkToolboxUI):
+    def __init__(
+        self, scenario_model: ScenarioModel, road_network_toolbox_ui: RoadNetworkToolboxUI
+    ):
         self.road_network_toolbox_ui = road_network_toolbox_ui
         self.scenario_model = scenario_model
 
@@ -130,7 +132,9 @@ class AddLaneletUI:
                 item.setCheckState(Qt.CheckState.Unchecked)
 
         line_markings_stop_line = [
-            e.value for e in LineMarking if e.value not in [LineMarking.UNKNOWN.value, LineMarking.NO_MARKING.value]
+            e.value
+            for e in LineMarking
+            if e.value not in [LineMarking.UNKNOWN.value, LineMarking.NO_MARKING.value]
         ]
         self.road_network_toolbox_ui.line_marking_stop_line.addItems(line_markings_stop_line)
 
@@ -226,7 +230,9 @@ class AddLaneletUI:
         self.road_network_toolbox_ui.selected_lanelet_referenced_traffic_light_ids.addItems(
             ["None"] + [str(item) for item in self.scenario_model.collect_traffic_light_ids()]
         )
-        self.road_network_toolbox_ui.selected_lanelet_referenced_traffic_light_ids.setCurrentIndex(0)
+        self.road_network_toolbox_ui.selected_lanelet_referenced_traffic_light_ids.setCurrentIndex(
+            0
+        )
 
         self.road_network_toolbox_ui.selected_lanelet_update.clear()
         self.road_network_toolbox_ui.selected_lanelet_update.addItems(
@@ -282,8 +288,12 @@ class AddLaneletUI:
 
         self.road_network_toolbox_ui.number_vertices.setText(str(len(lanelet.center_vertices)))
 
-        self.road_network_toolbox_ui.line_marking_left.setCurrentText(lanelet.line_marking_left_vertices.value)
-        self.road_network_toolbox_ui.line_marking_right.setCurrentText(lanelet.line_marking_right_vertices.value)
+        self.road_network_toolbox_ui.line_marking_left.setCurrentText(
+            lanelet.line_marking_left_vertices.value
+        )
+        self.road_network_toolbox_ui.line_marking_right.setCurrentText(
+            lanelet.line_marking_right_vertices.value
+        )
 
         self.road_network_toolbox_ui.lanelet_type.set_checked_items(
             [str(la_type.value) for la_type in lanelet.lanelet_type]
@@ -314,7 +324,10 @@ class AddLaneletUI:
         @return: length of lanelet
         """
         return str(
-            np.linalg.norm(lanelet.center_vertices[0] - lanelet.center_vertices[len(lanelet.center_vertices) - 1])
+            np.linalg.norm(
+                lanelet.center_vertices[0]
+                - lanelet.center_vertices[len(lanelet.center_vertices) - 1]
+            )
         )
 
     def update_lanelet_information(self, lanelet: Lanelet = None):
@@ -340,10 +353,18 @@ class AddLaneletUI:
         self.road_network_toolbox_ui.selected_lanelet_length.setEnabled(True)
 
         self.road_network_toolbox_ui.selected_lanelet_start_position_x.setText(
-            str(0.0 if lanelet.center_vertices[0][0] == 1.0e-16 else round(lanelet.center_vertices[0][0], 4))
+            str(
+                0.0
+                if lanelet.center_vertices[0][0] == 1.0e-16
+                else round(lanelet.center_vertices[0][0], 4)
+            )
         )
         self.road_network_toolbox_ui.selected_lanelet_start_position_y.setText(
-            str(0.0 if lanelet.center_vertices[0][1] == 1.0e-16 else round(lanelet.center_vertices[0][1], 4))
+            str(
+                0.0
+                if lanelet.center_vertices[0][1] == 1.0e-16
+                else round(lanelet.center_vertices[0][1], 4)
+            )
         )
         self.road_network_toolbox_ui.selected_lanelet_end_position_x.setText(
             str(
@@ -364,23 +385,35 @@ class AddLaneletUI:
 
         self.road_network_toolbox_ui.selected_lanelet_radius.setText("10.0")
         self.road_network_toolbox_ui.selected_lanelet_angle.setText("90.0")
-        self.road_network_toolbox_ui.selected_number_vertices.setText(str(len(lanelet.center_vertices)))
+        self.road_network_toolbox_ui.selected_number_vertices.setText(
+            str(len(lanelet.center_vertices))
+        )
 
-        self.road_network_toolbox_ui.selected_line_marking_left.setCurrentText(lanelet.line_marking_left_vertices.value)
+        self.road_network_toolbox_ui.selected_line_marking_left.setCurrentText(
+            lanelet.line_marking_left_vertices.value
+        )
         self.road_network_toolbox_ui.selected_line_marking_right.setCurrentText(
             lanelet.line_marking_right_vertices.value
         )
 
-        self.road_network_toolbox_ui.selected_predecessors.set_checked_items([str(pre) for pre in lanelet.predecessor])
-        self.road_network_toolbox_ui.selected_successors.set_checked_items([str(suc) for suc in lanelet.successor])
+        self.road_network_toolbox_ui.selected_predecessors.set_checked_items(
+            [str(pre) for pre in lanelet.predecessor]
+        )
+        self.road_network_toolbox_ui.selected_successors.set_checked_items(
+            [str(suc) for suc in lanelet.successor]
+        )
 
         self.road_network_toolbox_ui.selected_adjacent_left.setCurrentText(str(lanelet.adj_left))
         self.road_network_toolbox_ui.selected_adjacent_right.setCurrentText(str(lanelet.adj_right))
         self.road_network_toolbox_ui.selected_adjacent_left_same_direction.setChecked(
-            lanelet.adj_left_same_direction if lanelet.adj_left_same_direction is not None else False
+            lanelet.adj_left_same_direction
+            if lanelet.adj_left_same_direction is not None
+            else False
         )
         self.road_network_toolbox_ui.selected_adjacent_right_same_direction.setChecked(
-            lanelet.adj_right_same_direction if lanelet.adj_right_same_direction is not None else False
+            lanelet.adj_right_same_direction
+            if lanelet.adj_right_same_direction is not None
+            else False
         )
 
         self.road_network_toolbox_ui.selected_lanelet_type.set_checked_items(
@@ -408,7 +441,9 @@ class AddLaneletUI:
                 self.road_network_toolbox_ui.selected_curved_checkbox.button.setEnabled(True)
                 self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(True)
                 self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(1000, 1000)
-                radius = self.calculate_curve_radius(angle, lanelet.center_vertices[0], lanelet.center_vertices[-1])
+                radius = self.calculate_curve_radius(
+                    angle, lanelet.center_vertices[0], lanelet.center_vertices[-1]
+                )
                 self.road_network_toolbox_ui.selected_lanelet_radius.setText(str(radius))
                 self.road_network_toolbox_ui.selected_lanelet_angle.setText(str(angle))
                 self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
@@ -427,7 +462,9 @@ class AddLaneletUI:
                 self.road_network_toolbox_ui.selected_lanelet_length.setDisabled(True)
 
         else:
-            self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
+            self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+                False
+            )
             self.road_network_toolbox_ui.selected_curved_checkbox.button.setEnabled(True)
             self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(False)
             self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(0, 0)
@@ -439,7 +476,9 @@ class AddLaneletUI:
             ):
                 self.road_network_toolbox_ui.selected_stop_line_beginning.setChecked(True)
                 self.road_network_toolbox_ui.lanelet_attributes_widget.adjust_selected_stop_line_position()
-            elif all(lanelet.stop_line.start == lanelet.left_vertices[len(lanelet.left_vertices) - 1]) and all(
+            elif all(
+                lanelet.stop_line.start == lanelet.left_vertices[len(lanelet.left_vertices) - 1]
+            ) and all(
                 lanelet.stop_line.end == lanelet.right_vertices[len(lanelet.right_vertices) - 1]
             ):
                 self.road_network_toolbox_ui.selected_stop_line_end.setChecked(True)
@@ -447,10 +486,18 @@ class AddLaneletUI:
             else:
                 self.road_network_toolbox_ui.selected_stop_line_select_position.setChecked(True)
                 self.road_network_toolbox_ui.lanelet_attributes_widget.adjust_selected_stop_line_position()
-                self.road_network_toolbox_ui.selected_stop_line_start_x.setText(str(lanelet.stop_line.start[0]))
-                self.road_network_toolbox_ui.selected_stop_line_start_y.setText(str(lanelet.stop_line.start[1]))
-                self.road_network_toolbox_ui.selected_stop_line_end_x.setText(str(lanelet.stop_line.end[0]))
-                self.road_network_toolbox_ui.selected_stop_line_end_y.setText(str(lanelet.stop_line.end[1]))
+                self.road_network_toolbox_ui.selected_stop_line_start_x.setText(
+                    str(lanelet.stop_line.start[0])
+                )
+                self.road_network_toolbox_ui.selected_stop_line_start_y.setText(
+                    str(lanelet.stop_line.start[1])
+                )
+                self.road_network_toolbox_ui.selected_stop_line_end_x.setText(
+                    str(lanelet.stop_line.end[0])
+                )
+                self.road_network_toolbox_ui.selected_stop_line_end_y.setText(
+                    str(lanelet.stop_line.end[1])
+                )
             self.road_network_toolbox_ui.selected_line_marking_stop_line.setCurrentText(
                 str(lanelet.stop_line.line_marking.value)
             )
@@ -544,7 +591,9 @@ class AddLaneletUI:
         else:
             return angle_total
 
-    def calculate_curve_radius(self, angle: float, start_point: ndarray, end_point: ndarray) -> float:
+    def calculate_curve_radius(
+        self, angle: float, start_point: ndarray, end_point: ndarray
+    ) -> float:
         """
         Calculates the radius of a given angle, start and endpoint of a lanelet
 
@@ -553,7 +602,9 @@ class AddLaneletUI:
         :param end_point: End Point of the lanelet
         :return: radius as a float
         """
-        distance = math.sqrt((end_point[0] - start_point[0]) ** 2 + (end_point[1] - start_point[1]) ** 2)
+        distance = math.sqrt(
+            (end_point[0] - start_point[0]) ** 2 + (end_point[1] - start_point[1]) ** 2
+        )
 
         radius = distance / (2 * math.sin(math.radians(abs(angle) / 2)))
 

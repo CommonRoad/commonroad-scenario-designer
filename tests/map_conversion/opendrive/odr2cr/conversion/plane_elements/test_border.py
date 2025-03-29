@@ -80,7 +80,9 @@ class TestBorder(unittest.TestCase):
         width_at_s = border.width_coefficients[2]
         offset_at_s = border.width_coefficient_offsets[2]
         distance = np.polynomial.polynomial.polyval(s_pos - offset_at_s, width_at_s)
-        coord_border = coord_line + np.array([distance * math.cos(ortho_at_s), distance * math.sin(ortho_at_s)])
+        coord_border = coord_line + np.array(
+            [distance * math.cos(ortho_at_s), distance * math.sin(ortho_at_s)]
+        )
 
         coord, tang_angle, curv, max_geometry_length = border.calc(s_pos, 0.0, False, False, True)
 

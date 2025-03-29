@@ -51,10 +51,14 @@ class TrafficSignParser:
                         if not zone:
                             # convert km/h to m/s and add to traffic sign elements
                             max_speed /= 3.6
-                            elements.append(TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED, [str(max_speed)]))
+                            elements.append(
+                                TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED, [str(max_speed)])
+                            )
                         else:
                             elements.append(
-                                TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED_ZONE_START, [str(max_speed)])
+                                TrafficSignElement(
+                                    TrafficSignIDZamunda.MAX_SPEED_ZONE_START, [str(max_speed)]
+                                )
                             )
 
                 # city limit edge case

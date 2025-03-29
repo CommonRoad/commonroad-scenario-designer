@@ -86,18 +86,18 @@ class FormulaParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ "<INVALID>", "'.'", "','", "')'", "'('", "<INVALID>", 
-                     "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                     "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                     "'->'", "'<->'", "'in'", "'='", "'!='", "'<'", "'>'", 
+    literalNames = [ "<INVALID>", "'.'", "','", "')'", "'('", "<INVALID>",
+                     "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>",
+                     "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>",
+                     "'->'", "'<->'", "'in'", "'='", "'!='", "'<'", "'>'",
                      "'<='", "'>='", "'||'" ]
 
-    symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                      "<INVALID>", "TRUE", "FALSE", "NOT", "UNIVERSAL", 
-                      "EXISTENTIAL", "COUNTING", "AND", "OR", "XOR", "IMPL", 
-                      "EQ", "IN", "EQUAL", "UNEQUAL", "LESS", "GREATER", 
-                      "LESS_EQUAL", "GREATER_EQUAL", "WITH", "PREDICATE", 
-                      "VAR", "FUNCTION", "FIXED_DOMAIN", "WS", "STR_VALUE", 
+    symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>",
+                      "<INVALID>", "TRUE", "FALSE", "NOT", "UNIVERSAL",
+                      "EXISTENTIAL", "COUNTING", "AND", "OR", "XOR", "IMPL",
+                      "EQ", "IN", "EQUAL", "UNEQUAL", "LESS", "GREATER",
+                      "LESS_EQUAL", "GREATER_EQUAL", "WITH", "PREDICATE",
+                      "VAR", "FUNCTION", "FIXED_DOMAIN", "WS", "STR_VALUE",
                       "INT_VALUE", "FLOAT_VALUE" ]
 
     RULE_formula = 0
@@ -114,8 +114,8 @@ class FormulaParser ( Parser ):
     RULE_atom = 11
     RULE_bool_ = 12
 
-    ruleNames =  [ "formula", "expr", "xor_expr", "or_expr", "and_expr", 
-                   "unary_expr", "term", "terms_signature", "const", "domain_vars", 
+    ruleNames =  [ "formula", "expr", "xor_expr", "or_expr", "and_expr",
+                   "unary_expr", "term", "terms_signature", "const", "domain_vars",
                    "domain", "atom", "bool_" ]
 
     EOF = Token.EOF
@@ -230,7 +230,7 @@ class FormulaParser ( Parser ):
         def getRuleIndex(self):
             return FormulaParser.RULE_expr
 
-     
+
         def copyFrom(self, ctx:ParserRuleContext):
             super().copyFrom(ctx)
 
@@ -358,7 +358,7 @@ class FormulaParser ( Parser ):
                         localctx.right = self.expr(2)
                         pass
 
-             
+
                 self.state = 44
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,2,self._ctx)
@@ -383,7 +383,7 @@ class FormulaParser ( Parser ):
         def getRuleIndex(self):
             return FormulaParser.RULE_xor_expr
 
-     
+
         def copyFrom(self, ctx:ParserRuleContext):
             super().copyFrom(ctx)
 
@@ -433,7 +433,7 @@ class FormulaParser ( Parser ):
                     self.state = 46
                     localctx.op = self.match(FormulaParser.XOR)
                     self.state = 47
-                    self.or_expr() 
+                    self.or_expr()
                 self.state = 52
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,3,self._ctx)
@@ -458,7 +458,7 @@ class FormulaParser ( Parser ):
         def getRuleIndex(self):
             return FormulaParser.RULE_or_expr
 
-     
+
         def copyFrom(self, ctx:ParserRuleContext):
             super().copyFrom(ctx)
 
@@ -508,7 +508,7 @@ class FormulaParser ( Parser ):
                     self.state = 54
                     localctx.op = self.match(FormulaParser.OR)
                     self.state = 55
-                    self.and_expr() 
+                    self.and_expr()
                 self.state = 60
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,4,self._ctx)
@@ -533,7 +533,7 @@ class FormulaParser ( Parser ):
         def getRuleIndex(self):
             return FormulaParser.RULE_and_expr
 
-     
+
         def copyFrom(self, ctx:ParserRuleContext):
             super().copyFrom(ctx)
 
@@ -583,7 +583,7 @@ class FormulaParser ( Parser ):
                     self.state = 62
                     localctx.op = self.match(FormulaParser.AND)
                     self.state = 63
-                    self.unary_expr() 
+                    self.unary_expr()
                 self.state = 68
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,5,self._ctx)
@@ -608,7 +608,7 @@ class FormulaParser ( Parser ):
         def getRuleIndex(self):
             return FormulaParser.RULE_unary_expr
 
-     
+
         def copyFrom(self, ctx:ParserRuleContext):
             super().copyFrom(ctx)
 
@@ -910,7 +910,7 @@ class FormulaParser ( Parser ):
         def getRuleIndex(self):
             return FormulaParser.RULE_term
 
-     
+
         def copyFrom(self, ctx:ParserRuleContext):
             super().copyFrom(ctx)
 
@@ -1024,7 +1024,7 @@ class FormulaParser ( Parser ):
         def getRuleIndex(self):
             return FormulaParser.RULE_terms_signature
 
-     
+
         def copyFrom(self, ctx:ParserRuleContext):
             super().copyFrom(ctx)
 
@@ -1095,7 +1095,7 @@ class FormulaParser ( Parser ):
         def getRuleIndex(self):
             return FormulaParser.RULE_const
 
-     
+
         def copyFrom(self, ctx:ParserRuleContext):
             super().copyFrom(ctx)
 
@@ -1202,7 +1202,7 @@ class FormulaParser ( Parser ):
         def getRuleIndex(self):
             return FormulaParser.RULE_domain_vars
 
-     
+
         def copyFrom(self, ctx:ParserRuleContext):
             super().copyFrom(ctx)
 
@@ -1313,7 +1313,7 @@ class FormulaParser ( Parser ):
         def getRuleIndex(self):
             return FormulaParser.RULE_domain
 
-     
+
         def copyFrom(self, ctx:ParserRuleContext):
             super().copyFrom(ctx)
 
@@ -1403,7 +1403,7 @@ class FormulaParser ( Parser ):
         def getRuleIndex(self):
             return FormulaParser.RULE_atom
 
-     
+
         def copyFrom(self, ctx:ParserRuleContext):
             super().copyFrom(ctx)
 
@@ -1468,13 +1468,13 @@ class FormulaParser ( Parser ):
                 self.enterOuterAlt(localctx, 2)
                 self.state = 150
                 self.match(FormulaParser.T__3)
-                self.state = 152 
+                self.state = 152
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 while True:
                     self.state = 151
                     localctx.content = self.expr(0)
-                    self.state = 154 
+                    self.state = 154
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
                     if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << FormulaParser.T__3) | (1 << FormulaParser.TRUE) | (1 << FormulaParser.FALSE) | (1 << FormulaParser.NOT) | (1 << FormulaParser.UNIVERSAL) | (1 << FormulaParser.EXISTENTIAL) | (1 << FormulaParser.COUNTING) | (1 << FormulaParser.PREDICATE) | (1 << FormulaParser.VAR) | (1 << FormulaParser.FUNCTION) | (1 << FormulaParser.STR_VALUE) | (1 << FormulaParser.INT_VALUE) | (1 << FormulaParser.FLOAT_VALUE))) != 0)):
@@ -1506,7 +1506,7 @@ class FormulaParser ( Parser ):
         def getRuleIndex(self):
             return FormulaParser.RULE_bool_
 
-     
+
         def copyFrom(self, ctx:ParserRuleContext):
             super().copyFrom(ctx)
 
@@ -1591,12 +1591,7 @@ class FormulaParser ( Parser ):
     def expr_sempred(self, localctx:ExprContext, predIndex:int):
             if predIndex == 0:
                 return self.precpred(self._ctx, 3)
-         
+
 
             if predIndex == 1:
                 return self.precpred(self._ctx, 2)
-         
-
-
-
-

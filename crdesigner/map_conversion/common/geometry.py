@@ -71,7 +71,9 @@ class Area:
             raise TypeError("the tested Object must be either a Point or a numpy array")
 
     def __str__(self):
-        return "Area: x in [{}, {}], y in [{}, {}]".format(self.x_min, self.x_max, self.y_min, self.y_max)
+        return "Area: x in [{}, {}], y in [{}, {}]".format(
+            self.x_min, self.x_max, self.y_min, self.y_max
+        )
 
 
 def points_to_array(points: List[Point]) -> np.ndarray:
@@ -209,9 +211,9 @@ def create_tilted_parallels(
         vector = [x2 - x1, y2 - y1]
         orthogonal_vector = np.array([vector[1], -vector[0]])
         magnitude = np.linalg.norm(orthogonal_vector)
-        width = width1 * (1 - waypoint_counter / (len(waypoints) - 1)) + width2 * waypoint_counter / (
-            len(waypoints) - 1
-        )
+        width = width1 * (
+            1 - waypoint_counter / (len(waypoints) - 1)
+        ) + width2 * waypoint_counter / (len(waypoints) - 1)
         orthogonal_vector = orthogonal_vector / magnitude * width
         left_bound.append(
             np.array(
@@ -339,7 +341,9 @@ def distance(point: np.ndarray, polyline: Iterable[np.ndarray]) -> float:
     return min(distances)
 
 
-def create_middle_line(polyline1: List[np.ndarray], polyline2: List[np.ndarray]) -> List[np.ndarray]:
+def create_middle_line(
+    polyline1: List[np.ndarray], polyline2: List[np.ndarray]
+) -> List[np.ndarray]:
     """
     creates a line between two polylines
     the lines should have the same amount of way points for good results
@@ -489,7 +493,9 @@ def get_evaluation_point(line: List[np.ndarray], start_point: int, length: float
     return current_point, remaining_length
 
 
-def evaluate_line(line: List[np.ndarray], length: float, start_point: int = 0) -> Tuple[np.ndarray, int, float]:
+def evaluate_line(
+    line: List[np.ndarray], length: float, start_point: int = 0
+) -> Tuple[np.ndarray, int, float]:
     """
     returns the point after a given length on a polyline
 
@@ -522,7 +528,9 @@ def set_line_points(line: List[np.ndarray], n: int) -> List[np.ndarray]:
     remaining_length = 0
     delta = total_length / (n - 1)
     for i in range(n - 2):
-        new_point, current_point, remaining_length = evaluate_line(line, delta + remaining_length, current_point)
+        new_point, current_point, remaining_length = evaluate_line(
+            line, delta + remaining_length, current_point
+        )
         newline.append(new_point)
     newline.append(line[-1])
     return newline
@@ -610,7 +618,9 @@ def lon_lat_to_cartesian(waypoint: np.ndarray, origin: np.ndarray) -> np.ndarray
     return np.array([x, y])
 
 
-def point_to_line_distance(point: np.ndarray, line_start: np.ndarray, line_end: np.ndarray) -> float:
+def point_to_line_distance(
+    point: np.ndarray, line_start: np.ndarray, line_end: np.ndarray
+) -> float:
     """
     calculates the distance of a point to a line defined by two points
 
@@ -619,7 +629,9 @@ def point_to_line_distance(point: np.ndarray, line_start: np.ndarray, line_end: 
     :param line_end:
     :return: the perpendicular distance of the point to the line
     """
-    return np.linalg.norm(np.cross(line_end - line_start, line_start - point)) / np.linalg.norm(line_end - line_start)
+    return np.linalg.norm(np.cross(line_end - line_start, line_start - point)) / np.linalg.norm(
+        line_end - line_start
+    )
 
 
 def pre_filter_points(lines: List[List[np.ndarray]]) -> List[List[np.ndarray]]:
@@ -638,8 +650,12 @@ def pre_filter_points(lines: List[List[np.ndarray]]) -> List[List[np.ndarray]]:
         angle = angle_to(v1, v2)
         return angle >= 179.99
 
-    negligible = [all([is_straight(line, index) for line in lines]) for index in range(len(lines[0]))]
-    result = [[point for index, point in enumerate(line) if not negligible[index]] for line in lines]
+    negligible = [
+        all([is_straight(line, index) for line in lines]) for index in range(len(lines[0]))
+    ]
+    result = [
+        [point for index, point in enumerate(line) if not negligible[index]] for line in lines
+    ]
 
     # set waypoints to at least three
     if len(result[0]) == 2:
@@ -658,7 +674,9 @@ def filter_points(lines: List[List[np.ndarray]], threshold: float) -> List[List[
     :return:
     """
 
-    def point_negligible(original_lines: List[List[np.ndarray]], omitted_point_interval: Tuple[int, int]) -> bool:
+    def point_negligible(
+        original_lines: List[List[np.ndarray]], omitted_point_interval: Tuple[int, int]
+    ) -> bool:
         """
         checks if the resulting lines will have a distance below the threshold to the original lines
 
@@ -668,12 +686,17 @@ def filter_points(lines: List[List[np.ndarray]], threshold: float) -> List[List[
         :return:
         """
         assert omitted_point_interval[0] > 0, "the first point of a line cannot be ommited"
-        assert omitted_point_interval[1] + 1 < len(original_lines[0]), "the last point of a line cannot be omitted"
+        assert omitted_point_interval[1] + 1 < len(
+            original_lines[0]
+        ), "the last point of a line cannot be omitted"
         for line in original_lines:
             new_line_start = line[omitted_point_interval[0] - 1]
             new_line_end = line[omitted_point_interval[1] + 1]
             for point_index in range(omitted_point_interval[0], omitted_point_interval[1] + 1):
-                if point_to_line_distance(line[point_index], new_line_start, new_line_end) > threshold:
+                if (
+                    point_to_line_distance(line[point_index], new_line_start, new_line_end)
+                    > threshold
+                ):
                     return False
         return True
 

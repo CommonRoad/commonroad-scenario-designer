@@ -186,7 +186,9 @@ def get_sumo_edge_type(
     default_type = LaneletType.URBAN
     default_country = SupportedTrafficSignCountry.ZAMUNDA
     if not lanelet_types:
-        logging.warning(f"No Lanelet Type given for sumo_edge_type conversion, falling back to {default_type}")
+        logging.warning(
+            f"No Lanelet Type given for sumo_edge_type conversion, falling back to {default_type}"
+        )
         return get_sumo_edge_type(edge_types, country_id, default_type)
 
     supported = set(lanelet_types) & {
@@ -197,14 +199,19 @@ def get_sumo_edge_type(
         return edge_types.types[lanelet_type_CR2SUMO[country_id][most_common]]
     # Max Error
     except ValueError:
-        logging.warning(f"No LaneletType in {lanelet_types} not supported, falling back to {default_type}")
+        logging.warning(
+            f"No LaneletType in {lanelet_types} not supported, falling back to {default_type}"
+        )
         return get_sumo_edge_type(edge_types, country_id, default_type)
     # Dict lookup error
     except KeyError as e:
         if country_id in lanelet_type_CR2SUMO and most_common in lanelet_type_CR2SUMO[country_id]:
-            raise KeyError(f"EdgeType {lanelet_type_CR2SUMO[country_id][most_common]} not in EdgeTypes") from e
+            raise KeyError(
+                f"EdgeType {lanelet_type_CR2SUMO[country_id][most_common]} not in EdgeTypes"
+            ) from e
         logging.warning(
-            f"({country_id}, {most_common}) is not supported, " f"falling_back to: ({default_country}, {default_type})"
+            f"({country_id}, {most_common}) is not supported, "
+            f"falling_back to: ({default_country}, {default_type})"
         )
         return get_sumo_edge_type(edge_types, default_country, default_type)
 

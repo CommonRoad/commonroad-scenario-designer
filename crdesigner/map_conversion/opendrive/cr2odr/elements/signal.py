@@ -16,7 +16,9 @@ class Signal:
     Class serves as base class for different signal types.
     """
 
-    def __init__(self, road_key: int, unique_id: int, data: List, lane_list: LaneletNetwork) -> None:
+    def __init__(
+        self, road_key: int, unique_id: int, data: List, lane_list: LaneletNetwork
+    ) -> None:
         """
         This function let class Signal to initialize the object with road_key, unique_id, data, lane_list and
         converts the CommonRoad traffic signals into OpenDRIVE traffic signals.

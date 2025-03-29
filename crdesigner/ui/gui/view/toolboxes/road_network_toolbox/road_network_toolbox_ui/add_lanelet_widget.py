@@ -50,7 +50,9 @@ class AddLaneletWidget:
         # connect to previous selection section
         self.toolbox.connect_to_previous_selection = QRadioButton("Connect to previously added")
         self.toolbox.connect_to_previous_selection.setChecked(False)
-        self.toolbox.connecting_radio_button_group.addButton(self.toolbox.connect_to_previous_selection)
+        self.toolbox.connecting_radio_button_group.addButton(
+            self.toolbox.connect_to_previous_selection
+        )
         font = self.toolbox.connect_to_previous_selection.font()
         font.setBold(True)
         self.toolbox.connect_to_previous_selection.setFont(font)
@@ -58,7 +60,9 @@ class AddLaneletWidget:
         # connect to predecessors selection section
         self.toolbox.connect_to_predecessors_selection = QRadioButton("Connect to predecessors")
         self.toolbox.connect_to_predecessors_selection.setChecked(False)
-        self.toolbox.connecting_radio_button_group.addButton(self.toolbox.connect_to_predecessors_selection)
+        self.toolbox.connecting_radio_button_group.addButton(
+            self.toolbox.connect_to_predecessors_selection
+        )
         font = self.toolbox.connect_to_predecessors_selection.font()
         font.setBold(True)
         self.toolbox.connect_to_predecessors_selection.setFont(font)
@@ -66,7 +70,9 @@ class AddLaneletWidget:
         # connect to successors section
         self.toolbox.connect_to_successors_selection = QRadioButton("Connect to successors")
         self.toolbox.connect_to_successors_selection.setChecked(False)
-        self.toolbox.connecting_radio_button_group.addButton(self.toolbox.connect_to_successors_selection)
+        self.toolbox.connecting_radio_button_group.addButton(
+            self.toolbox.connect_to_successors_selection
+        )
         font = self.toolbox.connect_to_successors_selection.font()
         font.setBold(True)
         self.toolbox.connect_to_successors_selection.setFont(font)
@@ -78,9 +84,15 @@ class AddLaneletWidget:
         self.toolbox.lanelet_adding_groupbox.setLayout(self.toolbox.layout_lanelet_adding_groupbox)
 
         self.toolbox.layout_lanelet_adding_groupbox.addRow(self.toolbox.place_at_position)
-        self.toolbox.layout_lanelet_adding_groupbox.addRow(self.toolbox.connect_to_previous_selection)
-        self.toolbox.layout_lanelet_adding_groupbox.addRow(self.toolbox.connect_to_predecessors_selection)
-        self.toolbox.layout_lanelet_adding_groupbox.addRow(self.toolbox.connect_to_successors_selection)
+        self.toolbox.layout_lanelet_adding_groupbox.addRow(
+            self.toolbox.connect_to_previous_selection
+        )
+        self.toolbox.layout_lanelet_adding_groupbox.addRow(
+            self.toolbox.connect_to_predecessors_selection
+        )
+        self.toolbox.layout_lanelet_adding_groupbox.addRow(
+            self.toolbox.connect_to_successors_selection
+        )
 
         # Add button
         self.toolbox.button_add_lanelet = QPushButton("Add")
@@ -133,7 +145,9 @@ class AddLaneletWidget:
         self.toolbox.lanelet_start_position_y.setText("0.0")
 
         self.toolbox.button_start_position = PositionButton(
-            self.toolbox.lanelet_start_position_x, self.toolbox.lanelet_start_position_y, self.toolbox
+            self.toolbox.lanelet_start_position_x,
+            self.toolbox.lanelet_start_position_y,
+            self.toolbox,
         )
 
         self.toolbox.lanelet_start_position = QGridLayout()
@@ -145,7 +159,9 @@ class AddLaneletWidget:
         self.toolbox.lanelet_start_position.addWidget(QLabel("[m]"), 1, 5)
         self.toolbox.lanelet_start_position.addWidget(self.toolbox.button_start_position, 1, 6)
 
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(2, self.toolbox.lanelet_start_position)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(
+            2, self.toolbox.lanelet_start_position
+        )
 
         # radio button group for selecting method of end position
         self.toolbox.connecting_radio_button_group_lanelet_end = QButtonGroup()
@@ -155,7 +171,9 @@ class AddLaneletWidget:
 
         self.toolbox.select_end_position = QRadioButton("select end pos")
         self.toolbox.select_end_position.setChecked(False)
-        self.toolbox.connecting_radio_button_group_lanelet_end.addButton(self.toolbox.select_end_position)
+        self.toolbox.connecting_radio_button_group_lanelet_end.addButton(
+            self.toolbox.select_end_position
+        )
         self.toolbox.select_end_position.setToolTip("select end position")
 
         self.toolbox.rotate = QRadioButton("rotate")
@@ -172,7 +190,9 @@ class AddLaneletWidget:
         self.toolbox.lanelet_end_position_method.addWidget(self.toolbox.select_end_position, 1, 1)
         self.toolbox.lanelet_end_position_method.addWidget(self.toolbox.rotate, 1, 2)
 
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(3, self.toolbox.lanelet_end_position_method)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(
+            3, self.toolbox.lanelet_end_position_method
+        )
 
         # Lanelet Length and Width
         self.toolbox.lanelet_length = QLineEdit()
@@ -188,8 +208,12 @@ class AddLaneletWidget:
         self.toolbox.lanelet_width.setMaxLength(5)
         self.toolbox.lanelet_width.setAlignment(Qt.AlignmentFlag.AlignRight)
 
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(4, "Length [m]", self.toolbox.lanelet_length)
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(5, "Width [m]", self.toolbox.lanelet_width)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(
+            4, "Length [m]", self.toolbox.lanelet_length
+        )
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(
+            5, "Width [m]", self.toolbox.lanelet_width
+        )
 
         self.add_curved_fields(6)
         self.add_line_marking_fields(8)
@@ -219,21 +243,31 @@ class AddLaneletWidget:
             self.toolbox.lanelet_end_position_y.setAlignment(Qt.AlignmentFlag.AlignRight)
 
             self.toolbox.button_end_position = PositionButton(
-                self.toolbox.lanelet_end_position_x, self.toolbox.lanelet_end_position_y, self.toolbox
+                self.toolbox.lanelet_end_position_x,
+                self.toolbox.lanelet_end_position_y,
+                self.toolbox,
             )
             self.toolbox.button_end_position.setFlat(True)
             self.toolbox.button_start_position.setAutoFillBackground(True)
 
             self.toolbox.lanelet_select_end_position = QGridLayout()
             self.toolbox.lanelet_select_end_position.addWidget(QLabel("x: "), 1, 0)
-            self.toolbox.lanelet_select_end_position.addWidget(self.toolbox.lanelet_end_position_x, 1, 1)
+            self.toolbox.lanelet_select_end_position.addWidget(
+                self.toolbox.lanelet_end_position_x, 1, 1
+            )
             self.toolbox.lanelet_select_end_position.addWidget(QLabel("[m]"), 1, 2)
             self.toolbox.lanelet_select_end_position.addWidget(QLabel("y:"), 1, 3)
-            self.toolbox.lanelet_select_end_position.addWidget(self.toolbox.lanelet_end_position_y, 1, 4)
+            self.toolbox.lanelet_select_end_position.addWidget(
+                self.toolbox.lanelet_end_position_y, 1, 4
+            )
             self.toolbox.lanelet_select_end_position.addWidget(QLabel("[m]"), 1, 5)
-            self.toolbox.lanelet_select_end_position.addWidget(self.toolbox.button_end_position, 1, 6)
+            self.toolbox.lanelet_select_end_position.addWidget(
+                self.toolbox.button_end_position, 1, 6
+            )
 
-            self.toolbox.layout_lanelet_adding_groupbox.insertRow(4, self.toolbox.lanelet_select_end_position)
+            self.toolbox.layout_lanelet_adding_groupbox.insertRow(
+                4, self.toolbox.lanelet_select_end_position
+            )
 
             self.toolbox.curved_check_button.button.setDisabled(True)
 
@@ -334,7 +368,9 @@ class AddLaneletWidget:
         self.toolbox.layout_lanelet_adding_groupbox.insertRow(1, self.toolbox.line1)
 
         self.toolbox.previous_lanelet = QComboBox()
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(3, "Previous Lanelet", self.toolbox.previous_lanelet)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(
+            3, "Previous Lanelet", self.toolbox.previous_lanelet
+        )
 
         # Lanelet Length and Width
         self.toolbox.lanelet_length = QLineEdit()
@@ -354,8 +390,12 @@ class AddLaneletWidget:
             + self.toolbox.mwindow.mwindow_ui.colorscheme().disabled
         )
 
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(4, "Length [m]", self.toolbox.lanelet_length)
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(5, "Width [m]", self.toolbox.lanelet_width)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(
+            4, "Length [m]", self.toolbox.lanelet_length
+        )
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(
+            5, "Width [m]", self.toolbox.lanelet_width
+        )
 
         self.add_curved_fields(6)
         self.add_line_marking_fields(8)
@@ -373,12 +413,18 @@ class AddLaneletWidget:
         self.toolbox.layout_lanelet_adding_groupbox.insertRow(2, self.toolbox.line1)
 
         self.toolbox.predecessors = CheckableComboBox(self.toolbox)
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(4, "Predecessors:", self.toolbox.predecessors)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(
+            4, "Predecessors:", self.toolbox.predecessors
+        )
 
         self.init_length_width()
 
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(5, "Length [m]", self.toolbox.lanelet_length)
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(6, "Width [m]", self.toolbox.lanelet_width)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(
+            5, "Length [m]", self.toolbox.lanelet_length
+        )
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(
+            6, "Width [m]", self.toolbox.lanelet_width
+        )
 
         self.add_curved_fields(7)
         self.add_line_marking_fields(9)
@@ -396,13 +442,19 @@ class AddLaneletWidget:
         self.toolbox.layout_lanelet_adding_groupbox.insertRow(3, self.toolbox.line1)
 
         self.toolbox.successors = CheckableComboBox()
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(5, "Successors:", self.toolbox.successors)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(
+            5, "Successors:", self.toolbox.successors
+        )
 
         # Lanelet Length and Width
         self.init_length_width()
 
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(6, "Length [m]", self.toolbox.lanelet_length)
-        self.toolbox.layout_lanelet_adding_groupbox.insertRow(7, "Width [m]", self.toolbox.lanelet_width)
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(
+            6, "Length [m]", self.toolbox.lanelet_length
+        )
+        self.toolbox.layout_lanelet_adding_groupbox.insertRow(
+            7, "Width [m]", self.toolbox.lanelet_width
+        )
 
         self.add_curved_fields(8)
         self.add_line_marking_fields(10)
@@ -417,11 +469,17 @@ class AddLaneletWidget:
     def remove_adding_method_fields(self):
         if self.toolbox.adding_method == "place_at_position":
             self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.line1)
-            self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.lanelet_start_position)
+            self.toolbox.layout_lanelet_adding_groupbox.removeRow(
+                self.toolbox.lanelet_start_position
+            )
             self.toolbox.button_start_position.remove()
-            self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.lanelet_end_position_method)
+            self.toolbox.layout_lanelet_adding_groupbox.removeRow(
+                self.toolbox.lanelet_end_position_method
+            )
             if self.toolbox.end_position_method == "select_end_position":
-                self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.lanelet_select_end_position)
+                self.toolbox.layout_lanelet_adding_groupbox.removeRow(
+                    self.toolbox.lanelet_select_end_position
+                )
                 self.toolbox.button_end_position.remove()
             elif self.toolbox.end_position_method == "rotate":
                 self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.lanelet_rotation)
@@ -471,7 +529,9 @@ class AddLaneletWidget:
 
         # TODO: Maybe change
         if self.toolbox.curved_check_button is not None:
-            self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
+            self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+                False
+            )
 
     def init_length_width(self):
         self.toolbox.lanelet_length = QLineEdit()
@@ -493,7 +553,9 @@ class AddLaneletWidget:
 
     def remove_end_position_method_fields(self):
         if self.toolbox.end_position_method == "select_end_position":
-            self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.lanelet_select_end_position)
+            self.toolbox.layout_lanelet_adding_groupbox.removeRow(
+                self.toolbox.lanelet_select_end_position
+            )
             self.toolbox.button_end_position.remove()
             self.toolbox.curved_check_button.button.setDisabled(False)
         elif self.toolbox.end_position_method == "rotate":
@@ -546,7 +608,9 @@ class AddLaneletWidget:
         )
 
         if self.toolbox.place_at_position.isChecked():
-            self.toolbox.curved_check_button.button.clicked.connect(lambda: self.disable_curved_select_end_pos())
+            self.toolbox.curved_check_button.button.clicked.connect(
+                lambda: self.disable_curved_select_end_pos()
+            )
 
     def disable_curved_select_end_pos(self):
         self.toolbox.update_window()
@@ -574,7 +638,9 @@ class AddLaneletWidget:
         self.toolbox.connecting_radio_button_group_stop_line = QButtonGroup()
         self.toolbox.stop_line_beginning = QRadioButton("beginning")
         self.toolbox.stop_line_beginning.setChecked(True)
-        self.toolbox.connecting_radio_button_group_stop_line.addButton(self.toolbox.stop_line_beginning)
+        self.toolbox.connecting_radio_button_group_stop_line.addButton(
+            self.toolbox.stop_line_beginning
+        )
 
         self.toolbox.stop_line_end = QRadioButton("end")
         self.toolbox.stop_line_end.setChecked(False)
@@ -587,7 +653,9 @@ class AddLaneletWidget:
         layout_stop_line.addRow("Line marking", self.toolbox.line_marking_stop_line)
         layout_stop_line.addRow(self.toolbox.stop_line_position)
 
-        self.toolbox.stop_line_check_box = CollapsibleCheckBox("Stop Line", layout_stop_line, layout_line_marking, 3)
+        self.toolbox.stop_line_check_box = CollapsibleCheckBox(
+            "Stop Line", layout_stop_line, layout_line_marking, 3
+        )
 
         self.toolbox.line_marking_box = CollapsibleArrowBox(
             "Line marking",
@@ -604,30 +672,50 @@ class AddLaneletWidget:
         self.toolbox.adjacent_right_same_direction = QRadioButton("same direction")
         self.toolbox.adjacent_right_same_direction.setChecked(True)
         self.toolbox.adjacent_right_direction.addButton(self.toolbox.adjacent_right_same_direction)
-        self.toolbox.adjacent_right_same_direction.setToolTip("Driving direction of right adjacent lanelet")
+        self.toolbox.adjacent_right_same_direction.setToolTip(
+            "Driving direction of right adjacent lanelet"
+        )
         self.toolbox.adjacent_right_opposite_direction = QRadioButton("opposite direction")
         self.toolbox.adjacent_right_opposite_direction.setChecked(False)
-        self.toolbox.adjacent_right_direction.addButton(self.toolbox.adjacent_right_opposite_direction)
-        self.toolbox.adjacent_right_opposite_direction.setToolTip("Driving direction of right adjacent lanelet")
+        self.toolbox.adjacent_right_direction.addButton(
+            self.toolbox.adjacent_right_opposite_direction
+        )
+        self.toolbox.adjacent_right_opposite_direction.setToolTip(
+            "Driving direction of right adjacent lanelet"
+        )
 
         self.toolbox.adjacent_right_direction_line = QGridLayout()
-        self.toolbox.adjacent_right_direction_line.addWidget(self.toolbox.adjacent_right_same_direction, 1, 0)
-        self.toolbox.adjacent_right_direction_line.addWidget(self.toolbox.adjacent_right_opposite_direction, 1, 1)
+        self.toolbox.adjacent_right_direction_line.addWidget(
+            self.toolbox.adjacent_right_same_direction, 1, 0
+        )
+        self.toolbox.adjacent_right_direction_line.addWidget(
+            self.toolbox.adjacent_right_opposite_direction, 1, 1
+        )
 
         self.toolbox.adjacent_left = QComboBox()
         self.toolbox.adjacent_left_direction = QButtonGroup()
         self.toolbox.adjacent_left_same_direction = QRadioButton("same direction")
         self.toolbox.adjacent_left_same_direction.setChecked(True)
         self.toolbox.adjacent_left_direction.addButton(self.toolbox.adjacent_left_same_direction)
-        self.toolbox.adjacent_left_same_direction.setToolTip("Driving direction of left adjacent lanelet")
+        self.toolbox.adjacent_left_same_direction.setToolTip(
+            "Driving direction of left adjacent lanelet"
+        )
         self.toolbox.adjacent_left_opposite_direction = QRadioButton("opposite direction")
         self.toolbox.adjacent_left_opposite_direction.setChecked(False)
-        self.toolbox.adjacent_left_direction.addButton(self.toolbox.adjacent_left_opposite_direction)
-        self.toolbox.adjacent_left_opposite_direction.setToolTip("Driving direction of left adjacent lanelet")
+        self.toolbox.adjacent_left_direction.addButton(
+            self.toolbox.adjacent_left_opposite_direction
+        )
+        self.toolbox.adjacent_left_opposite_direction.setToolTip(
+            "Driving direction of left adjacent lanelet"
+        )
 
         self.toolbox.adjacent_left_direction_line = QGridLayout()
-        self.toolbox.adjacent_left_direction_line.addWidget(self.toolbox.adjacent_left_same_direction, 1, 0)
-        self.toolbox.adjacent_left_direction_line.addWidget(self.toolbox.adjacent_left_opposite_direction, 1, 1)
+        self.toolbox.adjacent_left_direction_line.addWidget(
+            self.toolbox.adjacent_left_same_direction, 1, 0
+        )
+        self.toolbox.adjacent_left_direction_line.addWidget(
+            self.toolbox.adjacent_left_opposite_direction, 1, 1
+        )
 
         layout_neighboring_lanelets = QFormLayout()
         if not self.toolbox.connect_to_predecessors_selection.isChecked():
@@ -662,8 +750,12 @@ class AddLaneletWidget:
         layout_advanced.addRow("Lanelet Types:", self.toolbox.lanelet_type)
         layout_advanced.addRow("Users Oneway:", self.toolbox.road_user_oneway)
         layout_advanced.addRow("Users Bidirectional:", self.toolbox.road_user_bidirectional)
-        layout_advanced.addRow("Traffic Sign IDs:", self.toolbox.lanelet_referenced_traffic_sign_ids)
-        layout_advanced.addRow("Traffic Light IDs:", self.toolbox.lanelet_referenced_traffic_light_ids)
+        layout_advanced.addRow(
+            "Traffic Sign IDs:", self.toolbox.lanelet_referenced_traffic_sign_ids
+        )
+        layout_advanced.addRow(
+            "Traffic Light IDs:", self.toolbox.lanelet_referenced_traffic_light_ids
+        )
 
         self.toolbox.advanced_button = CollapsibleArrowBox(
             "Advanced",

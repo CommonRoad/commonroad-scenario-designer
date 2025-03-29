@@ -13,7 +13,9 @@ class Sign(Signal):
     which is used to convert CommonRoad sign to OpenDRIVE sign.
     """
 
-    def __init__(self, road_key: int, unique_id: int, data: List[TrafficSign], lane_list: LaneletNetwork) -> None:
+    def __init__(
+        self, road_key: int, unique_id: int, data: List[TrafficSign], lane_list: LaneletNetwork
+    ) -> None:
         """
         This function let class Sign to initialize the object with road_key, unique_id, data, lane_list and
         converts the CommonRoad traffic signs in to OpenDRIVE traffic signs.

@@ -13,7 +13,9 @@ class Light(Signal):
     which is used to convert the CommonRoad lights into the OpenDRIVE lights
     """
 
-    def __init__(self, road_key: int, unique_id: int, data: List[TrafficLight], lane_list: LaneletNetwork) -> None:
+    def __init__(
+        self, road_key: int, unique_id: int, data: List[TrafficLight], lane_list: LaneletNetwork
+    ) -> None:
         """
         This function let class Light to initialize the object with road_key, unique_id, data, lane_list and
         converts the CommonRoad traffic lights into OpenDRIVE traffic lights.

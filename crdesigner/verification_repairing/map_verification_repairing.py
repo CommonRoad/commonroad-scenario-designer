@@ -49,18 +49,24 @@ def collect_scenario_paths(
             scenario_names_complete += list(Path(scenario_dir).glob(f"*{file_format.value}"))
         else:
             scenario_names_complete += list(Path(scenario_dir).glob(f"*{FileFormat.XML.value}"))
-            scenario_names_complete += list(Path(scenario_dir).glob(f"*{FileFormat.PROTOBUF.value}"))
+            scenario_names_complete += list(
+                Path(scenario_dir).glob(f"*{FileFormat.PROTOBUF.value}")
+            )
     else:
         if file_format is not None:
             scenario_names_complete += list(Path(scenario_dir).rglob(f"*{file_format.value}"))
         else:
             scenario_names_complete += list(Path(scenario_dir).rglob(f"*{FileFormat.XML.value}"))
-            scenario_names_complete += list(Path(scenario_dir).rglob(f"*{FileFormat.PROTOBUF.value}"))
+            scenario_names_complete += list(
+                Path(scenario_dir).rglob(f"*{FileFormat.PROTOBUF.value}")
+            )
 
     return scenario_names_complete
 
 
-def verify_and_repair_scenario(scenario: Scenario, config: MapVerParams = MapVerParams()) -> Tuple[Scenario, bool]:
+def verify_and_repair_scenario(
+    scenario: Scenario, config: MapVerParams = MapVerParams()
+) -> Tuple[Scenario, bool]:
     """
     Verifies and repairs single scenario.
 
@@ -68,14 +74,20 @@ def verify_and_repair_scenario(scenario: Scenario, config: MapVerParams = MapVer
     :param config: Config parameters.
     :return: Boolean indicating whether there were errors and updated scenario
     """
-    network, result = verify_and_repair_map(copy.deepcopy(scenario.lanelet_network), config, scenario.scenario_id)
+    network, result = verify_and_repair_map(
+        copy.deepcopy(scenario.lanelet_network), config, scenario.scenario_id
+    )
     new_scenario = copy.deepcopy(scenario)
     new_scenario.replace_lanelet_network(network)
-    return new_scenario, len(result.map_verifications[0].map_verification_result.invalid_states) == 0
+    return new_scenario, len(
+        result.map_verifications[0].map_verification_result.invalid_states
+    ) == 0
 
 
 def verify_and_repair_map(
-    network: LaneletNetwork, config: MapVerParams = MapVerParams(), scenario_id: ScenarioID = ScenarioID()
+    network: LaneletNetwork,
+    config: MapVerParams = MapVerParams(),
+    scenario_id: ScenarioID = ScenarioID(),
 ) -> Tuple[LaneletNetwork, VerificationResult]:
     """
     Verifies and repairs a CommonRoad map. In the verification process the desired formulas are checked to be
@@ -111,9 +123,19 @@ def verify_and_repair_map(
     if config.verification.formulas is None or config.verification.formulas == []:
         config.verification.formulas = extract_formula_ids()
 
-    drawer = InvalidStatesDrawer(network, scenario_id) if config.evaluation.invalid_states_draw_dir else None
+    drawer = (
+        InvalidStatesDrawer(network, scenario_id)
+        if config.evaluation.invalid_states_draw_dir
+        else None
+    )
 
-    complete_map_name = str(scenario_id.country_id) + "_" + str(scenario_id.map_name) + "-" + str(scenario_id.map_id)
+    complete_map_name = (
+        str(scenario_id.country_id)
+        + "_"
+        + str(scenario_id.map_name)
+        + "-"
+        + str(scenario_id.map_id)
+    )
     verification_result = VerificationResult()
     map_verification = initial_map_verification(verification_result, str(complete_map_name), config)
 
@@ -146,7 +168,11 @@ def verify_and_repair_map(
         verification_time += end - start
 
         for formula_id, locations in invalid_states.items():
-            pre_locations = initial_invalid_states[formula_id] if formula_id in initial_invalid_states.keys() else []
+            pre_locations = (
+                initial_invalid_states[formula_id]
+                if formula_id in initial_invalid_states.keys()
+                else []
+            )
             initial_invalid_states[formula_id] = pre_locations + locations
 
         if drawer is not None:
@@ -196,7 +222,9 @@ def verify_and_repair_map(
                             file_format=config.evaluation.file_format,
                         )
 
-                    if invalid_states_tmp.get(f_id) is not None and loc in invalid_states_tmp.get(f_id):
+                    if invalid_states_tmp.get(f_id) is not None and loc in invalid_states_tmp.get(
+                        f_id
+                    ):
                         errors.add((f_id, loc))
 
                     iter_i += 1
@@ -218,7 +246,9 @@ def verify_and_repair_map(
         else:
             invalid_states[formula_id] = [location]
 
-    update_map_verification(map_verification, verification_time, repairing_time, initial_invalid_states)
+    update_map_verification(
+        map_verification, verification_time, repairing_time, initial_invalid_states
+    )
 
     if drawer is not None:
         drawer.save_invalid_states_drawing(
@@ -282,9 +312,13 @@ def verify_and_repair_dir_maps(
     assert Path.exists(scenarios_dir_path), "The path to configuration file is not existent!"
 
     file_paths = collect_scenario_paths(scenarios_dir_path)
-    scenarios_pp = [CommonRoadFileReader(join(scenarios_dir_path, name)).open() for name in file_paths]
+    scenarios_pp = [
+        CommonRoadFileReader(join(scenarios_dir_path, name)).open() for name in file_paths
+    ]
 
-    repaired_networks, verification_result = verify_and_repair_maps(list(zip(*scenarios_pp))[0], config)
+    repaired_networks, verification_result = verify_and_repair_maps(
+        list(zip(*scenarios_pp))[0], config
+    )
 
     for repaired_network, file_path in zip(repaired_networks, file_paths):
         for scenario, pp in scenarios_pp:

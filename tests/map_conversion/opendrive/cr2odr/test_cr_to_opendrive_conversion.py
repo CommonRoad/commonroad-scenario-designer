@@ -67,7 +67,9 @@ class TestConverterConvert(ConversionBaseTestCases.ConversionBaseTest):
 
     def test_convert_ZAM_random(self):
         self.prepare_conversion("ZAM_OpenDrive-1_1_T-1")
-        self.converter.convert(self.file_path_out)  # self.check_with_ground_truth(os.path.join(self.cwd_path,
+        self.converter.convert(
+            self.file_path_out
+        )  # self.check_with_ground_truth(os.path.join(self.cwd_path,
         # self.path_reference_xodr_file))
 
     def test_convert_ZAM_straight_lanelet(self):

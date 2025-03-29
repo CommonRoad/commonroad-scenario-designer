@@ -15,7 +15,9 @@ class TestSign(unittest.TestCase):
         # Initialize LaneletNetwork
         self.lanelet = MapCreator.create_straight(2, 8, 9, 1000, set())
 
-        sign_element = TrafficSignElement(TrafficSignIDGermany.MAX_SPEED, additional_values=["13.4112"])
+        sign_element = TrafficSignElement(
+            TrafficSignIDGermany.MAX_SPEED, additional_values=["13.4112"]
+        )
         self.traffic_sign = TrafficSign(
             traffic_sign_id=11513,
             traffic_sign_elements=[sign_element],
@@ -47,8 +49,12 @@ class TestSign(unittest.TestCase):
         self.assertEqual(f"Sign_{self.traffic_sign.traffic_sign_id}", sign.name)
         self.assertEqual("no", sign.dynamic)
         self.assertEqual("GERMANY", sign.get_country())
-        self.assertEqual(self.traffic_sign.traffic_sign_elements[0].traffic_sign_element_id.value, sign.type)
-        self.assertEqual(self.traffic_sign.traffic_sign_elements[0].additional_values[0], sign.value)
+        self.assertEqual(
+            self.traffic_sign.traffic_sign_elements[0].traffic_sign_element_id.value, sign.type
+        )
+        self.assertEqual(
+            self.traffic_sign.traffic_sign_elements[0].additional_values[0], sign.value
+        )
 
         # Test orientation
         self.assertEqual("+", sign.get_orientation())

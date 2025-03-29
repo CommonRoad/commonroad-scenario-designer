@@ -84,10 +84,18 @@ class AerialImageWidget:
         self.toolbox.eastern_bound.setMaxLength(8)
         self.toolbox.eastern_bound.setAlignment(Qt.AlignmentFlag.AlignRight)
 
-        self.toolbox.layout_aerial_image_groupbox.insertRow(3, "Northern Bound [°]", self.toolbox.northern_bound)
-        self.toolbox.layout_aerial_image_groupbox.insertRow(4, "Western Bound [°]", self.toolbox.western_bound)
-        self.toolbox.layout_aerial_image_groupbox.insertRow(5, "Southern Bound [°]", self.toolbox.southern_bound)
-        self.toolbox.layout_aerial_image_groupbox.insertRow(6, "Eastern Bound [°]", self.toolbox.eastern_bound)
+        self.toolbox.layout_aerial_image_groupbox.insertRow(
+            3, "Northern Bound [°]", self.toolbox.northern_bound
+        )
+        self.toolbox.layout_aerial_image_groupbox.insertRow(
+            4, "Western Bound [°]", self.toolbox.western_bound
+        )
+        self.toolbox.layout_aerial_image_groupbox.insertRow(
+            5, "Southern Bound [°]", self.toolbox.southern_bound
+        )
+        self.toolbox.layout_aerial_image_groupbox.insertRow(
+            6, "Eastern Bound [°]", self.toolbox.eastern_bound
+        )
 
         # probably move the next 4 lines to init_aerial_widget or something
         self.toolbox.northern_bound.setText("48.263864")

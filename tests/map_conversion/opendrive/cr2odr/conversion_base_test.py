@@ -24,11 +24,17 @@ class ConversionBaseTestCases:
                             os.remove(os.path.join(dir_path, file))
 
             self.map_name = map_name
-            self.path_reference_xodr_file = f"../../test_maps/cr2odr/reference_xodr_files/{self.map_name}.xodr"
+            self.path_reference_xodr_file = (
+                f"../../test_maps/cr2odr/reference_xodr_files/{self.map_name}.xodr"
+            )
             # absolute path for input
-            self.file_path_in = os.path.join(self.cwd_path, f"../../test_maps/cr2odr/{self.map_name}.xml")
+            self.file_path_in = os.path.join(
+                self.cwd_path, f"../../test_maps/cr2odr/{self.map_name}.xml"
+            )
             # absolute path for output
-            self.file_path_out = os.path.join(self.cwd_path, f".pytest_cache/converted_xodr_files/{self.map_name}.xodr")
+            self.file_path_out = os.path.join(
+                self.cwd_path, f".pytest_cache/converted_xodr_files/{self.map_name}.xodr"
+            )
 
             self.converter = Converter(self.file_path_in)
 

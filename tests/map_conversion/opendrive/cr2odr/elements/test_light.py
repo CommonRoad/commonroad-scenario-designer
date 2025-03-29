@@ -20,7 +20,11 @@ class TestLight(unittest.TestCase):
         # Initialize LaneletNetwork
         self.lanelet = MapCreator.create_straight(2, 8, 9, 1000, set())
 
-        cycle = [(TrafficLightState.RED, 100), (TrafficLightState.GREEN, 100), (TrafficLightState.YELLOW, 100)]
+        cycle = [
+            (TrafficLightState.RED, 100),
+            (TrafficLightState.GREEN, 100),
+            (TrafficLightState.YELLOW, 100),
+        ]
         cycle_element_list = [TrafficLightCycleElement(state[0], state[1]) for state in cycle]
         self.traffic_light = TrafficLight(
             traffic_light_id=123,

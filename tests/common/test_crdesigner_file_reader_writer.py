@@ -23,10 +23,18 @@ class TestCRDesignerFileReader(unittest.TestCase):
 
     def setUp(self) -> None:
         self.crdesigner_reader = CRDesignerFileReader()
-        self.filename_2020a = Path(__file__).parent.parent / "map_verification/test_maps/CHN_Merging-1.xml"
-        self.filename_map = Path(__file__).parent / "test_files_new_format/USA_Peach-1/USA_Peach-1.pb"
-        self.filename_dynamic = Path(__file__).parent / "test_files_new_format/USA_Peach-1/USA_Peach-1_1_T-1.pb"
-        self.filename_scenario = Path(__file__).parent / "test_files_new_format/USA_Peach-1/USA_Peach-1_1_T-1-SC.pb"
+        self.filename_2020a = (
+            Path(__file__).parent.parent / "map_verification/test_maps/CHN_Merging-1.xml"
+        )
+        self.filename_map = (
+            Path(__file__).parent / "test_files_new_format/USA_Peach-1/USA_Peach-1.pb"
+        )
+        self.filename_dynamic = (
+            Path(__file__).parent / "test_files_new_format/USA_Peach-1/USA_Peach-1_1_T-1.pb"
+        )
+        self.filename_scenario = (
+            Path(__file__).parent / "test_files_new_format/USA_Peach-1/USA_Peach-1_1_T-1-SC.pb"
+        )
 
     def test_crdesigner_file_reader_open_2020a(self):
         self.crdesigner_reader.filename_2020a = self.filename_2020a
@@ -38,7 +46,9 @@ class TestCRDesignerFileReader(unittest.TestCase):
         self.assertEqual(repaired_scenario, verify_and_repair_scenario(scenario)[0])
 
         # opening it with the different projection
-        projected_scenario = self.crdesigner_reader.open(target_projection="+proj=utm +zone=30 +ellps=WGS84")[0]
+        projected_scenario = self.crdesigner_reader.open(
+            target_projection="+proj=utm +zone=30 +ellps=WGS84"
+        )[0]
         # scenarios should not be the same as the projections are different
         self.assertNotEqual(projected_scenario, scenario)
 
@@ -60,9 +70,13 @@ class TestCRDesignerFileReader(unittest.TestCase):
         self.assertNotEqual(map_lanelet_network, verify_and_repair_map(map_lanelet_network)[0])
 
         # opening the verified and repaired lanelet network
-        map_lanelet_network_repaired = self.crdesigner_reader.open_map(verify_repair_lanelet_network=True)[0]
+        map_lanelet_network_repaired = self.crdesigner_reader.open_map(
+            verify_repair_lanelet_network=True
+        )[0]
         # asserting that the verifying and repairing the lanelet network works
-        self.assertEqual(map_lanelet_network_repaired, verify_and_repair_map(map_lanelet_network)[0])
+        self.assertEqual(
+            map_lanelet_network_repaired, verify_and_repair_map(map_lanelet_network)[0]
+        )
 
         # opening the map with the projection
         projected_lanelet_network = self.crdesigner_reader.open_map(
@@ -88,7 +102,9 @@ class TestCRDesignerFileReader(unittest.TestCase):
         self.assertNotEqual(scenario, verify_and_repair_scenario(scenario)[0])
 
         # opening the verified and repaired scenario
-        scenario_repaired = self.crdesigner_reader.open_map_dynamic(verify_repair_lanelet_network=True)
+        scenario_repaired = self.crdesigner_reader.open_map_dynamic(
+            verify_repair_lanelet_network=True
+        )
 
         # asserting that the verifying and repairing the scenario works
         self.assertEqual(scenario_repaired, verify_and_repair_scenario(scenario)[0])
@@ -131,7 +147,9 @@ class TestCRDesignerFileReader(unittest.TestCase):
         self.assertEqual(scenario_repaired, verify_and_repair_scenario(scenario)[0])
 
         # opening all with the projection
-        projected_scenario = self.crdesigner_reader.open_all(target_projection="+proj=utm +zone=30 +ellps=WGS84")[0]
+        projected_scenario = self.crdesigner_reader.open_all(
+            target_projection="+proj=utm +zone=30 +ellps=WGS84"
+        )[0]
         # scenarios should be the same as the scenario does not have base projection string
         self.assertEqual(projected_scenario, scenario)
 
@@ -172,7 +190,8 @@ class TestCRDesignerFileWriter(unittest.TestCase):
 
         # writing it without verifying and repairing
         CRDesignerFileWriter(scenario, pp).write_to_file(
-            str(Path(__file__).parent / "scenario.xml"), overwrite_existing_file=OverwriteExistingFile.ALWAYS
+            str(Path(__file__).parent / "scenario.xml"),
+            overwrite_existing_file=OverwriteExistingFile.ALWAYS,
         )
         reader_scenario = CRDesignerFileReader(Path(__file__).parent / "scenario.xml").open()[0]
 
@@ -194,9 +213,9 @@ class TestCRDesignerFileWriter(unittest.TestCase):
         )
 
         # compare the two verified and repaired scenarios
-        writer_repaired_scenario = CRDesignerFileReader(Path(__file__).parent / "writer_repaired_scenario.xml").open()[
-            0
-        ]
+        writer_repaired_scenario = CRDesignerFileReader(
+            Path(__file__).parent / "writer_repaired_scenario.xml"
+        ).open()[0]
         function_repaired_scenario = CRDesignerFileReader(
             Path(__file__).parent / "function_repaired_scenario.xml"
         ).open()[0]
@@ -214,7 +233,8 @@ class TestCRDesignerFileWriter(unittest.TestCase):
 
         # write the unrepaired map
         crdesigner_writer.write_map_to_file(
-            str(Path(__file__).parent / "CHN_Merging-1.pb"), overwrite_existing_file=OverwriteExistingFile.ALWAYS
+            str(Path(__file__).parent / "CHN_Merging-1.pb"),
+            overwrite_existing_file=OverwriteExistingFile.ALWAYS,
         )
         # write the unrepaired map and repair it in the file writer (flag set to true)
         crdesigner_writer.write_map_to_file(
@@ -223,7 +243,9 @@ class TestCRDesignerFileWriter(unittest.TestCase):
             verify_repair_map=True,
         )
         # read the unrepaired map with the new format map reader
-        map_scenario_2024 = CRDesignerFileReader(filename_map=Path(__file__).parent / "CHN_Merging-1.pb").open_map()[0]
+        map_scenario_2024 = CRDesignerFileReader(
+            filename_map=Path(__file__).parent / "CHN_Merging-1.pb"
+        ).open_map()[0]
 
         # read the repaired map with the new format map reader
         map_scenario_flag_repaired_2024 = CRDesignerFileReader(
@@ -250,11 +272,15 @@ class TestCRDesignerFileWriter(unittest.TestCase):
         # read the USA peach protobuf map
         crdesigner_reader = CRDesignerFileReader(
             filename_map=Path(__file__).parent / "test_files_new_format/USA_Peach-1/USA_Peach-1.pb",
-            filename_dynamic=Path(__file__).parent / "test_files_new_format/USA_Peach-1/USA_Peach-1_1_T-1.pb",
-            filename_scenario=Path(__file__).parent / "test_files_new_format/USA_Peach-1/USA_Peach-1_1_T-1-SC.pb",
+            filename_dynamic=Path(__file__).parent
+            / "test_files_new_format/USA_Peach-1/USA_Peach-1_1_T-1.pb",
+            filename_scenario=Path(__file__).parent
+            / "test_files_new_format/USA_Peach-1/USA_Peach-1_1_T-1-SC.pb",
         )
         ll_peach, pps, _ = crdesigner_reader.open_all()
-        crdesigner_writer = CRDesignerFileWriter(ll_peach, pps, tags={Tag.INTERSTATE}, file_format=FileFormat.PROTOBUF)
+        crdesigner_writer = CRDesignerFileWriter(
+            ll_peach, pps, tags={Tag.INTERSTATE}, file_format=FileFormat.PROTOBUF
+        )
 
         # write the map with different projection
         crdesigner_writer.write_map_to_file(

@@ -137,7 +137,12 @@ class ParametricLane:
 
         is_last_pos = np.isclose(self.length, border_pos)
         r1, r2, r3, la = self.border_group.calc_border_position(
-            border, border_pos, width_offset, is_last_pos, self.reverse, compute_curvature=compute_curvature
+            border,
+            border_pos,
+            width_offset,
+            is_last_pos,
+            self.reverse,
+            compute_curvature=compute_curvature,
         )
         return r1, r2, r3, la
 

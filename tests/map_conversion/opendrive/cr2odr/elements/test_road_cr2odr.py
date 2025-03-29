@@ -24,7 +24,9 @@ def init_conversion_lanelet_network():
     conversion_lanelet_network = ConversionLaneletNetwork()
     conversion_lanelet_1 = init_lanelet_from_id("79.0.-3.-1")
     conversion_lanelet_2 = init_lanelet_from_id("89.0.4.-1")
-    add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
+    add_lanelets_to_network(
+        conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2]
+    )
 
     return conversion_lanelet_network
 
@@ -53,7 +55,9 @@ class TestRoad(unittest.TestCase):
 
         # Then
         self.assertEqual(21, Road.counting)
-        self.assertEqual({config.SUCC_TAG: {}, config.PRED_TAG: {}}, Road.lane_2_lane_link[Road.counting])
+        self.assertEqual(
+            {config.SUCC_TAG: {}, config.PRED_TAG: {}}, Road.lane_2_lane_link[Road.counting]
+        )
         self.assertEqual(-1, road.junction_id)
         expected_links = {
             "79.0.-3.-1": {"pred": [], "succ": []},
@@ -79,11 +83,15 @@ class TestRoad(unittest.TestCase):
 
         self.assertEqual(config.TYPE_TAG, road.road[1].tag)
         self.assertEqual(
-            str.format(config.DOUBLE_FORMAT_PATTERN, 0), road.road[1].get(config.GEOMETRY_S_COORDINATE_TAG)
+            str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+            road.road[1].get(config.GEOMETRY_S_COORDINATE_TAG),
         )
         self.assertEqual(config.TOWN_TAG, road.road[1].get(config.TYPE_TAG))
         self.assertEqual(config.TYPE_TAG, road.type.tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), road.type.get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(
+            str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+            road.type.get(config.GEOMETRY_S_COORDINATE_TAG),
+        )
         self.assertEqual(config.TOWN_TAG, road.type.get(config.TYPE_TAG))
 
         self.assertEqual(config.PLAN_VIEW_TAG, road.road[2].tag)
@@ -183,18 +191,24 @@ class TestRoad(unittest.TestCase):
 
         self.assertEqual(config.GEOMETRY_TAG, road.plan_view[-2].tag)
         self.assertEqual(
-            str.format(config.DOUBLE_FORMAT_PATTERN, 0), road.plan_view[-2].get(config.GEOMETRY_S_COORDINATE_TAG)
+            str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+            road.plan_view[-2].get(config.GEOMETRY_S_COORDINATE_TAG),
         )
         self.assertEqual(
-            str.format(config.DOUBLE_FORMAT_PATTERN, 0), road.plan_view[-2].get(config.GEOMETRY_X_COORDINATE_TAG)
+            str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+            road.plan_view[-2].get(config.GEOMETRY_X_COORDINATE_TAG),
         )
         self.assertEqual(
-            str.format(config.DOUBLE_FORMAT_PATTERN, 1), road.plan_view[-2].get(config.GEOMETRY_Y_COORDINATE_TAG)
+            str.format(config.DOUBLE_FORMAT_PATTERN, 1),
+            road.plan_view[-2].get(config.GEOMETRY_Y_COORDINATE_TAG),
         )
         self.assertEqual(
-            str.format(config.DOUBLE_FORMAT_PATTERN, 0), road.plan_view[-2].get(config.GEOMETRY_HEADING_TAG)
+            str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+            road.plan_view[-2].get(config.GEOMETRY_HEADING_TAG),
         )
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 2), road.plan_view[-2].get(config.LENGTH_TAG))
+        self.assertEqual(
+            str.format(config.DOUBLE_FORMAT_PATTERN, 2), road.plan_view[-2].get(config.LENGTH_TAG)
+        )
 
     def test_print_line(self):
         # Given
@@ -231,27 +245,36 @@ class TestRoad(unittest.TestCase):
         spiral_elem = list(road.plan_view[-1].iter())[-1]
         self.assertEqual(config.SPIRAL_TAG, spiral_elem.tag)
         self.assertEqual(
-            str.format(config.DOUBLE_FORMAT_PATTERN, curv_start), spiral_elem.get(config.GEOMETRY_CURV_START_TAG)
+            str.format(config.DOUBLE_FORMAT_PATTERN, curv_start),
+            spiral_elem.get(config.GEOMETRY_CURV_START_TAG),
         )
         self.assertEqual(
-            str.format(config.DOUBLE_FORMAT_PATTERN, curv_end), spiral_elem.get(config.GEOMETRY_CURV_END_TAG)
+            str.format(config.DOUBLE_FORMAT_PATTERN, curv_end),
+            spiral_elem.get(config.GEOMETRY_CURV_END_TAG),
         )
 
     def compare_geometry(self, hdg, length, road, s, x, y):
         self.assertEqual(config.GEOMETRY_TAG, road.plan_view[-1].tag)
         self.assertEqual(
-            str.format(config.DOUBLE_FORMAT_PATTERN, s), road.plan_view[-1].get(config.GEOMETRY_S_COORDINATE_TAG)
+            str.format(config.DOUBLE_FORMAT_PATTERN, s),
+            road.plan_view[-1].get(config.GEOMETRY_S_COORDINATE_TAG),
         )
         self.assertEqual(
-            str.format(config.DOUBLE_FORMAT_PATTERN, x), road.plan_view[-1].get(config.GEOMETRY_X_COORDINATE_TAG)
+            str.format(config.DOUBLE_FORMAT_PATTERN, x),
+            road.plan_view[-1].get(config.GEOMETRY_X_COORDINATE_TAG),
         )
         self.assertEqual(
-            str.format(config.DOUBLE_FORMAT_PATTERN, y), road.plan_view[-1].get(config.GEOMETRY_Y_COORDINATE_TAG)
+            str.format(config.DOUBLE_FORMAT_PATTERN, y),
+            road.plan_view[-1].get(config.GEOMETRY_Y_COORDINATE_TAG),
         )
         self.assertEqual(
-            str.format(config.DOUBLE_FORMAT_PATTERN, hdg), road.plan_view[-1].get(config.GEOMETRY_HEADING_TAG)
+            str.format(config.DOUBLE_FORMAT_PATTERN, hdg),
+            road.plan_view[-1].get(config.GEOMETRY_HEADING_TAG),
         )
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, length), road.plan_view[-1].get(config.LENGTH_TAG))
+        self.assertEqual(
+            str.format(config.DOUBLE_FORMAT_PATTERN, length),
+            road.plan_view[-1].get(config.LENGTH_TAG),
+        )
 
     def test_print_arc(self):
         # Given
@@ -272,7 +295,8 @@ class TestRoad(unittest.TestCase):
         arc_elem = list(road.plan_view[-1].iter())[-1]
         self.assertEqual(config.ARC_TAG, arc_elem.tag)
         self.assertEqual(
-            str.format(config.DOUBLE_FORMAT_PATTERN, curvature), arc_elem.get(config.GEOMETRY_CURVATURE_TAG)
+            str.format(config.DOUBLE_FORMAT_PATTERN, curvature),
+            arc_elem.get(config.GEOMETRY_CURVATURE_TAG),
         )
 
     def test_print_signal(self):
@@ -293,7 +317,9 @@ class TestRoad(unittest.TestCase):
         # Then
         self.assertEqual(config.SIGNAL_TAG, road.signals[-1].tag)
 
-        self.assertEqual("4.9000000000000004e+00", road.signals[-1].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(
+            "4.9000000000000004e+00", road.signals[-1].get(config.GEOMETRY_S_COORDINATE_TAG)
+        )
         self.assertEqual("-1.1000000000000001e+00", road.signals[-1].get(config.SIGNAL_T_TAG))
         self.assertEqual("0", road.signals[-1].get(config.ID_TAG))
         self.assertEqual("Sign_0", road.signals[-1].get(config.NAME_TAG))
@@ -328,7 +354,9 @@ class TestRoad(unittest.TestCase):
         # Then
         self.assertEqual(config.SIGNAL_REFERENCE_TAG, road.signals[-1].tag)
 
-        self.assertEqual("4.9000000000000004e+00", road.signals[-1].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(
+            "4.9000000000000004e+00", road.signals[-1].get(config.GEOMETRY_S_COORDINATE_TAG)
+        )
         self.assertEqual("-1.1000000000000001e+00", road.signals[-1].get(config.SIGNAL_T_TAG))
         self.assertEqual("0", road.signals[-1].get(config.ID_TAG))
         self.assertEqual(config.MINUS_SIGN, road.signals[-1].get(config.SIGNAL_ORIENTATION_TAG))
@@ -343,7 +371,8 @@ class TestRoad(unittest.TestCase):
         # Then
         self.assertEqual(config.LANE_SECTION_TAG, road.lanes[-1].tag)
         self.assertEqual(
-            str.format(config.DOUBLE_FORMAT_PATTERN, 0), road.lanes[-1].get(config.GEOMETRY_S_COORDINATE_TAG)
+            str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+            road.lanes[-1].get(config.GEOMETRY_S_COORDINATE_TAG),
         )
 
         center = road.lanes[-1][0]
@@ -372,11 +401,17 @@ class TestRoad(unittest.TestCase):
         self.assertEqual(config.LINK_TAG, left_link.tag)
 
         left_width = road.lanes[-1][1][0][1]
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_SOFFSET_TAG))
+        self.assertEqual(
+            str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_SOFFSET_TAG)
+        )
         self.assertEqual("1.9999999999999998e+00", left_width.get(config.LANE_A_TAG))
         self.assertEqual("-7.8504622934188746e-17", left_width.get(config.LANE_B_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_C_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_D_TAG))
+        self.assertEqual(
+            str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_C_TAG)
+        )
+        self.assertEqual(
+            str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_D_TAG)
+        )
 
         roadmark = road.lanes[-1][1][0][2]
         self.compare_road_mark(roadmark)
@@ -394,11 +429,17 @@ class TestRoad(unittest.TestCase):
         self.assertEqual(config.LINK_TAG, left_link.tag)
 
         left_width = road.lanes[-1][2][0][1]
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_SOFFSET_TAG))
+        self.assertEqual(
+            str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_SOFFSET_TAG)
+        )
         self.assertEqual("1.9999999999999998e+00", left_width.get(config.LANE_A_TAG))
         self.assertEqual("-7.8504622934188746e-17", left_width.get(config.LANE_B_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_C_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_D_TAG))
+        self.assertEqual(
+            str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_C_TAG)
+        )
+        self.assertEqual(
+            str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_D_TAG)
+        )
 
         roadmark = road.lanes[-1][2][0][2]
         self.compare_road_mark(roadmark)
@@ -430,8 +471,12 @@ class TestRoad(unittest.TestCase):
         self.compare_road_mark(roadmark)
 
     def compare_road_mark(self, road_mark):
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), road_mark.get(config.LANE_SOFFSET_TAG))
+        self.assertEqual(
+            str.format(config.DOUBLE_FORMAT_PATTERN, 0), road_mark.get(config.LANE_SOFFSET_TAG)
+        )
         self.assertEqual(config.SOLID, road_mark.get(config.TYPE_TAG))
         self.assertEqual(config.STANDARD, road_mark.get(config.ROAD_MARK_WEIGHT_TAG))
         self.assertEqual(config.STANDARD, road_mark.get(config.ROAD_MARK_COLOR_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), road_mark.get(config.SIGNAL_WIDTH_TAG))
+        self.assertEqual(
+            str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), road_mark.get(config.SIGNAL_WIDTH_TAG)
+        )

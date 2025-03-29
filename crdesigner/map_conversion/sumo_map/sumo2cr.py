@@ -43,7 +43,15 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
 
     # convert to OpenDRIVE file using netconvert
     subprocess.check_output(
-        ["netconvert", "-s", net_file, "--opendrive-output", opendrive_file, "--junctions.scurve-stretch", "1.0"]
+        [
+            "netconvert",
+            "-s",
+            net_file,
+            "--opendrive-output",
+            opendrive_file,
+            "--junctions.scurve-stretch",
+            "1.0",
+        ]
     )
     if verbose:
         print("converted to OpenDrive (.xodr)")

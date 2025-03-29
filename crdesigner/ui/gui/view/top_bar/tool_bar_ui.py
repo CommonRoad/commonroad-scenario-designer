@@ -37,7 +37,9 @@ class ToolBarUI:
         )
         self.tb2.addAction(self.action_obstacle_toolbox)
 
-        self.action_converter_toolbox = QAction(QIcon(":/icons/tools.ico"), "Open Map Converter Toolbox", mwindow_ui)
+        self.action_converter_toolbox = QAction(
+            QIcon(":/icons/tools.ico"), "Open Map Converter Toolbox", mwindow_ui
+        )
         self.tb2.addAction(self.action_converter_toolbox)
 
         self.action_scenario_toolbox = QAction(
@@ -59,7 +61,9 @@ class ToolBarUI:
         self.tb3.addSeparator()
 
         self.tb4 = mwindow_ui.addToolBar("Animation Play")
-        self.button_play_pause = QAction(QIcon(":/icons/play.png"), "Play the animation", mwindow_ui)
+        self.button_play_pause = QAction(
+            QIcon(":/icons/play.png"), "Play the animation", mwindow_ui
+        )
         self.tb4.addAction(self.button_play_pause)
 
         self.slider = QSlider(Qt.Orientation.Horizontal)
@@ -97,11 +101,15 @@ class ToolBarUI:
         self.drawing_mode.setCheckable(True)
         self.tb5.addAction(self.drawing_mode)
 
-        self.add_adjacent_left = QAction(QIcon(":/icons/add_adjacent_left.png"), "add adjacent left", mwindow_ui)
+        self.add_adjacent_left = QAction(
+            QIcon(":/icons/add_adjacent_left.png"), "add adjacent left", mwindow_ui
+        )
         self.tb5.addAction(self.add_adjacent_left)
         self.add_adjacent_left.setDisabled(True)
 
-        self.add_adjacent_right = QAction(QIcon(":/icons/add_adjacent_right.png"), "add adjacent right", mwindow_ui)
+        self.add_adjacent_right = QAction(
+            QIcon(":/icons/add_adjacent_right.png"), "add adjacent right", mwindow_ui
+        )
         self.tb5.addAction(self.add_adjacent_right)
         self.add_adjacent_right.setDisabled(True)
 
@@ -118,7 +126,9 @@ class ToolBarUI:
         self.tb5.addAction(self.crop_map)
         self.crop_map.setCheckable(True)
 
-        self.cancel_edit_vertices = QAction(QIcon(":/icons/close.png"), "Stop editing vertices", mwindow_ui)
+        self.cancel_edit_vertices = QAction(
+            QIcon(":/icons/close.png"), "Stop editing vertices", mwindow_ui
+        )
         self.tb5.addAction(self.cancel_edit_vertices)
         self.cancel_edit_vertices.setVisible(False)
 

@@ -101,7 +101,10 @@ class CRDesignerFileReader(CommonRoadFileReader):
 
     # 2020a reader
     def open(
-        self, verify_repair_scenario: bool = False, target_projection: str = None, lanelet_assignment: bool = False
+        self,
+        verify_repair_scenario: bool = False,
+        target_projection: str = None,
+        lanelet_assignment: bool = False,
     ) -> Tuple[Scenario, PlanningProblemSet]:
         """
         Opens and loads CommonRoad scenario and planning problem set from file.
@@ -121,7 +124,9 @@ class CRDesignerFileReader(CommonRoadFileReader):
         if target_projection is not None:
             # check for geo transformation and geo reference
             if getattr(scenario.lanelet_network.location.geo_transformation, "geo_reference", None):
-                proj_string_from = scenario.lanelet_network.location.geo_transformation.geo_reference
+                proj_string_from = (
+                    scenario.lanelet_network.location.geo_transformation.geo_reference
+                )
                 # If no source projection is defined in the lanelet network location, we should skip the projection
                 if proj_string_from is not None:
                     # if both target and source projection are given, we project the scenario and the pps
@@ -161,7 +166,9 @@ class CRDesignerFileReader(CommonRoadFileReader):
                 # If no source projection is defined in the lanelet network location, we should skip the projection
                 if proj_string_from is not None:
                     # if both target and source projection are given, we project the lanelet network
-                    lanelet_network = project_lanelet_network(lanelet_network, proj_string_from, target_projection)
+                    lanelet_network = project_lanelet_network(
+                        lanelet_network, proj_string_from, target_projection
+                    )
 
         # check for verifying and repairing the lanelet network
         if verify_repair_lanelet_network is True:
@@ -195,8 +202,12 @@ class CRDesignerFileReader(CommonRoadFileReader):
                 # If no source projection is defined in the lanelet network location, we should skip the projection
                 if proj_string_from is not None:
                     # if both target & source projection are given, we project the lanelet network and env obstacles
-                    lanelet_network = project_lanelet_network(lanelet_network, proj_string_from, target_projection)
-                    env_obstacles = project_obstacles(env_obstacles, proj_string_from, target_projection)
+                    lanelet_network = project_lanelet_network(
+                        lanelet_network, proj_string_from, target_projection
+                    )
+                    env_obstacles = project_obstacles(
+                        env_obstacles, proj_string_from, target_projection
+                    )
 
         # check for verifying and repairing the lanelet network
         if verify_repair_lanelet_network:
@@ -204,7 +215,9 @@ class CRDesignerFileReader(CommonRoadFileReader):
 
         return lanelet_network, env_obstacles
 
-    def open_map_dynamic(self, verify_repair_lanelet_network: bool = False, target_projection: str = None) -> Scenario:
+    def open_map_dynamic(
+        self, verify_repair_lanelet_network: bool = False, target_projection: str = None
+    ) -> Scenario:
         """
         Opens and combines CommonRoadMap and CommonRoadDynamic files.
         The user has to provide both map and dynamic filenames in order to call this function.
@@ -224,7 +237,9 @@ class CRDesignerFileReader(CommonRoadFileReader):
         if target_projection is not None:
             # check for geo transformation and geo reference:
             if getattr(scenario.lanelet_network.location.geo_transformation, "geo_reference", None):
-                proj_string_from = scenario.lanelet_network.location.geo_transformation.geo_reference
+                proj_string_from = (
+                    scenario.lanelet_network.location.geo_transformation.geo_reference
+                )
                 # If no source projection is defined in the lanelet network location, we should skip the projection
                 if proj_string_from is not None:
                     # if both target and source projection are given, we project the scenario
@@ -260,11 +275,15 @@ class CRDesignerFileReader(CommonRoadFileReader):
         if target_projection is not None:
             # check for geo transformation and geo reference:
             if getattr(scenario.lanelet_network.location.geo_transformation, "geo_reference", None):
-                proj_string_from = scenario.lanelet_network.location.geo_transformation.geo_reference
+                proj_string_from = (
+                    scenario.lanelet_network.location.geo_transformation.geo_reference
+                )
                 # If no source projection is defined in the lanelet network location, we should skip the projection
                 if proj_string_from is not None:
                     # if both target and source projection are given, we project the scenario and the pps
-                    scenario, pps = project_scenario_and_pps(scenario, pps, proj_string_from, target_projection)
+                    scenario, pps = project_scenario_and_pps(
+                        scenario, pps, proj_string_from, target_projection
+                    )
 
         # check for verifying and repairing the lanelet network
         if verify_repair_lanelet_network is True:

@@ -495,7 +495,9 @@ class LaneWidth(RoadRecord):
     :ivar length: length of the position on the lane corresponding to the width
     """
 
-    def __init__(self, *polynomial_coefficients: float, idx: int = None, start_offset: float = None):
+    def __init__(
+        self, *polynomial_coefficients: float, idx: int = None, start_offset: float = None
+    ):
         """
         Constructor of class LaneWidth.
 
@@ -582,7 +584,9 @@ class RoadMark:
         :param value: value the SOffset is set to
         """
         if value is None:
-            warnings.warn("Parser could not find value for road_mark.SOffset, 0 is used per default.")
+            warnings.warn(
+                "Parser could not find value for road_mark.SOffset, 0 is used per default."
+            )
             value = 0
         self._SOffset = float(value)
 
@@ -631,7 +635,9 @@ class RoadMark:
         :getter: returns the color of the road mark
         :setter: sets the color of the road mark
         """
-        logging.warning("RoadMark::color: Attribute color is not used for conversion!", DeprecationWarning)
+        logging.warning(
+            "RoadMark::color: Attribute color is not used for conversion!", DeprecationWarning
+        )
         return self._color
 
     @color.setter
@@ -645,7 +651,9 @@ class RoadMark:
 
         :getter: returns material of the road mark
         """
-        logging.warning("RoadMark::material: Attribute material is not used for conversion!", DeprecationWarning)
+        logging.warning(
+            "RoadMark::material: Attribute material is not used for conversion!", DeprecationWarning
+        )
         return self._material
 
     @property
@@ -655,7 +663,9 @@ class RoadMark:
 
         :getter: returns the width of the road mark
         """
-        logging.warning("RoadMark::width: Attribute width is not used for conversion!", DeprecationWarning)
+        logging.warning(
+            "RoadMark::width: Attribute width is not used for conversion!", DeprecationWarning
+        )
         return self._width
 
     @property
@@ -666,7 +676,10 @@ class RoadMark:
         :getter: returns allowed lane change
         :setter: sets lane_change
         """
-        logging.warning("RoadMark::lane_change: Attribute lane_change is not used for conversion", DeprecationWarning)
+        logging.warning(
+            "RoadMark::lane_change: Attribute lane_change is not used for conversion",
+            DeprecationWarning,
+        )
         return self._lane_change
 
     @lane_change.setter
@@ -680,5 +693,7 @@ class RoadMark:
 
         :getter: returns the height of the road mark
         """
-        logging.warning("RoadMark::height: Attribute height is not used for conversion!", DeprecationWarning)
+        logging.warning(
+            "RoadMark::height: Attribute height is not used for conversion!", DeprecationWarning
+        )
         return self._height

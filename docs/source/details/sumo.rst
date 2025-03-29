@@ -236,7 +236,7 @@ Pedestrian paths through the network are randomly generated in a similar
 fashion as the already existing vehicle trips, by using the random trips
 functionality provided by SUMO. This built in functionality generates
 trips (start, to end edge) randomly based on distributions provided for
-each allowed ``vClass`` on a lane. Therefore, the need to explicitly 
+each allowed ``vClass`` on a lane. Therefore, the need to explicitly
 specify which vehicles classes should be generated is removed.
 Interaction between the different types then occurs during the
 simulation based on each agent having to wait at intersections and
@@ -257,8 +257,8 @@ Traffic lights in CommonRoad are specified by one or more lanelets
 referencing them. Their placement is per default at the end of the
 referencing lanelet.
 Optionally a position can be explicitly defined for more detailed
-placement at the side of the road. The cycle information describing 
-each phase of traffic lights are represented identically to CommonRoad 
+placement at the side of the road. The cycle information describing
+each phase of traffic lights are represented identically to CommonRoad
 by the tuple :math:`(\text{color}, \text{duration})`.
 However, SUMO represents time in
 seconds :math:`(sec)` and CommonRoad in multiples of the timestep
@@ -287,10 +287,9 @@ collision free cycles at intersections. This generation is done by:
 Visually this process is shown in :numref:`traffic_light_conversion`.
 The first image shows how a user selected a lanelet, which is displayed
 in red. Other colors in this figure are representing adjaceny information.
-The second image shows the generated traffic light system (a set of traffic 
+The second image shows the generated traffic light system (a set of traffic
 lights associated with each other by an intersection) in SUMO. Cycle
 states of each traffic light is shown by their respective colors.
 The collision-free generation of the cycles is visualized by opposing lanes
-having the same color. The last image displays the conversion result of the 
+having the same color. The last image displays the conversion result of the
 generated traffic lights.
-

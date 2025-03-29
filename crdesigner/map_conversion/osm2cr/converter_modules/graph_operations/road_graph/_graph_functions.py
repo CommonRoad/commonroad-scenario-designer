@@ -104,7 +104,9 @@ def sort_adjacent_lanes(lane: Lane) -> Tuple[List[Lane], List[bool]]:
     return result, forward
 
 
-def get_lane_waypoints(nr_of_lanes: int, width: float, center_waypoints: List[np.ndarray]) -> List[List[np.ndarray]]:
+def get_lane_waypoints(
+    nr_of_lanes: int, width: float, center_waypoints: List[np.ndarray]
+) -> List[List[np.ndarray]]:
     """
     creates waypoints of lanes based on a center line and the width and count of lanes
 
@@ -157,7 +159,9 @@ def set_points(predecessor: Lane, successor: Lane) -> List[np.ndarray]:
         return waypoints
     # use quadratic bezier if possible
     # do not use it if intersection point is to close to start or end point
-    distance_to_points = min(np.linalg.norm(intersection_point - p1), np.linalg.norm(intersection_point - p4))
+    distance_to_points = min(
+        np.linalg.norm(intersection_point - p1), np.linalg.norm(intersection_point - p4)
+    )
     total_distance = np.linalg.norm(p1 - p4)
     if not (distance_to_points > 1 or distance_to_points / total_distance > 0.1):
         pass

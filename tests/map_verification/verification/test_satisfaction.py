@@ -488,7 +488,9 @@ class TestLaneletFormulaPool(TestFormulaPool):
 
         self.check_sat(formula_id, self.network, expected=True)
 
-        self.lanelet_1.left_vertices = np.array([[0.0, 1.0, 1.0], [0.5, 0.0, 1.0], [1.0, -1.0, 1.0]])
+        self.lanelet_1.left_vertices = np.array(
+            [[0.0, 1.0, 1.0], [0.5, 0.0, 1.0], [1.0, -1.0, 1.0]]
+        )
 
         self.check_sat(formula_id, self.network, expected=True)
 
@@ -653,7 +655,9 @@ class TestLaneletFormulaPool(TestFormulaPool):
     def test_zero_or_two_points_stop_line(self):
         formula_id = LaneletFormulaID.ZERO_OR_TWO_POINTS_STOP_LINE
 
-        stop_line = StopLine(start=np.array([0.0, 0.0]), end=np.array([1.0, 1.0]), line_marking=LineMarking.SOLID)
+        stop_line = StopLine(
+            start=np.array([0.0, 0.0]), end=np.array([1.0, 1.0]), line_marking=LineMarking.SOLID
+        )
         self.lanelet_1.stop_line = stop_line
 
         self.check_sat(formula_id, self.network, expected=False)

@@ -77,7 +77,9 @@ class InvalidStatesDrawer(Drawer):
 
         custom_draw_params = {}
         for parameterizing in parameterizings:
-            func_names = [func for func in dir(parameterizing) if callable(getattr(parameterizing, func))]
+            func_names = [
+                func for func in dir(parameterizing) if callable(getattr(parameterizing, func))
+            ]
 
             for invalid_state_id, locations in invalid_states.items():
                 for func_name in func_names:
@@ -110,7 +112,9 @@ class InvalidStatesDrawer(Drawer):
 
         self._draw_information(ax)
 
-    def _draw_lanelet_supported_params(self, invalid_state_params: Dict[int, LaneletParams], rnd: MPRenderer):
+    def _draw_lanelet_supported_params(
+        self, invalid_state_params: Dict[int, LaneletParams], rnd: MPRenderer
+    ):
         """
         Draws the lanelets. For drawing the parameters supported by the renderer are used to
         indicate some invalid states in a lanelet.
@@ -138,7 +142,9 @@ class InvalidStatesDrawer(Drawer):
             )
             self._network.draw(rnd, draw_params=lanelet_network_params)
 
-    def _draw_traffic_sign_supported_params(self, invalid_state_params: Dict[int, TrafficSignParams], rnd: MPRenderer):
+    def _draw_traffic_sign_supported_params(
+        self, invalid_state_params: Dict[int, TrafficSignParams], rnd: MPRenderer
+    ):
         """
         Draws the traffic signs. For drawing the parameters supported by the renderer are used to
         indicate some invalid states in a traffic sign.
@@ -168,7 +174,9 @@ class InvalidStatesDrawer(Drawer):
             else:
                 traffic_light.draw(rnd, TrafficLightParams(show_label=False))
 
-    def _draw_intersection_supported_params(self, intersection_params: Dict[int, IntersectionParams], rnd: MPRenderer):
+    def _draw_intersection_supported_params(
+        self, intersection_params: Dict[int, IntersectionParams], rnd: MPRenderer
+    ):
         """
         Draws the intersections. For drawing the parameters supported by the renderer are used to
         indicate some invalid states in an intersection.
@@ -323,4 +331,7 @@ class InvalidStatesDrawer(Drawer):
             markeredgewidth=1.5,
             markeredgecolor="red",
         )
-        self._plot_legend([invalid_lanelet, connection_point, border_line, reference_arrow, invalid_sign_light], ax)
+        self._plot_legend(
+            [invalid_lanelet, connection_point, border_line, reference_arrow, invalid_sign_light],
+            ax,
+        )

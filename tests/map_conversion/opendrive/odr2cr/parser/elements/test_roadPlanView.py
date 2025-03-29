@@ -40,7 +40,11 @@ class TestRoadPlanView(unittest.TestCase):
         curvStart = 1
         curvEnd = 1.2
         plan_view.add_spiral(
-            start_pos=start_pos, heading=heading, length=length, curv_start=curvStart, curv_end=curvEnd
+            start_pos=start_pos,
+            heading=heading,
+            length=length,
+            curv_start=curvStart,
+            curv_end=curvEnd,
         )
         # arc
         start_pos = np.array([4, 5])
@@ -124,7 +128,11 @@ class TestRoadPlanView(unittest.TestCase):
         curvStart = 1
         curvEnd = 1.2
         plan_view.add_spiral(
-            start_pos=start_pos, heading=heading, length=length, curv_start=curvStart, curv_end=curvEnd
+            start_pos=start_pos,
+            heading=heading,
+            length=length,
+            curv_start=curvStart,
+            curv_end=curvEnd,
         )
         # arc
         start_pos = np.array([4, 5])

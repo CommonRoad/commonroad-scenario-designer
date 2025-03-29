@@ -27,7 +27,9 @@ class EulerSpiral:
         return self._gamma * s + kappa0, self._gamma
 
     @staticmethod
-    def create_from_length_and_curvature(length: float, curv_start: float, curv_end: float) -> EulerSpiral:
+    def create_from_length_and_curvature(
+        length: float, curv_start: float, curv_end: float
+    ) -> EulerSpiral:
         """
         Create an EulerSpiral from a given length with curveStart
         and curvEnd. This is how the OpenDrive format specifies
@@ -70,7 +72,9 @@ class EulerSpiral:
 
         elif self._gamma == 0 and kappa0 != 0:
             # Arc, (1/kappa) = radius
-            cs = c0 + np.exp(1j * theta0) / kappa0 * (np.sin(kappa0 * s) + 1j * (1 - np.cos(kappa0 * s)))
+            cs = c0 + np.exp(1j * theta0) / kappa0 * (
+                np.sin(kappa0 * s) + 1j * (1 - np.cos(kappa0 * s))
+            )
 
         else:
             # Fresnel integrals
@@ -81,7 +85,9 @@ class EulerSpiral:
 
         return cs.real, cs.imag, theta, self.curvature(s, kappa0)
 
-    def _calc_fresnel_integral(self, s: float, kappa0: float, theta0: float, C0: complex) -> complex:
+    def _calc_fresnel_integral(
+        self, s: float, kappa0: float, theta0: float, C0: complex
+    ) -> complex:
         """
         Calculates the fresnel integral.
 
@@ -95,7 +101,9 @@ class EulerSpiral:
         Sb, Cb = special.fresnel(kappa0 / np.sqrt(np.pi * np.abs(self._gamma)))
 
         # Euler Spiral
-        Cs1 = np.sqrt(np.pi / np.abs(self._gamma)) * np.exp(1j * (theta0 - kappa0**2 / 2 / self._gamma))
+        Cs1 = np.sqrt(np.pi / np.abs(self._gamma)) * np.exp(
+            1j * (theta0 - kappa0**2 / 2 / self._gamma)
+        )
         Cs2 = np.sign(self._gamma) * (Ca - Cb) + 1j * Sa - 1j * Sb
 
         Cs = C0 + Cs1 * Cs2

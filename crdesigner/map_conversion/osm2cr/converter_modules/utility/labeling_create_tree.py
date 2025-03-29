@@ -6,7 +6,9 @@ import pandas as pd
 
 
 class City:
-    def __init__(self, lat: float, lng: float, geonameID: int, name: str, country: str, timezone: str):
+    def __init__(
+        self, lat: float, lng: float, geonameID: int, name: str, country: str, timezone: str
+    ):
         self.lat = lat
         self.lng = lng
         self.geonameID = geonameID
@@ -36,7 +38,9 @@ def create_tree(df: pd.DataFrame) -> kdtree.KDNode:
     return kdtree.create(city_list)
 
 
-def create_tree_from_file(file: Path = Path(__file__).parent.joinpath("cities500.zip")) -> kdtree.KDNode:
+def create_tree_from_file(
+    file: Path = Path(__file__).parent.joinpath("cities500.zip"),
+) -> kdtree.KDNode:
     """
     Create kdtree.KDNode from cities file.
 

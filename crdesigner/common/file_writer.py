@@ -49,7 +49,15 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
         :return:
         """
         super().__init__(
-            scenario, planning_problem_set, author, affiliation, source, tags, location, decimal_precision, file_format
+            scenario,
+            planning_problem_set,
+            author,
+            affiliation,
+            source,
+            tags,
+            location,
+            decimal_precision,
+            file_format,
         )
         # map verification parameters
         self._mapver_params = MapVerParams()
@@ -90,14 +98,18 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
         # check for a projection
         # If target projection is not provided, no projection should be applied
         if target_projection is not None:
-            proj_string_from = self._file_writer.scenario.lanelet_network.location.geo_transformation.geo_reference
+            proj_string_from = (
+                self._file_writer.scenario.lanelet_network.location.geo_transformation.geo_reference
+            )
             # If no source projection is defined in the scenario location element, we should skip the projection
             if proj_string_from is not None:
-                self._file_writer.scenario, self._file_writer.planning_problem_set = project_scenario_and_pps(
-                    self._file_writer.scenario,
-                    self._file_writer.planning_problem_set,
-                    proj_string_from,
-                    target_projection,
+                self._file_writer.scenario, self._file_writer.planning_problem_set = (
+                    project_scenario_and_pps(
+                        self._file_writer.scenario,
+                        self._file_writer.planning_problem_set,
+                        proj_string_from,
+                        target_projection,
+                    )
                 )
 
         # check for verifying and repairing the scenario
@@ -131,22 +143,29 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
         # If target projection is not provided, no projection should be applied
         if target_projection is not None:
             # check for geo transformation and geo reference
-            if getattr(self._file_writer.scenario.lanelet_network.location.geo_transformation, "geo_reference", None):
+            if getattr(
+                self._file_writer.scenario.lanelet_network.location.geo_transformation,
+                "geo_reference",
+                None,
+            ):
                 proj_string_from = self._file_writer.scenario.lanelet_network.location.geo_transformation.geo_reference
                 # If no source projection is defined in the lanelet network location, we should skip the projection
                 if proj_string_from is not None:
-
                     # if both target & source projection are given, we project the lanelet network and env obstacles and
                     # update the scenario accordingly
                     projected_ll = project_lanelet_network(
-                        copy.deepcopy(self._file_writer.scenario.lanelet_network), proj_string_from, target_projection
+                        copy.deepcopy(self._file_writer.scenario.lanelet_network),
+                        proj_string_from,
+                        target_projection,
                     )
 
                     self._file_writer.scenario.replace_lanelet_network(projected_ll)
 
                     self._file_writer.scenario.add_objects(
                         project_obstacles(
-                            self._file_writer.scenario.environment_obstacle, proj_string_from, target_projection
+                            self._file_writer.scenario.environment_obstacle,
+                            proj_string_from,
+                            target_projection,
                         )
                     )
 

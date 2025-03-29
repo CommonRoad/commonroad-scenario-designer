@@ -55,7 +55,9 @@ class OpenDRIVEObstacle:
 
         self.set_coordinates()
 
-        self.object.set(config.SIGNAL_HEIGHT_TAG, config.OBSTACLE_HEIGHT_VALUE)  # should this be hardcoded?
+        self.object.set(
+            config.SIGNAL_HEIGHT_TAG, config.OBSTACLE_HEIGHT_VALUE
+        )  # should this be hardcoded?
 
         if isinstance(shape, Rectangle):
             self.set_rectangle(shape)

@@ -29,7 +29,12 @@ class MapRepairer:
         """
         self._network = network
         self._repairings = []
-        for repairing in [LaneletRepairing, TrafficSignRepairing, TrafficLightRepairing, IntersectionRepairing]:
+        for repairing in [
+            LaneletRepairing,
+            TrafficSignRepairing,
+            TrafficLightRepairing,
+            IntersectionRepairing,
+        ]:
             self._repairings.append(repairing(network))
 
     def repair_map(self, invalid_states: InvalidStates):
