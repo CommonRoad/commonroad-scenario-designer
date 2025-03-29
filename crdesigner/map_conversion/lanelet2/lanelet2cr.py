@@ -854,7 +854,9 @@ class Lanelet2CRConverter:
                 first_left_node, last_left_node = (last_left_node, first_left_node)
 
         # set center vertices
-        center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
+        center_vertices = np.array(
+            [(left + right) / 2 for (left, right) in zip(left_vertices, right_vertices)]
+        )
 
         wrong_left_right_boundary_side = _wrong_left_right_boundary_side(
             center_vertices, left_vertices, right_vertices, lanelet2_config

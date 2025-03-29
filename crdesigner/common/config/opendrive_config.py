@@ -89,7 +89,9 @@ class OpenDriveConfig(BaseConfig):
 
     # 0.0174533 == 1deg
     heading_threshold = Attribute(
-        0.0174533, "Heading threshold", "Threshold influencing selection of line (constant heading)"
+        0.00174533,
+        "Heading threshold",
+        "Threshold influencing selection of line (constant heading)",
     )
 
     # 0.01 == 0.5729578deg

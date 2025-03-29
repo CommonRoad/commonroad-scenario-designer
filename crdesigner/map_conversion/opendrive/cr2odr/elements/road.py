@@ -6,11 +6,12 @@ from typing import Dict, List, Union
 import numpy as np
 from commonroad.geometry.polyline_util import compute_polyline_lengths  # type: ignore
 from commonroad.scenario.lanelet import Lanelet  # type: ignore
-from commonroad_dc.geometry.util import (
+from commonroad_clcs.util import (
     compute_curvature_from_polyline,
     compute_pathlength_from_polyline,
 )
 from lxml import etree
+from pyclothoids import SolveG2
 
 from crdesigner.common.config.opendrive_config import open_drive_config
 from crdesigner.map_conversion.opendrive.cr2odr.elements.sign import Sign
@@ -208,8 +209,10 @@ class Road:
             # lane_2_lane linkage
             for lane_id, successors in lane_2_lane[config.SUCC_TAG].items():
                 for succ_id in successors:
-                    succ = etree.SubElement(self.lane_link[lane_id], config.SUCCESSOR_TAG)
-                    succ.set(config.ID_TAG, str(succ_id))
+                    if self.lane_link.get(lane_id) is not None:
+                        # if condition added to prevent failure -> TODO check why sometime lane_id does not exist
+                        succ = etree.SubElement(self.lane_link[lane_id], config.SUCCESSOR_TAG)
+                        succ.set(config.ID_TAG, str(succ_id))
 
         if len_pred == 1:
             predecessor = self.element_type = etree.SubElement(self.link, config.PREDECESSOR_TAG)
@@ -327,28 +330,57 @@ class Road:
         if geo_type == GeometryType.LINE:
             self.print_line(
                 path_length[start_idx],
-                self.center[start_idx][0],
-                self.center[start_idx][1],
-                self.hdg[start_idx],
+                float(self.center[start_idx][0]),
+                float(self.center[start_idx][1]),
+                float(self.hdg[start_idx]),
                 this_length,
             )
         elif geo_type == GeometryType.ARC:
             self.print_arc(
                 path_length[start_idx],
+                float(self.center[start_idx][0]),
+                float(self.center[start_idx][1]),
+                float(self.hdg[start_idx]),
+                this_length,
+                curv[end_idx],
+            )
+        elif geo_type == GeometryType.SPIRAL:
+            clothoids = SolveG2(
                 self.center[start_idx][0],
                 self.center[start_idx][1],
                 self.hdg[start_idx],
-                this_length,
+                curv[start_idx],
+                self.center[end_idx][0],
+                self.center[end_idx][1],
+                self.hdg[end_idx],
                 curv[end_idx],
             )
         elif geo_type == GeometryType.SPIRAL:
             self.print_spiral(
                 path_length[start_idx],
-                self.center[start_idx][0],
-                self.center[start_idx][1],
-                self.hdg[start_idx],
-                this_length,
+                float(self.center[start_idx][0]),
+                float(self.center[start_idx][1]),
+                float(self.hdg[start_idx]),
+                clothoids[0].Parameters[5],
                 curv[start_idx],
+                clothoids[0].KappaEnd,
+            )
+            self.print_spiral(
+                path_length[start_idx] + clothoids[0].Parameters[5],
+                clothoids[1].XStart,
+                clothoids[1].YStart,
+                clothoids[1].ThetaStart,
+                clothoids[1].Parameters[5],
+                clothoids[1].KappaStart,
+                clothoids[1].KappaEnd,
+            )
+            self.print_spiral(
+                path_length[start_idx] + clothoids[0].Parameters[5] + clothoids[1].Parameters[5],
+                clothoids[2].XStart,
+                clothoids[2].YStart,
+                clothoids[2].ThetaStart,
+                clothoids[2].Parameters[5],
+                clothoids[2].KappaStart,
                 curv[end_idx],
             )
 

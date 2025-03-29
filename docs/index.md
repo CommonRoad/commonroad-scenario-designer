@@ -15,7 +15,7 @@ CommonRoad maps and scenarios.
 
 |              Tool              |                         Path                         |                                Functionality                                 |
 |:------------------------------:|:----------------------------------------------------:|:----------------------------------------------------------------------------:|
-|        OpenDRIVE <=> CR        |        `crdesigner/map_conversion/opendrive`         |           Conversion from OpenDRIVE to CommonRoad and vice versa.            |
+|        OpenDRIVE => CR         |        `crdesigner/map_conversion/opendrive`         |                   Conversion from OpenDRIVE to CommonRoad.                   |
 |    Lanelet/Lanelet2 <=> CR     |         `crdesigner/map_conversion/lanelet2`         | Conversion from Lanelet2 to CommonRoad <br /> and from CommonRoad to Lanelet |
 |           OSM => CR            |          `crdesigner/map_conversion/osm2cr`          |                      Conversion from OSM to CommonRoad.                      |
 |          SUMO <=> CR           |         `crdesigner/map_conversion/sumo_map`         |              Conversion from SUMO to CommonRoad and vice versa.              |
@@ -62,7 +62,7 @@ the different usage methods.
 
 ### GUI
 
-![GUI_Screenshot](docs/assets/gui_screenshot.png)
+![GUI_Screenshot](assets/gui_screenshot.png)
 
 The recommended aspect ratio is 16:9 with a scaling of 100%.
 Within the GUI, you can also execute the different converters.
@@ -163,7 +163,7 @@ The titles of module pages have to be set manually!
 The full documentation of the API and introducing examples can also be found [here](https://cps.pages.gitlab.lrz.de/commonroad/commonroad-scenario-designer/).
 
 ## Changelog
-A detailed overview about the changes in each version is provided in the [Changelog](https://github.com/CommonRoad/commonroad-scenario-designer/blob/master/CHANGELOG.md).
+A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).
 
 ## Bug and feature reporting
 This release (v0.9.3) is still a BETA version.
@@ -173,10 +173,9 @@ If you want to contribute to the toolbox, you can also post it in the [forum](ht
 ## Authors
 Responsible: Sebastian Maierhofer, Sebastian Mair
 Contribution (in alphabetic order by last name): Daniel Asch, Hamza Begic, Mohamed Bouhali, Florian Braunmiller,
-Tim Dang, Setenay Eryasar, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke,
-Julian Hohenadel, Tom Irion, Aaron Kaefer, Anton Kluge,
+Tim Dang, Setenay Eryasar, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Tom Irion, Aaron Kaefer, Anton Kluge,
 David Le, Gustaf Lindgren, Sarra Ben Mohamed, Benjamin Orthen, Luisa Ortner, Louis Pröbstle, Benedikt Reinhard,
-Maximilian Rieger, Nikolaos Sotirakis, Til Stotz, Stefan Urban, Max Winklhofer
+Maximilian Rieger, Til Stotz, Stefan Urban, Max Winklhofer
 
 ## Credits
 We gratefully acknowledge partial financial support by

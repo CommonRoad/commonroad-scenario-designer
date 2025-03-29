@@ -6,18 +6,15 @@ import numpy as np
 from commonroad.scenario.lanelet import Lanelet, StopLine
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
+from commonroad_clcs.clcs import CurvilinearCoordinateSystem
+from commonroad_clcs.config import CLCSParams, ResamplingParams
+from commonroad_clcs.util import (
+    chaikins_corner_cutting,
+    compute_orientation_from_polyline,
+    resample_polyline,
+)
 from shapely import LineString
 from similaritymeasures import similaritymeasures
-
-try:
-    from commonroad_dc.geometry.geometry import CurvilinearCoordinateSystem
-    from commonroad_dc.geometry.util import (
-        chaikins_corner_cutting,
-        compute_orientation_from_polyline,
-        resample_polyline,
-    )
-except ModuleNotFoundError:
-    logging.error("MapVerification: Please install CommonRoad Drivability Checker manually.")
 
 from crdesigner.common.config.lanelet2_config import Lanelet2Config
 
@@ -157,9 +154,17 @@ def _wrong_left_right_boundary_side(
         config.eps2_values, config.max_polyline_resampling_step_values
     ):
         try:
-            ccs = CurvilinearCoordinateSystem(
-                center_vertices, eps2=eps, max_polyline_resampling_step=max_polyline_resampling_step
+            if len(center_vertices) == 2:
+                center_vertices = np.insert(
+                    center_vertices, 1, (center_vertices[0] + center_vertices[1]) / 2, axis=0
+                )
+            cpar = CLCSParams(
+                eps2=eps,
+                resampling=ResamplingParams(
+                    fixed_step=max_polyline_resampling_step, interpolation_type="linear"
+                ),
             )
+            ccs = CurvilinearCoordinateSystem(center_vertices, cpar, False)
             left = np.array(
                 [ccs.convert_to_curvilinear_coords(vert[0], vert[1])[1] for vert in left_vertices]
             )

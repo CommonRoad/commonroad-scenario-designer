@@ -1,4 +1,7 @@
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
+from commonroad.scenario.traffic_sign import (
+    SupportedTrafficSignCountry,
+    TrafficSignIDCountries,
+)
 from PyQt6.QtWidgets import QComboBox, QTableWidgetItem
 
 from crdesigner.common.logging import logger

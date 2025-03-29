@@ -216,7 +216,9 @@ class ParametricLaneGroup:
             else:
                 pass
 
-        center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
+        center_vertices = np.array(
+            [(left + right) / 2 for (left, right) in zip(left_vertices, right_vertices)]
+        )
         # access to user conversion
         user_list = [set(), set()]
         user_set = {
@@ -472,7 +474,9 @@ class ParametricLaneGroup:
         )
         # right_vertices = np.array(right_vertices)
 
-        center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
+        center_vertices = np.array(
+            [(left + right) / 2 for (left, right) in zip(left_vertices, right_vertices)]
+        )
         lanelet = ConversionLanelet(
             copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_
         )

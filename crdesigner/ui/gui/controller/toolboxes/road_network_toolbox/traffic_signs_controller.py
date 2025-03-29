@@ -1,8 +1,8 @@
 import numpy as np
 from commonroad.scenario.traffic_sign import (
-    SupportedTrafficSignCountry,
     TrafficSign,
     TrafficSignElement,
+    TrafficSignIDCountries,
 )
 
 from crdesigner.common.logging import logger

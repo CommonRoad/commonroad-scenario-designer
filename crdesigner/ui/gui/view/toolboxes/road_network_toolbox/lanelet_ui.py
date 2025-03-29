@@ -518,9 +518,9 @@ class AddLaneletUI:
         self.road_network_toolbox_ui.x_translation.setText("")
         self.road_network_toolbox_ui.y_translation.setText("")
 
-    def lanelet_is_straight(self, lanelet: Lanelet = None) -> bool:
+    def lanelet_is_straight(self, lanelet: Lanelet) -> bool:
         """
-        Checks wether lanelet is straight
+        Checks whether lanelet is straight
 
         @param lanelet: Lanelet of which it should be checked whether it is straight.
         @return: bool value of result
@@ -537,7 +537,7 @@ class AddLaneletUI:
             - lanelet.right_vertices[len(lanelet.right_vertices) - 1][1],
             3,
         )
-        return x_start == x_end and y_start == y_end
+        return np.isclose(x_start, x_end, 0.01) and np.isclose(y_start, y_end, 0.01)
 
     def lanelet_has_constant_curvature(self, lanelet: Lanelet) -> bool:
         """

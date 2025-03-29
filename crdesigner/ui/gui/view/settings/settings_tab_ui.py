@@ -100,22 +100,22 @@ class SettingsTabUI:
                 if isinstance(attribute, str):
                     self._add_label(attribute, column, attributes.index(attribute) != 0)
                 else:
-                    if attribute.value_type == bool:
+                    if attribute.value_type is bool:
                         self._add_checkbox(attribute, column)
-                    elif attribute.value_type == int:
+                    elif attribute.value_type is int:
                         self._add_int_spinbox(attribute, column)
-                    elif attribute.value_type == float:
+                    elif attribute.value_type is float:
                         self._add_float_spinbox(attribute, column)
-                    elif attribute.value_type == str:
+                    elif attribute.value_type is str:
                         if attribute.options is not None:
                             self._add_str_dropdown(attribute, column)
                         else:
                             self._add_str_textbox(attribute, column)
-                    elif attribute.value_type == dict:
+                    elif attribute.value_type is dict:
                         self._add_sub_window(attribute, column)
-                    elif attribute.value_type == Interval:
+                    elif attribute.value_type is Interval:
                         self._add_interval_str(attribute, column)
-                    elif attribute.value_type == list:
+                    elif attribute.value_type is list:
                         self._add_list_str(attribute, column)
 
         self.scrollArea.setWidget(self.contentWrapper)

@@ -6,14 +6,31 @@
 - Projection option for the new format scenario designer file reader and writer
 - Direct conversion from OpenDRVIE to Lanelet2
 
-## [0.8.3]
+## [0.8.5] - 2025-XX-XX
+
+### Fixed
+- settings window empty
+- github actions static code evaluation and python versions
+
+### Changed
+- use new CLCS instead of version in drivability-checker
+
+## [0.8.4] - 2024-12-21
+
+### Changed
+- Update required commonroad-io version
+
+## [0.8.3] - 2024-12-20
 
 ### Added
 - odr2cr: Left-hand drive consideration
+- pre-commit hook
 - CommonRoad to OpenDRIVE conversion
 
 ### Changed
 - map-conversion: Interfaces can consider string and Path objects
+- mkdocs for docu
+- ruff for formatting
 
 ### Fixed
 - cr2sumo: Trajectory conversion assigned non-existent edges to routes
@@ -22,6 +39,9 @@
 - Scenario fails to be opened, if any of the dynamic obstacles does not contain a prediction
 - GUI: wrong usage of button
 - Check for qt6 so that map conversions work under Ubuntu 20.04
+- GUI: Adding traffic signs to lanelet did not work due to changes in commonroad-io
+- osm2cr: Lanelet line markings were always set to 'no_marking' although the line markings are unkown
+- GUI: rounding error identification of straight lanelets
 
 ## [0.8.2] - 2024-07-22
 
@@ -32,7 +52,6 @@
 - cr2lanelet: Lane change property tags
 - odr2cr: Road speed limit conversion
 - odr2cr: Option to neglect projection by setting `config.proj_string_odr = None`
-- cr2odr
 
 
 ### Changed
