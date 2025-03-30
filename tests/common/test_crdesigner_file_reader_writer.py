@@ -1,10 +1,10 @@
 import copy
-import sys
 import unittest
+from datetime import datetime
 from pathlib import Path
 
 import pytest
-from commonroad.common.util import FileFormat
+from commonroad.common.util import FileFormat, Time
 from commonroad.common.writer.file_writer_interface import OverwriteExistingFile
 from commonroad.scenario.scenario import Tag
 
@@ -37,11 +37,13 @@ class TestCRDesignerFileReader(unittest.TestCase):
             Path(__file__).parent / "test_files_new_format/USA_Peach-1/USA_Peach-1_1_T-1-SC.pb"
         )
 
-    @unittest.skipIf(sys.version_info[:2] == (3, 9), "Skipping test for Python 3.9")
     def test_crdesigner_file_reader_open_2020a(self):
         self.crdesigner_reader.filename_2020a = self.filename_2020a
+        time = datetime.now()
+        date = Time(time.hour, time.minute, time.day, time.month, time.year)
         # opening it without verifying and repairing
         scenario = self.crdesigner_reader.open(verify_repair_scenario=False)[0]
+        scenario.file_information.date = date
         # opening it with verifying and repairing
         repaired_scenario = self.crdesigner_reader.open(verify_repair_scenario=True)[0]
         self.assertNotEqual(scenario, repaired_scenario)
@@ -51,8 +53,9 @@ class TestCRDesignerFileReader(unittest.TestCase):
         projected_scenario = self.crdesigner_reader.open(
             target_projection=scenario.lanelet_network.location.geo_transformation.geo_reference
         )[0]
+        projected_scenario.file_information.date = date
         # scenarios should be the same as the proj_string is the same
-        self.assertTrue(projected_scenario == scenario)
+        self.assertEqual(projected_scenario, scenario)
 
         # opening it with the different projection
         projected_scenario = self.crdesigner_reader.open(
