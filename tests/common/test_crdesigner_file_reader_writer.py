@@ -52,7 +52,7 @@ class TestCRDesignerFileReader(unittest.TestCase):
             target_projection=scenario.lanelet_network.location.geo_transformation.geo_reference
         )[0]
         # scenarios should be the same as the proj_string is the same
-        self.assertEqual(projected_scenario, scenario)
+        self.assertTrue(projected_scenario == scenario)
 
         # opening it with the different projection
         projected_scenario = self.crdesigner_reader.open(
