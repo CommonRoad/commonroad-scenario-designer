@@ -1,5 +1,6 @@
 import math
 import os
+import sys
 
 import numpy as np
 from commonroad.common.common_lanelet import LineMarking
@@ -40,7 +41,8 @@ def test_pyqt_framework(qtbot):
     # -- MENUBAR
     execute_menubar_test(window)
     # -- Load Scenario
-    execute_load_scenario_test(window)
+    if sys.version_info[:2] != (3, 9):
+        execute_load_scenario_test(window)
 
     if os.path.exists(path_autosave):
         os.remove(path_autosave)

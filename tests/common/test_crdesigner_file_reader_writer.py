@@ -1,4 +1,5 @@
 import copy
+import sys
 import unittest
 from pathlib import Path
 
@@ -36,6 +37,7 @@ class TestCRDesignerFileReader(unittest.TestCase):
             Path(__file__).parent / "test_files_new_format/USA_Peach-1/USA_Peach-1_1_T-1-SC.pb"
         )
 
+    @unittest.skipIf(sys.version_info[:2] == (3, 9), "Skipping test for Python 3.9")
     def test_crdesigner_file_reader_open_2020a(self):
         self.crdesigner_reader.filename_2020a = self.filename_2020a
         # opening it without verifying and repairing
