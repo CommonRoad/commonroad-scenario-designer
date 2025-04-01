@@ -593,7 +593,7 @@ tqdm = ">=4.64"
 
 [package.source]
 type = "git"
-url = "ssh://git@gitlab.lrz.de/cps/commonroad/commonroad-io.git"
+url = "https://github.com/commonroad/commonroad-io"
 reference = "feature/new-format"
 resolved_reference = "f5f83646d1d82265c44bf2193fc67460d58a98cd"
 
@@ -5285,4 +5285,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9,<3.12"
-content-hash = "08f8f8a4c33c85dd3cfaad174b324686d12bd00123da6a577e3a7fda2e0ca34a"
+content-hash = "d8c07692872fb95038350cf6a4d4b413c8d801f23f9da8365d613fba8ba8175d"
