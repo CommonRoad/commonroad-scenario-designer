@@ -18,7 +18,7 @@ class Lanelet2Config(BaseConfig):
     )
 
     autoware = Attribute(
-        False,
+        True,
         "Autoware",
         "Boolean indicating whether the conversion " "should be autoware compatible",
     )

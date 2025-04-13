@@ -78,7 +78,7 @@ class Signal:
         self._t = float(value)
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         """
         ID of the signal.
 
@@ -89,7 +89,7 @@ class Signal:
 
     @id.setter
     def id(self, value):
-        self._id = int(value)
+        self._id = str(value)
 
     @property
     def name(self) -> str:
