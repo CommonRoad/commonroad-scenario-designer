@@ -2,7 +2,7 @@ import itertools
 import logging
 import warnings
 from queue import Queue
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 import numpy as np
 import shapely
