@@ -154,23 +154,23 @@ def assign_traffic_signals_to_road(
             # we ignore such signals in order not cause trouble in traffic simulation
             tdir = TrafficLightDirection.ALL
             if traffic_light_dirs.get(signal.signal_id) is not None:
-                for tid, t_light in traffic_light_dirs.items():
-                    if "Right" in t_light and "Straight" in t_light and "Left" in t_light:
-                        tdir = TrafficLightDirection.ALL
-                    elif "Left" in t_light and "Straight" in t_light:
-                        tdir = TrafficLightDirection.LEFT_STRAIGHT
-                    elif "Right" in t_light and "Straight" in t_light:
-                        tdir = TrafficLightDirection.STRAIGHT_RIGHT
-                    elif "Left" in t_light and "Right" in t_light:
-                        tdir = TrafficLightDirection.LEFT_RIGHT
-                    elif "Left" in t_light:
-                        tdir = TrafficLightDirection.LEFT
-                    elif "Right" in t_light:
-                        tdir = TrafficLightDirection.RIGHT
-                    elif "Straight" in t_light:
-                        tdir = TrafficLightDirection.STRAIGHT
-                    else:
-                        tdir = TrafficLightDirection.ALL
+                t_light = traffic_light_dirs[signal.signal_id]
+                if "Right" in t_light and "Straight" in t_light and "Left" in t_light:
+                    tdir = TrafficLightDirection.ALL
+                elif "Left" in t_light and "Straight" in t_light:
+                    tdir = TrafficLightDirection.LEFT_STRAIGHT
+                elif "Right" in t_light and "Straight" in t_light:
+                    tdir = TrafficLightDirection.STRAIGHT_RIGHT
+                elif "Left" in t_light and "Right" in t_light:
+                    tdir = TrafficLightDirection.LEFT_RIGHT
+                elif "Left" in t_light:
+                    tdir = TrafficLightDirection.LEFT
+                elif "Right" in t_light:
+                    tdir = TrafficLightDirection.RIGHT
+                elif "Straight" in t_light:
+                    tdir = TrafficLightDirection.STRAIGHT
+                else:
+                    tdir = TrafficLightDirection.ALL
             lanes = (
                 lanes
                 if traffic_light_lanes.get(signal.signal_id) is None
