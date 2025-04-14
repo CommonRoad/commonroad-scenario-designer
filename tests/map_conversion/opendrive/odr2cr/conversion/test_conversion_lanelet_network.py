@@ -16,7 +16,9 @@ from crdesigner.map_conversion.common.conversion_lanelet_network import (
     _JoinSplitTarget,
 )
 from crdesigner.map_conversion.common.utils import generate_unique_id
-from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.network import get_all_adjacent_lanelets
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.network import (
+    get_all_adjacent_lanelets,
+)
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.plane import (
     Border,
     ParametricLaneBorderGroup,
