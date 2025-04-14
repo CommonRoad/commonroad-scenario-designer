@@ -11,6 +11,7 @@
 ### Fixed
 - settings window empty
 - github actions static code evaluation and python versions
+- odr2cr tagging intersection lanelet type
 
 ### Changed
 - use new CLCS instead of version in drivability-checker
