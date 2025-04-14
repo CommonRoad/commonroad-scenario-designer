@@ -65,6 +65,43 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road i
 )
 
 
+def get_all_adjacent_lanelets(lanelet_network, incoming_lanelet_id):
+    """
+    Get all adjacent lanelets of the incoming lanelet, considering transitive adjacency.
+
+    :param lanelet_network: Lanelet network object to find lanelets by ID.
+    :param incoming_lanelet_id: ID of the incoming lanelet.
+    :return: Set of all adjacent lanelets, including transitive adjacency.
+    """
+    # Initialize a set to store all lanelets, including transitive adjacent ones
+    all_adjacent_lanelets = {incoming_lanelet_id}
+
+    # Use a queue to process lanelets iteratively
+    queue = [incoming_lanelet_id]
+
+    # Track visited lanelets to avoid processing the same lanelet twice
+    visited = {incoming_lanelet_id}
+
+    while queue:
+        current_lanelet = queue.pop(0)
+        # Get adjacent lanelets (left and right neighbors)
+        adjacent_lanelets = set()
+        lanelet = lanelet_network.find_lanelet_by_id(current_lanelet)
+        if lanelet.adj_left is not None:
+            adjacent_lanelets.add(lanelet.adj_left)
+        if lanelet.adj_right is not None:
+            adjacent_lanelets.add(lanelet.adj_right)
+
+        # Add new adjacent lanelets to the set and queue
+        for adj_lanelet in adjacent_lanelets:
+            if adj_lanelet not in visited:
+                visited.add(adj_lanelet)
+                all_adjacent_lanelets.add(adj_lanelet)
+                queue.append(adj_lanelet)
+
+    return all_adjacent_lanelets
+
+
 def update_line_markings(lanelet_network: ConversionLaneletNetwork) -> ConversionLaneletNetwork:
     """
     Updates line markings of lanelets vertices in the conversion lanelet network,
@@ -394,11 +431,18 @@ class Network:
             lanelet_network.add_lanelet(crosswalk)
 
         # generating intersections
+        incoming_lanelet_ids = set().union(
+            *[
+                get_all_adjacent_lanelets(lanelet_network, key)
+                for intersection_map in self._link_index.intersection_maps()
+                for key in intersection_map.keys()
+            ]
+        )
         for intersection_map in self._link_index.intersection_maps():
             # Remove lanelets that are not part of the network (as they are of a different type)
             intersection_id_counter = generate_unique_id()
             lanelet_network._old_lanelet_ids[intersection_id_counter] = intersection_id_counter
-            lanelet_network.create_intersection(intersection_map)
+            lanelet_network.create_intersection(intersection_map, incoming_lanelet_ids)
 
         self.relate_crosswalks_to_intersection(lanelet_network)
 
