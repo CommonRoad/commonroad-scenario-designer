@@ -6,6 +6,7 @@
 - settings window empty
 - github actions static code evaluation and python versions
 - odr2cr tagging intersection lanelet type
+- odr2cr traffic light direction assignment
 
 ### Changed
 - use new CLCS instead of version in drivability-checker
