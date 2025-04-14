@@ -151,27 +151,34 @@ class ScenarioSavingDialogController:
             else:
                 self.init_scenario_location_default()
 
-            if self.current_scenario.location.geo_transformation:
-                if self.current_scenario.location.geo_transformation.geo_reference in [
-                    self.save_window.geo_reference.itemText(i)
-                    for i in range(self.save_window.geo_reference.count())
-                ]:
+            if self.current_scenario.lanelet_network.location.geo_transformation:
+                if (
+                    self.current_scenario.lanelet_network.location.geo_transformation.geo_reference
+                    in [
+                        self.save_window.geo_reference.itemText(i)
+                        for i in range(self.save_window.geo_reference.count())
+                    ]
+                ):
                     self.save_window.geo_reference.setCurrentText(
-                        self.current_scenario.location.geo_transformation.geo_reference
+                        self.current_scenario.lanelet_network.location.geo_transformation.geo_reference
                     )
                 else:
                     self.save_window.geo_reference.addItem(
-                        self.current_scenario.location.geo_transformation.geo_reference
+                        self.current_scenario.lanelet_network.location.geo_transformation.geo_reference
                     )
                     self.save_window.geo_reference.setCurrentText(
-                        self.current_scenario.location.geo_transformation.geo_reference
+                        self.current_scenario.lanelet_network.location.geo_transformation.geo_reference
                     )
 
                 self.save_window.x_translation.setText(
-                    str(self.current_scenario.location.geo_transformation.x_translation)
+                    str(
+                        self.current_scenario.lanelet_network.location.geo_transformation.x_translation
+                    )
                 )
                 self.save_window.y_translation.setText(
-                    str(self.current_scenario.location.geo_transformation.y_translation)
+                    str(
+                        self.current_scenario.lanelet_network.location.geo_transformation.y_translation
+                    )
                 )
 
             else:
@@ -361,15 +368,6 @@ class ScenarioSavingDialogController:
                     self.save_window.scenario_geo_anme_id.text(),
                     self.save_window.scenario_latitude.text(),
                     self.save_window.scenario_longitude.text(),
-                    environment=Environment(
-                        Time(
-                            int(self.save_window.scenario_time_hour.text()),
-                            int(self.save_window.scenario_time_minute.text()),
-                        ),
-                        TimeOfDay(self.save_window.scenario_time_of_day.currentText()),
-                        Weather(self.save_window.scenario_weather.currentText()),
-                        Underground(self.save_window.scenario_underground.currentText()),
-                    ),
                     geo_transformation=GeoTransformation(
                         geo_reference=self.save_window.geo_reference.currentText(),
                         x_translation=get_float_position(self.save_window.x_translation),

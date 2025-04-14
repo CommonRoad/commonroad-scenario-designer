@@ -16,6 +16,9 @@ from crdesigner.map_conversion.common.conversion_lanelet_network import (
     _JoinSplitTarget,
 )
 from crdesigner.map_conversion.common.utils import generate_unique_id
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.network import (
+    get_all_adjacent_lanelets,
+)
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.plane import (
     Border,
     ParametricLaneBorderGroup,
@@ -697,7 +700,7 @@ class TestConversionLanelet(unittest.TestCase):
         add_lanelets_to_network(conversion_lanelet_network, [lanelet_2, lanelet_2_succ])
 
         conversion_lanelet_network.check_lanelet_type_for_successor_of_successor(
-            lanelet_1, intersection_map
+            lanelet_1, intersection_map, set()
         )
         self.assertEqual({LaneletType.INTERSECTION, LaneletType.URBAN}, lanelet_2.lanelet_type)
 

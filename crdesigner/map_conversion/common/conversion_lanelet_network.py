@@ -2,7 +2,7 @@ import itertools
 import logging
 import warnings
 from queue import Queue
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 import numpy as np
 import shapely
@@ -570,11 +570,14 @@ class ConversionLaneletNetwork(LaneletNetwork):
             return successor.adj_left is None
         return True
 
-    def create_intersection(self, intersection_map: Dict[int, List[int]]):
+    def create_intersection(
+        self, intersection_map: Dict[int, List[int]], all_incoming_lanelets: Set[int]
+    ):
         """
         Creates an intersection inside the lanelet network object
 
         :param intersection_map: Information about the successors of a lanelet in a junction.
+        :param all_incoming_lanelets: Set of all incoming lanelets in the intersection.
         """
         # If different incoming lanelets have same successors, combine into set
         incoming_lanelet_ids = self.combine_common_incoming_lanelets(intersection_map)
@@ -590,7 +593,9 @@ class ConversionLaneletNetwork(LaneletNetwork):
             successor_straight = set()
 
             for incoming_lane in incoming_lanelet_set:
-                self.set_intersection_lanelet_type(incoming_lane, intersection_map)
+                self.set_intersection_lanelet_type(
+                    incoming_lane, intersection_map, all_incoming_lanelets
+                )
                 successor_directions = self.get_successor_directions(
                     self.find_lanelet_by_id(incoming_lane)
                 )
@@ -626,25 +631,30 @@ class ConversionLaneletNetwork(LaneletNetwork):
             self.add_intersection(intersection)
 
     def set_intersection_lanelet_type(
-        self, incoming_lane: int, intersection_map: Dict[int, List[int]]
+        self,
+        incoming_lane: int,
+        intersection_map: Dict[int, List[int]],
+        incoming_lanelet_ids: Set[int],
     ):
         """Set the lanelet type of all the lanelets inside an intersection to Intersection from the enum class
 
         :param incoming_lane: ID of incoming lanelet
         :param intersection_map: Dictionary that contains all the incomings of a particular intersection.
+        :param incoming_lanelet_ids: Set of all incoming lanelets in the intersection.
         """
         for successor_incoming in self.find_lanelet_by_id(incoming_lane).successor:
             successor_incoming_lanelet = self.find_lanelet_by_id(successor_incoming)
-            # successor_incoming_lanelet.lanelet_type = "intersection"
-            # TODO assign only to main intersection lanelets not to incomings or other lanelets,
-            #  e.g., check KA-Suedtangente scenario
+            successor_incoming_lanelet.lanelet_type = "intersection"
             # Also check if the successor of a incoming successor intersects with another successor of an incoming
             self.check_lanelet_type_for_successor_of_successor(
-                successor_incoming_lanelet, intersection_map
+                successor_incoming_lanelet, intersection_map, incoming_lanelet_ids
             )
 
     def check_lanelet_type_for_successor_of_successor(
-        self, successor_incoming_lanelet: ConversionLanelet, intersection_map: Dict[int, List[int]]
+        self,
+        successor_incoming_lanelet: ConversionLanelet,
+        intersection_map: Dict[int, List[int]],
+        incoming_lanelet_ids: Set[int],
     ):
         """
         Check if the successor of an incoming successor in an intersection is also a part of the lanelet.
@@ -654,13 +664,17 @@ class ConversionLaneletNetwork(LaneletNetwork):
         :param successor_incoming_lanelet: Lanelet for which we require to test if it is a part of a particular
             intersection
         :param intersection_map: Dict of the particular intersection for which the test is being conducted.
+        :param incoming_lanelet_ids: Set of all incoming lanelets in the intersection.
         """
         for successor_successor_incoming in successor_incoming_lanelet.successor:
             successor_successor_incoming_lanelet = self.find_lanelet_by_id(
                 successor_successor_incoming
             )
-            if self.check_if_lanelet_in_intersection(
-                successor_successor_incoming_lanelet, intersection_map
+            if (
+                self.check_if_lanelet_in_intersection(
+                    successor_successor_incoming_lanelet, intersection_map
+                )
+                and successor_successor_incoming_lanelet.lanelet_id not in incoming_lanelet_ids
             ):
                 successor_successor_incoming_lanelet.lanelet_type = "intersection"
 
