@@ -1,5 +1,5 @@
 from typing import List, Optional, Tuple
-
+from pyproj import CRS, Transformer
 import numpy as np
 from numpy.polynomial import polynomial
 from pyproj import Transformer
@@ -10,7 +10,9 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_eleme
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     RoadMark,
 )
-
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.utils import (
+    convert_height_ellipsoid_to_orthometric,
+)
 
 class ParametricLaneBorderGroup:
     """Group Borders and BorderOffsets of ParametricLanes into one class."""
@@ -279,6 +281,8 @@ class ParametricLane:
         """
         left_vertices = []
         right_vertices = []
+        left_heights = []  #store the height info separately
+        right_heights = []
         # calculate left and right vertices of lanelet
         # s = 0
         # check_3 = True
@@ -297,14 +301,54 @@ class ParametricLane:
             # version with sampling
             # while s <= self.length:
             # s_cache = s + 0.0
+            #sglobal tglobal
             inner_pos, _, curvature, max_geometry_length = self.calc_border("inner", s)
             outer_pos = self.calc_border("outer", s, compute_curvature=False)[0]
+            #get height
+            ##
+            #
+            #transform to orthometric
+            x_inner, y_inner = inner_pos[0], inner_pos[1]
+            x_outer, y_outer = outer_pos[0], outer_pos[1]
+
+            #HEIGHT_ellipsoid
+            HEIGHT_ellipsoid= 150
+            height_inner = convert_height_ellipsoid_to_orthometric(x_inner, y_inner, HEIGHT_ellipsoid)
+            height_outer = convert_height_ellipsoid_to_orthometric(x_outer, y_outer, HEIGHT_ellipsoid)
+            #debug:compare height before and after
+            print(f"height_ellipsoid: {HEIGHT_ellipsoid}, height_orthometric: {height_inner}")
+            print(f"height_ellipsoid: {HEIGHT_ellipsoid}, height_orthometric: {height_outer}")
+            height_diff_inner = height_inner - HEIGHT_ellipsoid
+            height_diff_outer = height_outer - HEIGHT_ellipsoid
+            print(f"height_diff_inner: {height_diff_inner}") 
+            print(f"height_diff_outer: {height_diff_outer}")
             if transformer is not None:
-                left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
-                right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
+                #avoid the type error
+                x_trans_inner, y_trans_inner = transformer.transform(x_inner, y_inner)
+                x_trans_outer, y_trans_outer = transformer.transform(x_outer, y_outer)
+
+                #buidl the vertices
+                left_vertices.append([x_trans_inner, y_trans_inner])
+                right_vertices.append([x_trans_outer, y_trans_outer])
+
+            
+
+                #left_vertices.append((x_trans_inner,y_trans_inner, height_innner))
+                #right_vertices.append((x_trans_outer, y_trans_outer, height_outer))
+
+                #left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]), height_innner)
+                #right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]), height_outer)
             else:
                 left_vertices.append(inner_pos)
                 right_vertices.append(outer_pos)
+            #record the height ifo separately
+            left_heights.append(height_inner)
+            right_heights.append(height_outer)
+
+        left_arr = np.array(left_vertices)
+        right_arr = np.array(right_vertices)
+
+        return left_arr, right_arr
 
             # version with sampling
             # if s >= self.length:
@@ -324,7 +368,7 @@ class ParametricLane:
             #
             # check_3 = False
         # assert len(left_vertices) >= 3, f"Not enough vertices, len: {len(left_vertices)}"
-        return np.array(left_vertices), np.array(right_vertices)
+        # return np.array(left_vertices), np.array(right_vertices)
 
     def zero_width_change_positions(self) -> float:
         """Position where the inner and outer Border have zero minimal distance change.
