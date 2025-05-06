@@ -36,9 +36,9 @@ class OpenDriveConfig(BaseConfig):
     )
 
     general_use_elevation_type_activ = Attribute(
-        False,
+        True,
         "General use elevation type active",
-        "Activates whether certain use elevation type should be added to all lanelets",
+        "Activates whether certain use elevation info should be added to all lanelets",
     )
 
 

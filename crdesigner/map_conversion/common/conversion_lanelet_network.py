@@ -969,19 +969,50 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         :param traffic_signs: List of all the traffic signs.
         """
-
+        #get elevation config
+        use_3d = open_drive_config.general_use_elevation_type_activ
         # Assign traffic signs to lanelets
         for traffic_sign in traffic_signs:
             id_for_adding = None
             min_distance = float("inf")
+            
+
+            #hadle traffic sign elevation
+            pos_1 = np.asarray(traffic_sign.position)
+            if use_3d and pos_1.shape[0] == 2:
+                pos_1 = np.append(pos_1, 0)#add dimension of elevation
             for lanelet in self.lanelets:
+                #nomalising the coordinginates
                 # Find closest lanelet to traffic signal
-                pos_1 = traffic_sign.position
-                pos_2 = lanelet.center_vertices[0]
-                dist = np.linalg.norm(pos_1 - pos_2)
+                #pos_1 = traffic_sign.position
+                #pos_2 = lanelet.center_vertices[0]
+                #handle center vertices
+                pos_2_raw = np.asarray(lanelet.center_vertices[0])
+
+                if use_3d:
+                    #get elevation config
+                    pos_2 = np.append(pos_2_raw, 0)
+                else:
+                    pos_2 = pos_2_raw
+                #normalising the coordinates to 3d
+                if use_3d:
+                    #force alignment to 3d
+                    compare_pos_1 = pos_1 if pos_1.size == 3 else np.append(pos_1, 0)
+                    compare_pos_2 = pos_2 if pos_2.size == 3 else np.append(pos_2, 0)
+                else:
+                    compare_pos_1 = pos_1[:2]
+                    compare_pos_2 = pos_2[:2]
+                #calaculating the distance
+                try:
+                    dist = np.linalg.norm(compare_pos_1 - compare_pos_2)
+                except ValueError:
+                    #handle the case where the two arrays have different dimensions
+                    min_dim = min(compare_pos_1.size, compare_pos_2.size)
+                    dist = np.linalg.norm(compare_pos_1[:min_dim] - compare_pos_2[:min_dim])
                 if dist < min_distance:
                     min_distance = dist
                     id_for_adding = lanelet.lanelet_id
+
             if id_for_adding is None:
                 warnings.warn(
                     "For traffic sign with ID {} no referencing lanelet was found!".format(
