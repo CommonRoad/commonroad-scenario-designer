@@ -462,3 +462,13 @@ class ConversionLanelet(Lanelet):
         return self.parametric_lane_group.calc_border(
             border, s_pos, width_offset, compute_curvature=compute_curvature
         )
+    
+    def calc_border_height(
+        # self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True
+        self, border: str, s_pos: float, x_old: Optional[float] = None, y_old: Optional[float] = None, \
+                           plane_curve_hdg: Optional[float] = None
+    ) -> Tuple[Tuple[float, float], float, float, float]:
+
+        return self.parametric_lane_group.calc_border_height(
+            border, s_pos, x_old, y_old, plane_curve_hdg=plane_curve_hdg
+        )

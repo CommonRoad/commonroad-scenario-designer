@@ -18,13 +18,13 @@ class Lanelet2Config(BaseConfig):
     )
 
     autoware = Attribute(
-        False,
+        True,
         "Autoware",
         "Boolean indicating whether the conversion " "should be autoware compatible",
     )
 
     use_local_coordinates = Attribute(
-        False,
+        True,
         "Use local coordinates",
         "Boolean indicating whether local coordinates should be added",
     )
@@ -81,7 +81,7 @@ class Lanelet2Config(BaseConfig):
     )
 
     translate = Attribute(
-        False,
+        True,
         "Translate",
         "Boolean indicating whether map should be translated by the location coordinate specified "
         "in the CommonRoad map",

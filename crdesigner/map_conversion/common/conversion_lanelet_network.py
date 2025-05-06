@@ -934,6 +934,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     if len(lane.successor) > len(lane.traffic_lights):
                         pos_1 = traffic_light.position
                         pos_2 = lane.center_vertices[-1]
+                        if pos_2.shape == (3,):
+                            pos_2 = pos_2[:2]
                         dist = np.linalg.norm(pos_1 - pos_2)
                         if dist < min_distance:
                             min_distance = dist
@@ -964,7 +966,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 # Find closest lanelet to traffic signal
                 pos_1 = traffic_sign.position
                 pos_2 = lanelet.center_vertices[0]
-                dist = np.linalg.norm(pos_1 - pos_2)
+                dist = np.linalg.norm(pos_1[:2] - pos_2[:2])
                 if dist < min_distance:
                     min_distance = dist
                     id_for_adding = lanelet.lanelet_id
@@ -1214,6 +1216,7 @@ class _JoinSplitTarget:
         lanelet_split = self._js_pairs[0].move_border(
             width=[start_width_split, self.change_width[0]],
             linking_side=self.linking_side,
+            transformer=self._transformer
         )
         left_vertices = lanelet_split.left_vertices
         right_vertices = lanelet_split.right_vertices
@@ -1222,6 +1225,7 @@ class _JoinSplitTarget:
         self._js_pairs[1].move_border(
             width=[self.change_width[1], start_width_join],
             linking_side=self.linking_side,
+            transformer=self._transformer
         )
 
         # take first half of lanelet which does the split

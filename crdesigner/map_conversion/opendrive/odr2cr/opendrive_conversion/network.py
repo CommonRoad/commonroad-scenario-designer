@@ -225,6 +225,7 @@ class Network:
             self._stop_lines_from_road(road)
 
             # A lane section is the smallest part that can be converted at once
+            accumulated_lanesection_offset = 0
             for lane_section in road.lanes.lane_sections:
                 parametric_lane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(
                     lane_section,
@@ -235,6 +236,52 @@ class Network:
                     road.driving_direction,
                 )
 
+                lane_section_elevations = []
+                if len(road.elevation_profile.elevations) > 1:
+                    for i, elevations in enumerate(road.elevation_profile.elevations):
+                        if elevations.start_pos >= lane_section.sPos:
+                            lane_section_elevations.append(elevations)
+                        else:
+                            if i < len(road.elevation_profile.elevations) - 1:
+                                if road.elevation_profile.elevations[i + 1].start_pos >= lane_section.sPos:
+                                    lane_section_elevations.append(elevations)
+                            else:
+                                # 最后一个
+                                lane_section_elevations.append(elevations)
+                else:
+                    if len(road.elevation_profile.elevations) > 0:
+                        lane_section_elevations.append(road.elevation_profile.elevations[0])
+                for parametric_lane_group in parametric_lane_groups:
+                    parametric_lane_group.set_elevation_profile(lane_section_elevations)
+
+                lane_section_superelevations = []
+                if len(road.lateral_profile.superelevations) > 1:
+                    for i, superelevations in enumerate(road.lateral_profile.superelevations):
+                        if superelevations.start_pos >= lane_section.sPos:
+                            lane_section_superelevations.append(superelevations)
+                        else:
+                            if i < len(road.lateral_profile.superelevations) - 1:
+                                if road.lateral_profile.superelevations[i + 1].start_pos >= lane_section.sPos:
+                                    lane_section_superelevations.append(superelevations)
+                            else:
+                                # 最后一个
+                                lane_section_superelevations.append(superelevations)
+                else:
+                    if len(road.lateral_profile.superelevations) > 0:
+                        lane_section_superelevations.append(road.lateral_profile.superelevations[0])
+                for parametric_lane_group in parametric_lane_groups:
+                    parametric_lane_group.set_superelevation(lane_section_superelevations)
+
+                for parametric_lane_group in parametric_lane_groups:
+                    for parametric_lane in parametric_lane_group.parametric_lanes:
+                        parametric_lane.set_offset_lanesection(accumulated_lanesection_offset)
+
+                accumulated_lanesection_offset += lane_section.length
+
+                for parametric_lane_group in parametric_lane_groups:
+                    # add the parametric lane groups to the link index
+                    for parametric_lane in parametric_lane_group.parametric_lanes:
+                        parametric_lane.set_shape(road.lateral_profile.shapes)
                 self._planes.extend(parametric_lane_groups)
 
                 # check if parametric lane group is not part of intersection

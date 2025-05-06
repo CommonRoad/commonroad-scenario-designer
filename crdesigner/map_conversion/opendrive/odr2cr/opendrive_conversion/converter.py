@@ -128,6 +128,7 @@ class OpenDriveConverter:
                     driving_direction=driving_direction,
                 )
 
+                accumlated_width = 0
                 # Create new lane for each width segment
                 for width in lane.widths:
                     # check if road mark was changed and set corresponding road mark
@@ -139,6 +140,28 @@ class OpenDriveConverter:
                     parametric_lane = OpenDriveConverter.create_parametric_lane(
                         lane_borders, width, lane, side, mark_idx, driving_direction
                     )
+                    if abs(int(lane.id)) > 1:           
+                        target_inner_parametric_lane_group_id = encode_road_section_lane_width_id(
+                            lane.lane_section.parent_road.id,
+                            lane.lane_section.idx,
+                            int(lane.id - coeff_factor),
+                            width.idx,
+                        )
+
+                        inner_lane_group = None
+                        for lane_group_ in plane_groups:
+                            target_inner_id_ = ".".join(target_inner_parametric_lane_group_id.split(".")[:3])
+                            lane_group_id_ = ".".join(lane_group_.id_.split(".")[:3])
+                            if target_inner_id_ == lane_group_id_:
+                                inner_lane_group = lane_group_
+                                break
+
+                        if inner_lane_group:
+                                parametric_lane.set_inner_parametric_lane_group(inner_lane_group)
+
+                    parametric_lane.set_offset_width(accumlated_width)
+                    accumlated_width += width.length
+
                     parametric_lane.reverse = bool(lane.id > 0)
                     # check the driving side
                     if driving_direction is False:
