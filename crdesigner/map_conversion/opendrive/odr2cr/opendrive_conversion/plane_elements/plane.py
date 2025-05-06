@@ -14,6 +14,8 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.utils impor
     convert_height_ellipsoid_to_orthometric,
 )
 
+from crdesigner.common.config.opendrive_config import open_drive_config
+
 class ParametricLaneBorderGroup:
     """Group Borders and BorderOffsets of ParametricLanes into one class."""
 
@@ -291,7 +293,10 @@ class ParametricLane:
         # no sampling of s and "distance" between two consecutive s is similar
         #
         if self.length < 0:
-            return np.array(left_vertices), np.array(right_vertices)
+            ###return np.array(left_vertices), np.array(right_vertices)
+            #check elevation type active or not
+            return np.empty((0,3)), np.empty((0,3)) if open_drive_config.general_use_elevation_type_activ else np.empty((0,2)), np.empty((0,2))
+        
         num_steps = int(max(3, np.ceil(self.length / float(0.5))))
         poses = np.linspace(0, self.length, num_steps)
         for s in poses:
@@ -302,7 +307,8 @@ class ParametricLane:
             # while s <= self.length:
             # s_cache = s + 0.0
             #sglobal tglobal
-            inner_pos, _, curvature, max_geometry_length = self.calc_border("inner", s)
+            #inner_pos, _, curvature, max_geometry_length = self.calc_border("inner", s)[0]
+            inner_pos = self.calc_border("inner", s)[0]
             outer_pos = self.calc_border("outer", s, compute_curvature=False)[0]
             #get height
             ##
@@ -316,31 +322,44 @@ class ParametricLane:
             height_inner = convert_height_ellipsoid_to_orthometric(x_inner, y_inner, HEIGHT_ellipsoid)
             height_outer = convert_height_ellipsoid_to_orthometric(x_outer, y_outer, HEIGHT_ellipsoid)
             #debug:compare height before and after
-            print(f"height_ellipsoid: {HEIGHT_ellipsoid}, height_orthometric: {height_inner}")
-            print(f"height_ellipsoid: {HEIGHT_ellipsoid}, height_orthometric: {height_outer}")
+
             height_diff_inner = height_inner - HEIGHT_ellipsoid
             height_diff_outer = height_outer - HEIGHT_ellipsoid
-            print(f"height_diff_inner: {height_diff_inner}") 
-            print(f"height_diff_outer: {height_diff_outer}")
+
+
             if transformer is not None:
                 #avoid the type error
                 x_trans_inner, y_trans_inner = transformer.transform(x_inner, y_inner)
                 x_trans_outer, y_trans_outer = transformer.transform(x_outer, y_outer)
+            else:
+                x_trans_inner, y_trans_inner = x_inner, y_inner
+                x_trans_outer, y_trans_outer = x_outer, y_outer
 
-                #buidl the vertices
+
+            #choose the height type according to the config
+            if open_drive_config.general_use_elevation_type_activ:
+                left_vertices.append([x_trans_inner, y_trans_inner, height_inner])
+                right_vertices.append([x_trans_outer, y_trans_outer, height_outer])
+            else:
                 left_vertices.append([x_trans_inner, y_trans_inner])
                 right_vertices.append([x_trans_outer, y_trans_outer])
-
-            
+                #buidl the vertices
+                ###left_vertices.append([x_trans_inner, y_trans_inner])
+                ###right_vertices.append([x_trans_outer, y_trans_outer])
 
                 #left_vertices.append((x_trans_inner,y_trans_inner, height_innner))
                 #right_vertices.append((x_trans_outer, y_trans_outer, height_outer))
 
-                #left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]), height_innner)
-                #right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]), height_outer)
-            else:
-                left_vertices.append(inner_pos)
-                right_vertices.append(outer_pos)
+                # 构建三维坐标元组
+                ###left_3d = (x_trans_inner, y_trans_inner, height_inner)
+                ###right_3d = (x_trans_outer, y_trans_outer, height_outer)
+
+                ###left_vertices.append(left_3d)
+                ###right_vertices.append(right_3d)
+
+            ###else:
+                ###left_vertices.append(inner_pos)
+                ###right_vertices.append(outer_pos)
             #record the height ifo separately
             left_heights.append(height_inner)
             right_heights.append(height_outer)

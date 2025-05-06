@@ -768,8 +768,14 @@ def parse_opendrive_header(opendrive: OpenDrive, header: etree.ElementTree):
     )
 
     # Reference
-    if header.find("geoReference") is not None:
+    # if elevation config set to true and xml has geoReference, do not clean it
+    if header.find("geoReference") is not None and open_drive_config.general_use_elevation_type_activ:
+        parsed_header.geo_reference = header.find("geoReference").text
+        print(parsed_header.geo_reference)
+    elif header.find("geoReference") is not None:
         parsed_header.geo_reference = clean_projection_string(header.find("geoReference").text)
+    #if header.find("geoReference") is not None:
+        #parsed_header.geo_reference = clean_projection_string(header.find("geoReference").text)
 
     # offset {x: , y: , z: , hdg:}
     if header.find("offset") is not None:
