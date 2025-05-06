@@ -1,6 +1,7 @@
 from typing import List, Optional, Tuple
 from pyproj import CRS, Transformer
 import numpy as np
+import bisect
 from numpy.polynomial import polynomial
 from pyproj import Transformer
 
@@ -13,6 +14,22 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLa
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.utils import (
     convert_height_ellipsoid_to_orthometric,
 )
+def find_open_interval_index(arr, a):
+    if len(arr) == 0:
+        return None
+    
+    if len(arr) == 1:
+        if a > arr[0]:
+            return 0
+        else:
+            return None
+
+    idx = bisect.bisect_right(arr, a) - 1
+    
+    if idx < 0:
+        return None 
+    else:
+        return idx
 
 class ParametricLaneBorderGroup:
     """Group Borders and BorderOffsets of ParametricLanes into one class."""
@@ -120,6 +137,33 @@ class ParametricLane:
         self.speed = speed
         self.access = access if access is not None else []
         self.driving_direction = driving_direction
+        self.inner_neighbour_id = None
+        self.inner_parametric_lane_group = None 
+        self.elevation_profile = None
+        self.superelevation = None
+        # The offset of the lane section belonging to its ParametricLaneGroup within the entire road.
+        self.offset_lanesection = 0.0  
+        # The offset of its associated ParametricLane within the ParametricLaneGroup due to its width.
+        self.offset_width = 0.0 
+        self.shape = None 
+
+    def set_elevation_profile(self, elevation_profile):
+        self.elevation_profile = elevation_profile
+
+    def set_superelevation(self, superelevation):
+        self.superelevation = superelevation
+
+    def set_inner_parametric_lane_group(self, inner_parametric_lane_group):
+        self.inner_parametric_lane_group = inner_parametric_lane_group
+
+    def set_offset_width(self, offset_width):
+        self.offset_width = offset_width
+
+    def set_offset_lanesection(self, offset_lanesection):
+        self.offset_lanesection = offset_lanesection
+
+    def set_shape(self, shape):
+        self.shape = shape
 
     def calc_border(
         self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature: bool = True
@@ -341,14 +385,6 @@ class ParametricLane:
             else:
                 left_vertices.append(inner_pos)
                 right_vertices.append(outer_pos)
-            #record the height ifo separately
-            left_heights.append(height_inner)
-            right_heights.append(height_outer)
-
-        left_arr = np.array(left_vertices)
-        right_arr = np.array(right_vertices)
-
-        return left_arr, right_arr
 
             # version with sampling
             # if s >= self.length:
@@ -368,7 +404,74 @@ class ParametricLane:
             #
             # check_3 = False
         # assert len(left_vertices) >= 3, f"Not enough vertices, len: {len(left_vertices)}"
-        # return np.array(left_vertices), np.array(right_vertices)
+        return np.array(left_vertices), np.array(right_vertices)
+
+    def calc_vertices_3d(
+        self, error_tolerance: float, min_delta_s: float, transformer: Optional[Transformer] = None
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Convert a ParametricLane to Lanelet with elevation information.
+
+        :param error_tolerance: Max. error between reference geometry and polyline of vertices.
+        :param min_delta_s: Min. step length between two sampling positions on the reference geometry
+        :param transformer: Coordinate transformer/projection.
+        :return: left and right vertices of the created Lanelet
+        """
+        left_vertices = []
+        right_vertices = []
+        # calculate left and right vertices of lanelet
+        # s = 0
+        # check_3 = True
+
+        # old version from opendrive2lanelet start
+        # no sampling of s and "distance" between two consecutive s is similar
+        #
+        if self.length < 0:
+            return np.array(left_vertices), np.array(right_vertices)
+        
+        num_steps = int(max(3, np.ceil(self.length / float(0.5))))
+        poses = np.linspace(0, self.length, num_steps)
+
+        for s in poses:
+            #----------------------------------------------------------------------------------------------------
+            #
+            # old version end
+
+            # version with sampling
+            # while s <= self.length:
+            # s_cache = s + 0.0
+            inner_pos, result_tang, curvature, max_geometry_length = self.calc_border("inner", s)
+            outer_pos, result_tang_outer, _, _ = self.calc_border("outer", s, compute_curvature=False)
+            elevation_inner, new_inner_x, new_inner_y = self.calc_border_height("inner", s, inner_pos[0], inner_pos[1], result_tang)
+            elevation_outer, new_outer_x, new_outer_y = self.calc_border_height("outer", s, outer_pos[0], outer_pos[1], result_tang_outer)
+
+            if transformer is not None:
+                # left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
+                # right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
+                left_vertices.append(transformer.transform(new_inner_x, new_inner_y, elevation_inner))
+                right_vertices.append(transformer.transform(new_outer_x, new_outer_y, elevation_outer))
+            else:
+                left_vertices.append([inner_pos[0], inner_pos[1], elevation_inner])
+                right_vertices.append([outer_pos[0], outer_pos[1], elevation_outer])
+
+            # version with sampling
+            # if s >= self.length:
+            #     break
+            #
+            # if s == max_geometry_length:
+            #     s += min_delta_s
+            # else:
+            #     s = calc_next_s(s, curvature, error_tolerance=error_tolerance, min_delta_s=min_delta_s,
+            #                     s_max=max_geometry_length)
+            #
+            # # ensure total road length is not exceeded
+            # s = min(self.length, s)
+            # # ensure lanelet has >= 3 vertices
+            # if check_3 and s >= self.length:
+            #     s = (s_cache + self.length) * 0.5
+            #
+            # check_3 = False
+        # assert len(left_vertices) >= 3, f"Not enough vertices, len: {len(left_vertices)}"
+        return np.array(left_vertices), np.array(right_vertices)
 
     def zero_width_change_positions(self) -> float:
         """Position where the inner and outer Border have zero minimal distance change.
@@ -431,3 +534,205 @@ class ParametricLane:
 
         max_idx = np.argmax(pos_and_val, axis=0)[1]
         return tuple(pos_and_val[max_idx])
+    
+    def calc_elevation_central(self, s_pos):
+        if not self.elevation_profile:
+            return 0.0
+
+        for i, ele_profile in enumerate(self.elevation_profile):
+            if s_pos >= ele_profile.start_pos:
+                if i == len(self.elevation_profile) - 1:
+                    profile = ele_profile
+                else:
+                    if s_pos < self.elevation_profile[i + 1].start_pos:
+                        profile = ele_profile
+                        break
+        else:
+            profile = self.elevation_profile[-1]    
+
+
+        a, b, c, d = profile.polynomial_coefficients
+        cs_pos = s_pos - profile.start_pos
+        return a + b * cs_pos + c * cs_pos**2 + d * cs_pos**3
+    
+    def calc_superelevation(self, s_pos):
+        if not self.superelevation:
+            return 0.0    
+    
+        for i, ele_profile in enumerate(self.superelevation):
+            if s_pos >= ele_profile.start_pos:
+                if i == len(self.superelevation) - 1:
+                    profile = ele_profile
+                else:
+                    if s_pos < self.superelevation[i + 1].start_pos:
+                        profile = ele_profile
+                        break
+        else:
+            profile = self.superelevation[-1]    
+
+
+        a, b, c, d = profile.polynomial_coefficients
+        cs_pos = s_pos - profile.start_pos
+        return a + b * cs_pos + c * cs_pos**2 + d * cs_pos**3
+
+    def calc_border_height(self, border, s_to_parametriclane, x_old: Optional[float] = None, y_old: Optional[float] = None, \
+                           plane_curve_hdg: Optional[float] = None):
+        # <superelevation> rotates the road surface, leading to a difference  in projected width, therefore, the x and y of the
+        # vertices point should be corrected
+        # It is also considered that some of the road segments are under control of both <superelevation> and <shape>.
+        # This is no longer recommended or deprecated in in the latest version of OpenDRIVE 1.8.0
+        def correction_due_to_superelevation(x, y, plane_curve_hdg, superelevation, shape_profile, lateral_distance_to_centerline):
+            projection_height_superelevation = np.sin(superelevation) * (lateral_distance_to_centerline - \
+                                                     np.tan(superelevation) * shape_profile)
+            projection_height_shape = shape_profile / np.cos(superelevation) 
+            height_to_ref_line = projection_height_superelevation + projection_height_shape
+            plane_short_distance = lateral_distance_to_centerline * (1 - np.cos(superelevation)) + np.sin(superelevation) * shape_profile
+
+            x_new = x + plane_short_distance * np.sin(plane_curve_hdg)
+            y_new = y - plane_short_distance * np.cos(plane_curve_hdg)
+            return height_to_ref_line, x_new, y_new
+        
+        if border not in ("inner", "outer"):
+            raise ValueError("Border specified must be 'inner' or 'outer'!")
+
+
+        in_lane_length = self.length - s_to_parametriclane if self.reverse else s_to_parametriclane 
+
+        s_to_road_inner =  in_lane_length + self.offset_lanesection + self.offset_width
+        s_to_road_outer =  in_lane_length + self.offset_lanesection + self.offset_width
+        s_to_lane_inner = in_lane_length + self.offset_width
+        # s_to_lane_outer = in_lane_length + self.offset_width
+
+        s_to_road = s_to_road_inner if border == "inner" else s_to_road_outer
+        # relative to the road reference line, right < 0, left > 0
+        side_coeff = 1.0 if int(self.id_.split('.')[2]) > 0 else -1.0
+
+        lateral_distance_from_inner_to_centerline = self.calc_lateral_distance_from_inner_to_centerline(
+                                                    s_to_parametriclane, s_to_lane_inner)
+        lateral_distance_to_centerline = lateral_distance_from_inner_to_centerline if border == "inner" \
+                                         else lateral_distance_from_inner_to_centerline + \
+                                         self.calc_width(s_to_parametriclane)
+
+
+        # lateral Profile: <shape> and <superelevation>
+        superelevation = self.calc_superelevation(s_to_road)
+        shape_profile = self.calc_shape(s_to_road, lateral_distance_to_centerline)
+        
+        height_to_ref_line, x_new, y_new = correction_due_to_superelevation(x_old, y_old, plane_curve_hdg, \
+                                                                            superelevation, \
+                                                                            shape_profile, \
+                                                                            lateral_distance_to_centerline)
+        final_height = height_to_ref_line * side_coeff + self.calc_elevation_central(s_to_road)
+
+        return final_height, x_new, y_new
+    
+    def calc_lateral_distance_from_inner_to_centerline(self, s_to_parametriclane, s_to_lane_inner):
+        # accumulate the width of the inner parametric lane to get the t lateral coordinate
+        inner_parametric_lane = self.select_inner_parametric_lane(s_to_lane_inner)
+        lateral_distance_to_centerline = 0.0
+        current_lane_width_offset = self.offset_width
+        s_to_current_pl = s_to_parametriclane
+        while (inner_parametric_lane is not None):
+            s_for_width = s_to_current_pl + (current_lane_width_offset - inner_parametric_lane.offset_width)
+            inner_width = inner_parametric_lane.calc_width(s_for_width)
+            lateral_distance_to_centerline += inner_width
+            current_lane_width_offset = inner_parametric_lane.offset_width
+            s_to_current_pl = s_for_width
+            inner_parametric_lane = inner_parametric_lane.select_inner_parametric_lane(s_to_lane_inner)
+
+        return lateral_distance_to_centerline
+
+    def select_inner_parametric_lane(self, s_to_lanesection):
+        if not self.inner_parametric_lane_group:
+            return None
+
+        if len(self.inner_parametric_lane_group.parametric_lanes) == 1:
+            return self.inner_parametric_lane_group.parametric_lanes[0]
+
+        inner_lane = None
+        for i, parametric_lane in enumerate(self.inner_parametric_lane_group.parametric_lanes):
+            if s_to_lanesection >= parametric_lane.offset_width:
+                if i == len(self.inner_parametric_lane_group.parametric_lanes) - 1:
+                    inner_lane = parametric_lane
+                else:
+                    if s_to_lanesection < self.inner_parametric_lane_group.parametric_lanes[i + 1].offset_width:
+                        inner_lane = parametric_lane
+                        break
+        else:
+            inner_lane = self.inner_parametric_lane_group.parametric_lanes[-1]     
+
+        return inner_lane    
+    
+
+    def calc_shape(self, s_pos, t_to_ref_line):
+
+        def get_lateralprofile_from_shape(t_to_ref_line, piecewise_crosssection):
+            if piecewise_crosssection is None: 
+                return 0.0
+            
+            start_pos_t_list = [shape.start_pos_t for shape in piecewise_crosssection]
+            idx_t = find_open_interval_index(start_pos_t_list, t_to_ref_line)
+            if idx_t == None:
+                return 0.0  
+            
+            selected_shape_profile = next(
+                (shape for shape in piecewise_crosssection if shape.start_pos_t == start_pos_t_list[idx_t]),
+                None
+            )
+
+            if selected_shape_profile is None:
+                return 0.0
+            
+            a, b, c, d = selected_shape_profile.polynomial_coefficients
+            t = t_to_ref_line - selected_shape_profile.start_pos_t
+
+            return a + b * t + c * t**2 + d * t**3
+        
+        # self.shape contains the info from <shape> for the whole road instead the scope of the current parametriclane
+        # front means standing on the s and facing the positive s-direction, back is the opposite
+        if self.shape is None:
+            return 0.0
+        start_pos_s_list = list(dict.fromkeys([shape.start_pos for shape in self.shape]))
+    
+        
+        back_shapes, front_shapes = [], []
+        idx = bisect.bisect_right(start_pos_s_list, s_pos)
+
+        # a <shape> defined cross section, only effects the height profile from its s_pos until next 
+        # <shape> defined cross section.
+        # if there is no next <shape> defined cross section, use the default, that is height profile = 0
+        no_back_shape = idx <= 0
+        no_front_shape = idx >= len(start_pos_s_list)
+
+        if no_back_shape:  
+            # front has a <shape> defined cross section, back side is the beginning of the road
+            back_shapes = []
+            back_s = 0.0
+            front_s = start_pos_s_list[idx]
+            front_shapes = [shape for shape in self.shape if shape.start_pos == front_s]
+            return 0.0
+        
+        elif no_front_shape:
+            # front is the end of the road, back side has a <shape> defined cross section
+            # so the height 
+            front_shapes = []
+            front_s = 0.0
+            back_s = start_pos_s_list[idx - 1]
+            back_shapes = [shape for shape in self.shape if shape.start_pos == back_s]
+            back_height = get_lateralprofile_from_shape(t_to_ref_line, back_shapes)
+
+            full_road_length = self.length + self.offset_lanesection + self.offset_width
+            return np.interp(s_pos, [back_s, full_road_length], [back_height, 0.0])
+        
+        else:
+            back_s = start_pos_s_list[idx - 1]
+            front_s = start_pos_s_list[idx]
+
+            back_shapes = [shape for shape in self.shape if shape.start_pos == back_s]
+            front_shapes = [shape for shape in self.shape if shape.start_pos == front_s]
+        
+            back_height = get_lateralprofile_from_shape(t_to_ref_line, back_shapes)
+            front_height = get_lateralprofile_from_shape(t_to_ref_line, front_shapes)
+                
+            return np.interp(s_pos, [back_s, front_s], [back_height, front_height])
+

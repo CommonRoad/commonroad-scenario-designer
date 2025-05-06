@@ -103,6 +103,28 @@ class ParametricLaneGroup:
                 self.append(parametric_lanes)
 
         self.driving_direction = driving_direction
+        
+        self.elevation_profile = None
+        self.superelevation = None
+
+    def set_elevation_profile(self, elevation_profile):
+        self.elevation_profile = elevation_profile
+        for parametric_lane in self.parametric_lanes:
+            parametric_lane.set_elevation_profile(elevation_profile)
+
+    def set_superelevation(self, superelevation):
+        self.superelevation = superelevation
+        for parametric_lane in self.parametric_lanes:
+            parametric_lane.set_superelevation(superelevation)
+
+    def get_parametriclane_by_id(self, id):
+        target_lane = None
+        for lane in self.parametric_lanes:
+            if id == lane.id_:
+                target_lane = lane
+                break
+        return target_lane
+
 
     def append(self, parametric_lane: ParametricLane):
         """Append lane to start or end of internal list of ParametricLane objects. If the parametric_lane is reverse,
@@ -188,9 +210,12 @@ class ParametricLaneGroup:
         line_marking_right_vertices = LineMarking.UNKNOWN
 
         for parametric_lane in self.parametric_lanes:
-            local_left_vertices, local_right_vertices = parametric_lane.calc_vertices(
+            local_left_vertices, local_right_vertices = parametric_lane.calc_vertices_3d(
                 error_tolerance=error_tolerance, min_delta_s=min_delta_s, transformer=transformer
             )
+            # local_left_vertices, local_right_vertices = parametric_lane.calc_vertices(
+            #     error_tolerance=error_tolerance, min_delta_s=min_delta_s, transformer=transformer
+            # )
             # check whether parametric lane cannot be used,
             # e.g., if to small it is possible that no vertices are generated
             if local_left_vertices is None or len(local_left_vertices) == 0:
@@ -338,6 +363,41 @@ class ParametricLaneGroup:
             compute_curvature=compute_curvature,
         )
 
+    def calc_border_height(
+        self, border: str, s_pos: float, x_old: Optional[float] = None, y_old: Optional[float] = None, \
+        plane_curve_hdg: Optional[float] = None
+    ) -> Tuple[Tuple[float, float], float, float, float]:
+        """Calc vertices point of inner or outer Border.
+
+        :param border: Which border to calculate (inner or outer)
+        :param s_pos: Position of parameter ds where to calc the cartesian coordinates
+        :param width_offset: Offset to add to calculated width in reference to the reference border. Default is 0.0.
+        :param compute_curvature: Whether to computer curvature. Default is True.
+        :return: Cartesian coordinates of point on inner border and tangential direction.
+        """
+        try:
+            # get index of geometry which is at s_pos
+            mask = self._geo_lengths > s_pos
+            sub_idx = np.argmin(self._geo_lengths[mask] - s_pos)
+            plane_idx = np.arange(self._geo_lengths.shape[0])[mask][sub_idx] - 1
+        except ValueError:
+            # s_pos is after last geometry because of rounding error
+            if np.isclose(s_pos, self._geo_lengths[-1]):
+                plane_idx = self._geo_lengths.size - 2
+            else:
+                raise Exception(
+                    f"Tried to calculate a position outside of the borders of the reference path at s={s_pos}"
+                    f", but path has only length of l={self._geo_lengths[-1]}"
+                )
+
+        return self.parametric_lanes[plane_idx].calc_border_height(
+            border,
+            s_pos - self._geo_lengths[plane_idx],
+            x_old,
+            y_old,
+            plane_curve_hdg
+        )
+
     def to_lanelet_with_mirroring(
         self,
         mirror_border: str,
@@ -371,8 +431,10 @@ class ParametricLaneGroup:
         poses = self._calc_border_positions(precision)
         distance_slope = (global_distance[1] - global_distance[0]) / self.length
         for pos in poses:
-            inner_pos = self.calc_border("inner", pos)[0]
-            outer_pos = self.calc_border("outer", pos)[0]
+            inner_pos, result_tang, _, _ = self.calc_border("inner", pos)
+            inner_pos_height, new_inner_pos_x, new_inner_pos_y = self.calc_border_height("inner", pos, inner_pos[0], inner_pos[1], result_tang)
+            outer_pos, result_tang, _, _ = self.calc_border("outer", pos)
+            outer_pos_height, new_outer_pos_x, new_outer_pos_y = self.calc_border_height("outer", pos, outer_pos[0], outer_pos[1], result_tang)
             original_width = np.linalg.norm(inner_pos - outer_pos)
 
             # if not mirroring lane or outside of range
@@ -380,23 +442,28 @@ class ParametricLaneGroup:
                 pos, mirror_interval[1]
             ):
                 if transformer is not None:
-                    left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
-                    right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
+                    left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1], inner_pos_height))
+                    right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1], outer_pos_height))
                 else:
-                    left_vertices.append(inner_pos)
-                    right_vertices.append(outer_pos)
+                    inner_pos_3d = np.concatenate([inner_pos, np.array([inner_pos_height])])
+                    outer_pos_3d = np.concatenate([outer_pos, np.array([outer_pos_height])])
+                    left_vertices.append(inner_pos_3d)
+                    right_vertices.append(outer_pos_3d)
                 last_width_difference = 0
 
             else:
                 # calculate positions of adjacent lanelet because new width of lanelet
                 # cannot be more than width of adjacent lanelet and original width
-                adj_inner_pos = adjacent_lanelet.calc_border("inner", pos)[0]
-                adj_outer_pos = adjacent_lanelet.calc_border("outer", pos)[0]
+                adj_inner_pos, result_tang_inner, _, _ = adjacent_lanelet.calc_border("inner", pos)
+                adj_outer_pos, result_tang_outer, _, _ = adjacent_lanelet.calc_border("outer", pos)
+                adj_inner_pos_height = adjacent_lanelet.calc_border_height("inner", pos, adj_inner_pos[0], adj_inner_pos[1], result_tang_inner)[0]
+                adj_outer_pos_height = adjacent_lanelet.calc_border_height("outer", pos, adj_outer_pos[0], adj_outer_pos[1], result_tang_outer)[0]
                 adjacent_width = np.linalg.norm(adj_inner_pos - adj_outer_pos)
                 local_width_offset = distance_slope * pos + global_distance[0]
 
                 if mirror_border == "left":
-                    new_outer_pos = self.calc_border("inner", pos, local_width_offset)[0]
+                    new_outer_pos, result_tang, _, _ = self.calc_border("inner", pos, local_width_offset)
+                    new_outer_pos_height = self.calc_border_height("inner", pos, new_outer_pos[0], new_outer_pos[1], result_tang)[0]
                     modified_width = np.linalg.norm(new_outer_pos - inner_pos)
 
                     # change width s.t. it does not mirror inner border but instead
@@ -405,68 +472,79 @@ class ParametricLaneGroup:
                         math.copysign(1, local_width_offset) * last_width_difference
                     )
                     if modified_width < original_width:
-                        new_vertex = self.calc_border("outer", pos, local_width_offset)[0]
+                        new_vertex, result_tang, _, _ = self.calc_border("outer", pos, local_width_offset)
+                        new_vertex_height = self.calc_border_height("outer", pos, new_vertex[0], new_vertex[1], result_tang)[0]
                         if transformer is not None:
                             right_vertices.append(
-                                transformer.transform(new_vertex[0], new_vertex[1])
+                                transformer.transform(new_vertex[0], new_vertex[1], new_vertex_height)
                             )
                         else:
-                            right_vertices.append(new_vertex)
+                            new_vertex_3d = np.concatenate([new_vertex, np.array([new_vertex_height])])
+                            right_vertices.append(new_vertex_3d)
                     elif modified_width > original_width + adjacent_width:
                         if transformer is not None:
                             right_vertices.append(
-                                transformer.transform(adj_outer_pos[0], adj_outer_pos[1])
+                                transformer.transform(adj_outer_pos[0], adj_outer_pos[1], adj_outer_pos_height)
                             )
                         else:
-                            right_vertices.append(adj_outer_pos)
+                            adj_outer_pos_3d = np.concatenate([adj_outer_pos, np.array([adj_outer_pos_height])])[0]
+                            right_vertices.append(adj_outer_pos_3d)
                     else:
                         if transformer is not None:
                             right_vertices.append(
-                                transformer.transform(new_outer_pos[0], new_outer_pos[1])
+                                transformer.transform(new_outer_pos[0], new_outer_pos[1], new_outer_pos_height)
                             )
                         else:
-                            right_vertices.append(new_outer_pos)
+                            new_outer_pos_3d = np.concatenate([new_outer_pos, np.array([new_outer_pos_height])])
+                            right_vertices.append(new_outer_pos_3d)
                         last_width_difference = abs(modified_width - original_width)
 
                     if transformer is not None:
-                        left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
+                        left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1], inner_pos_height))
                     else:
-                        left_vertices.append(inner_pos)
+                        inner_pos_3d = np.concatenate([inner_pos, np.array([inner_pos_height])])
+                        left_vertices.append(inner_pos_3d)
                 elif mirror_border == "right":
-                    new_inner_pos = self.calc_border("outer", pos, local_width_offset)[0]
+                    new_inner_pos, result_tang, _, _ = self.calc_border("outer", pos, local_width_offset)
+                    new_inner_pos_height = self.calc_border_height("outer", pos, new_inner_pos[0], new_inner_pos[1], result_tang)[0]
                     modified_width = np.linalg.norm(new_inner_pos - outer_pos)
 
                     local_width_offset = (
                         math.copysign(1, local_width_offset) * last_width_difference
                     )
                     if modified_width < original_width:
-                        new_vertex = self.calc_border("inner", pos, local_width_offset)[0]
+                        new_vertex, result_tang, _, _ = self.calc_border("inner", pos, local_width_offset)
+                        new_vertex_height = self.calc_border_height("inner", pos, new_vertex[0], new_vertex[1], result_tang)[0]
                         if transformer is not None:
                             left_vertices.append(
-                                transformer.transform(new_vertex[0], new_vertex[1])
+                                transformer.transform(new_vertex[0], new_vertex[1], new_vertex_height)
                             )
                         else:
-                            left_vertices.append(new_vertex)
+                            new_vertex_3d = np.concatenate([new_vertex, np.array([new_vertex_height])])
+                            left_vertices.append(new_vertex_3d)
                     elif modified_width > original_width + adjacent_width:
                         if transformer is not None:
                             left_vertices.append(
-                                transformer.transform(adj_inner_pos[0], adj_inner_pos[1])
+                                transformer.transform(adj_inner_pos[0], adj_inner_pos[1], adj_inner_pos_height)
                             )
                         else:
-                            left_vertices.append(adj_inner_pos)
+                            adj_inner_pos_3d = np.concatenate([adj_inner_pos, np.array([adj_inner_pos_height])])
+                            left_vertices.append(adj_inner_pos_3d)
                     else:
                         if transformer is not None:
                             left_vertices.append(
-                                transformer.transform(new_inner_pos[0], new_inner_pos[1])
+                                transformer.transform(new_inner_pos[0], new_inner_pos[1], new_inner_pos_height)
                             )
                         else:
-                            left_vertices.append(new_inner_pos)
+                            new_inner_pos_3d = np.concatenate([new_inner_pos, np.array([new_inner_pos_height])])
+                            left_vertices.append(new_inner_pos_3d)
                         last_width_difference = abs(modified_width - original_width)
 
                     if transformer is not None:
-                        right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
+                        right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1], outer_pos_height))
                     else:
-                        right_vertices.append(outer_pos)
+                        outer_pos_3d = np.concatenate([outer_pos, np.array([outer_pos_height])])
+                        right_vertices.append(outer_pos_3d)
 
         left_vertices, right_vertices = (
             np.array(left_vertices),

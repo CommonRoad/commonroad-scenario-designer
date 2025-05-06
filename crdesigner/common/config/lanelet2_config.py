@@ -81,7 +81,7 @@ class Lanelet2Config(BaseConfig):
     )
 
     translate = Attribute(
-        False,
+        True,
         "Translate",
         "Boolean indicating whether map should be translated by the location coordinate specified "
         "in the CommonRoad map",
