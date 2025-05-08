@@ -360,12 +360,12 @@ class ParametricLane:
             height_inner = convert_height_ellipsoid_to_orthometric(x_inner, y_inner, HEIGHT_ellipsoid)
             height_outer = convert_height_ellipsoid_to_orthometric(x_outer, y_outer, HEIGHT_ellipsoid)
             #debug:compare height before and after
-            print(f"height_ellipsoid: {HEIGHT_ellipsoid}, height_orthometric: {height_inner}")
-            print(f"height_ellipsoid: {HEIGHT_ellipsoid}, height_orthometric: {height_outer}")
+            # print(f"height_ellipsoid: {HEIGHT_ellipsoid}, height_orthometric: {height_inner}")
+            # print(f"height_ellipsoid: {HEIGHT_ellipsoid}, height_orthometric: {height_outer}")
             height_diff_inner = height_inner - HEIGHT_ellipsoid
             height_diff_outer = height_outer - HEIGHT_ellipsoid
-            print(f"height_diff_inner: {height_diff_inner}") 
-            print(f"height_diff_outer: {height_diff_outer}")
+            # print(f"height_diff_inner: {height_diff_inner}") 
+            # print(f"height_diff_outer: {height_diff_outer}")
             if transformer is not None:
                 #avoid the type error
                 x_trans_inner, y_trans_inner = transformer.transform(x_inner, y_inner)
@@ -444,11 +444,14 @@ class ParametricLane:
             elevation_inner, new_inner_x, new_inner_y = self.calc_border_height("inner", s, inner_pos[0], inner_pos[1], result_tang)
             elevation_outer, new_outer_x, new_outer_y = self.calc_border_height("outer", s, outer_pos[0], outer_pos[1], result_tang_outer)
 
+            height_inner = convert_height_ellipsoid_to_orthometric(inner_pos[0], inner_pos[1], elevation_inner)
+            height_outer = convert_height_ellipsoid_to_orthometric(outer_pos[0], outer_pos[1], elevation_outer)
+
             if transformer is not None:
                 # left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
                 # right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
-                left_vertices.append(transformer.transform(new_inner_x, new_inner_y, elevation_inner))
-                right_vertices.append(transformer.transform(new_outer_x, new_outer_y, elevation_outer))
+                left_vertices.append(transformer.transform(new_inner_x, new_inner_y, height_inner))
+                right_vertices.append(transformer.transform(new_outer_x, new_outer_y, height_outer))
             else:
                 left_vertices.append([inner_pos[0], inner_pos[1], elevation_inner])
                 right_vertices.append([outer_pos[0], outer_pos[1], elevation_outer])
