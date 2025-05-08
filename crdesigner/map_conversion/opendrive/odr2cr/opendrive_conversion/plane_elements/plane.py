@@ -2,6 +2,7 @@ from typing import List, Optional, Tuple
 from pyproj import CRS, Transformer
 import numpy as np
 import bisect
+import bisect
 from numpy.polynomial import polynomial
 from pyproj import Transformer
 
@@ -137,6 +138,33 @@ class ParametricLane:
         self.speed = speed
         self.access = access if access is not None else []
         self.driving_direction = driving_direction
+        self.inner_neighbour_id = None
+        self.inner_parametric_lane_group = None 
+        self.elevation_profile = None
+        self.superelevation = None
+        # The offset of the lane section belonging to its ParametricLaneGroup within the entire road.
+        self.offset_lanesection = 0.0  
+        # The offset of its associated ParametricLane within the ParametricLaneGroup due to its width.
+        self.offset_width = 0.0 
+        self.shape = None 
+
+    def set_elevation_profile(self, elevation_profile):
+        self.elevation_profile = elevation_profile
+
+    def set_superelevation(self, superelevation):
+        self.superelevation = superelevation
+
+    def set_inner_parametric_lane_group(self, inner_parametric_lane_group):
+        self.inner_parametric_lane_group = inner_parametric_lane_group
+
+    def set_offset_width(self, offset_width):
+        self.offset_width = offset_width
+
+    def set_offset_lanesection(self, offset_lanesection):
+        self.offset_lanesection = offset_lanesection
+
+    def set_shape(self, shape):
+        self.shape = shape
         self.inner_neighbour_id = None
         self.inner_parametric_lane_group = None 
         self.elevation_profile = None

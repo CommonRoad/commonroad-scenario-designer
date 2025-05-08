@@ -18,13 +18,13 @@ class Lanelet2Config(BaseConfig):
     )
 
     autoware = Attribute(
-        False,
+        True,
         "Autoware",
         "Boolean indicating whether the conversion " "should be autoware compatible",
     )
 
     use_local_coordinates = Attribute(
-        False,
+        True,
         "Use local coordinates",
         "Boolean indicating whether local coordinates should be added",
     )
