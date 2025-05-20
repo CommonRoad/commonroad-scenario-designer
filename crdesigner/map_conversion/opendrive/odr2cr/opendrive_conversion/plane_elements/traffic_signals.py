@@ -27,6 +27,7 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadSi
     Signal,
 )
 
+import bisect
 
 def extract_traffic_element_id(
     signal_type: str, signal_subtype: str, traffic_sign_enum: enum
@@ -81,15 +82,18 @@ def assign_traffic_signals_to_road(
     # TODO: Stop lines are created and appended to the list for DEU and OpenDrive format.
     # This has been replicated for other countries but has not been tested with a test case
     # Stop lines have a signal type of 294 and are handled differently in the CommonRoad format
+
     for signal in road.signals:
         lanes = (
             (0, 0) if signal.validity_from is None else (signal.validity_from, signal.validity_to)
         )
         position, tangent, _, _ = road.plan_view.calc(signal.s, compute_curvature=False)
+        elevation = calculate_elevation(road.elevation_profile, signal.s)
         position = np.array(
             [
                 position[0] + signal.t * np.cos(tangent + np.pi / 2),
                 position[1] + signal.t * np.sin(tangent + np.pi / 2),
+                elevation + signal.zOffset,
             ]
         )
         if signal.dynamic == "no":
@@ -253,3 +257,28 @@ def get_traffic_signal_references(
                 )
             else:
                 traffic_light_lanes[signal.signal_id] = (signal.validity_to, signal.validity_from)
+
+def calculate_elevation(elevation_profile, s: float) -> float:
+    """
+    优化的高程计算方法（二分查找）
+    """
+    # 预处理：获取有序的s_start列表和对应的多项式系数
+    elevations = elevation_profile.elevations
+    s_starts = [e.start_pos for e in elevations]  # 假设start_pos对应XML中的s属性
+    
+    # 二分查找找到最后一个s_start <= s的索引
+    idx = bisect.bisect_right(s_starts, s) - 1
+    
+    # 处理边界情况
+    if idx < 0:
+        return 0.0  # 或根据第一个段的a值返回
+    
+    # 获取对应的高程段
+    elevation = elevations[idx]
+    a, b, c, d = elevation.polynomial_coefficients  # 假设返回顺序是[a, b, c, d]
+    
+    # 计算ds
+    ds = s - elevation.start_pos
+    
+    # 三次多项式计算
+    return a + b*ds + c*(ds**2) + d*(ds**3)

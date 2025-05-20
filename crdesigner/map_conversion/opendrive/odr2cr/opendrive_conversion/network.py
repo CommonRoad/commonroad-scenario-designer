@@ -63,7 +63,9 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.opendr
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road import (
     Road,
 )
-
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.utils import (
+    convert_height_ellipsoid_to_orthometric,
+)
 
 def get_all_adjacent_lanelets(lanelet_network, incoming_lanelet_id):
     """
@@ -493,7 +495,7 @@ class Network:
 
         self.relate_crosswalks_to_intersection(lanelet_network)
 
-        if transformer is not None:
+        '''if transformer is not None:
             # Apply the transformer to traffic controls
             for xs in [
                 self._traffic_lights,
@@ -503,7 +505,27 @@ class Network:
                     x.position = np.array(transformer.transform(*x.position))
             for x in self._stop_lines:
                 x.start = np.array(transformer.transform(*x.start))
-                x.end = np.array(transformer.transform(*x.end))
+                x.end = np.array(transformer.transform(*x.end))'''
+
+        if transformer is  not None:
+            for xs in [self._traffic_lights, self._traffic_signs]:
+                for x in xs:
+                    x_ellipsoid, y_ellipsoid, z_ellipsoid = x.position
+                    x_proj, y_proj = transformer.transform(x_ellipsoid, y_ellipsoid)
+                    z_orthometric = convert_height_ellipsoid_to_orthometric(x_ellipsoid, y_ellipsoid, z_ellipsoid)
+                    x.position = np.array([x_proj, y_proj, z_orthometric])
+
+            for x in self._stop_lines:
+                start_x_ellipsoid, start_y_ellipsoid, start_z_ellipsoid = x.start
+                start_x_proj, start_y_proj = transformer.transform(start_x_ellipsoid, start_y_ellipsoid)
+                start_z_orthometric = convert_height_ellipsoid_to_orthometric(start_x_ellipsoid, start_y_ellipsoid, start_z_ellipsoid)
+                x.start = np.array([start_x_proj, start_y_proj, start_z_orthometric])
+                
+                # 转换终点
+                end_x_ellipsoid, end_y_ellipsoid, end_z_ellipsoid = x.end
+                end_x_proj, end_y_proj = transformer.transform(end_x_ellipsoid, end_y_ellipsoid)
+                end_z_orthometric = convert_height_ellipsoid_to_orthometric(end_x_ellipsoid, end_y_ellipsoid, end_z_ellipsoid)
+                x.end = np.array([end_x_proj, end_y_proj, end_z_orthometric])
 
         # Assign traffic signals, lights and stop lines to lanelet network
         lanelet_network.add_traffic_lights_to_network(self._traffic_lights)

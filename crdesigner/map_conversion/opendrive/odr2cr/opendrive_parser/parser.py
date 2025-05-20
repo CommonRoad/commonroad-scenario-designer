@@ -509,6 +509,7 @@ def parse_opendrive_road_signal(new_road: Road, road_signal: etree.ElementTree):
     new_signal.signal_value = road_signal.get("value")
     new_signal.unit = road_signal.get("unit")
     new_signal.text = road_signal.get("text")
+    new_signal.zOffset = road_signal.get("zOffset")
     if road_signal.find("validity") is not None:
         new_signal.validity_from = road_signal.find("validity").get("fromLane")
         new_signal.validity_to = road_signal.find("validity").get("toLane")
@@ -536,6 +537,7 @@ def parse_opendrive_road_signal_reference(new_road: Road, road_signal_reference:
     new_signal_reference.t = road_signal_reference.get(
         "t"
     )  # position away from the reference curve
+    new_signal_reference.zOffset = road_signal_reference.get("zOffset")
     new_signal_reference.orientation = road_signal_reference.get("orientation")
     if road_signal_reference.find("validity") is not None:
         new_signal_reference.validity_from = road_signal_reference.find("validity").get("fromLane")
