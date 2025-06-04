@@ -544,7 +544,7 @@ class Network:
                 x.start = np.array(transformer.transform(*x.start))
                 x.end = np.array(transformer.transform(*x.end))
         '''
-        
+        '''
         if transformer is  not None:
             for xs in [self._traffic_lights, self._traffic_signs]:
                 for x in xs:
@@ -566,6 +566,23 @@ class Network:
                 end_x_proj, end_y_proj = transformer.transform(end_x_ellipsoid, end_y_ellipsoid)
                 end_z_orthometric = convert_height_ellipsoid_to_orthometric(end_x_ellipsoid, end_y_ellipsoid, end_z_ellipsoid)
                 x.end = np.array([end_x_proj, end_y_proj, end_z_orthometric])
+        '''
+        if transformer is  not None:
+            for xs in [self._traffic_lights, self._traffic_signs]:
+                for x in xs:
+                    x_temp, y_temp, z_temp = x.position
+                    x_proj, y_proj = transformer.transform(x_temp, y_temp)
+                    x.position = np.array([x_proj, y_proj, z_temp])
+
+            for x in self._stop_lines:
+                start_x_temp, start_y_temp, start_z_temp = x.start
+                start_x_proj, start_y_proj = transformer.transform(start_x_temp, start_y_temp)
+                x.start = np.array([start_x_proj, start_y_proj, start_z_temp])
+                
+                #
+                end_x_temp, end_y_temp, end_z_temp = x.end
+                end_x_proj, end_y_proj = transformer.transform(end_x_temp, end_y_temp)
+                x.end = np.array([end_x_proj, end_y_proj, end_z_temp])
         self.assign_traffic_sign_heights_from_surface()
         # Assign traffic signals, lights and stop lines to lanelet network
         lanelet_network.add_traffic_lights_to_network(self._traffic_lights)
@@ -613,34 +630,33 @@ class Network:
         
         return convert_to_base_lanelet_network(lanelet_network)
     
+
     def assign_traffic_sign_heights_from_surface(self):
         from scipy.spatial import cKDTree
         import numpy as np
-        surface_pts = []
-        for pg in self._planes:
-            for pl in getattr(pg, "parametric_lanes", []):
-                if hasattr(pl, "_all_surface_points"):
-                    surface_pts.append(pl._all_surface_points)
-        if not surface_pts:
-            print("no surface points …");  return
-        surface_pts = np.vstack(surface_pts)
-        tree = cKDTree(surface_pts[:, :2])
+        surface_points = []
+
+        for pl_group in self._planes:
+            # 遍历每个 PlaneGroup 里的 parametric_lanes
+            for pl in getattr(pl_group, "parametric_lanes", []):
+                if hasattr(pl, "_all_surface_points") and pl._all_surface_points is not None:
+                    surface_points.append(pl._all_surface_points)
+
+        if not surface_points:
+            print("there are no surface points to assign traffic sign heights from")
+            return
+        surface_points = np.vstack(surface_points)
+        tree = cKDTree(surface_points[:, :2])
 
         for ts in self._traffic_signs:
-            # --- 最近的正高地面 --------------------
-            x, y = ts.position[:2]
-            _, idx = tree.query([x, y])
-            H_ground = surface_pts[idx, 2]          # 正高
-
-            # --- 把椭球 zOffset → 正高差 ----------
-            dz_ellip = getattr(ts, "zOffset", 0.0)  # still ellipsoid
-            # 用同一点 (x,y) 把 “0” 和 “dz” 分别做一次转换
-            H0   = convert_height_ellipsoid_to_orthometric(x, y, 0.0)
-            Hdz  = convert_height_ellipsoid_to_orthometric(x, y, dz_ellip)
-            dz_orth = Hdz - H0                      # 正高版 zOffset
-
-            # --- 最终高度 --------------------------
-            ts.position = np.array([x, y, H_ground + dz_orth])
+            # 支持2d/3d输入
+            pos = ts.position
+            x, y = pos[:2]
+            z_offset = getattr(ts, 'zOffset', 0.0)
+            dist, idx = tree.query([x, y])
+            z_surface = surface_points[idx, 2]
+            z_final = z_surface + z_offset
+            ts.position = np.array([x, y, z_final])
 
 
     def relate_crosswalks_to_intersection(self, lanelet_network: ConversionLaneletNetwork):
