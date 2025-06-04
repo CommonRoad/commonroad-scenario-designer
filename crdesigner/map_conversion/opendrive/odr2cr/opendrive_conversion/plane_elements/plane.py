@@ -472,6 +472,12 @@ class ParametricLane:
             else:
                 left_vertices.append([inner_pos[0], inner_pos[1], elevation_inner])
                 right_vertices.append([outer_pos[0], outer_pos[1], elevation_outer])
+                
+        self._all_surface_points = np.vstack([
+            np.array(left_vertices),
+            np.array(right_vertices),
+            np.array([( (l[0]+r[0])/2, (l[1]+r[1])/2, (l[2]+r[2])/2 ) for l, r in zip(left_vertices, right_vertices)])
+        ])
 
         return np.array(left_vertices), np.array(right_vertices)
 

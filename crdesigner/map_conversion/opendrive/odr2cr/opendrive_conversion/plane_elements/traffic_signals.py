@@ -87,7 +87,7 @@ def assign_traffic_signals_to_road(
         lanes = (
             (0, 0) if signal.validity_from is None else (signal.validity_from, signal.validity_to)
         )
-
+        """
         # ——— ①：先计算参考线在 s 处的平面坐标和切线角度 ———
         ref_pos, tangent, _, _ = road.plan_view.calc(
             signal.s, compute_curvature=False
@@ -104,15 +104,17 @@ def assign_traffic_signals_to_road(
 
         position = np.array([x_t, y_t, z_t])
         """
+        
         position, tangent, _, _ = road.plan_view.calc(signal.s, compute_curvature=False)
-        elevation = calculate_elevation(road.elevation_profile, signal.s)#here elevation = z coordinate
+        #elevation = calculate_elevation(road.elevation_profile, signal.s)#here elevation = z coordinate
         position = np.array(
             [
                 position[0] + signal.t * np.cos(tangent + np.pi / 2),
                 position[1] + signal.t * np.sin(tangent + np.pi / 2),
-                elevation + signal.zOffset,#build xyz coordinate with zOffset
+                0,
+                #elevation + signal.zOffset,#build xyz coordinate with zOffset
             ]
-        )"""
+        )
         if signal.dynamic == "no":
             if (
                 signal.signal_value == "-1"

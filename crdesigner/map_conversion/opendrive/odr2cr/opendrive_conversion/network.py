@@ -542,7 +542,7 @@ class Network:
             for x in self._stop_lines:
                 x.start = np.array(transformer.transform(*x.start))
                 x.end = np.array(transformer.transform(*x.end))'''
-
+        self.assign_traffic_sign_heights_from_surface()
         if transformer is  not None:
             for xs in [self._traffic_lights, self._traffic_signs]:
                 for x in xs:
@@ -607,7 +607,37 @@ class Network:
         self.find_lane_speed_changes(drivable_lanelets, lanelet_network)
         self.reference_traffic_signs_with_equal_speed(drivable_lanelets, lanelet_network)
         lanelet_network = update_line_markings(lanelet_network)
+
+        
         return convert_to_base_lanelet_network(lanelet_network)
+    
+    def assign_traffic_sign_heights_from_surface(self):
+        from scipy.spatial import cKDTree
+        import numpy as np
+        surface_points = []
+
+        for pl_group in self._planes:
+            # 遍历每个 PlaneGroup 里的 parametric_lanes
+            for pl in getattr(pl_group, "parametric_lanes", []):
+                if hasattr(pl, "_all_surface_points") and pl._all_surface_points is not None:
+                    surface_points.append(pl._all_surface_points)
+
+        if not surface_points:
+            print("there are no surface points to assign traffic sign heights from")
+            return
+        surface_points = np.vstack(surface_points)
+        tree = cKDTree(surface_points[:, :2])
+
+        for ts in self._traffic_signs:
+            # 支持2d/3d输入
+            pos = ts.position
+            x, y = pos[:2]
+            z_offset = getattr(ts, 'zOffset', 0.0)
+            dist, idx = tree.query([x, y])
+            z_surface = surface_points[idx, 2]
+            z_final = z_surface + z_offset
+            ts.position = np.array([x, y, z_final])
+
 
     def relate_crosswalks_to_intersection(self, lanelet_network: ConversionLaneletNetwork):
         """
