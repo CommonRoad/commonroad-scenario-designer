@@ -616,29 +616,31 @@ class Network:
     def assign_traffic_sign_heights_from_surface(self):
         from scipy.spatial import cKDTree
         import numpy as np
-        surface_points = []
-
-        for pl_group in self._planes:
-            # 遍历每个 PlaneGroup 里的 parametric_lanes
-            for pl in getattr(pl_group, "parametric_lanes", []):
-                if hasattr(pl, "_all_surface_points") and pl._all_surface_points is not None:
-                    surface_points.append(pl._all_surface_points)
-
-        if not surface_points:
-            print("there are no surface points to assign traffic sign heights from")
-            return
-        surface_points = np.vstack(surface_points)
-        tree = cKDTree(surface_points[:, :2])
+        surface_pts = []
+        for pg in self._planes:
+            for pl in getattr(pg, "parametric_lanes", []):
+                if hasattr(pl, "_all_surface_points"):
+                    surface_pts.append(pl._all_surface_points)
+        if not surface_pts:
+            print("no surface points …");  return
+        surface_pts = np.vstack(surface_pts)
+        tree = cKDTree(surface_pts[:, :2])
 
         for ts in self._traffic_signs:
-            # 支持2d/3d输入
-            pos = ts.position
-            x, y = pos[:2]
-            z_offset = getattr(ts, 'zOffset', 0.0)
-            dist, idx = tree.query([x, y])
-            z_surface = surface_points[idx, 2]
-            z_final = z_surface + z_offset
-            ts.position = np.array([x, y, z_final])
+            # --- 最近的正高地面 --------------------
+            x, y = ts.position[:2]
+            _, idx = tree.query([x, y])
+            H_ground = surface_pts[idx, 2]          # 正高
+
+            # --- 把椭球 zOffset → 正高差 ----------
+            dz_ellip = getattr(ts, "zOffset", 0.0)  # still ellipsoid
+            # 用同一点 (x,y) 把 “0” 和 “dz” 分别做一次转换
+            H0   = convert_height_ellipsoid_to_orthometric(x, y, 0.0)
+            Hdz  = convert_height_ellipsoid_to_orthometric(x, y, dz_ellip)
+            dz_orth = Hdz - H0                      # 正高版 zOffset
+
+            # --- 最终高度 --------------------------
+            ts.position = np.array([x, y, H_ground + dz_orth])
 
 
     def relate_crosswalks_to_intersection(self, lanelet_network: ConversionLaneletNetwork):
