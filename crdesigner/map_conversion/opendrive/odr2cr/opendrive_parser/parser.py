@@ -48,6 +48,9 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLa
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     RoadMark as RoadLaneRoadMark,
 )
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
+    height as RoadLaneHeight,
+)
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLateralProfile import (
     Crossfall as RoadLateralProfileCrossfall,
 )
@@ -482,7 +485,12 @@ def parse_opendrive_road_lane_section(
                     ]
                 ]
             # Lane Height
-            # TODO implementation
+            for height in lane.findall("height"):
+                lane_height = RoadLaneHeight()
+                lane_height.sOffset = height.get("sOffset")
+                lane_height.inner = height.get("inner")
+                lane_height.outer = height.get("outer")
+                new_lane.height.append(lane_height)
 
             newSideLanes.append(new_lane)
 

@@ -193,6 +193,7 @@ class Lane:
         self._road_mark = []
         self.speed = None
         self.access = []
+        self._height = []
         # TODO material -> see parser.py
         # TODO speed limit -> see parser.py
         # TODO height -> see parser.py
@@ -302,6 +303,18 @@ class Lane:
             return num_widths - 1
 
         return 0
+    @property
+    def height(self) -> List[height]:
+        """
+        Describes the height of the lane.
+
+        :getter: returns height
+        :setter: sets height
+        """
+        return self._height
+    @height.setter
+    def height(self, value: List[height]):
+        self._height = value
 
     @property
     def borders(self) -> List[LaneBorder]:
@@ -534,7 +547,87 @@ class LaneBorder(LaneWidth):
     and methods.
     """
 
+class height:
+    """
+    Lane height 
+    Lane height may be used to elevate a lane independent from the road elevation.
+    Lane height is used to implement small-scale elevation, such as raising pedestrian walkways. 
+    Lane height is specified as offset from the road (including elevation, superelevation, shape, cross section surface) in h-direction.
+    """
+    def __init__(self):
+        self._sOffset = None
+        self._inner = None
+        self._outer = None
 
+    @property
+    def sOffset(self) -> float:
+        """
+        s-coordinate of start position, 
+        relative to the position of the preceding <laneSection> element
+
+
+        :getter: returns sOffset
+        :setter: sets sOffset
+        """
+        return self._sOffset
+    
+    @sOffset.setter
+    def sOffset(self, value: float):
+        """
+        Setter of the s-coordinate of the start position
+        relative to the position of the preceding <laneSection> element
+        :param value: value the sOffset is set to
+        """
+        if value is None:
+            warnings.warn(
+                "Parser could not find value for height.sOffset, 0 is used per default."
+            )
+            value = 0
+        self._sOffset = float(value)
+
+    @property
+    def inner(self) -> float:
+        """
+        Inner offset from road level
+
+        :getter: returns inner height
+        :setter: sets inner height
+        """
+        return self._inner
+    @inner.setter
+    def inner(self, value: float):
+        """
+        Setter of the inner offset from road level
+        :param value: value the inner height is set to
+        """
+        if value is None:
+            warnings.warn(
+                "Parser could not find value for height.inner, 0 is used per default."
+            )
+            value = 0
+        self._inner = float(value)
+
+    @property
+    def outer(self) -> float:
+        """
+        Outer offset from road level
+
+        :getter: returns outer height
+        :setter: sets outer height
+        """
+        return self._outer
+    @outer.setter
+    def outer(self, value: float):
+        """
+        Setter of the outer offset from road level
+        :param value: value the outer height is set to
+        """
+        if value is None:
+            warnings.warn(
+                "Parser could not find value for height.outer, 0 is used per default."
+            )
+            value = 0
+        self._outer = float(value)
 class RoadMark:
     """
     Lanes on roads can have different lane markings, for example lines of different colors and styles.

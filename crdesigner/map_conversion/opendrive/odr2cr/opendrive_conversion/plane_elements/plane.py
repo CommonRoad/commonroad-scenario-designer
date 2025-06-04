@@ -98,6 +98,7 @@ class ParametricLaneBorderGroup:
         # TODO: expand implementation to consider border offset record
         return self.outer_border.get_next_width_coeffs(self.outer_border_offset)
 
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import height as HeightRecord
 
 class ParametricLane:
     """A lane defines a part of a road along a
@@ -147,6 +148,7 @@ class ParametricLane:
         # The offset of its associated ParametricLane within the ParametricLaneGroup due to its width.
         self.offset_width = 0.0 
         self.shape = None 
+        self.lane_height_records: List[HeightRecord] = []
 
     def set_elevation_profile(self, elevation_profile):
         self.elevation_profile = elevation_profile
@@ -446,13 +448,7 @@ class ParametricLane:
         """
         left_vertices = []
         right_vertices = []
-        # calculate left and right vertices of lanelet
-        # s = 0
-        # check_3 = True
 
-        # old version from opendrive2lanelet start
-        # no sampling of s and "distance" between two consecutive s is similar
-        #
         if self.length < 0:
             return np.array(left_vertices), np.array(right_vertices)
         
@@ -460,13 +456,7 @@ class ParametricLane:
         poses = np.linspace(0, self.length, num_steps)
 
         for s in poses:
-            #----------------------------------------------------------------------------------------------------
-            #
-            # old version end
 
-            # version with sampling
-            # while s <= self.length:
-            # s_cache = s + 0.0
             inner_pos, result_tang, curvature, max_geometry_length = self.calc_border("inner", s)
             outer_pos, result_tang_outer, _, _ = self.calc_border("outer", s, compute_curvature=False)
             elevation_inner, new_inner_x, new_inner_y = self.calc_border_height("inner", s, inner_pos[0], inner_pos[1], result_tang)
@@ -476,32 +466,13 @@ class ParametricLane:
             height_outer = convert_height_ellipsoid_to_orthometric(outer_pos[0], outer_pos[1], elevation_outer)
 
             if transformer is not None:
-                # left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
-                # right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
+
                 left_vertices.append(transformer.transform(new_inner_x, new_inner_y, height_inner))
                 right_vertices.append(transformer.transform(new_outer_x, new_outer_y, height_outer))
             else:
                 left_vertices.append([inner_pos[0], inner_pos[1], elevation_inner])
                 right_vertices.append([outer_pos[0], outer_pos[1], elevation_outer])
 
-            # version with sampling
-            # if s >= self.length:
-            #     break
-            #
-            # if s == max_geometry_length:
-            #     s += min_delta_s
-            # else:
-            #     s = calc_next_s(s, curvature, error_tolerance=error_tolerance, min_delta_s=min_delta_s,
-            #                     s_max=max_geometry_length)
-            #
-            # # ensure total road length is not exceeded
-            # s = min(self.length, s)
-            # # ensure lanelet has >= 3 vertices
-            # if check_3 and s >= self.length:
-            #     s = (s_cache + self.length) * 0.5
-            #
-            # check_3 = False
-        # assert len(left_vertices) >= 3, f"Not enough vertices, len: {len(left_vertices)}"
         return np.array(left_vertices), np.array(right_vertices)
 
     def zero_width_change_positions(self) -> float:
@@ -644,16 +615,33 @@ class ParametricLane:
                                          else lateral_distance_from_inner_to_centerline + \
                                          self.calc_width(s_to_parametriclane)
 
-
-        # lateral Profile: <shape> and <superelevation>
-        superelevation = self.calc_superelevation(s_to_road)
-        shape_profile = self.calc_shape(s_to_road, lateral_distance_to_centerline)
-        
-        height_to_ref_line, x_new, y_new = correction_due_to_superelevation(x_old, y_old, plane_curve_hdg, \
-                                                                            superelevation, \
-                                                                            shape_profile, \
-                                                                            lateral_distance_to_centerline)
+        #Decide whether to apply superelevation/shape, for lane height
+        if getattr(self, "level", False):
+            height_to_ref_line = 0.0
+            x_new, y_new = x_old, y_old
+        else:
+            # lateral Profile: <shape> and <superelevation>
+            superelevation = self.calc_superelevation(s_to_road)
+            shape_profile = self.calc_shape(s_to_road, lateral_distance_to_centerline)
+            
+            height_to_ref_line, x_new, y_new = correction_due_to_superelevation(x_old, y_old, plane_curve_hdg, \
+                                                                                superelevation, \
+                                                                                shape_profile, \
+                                                                                lateral_distance_to_centerline)
         final_height = height_to_ref_line * side_coeff + self.calc_elevation_central(s_to_road)
+         # —— 新增：把 lane‐local height（<height> inner/outer）叠加到 final_height
+            # 确保 records 按 sOffset 升序
+        records = sorted(self.lane_height_records, key=lambda rec: rec.sOffset)
+        lane_offset = 0.0
+        for rec in records:
+            if rec.sOffset <= s_to_parametriclane:
+                # 每遇到一个新的高度记录，就更新 offset
+                lane_offset = rec.inner if border == "inner" else rec.outer
+            else:
+                # 一旦超过了当前 s，就可以退出循环
+                break
+        final_height += lane_offset
+        print(f"s={s_to_parametriclane}, records={self.lane_height_records}")
 
         return final_height, x_new, y_new
     

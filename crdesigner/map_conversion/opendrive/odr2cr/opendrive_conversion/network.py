@@ -66,6 +66,7 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road i
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.utils import (
     convert_height_ellipsoid_to_orthometric,
 )
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import height as HeightRecord
 
 def get_all_adjacent_lanelets(lanelet_network, incoming_lanelet_id):
     """
@@ -274,6 +275,41 @@ class Network:
                     road.cr_stop_lines,
                     road.driving_direction,
                 )
+            # 2) 注入每个 ParametricLane 对应的 height 列表
+            for group in parametric_lane_groups:
+                for pl in group.parametric_lanes:
+                    parts = pl.id_.split('.')
+                    if len(parts) < 4:
+                        pl.lane_height_records = []
+                        continue
+
+                    side    = int(parts[2])  # lane_id
+                    # 找到 origlane
+                    if side < 0:
+                        origlane = next(
+                            (l for l in lane_section.right_lanes if int(l.id) == side),
+                            None
+                        )
+                    else:
+                        origlane = next(
+                            (l for l in lane_section.left_lanes  if int(l.id) == side),
+                            None
+                        )
+
+                    if origlane and origlane.height:
+                        pl.lane_height_records = origlane.height.copy()
+                    else:
+                        pl.lane_height_records = []
+                    print(f"PL {pl.id_} → origlane: {origlane}, height: {pl.lane_height_records}")
+
+                    lane_id = int(pl.id_.split(".")[2])
+                    if lane_id < 0:
+                        origlane = next((l for l in lane_section.right_lanes if int(l.id)==lane_id), None)
+                    else:
+                        origlane = next((l for l in lane_section.left_lanes  if int(l.id)==lane_id), None)
+
+                        # 原始 new_lane.level 是 "true" 或 "false"
+                    pl.level = (origlane.level == "true") if origlane is not None else False
 
                 lane_section_elevations = []
                 if len(road.elevation_profile.elevations) > 1:
@@ -512,7 +548,9 @@ class Network:
                 for x in xs:
                     x_ellipsoid, y_ellipsoid, z_ellipsoid = x.position
                     x_proj, y_proj = transformer.transform(x_ellipsoid, y_ellipsoid)
+                    # convert_height_ellipsoid_to_orthometric returns z_orthometric only
                     z_orthometric = convert_height_ellipsoid_to_orthometric(x_ellipsoid, y_ellipsoid, z_ellipsoid)
+
                     x.position = np.array([x_proj, y_proj, z_orthometric])
 
             for x in self._stop_lines:
@@ -521,7 +559,7 @@ class Network:
                 start_z_orthometric = convert_height_ellipsoid_to_orthometric(start_x_ellipsoid, start_y_ellipsoid, start_z_ellipsoid)
                 x.start = np.array([start_x_proj, start_y_proj, start_z_orthometric])
                 
-                # 转换终点
+                #
                 end_x_ellipsoid, end_y_ellipsoid, end_z_ellipsoid = x.end
                 end_x_proj, end_y_proj = transformer.transform(end_x_ellipsoid, end_y_ellipsoid)
                 end_z_orthometric = convert_height_ellipsoid_to_orthometric(end_x_ellipsoid, end_y_ellipsoid, end_z_ellipsoid)
