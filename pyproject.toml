@@ -32,7 +32,7 @@ build-backend = "poetry.core.masonry.api"
 crdesigner = 'crdesigner.ui.command_line:cli'
 
 [tool.poetry.dependencies]
-python = "^3.9,<3.12"
+python = "^3.10,<3.12"
 commonroad-io = ">=2024.2, <=2024.3"
 commonroad-clcs = "^2025.1"
 commonroad-drivability-checker = "^2025.1"

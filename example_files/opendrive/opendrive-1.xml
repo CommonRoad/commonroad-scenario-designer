@@ -337,9 +337,9 @@
     <adjacentLeft ref="4" drivingDir="opposite"/>
     <adjacentRight ref="5" drivingDir="same"/>
     <laneletType>urban</laneletType>
+    <userOneWay>train</userOneWay>
     <userOneWay>pedestrian</userOneWay>
     <userOneWay>vehicle</userOneWay>
-    <userOneWay>train</userOneWay>
     <userOneWay>bicycle</userOneWay>
     <trafficSignRef ref="8"/>
   </lanelet>
@@ -663,9 +663,9 @@
     <adjacentLeft ref="3" drivingDir="same"/>
     <adjacentRight ref="6" drivingDir="same"/>
     <laneletType>urban</laneletType>
+    <userOneWay>train</userOneWay>
     <userOneWay>pedestrian</userOneWay>
     <userOneWay>vehicle</userOneWay>
-    <userOneWay>train</userOneWay>
     <userOneWay>bicycle</userOneWay>
     <trafficSignRef ref="9"/>
   </lanelet>
@@ -988,9 +988,9 @@
     </rightBound>
     <adjacentLeft ref="5" drivingDir="same"/>
     <laneletType>border</laneletType>
+    <userOneWay>train</userOneWay>
     <userOneWay>pedestrian</userOneWay>
     <userOneWay>vehicle</userOneWay>
-    <userOneWay>train</userOneWay>
     <userOneWay>bicycle</userOneWay>
   </lanelet>
   <lanelet id="4">
@@ -1313,9 +1313,9 @@
     <adjacentLeft ref="3" drivingDir="opposite"/>
     <adjacentRight ref="7" drivingDir="same"/>
     <laneletType>urban</laneletType>
+    <userOneWay>train</userOneWay>
     <userOneWay>pedestrian</userOneWay>
     <userOneWay>vehicle</userOneWay>
-    <userOneWay>train</userOneWay>
     <userOneWay>bicycle</userOneWay>
     <trafficSignRef ref="2"/>
     <trafficSignRef ref="10"/>
@@ -1639,9 +1639,9 @@
     </rightBound>
     <adjacentLeft ref="4" drivingDir="same"/>
     <laneletType>border</laneletType>
+    <userOneWay>train</userOneWay>
     <userOneWay>pedestrian</userOneWay>
     <userOneWay>vehicle</userOneWay>
-    <userOneWay>train</userOneWay>
     <userOneWay>bicycle</userOneWay>
   </lanelet>
   <trafficSign id="2">
@@ -1652,7 +1652,7 @@
       <point>
         <x>234630.2159</x>
         <y>5087069.7469</y>
-        <z>203.7576</z>
+        <z>249.9615</z>
       </point>
     </position>
     <virtual>false</virtual>
