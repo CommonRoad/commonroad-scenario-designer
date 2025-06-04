@@ -82,7 +82,7 @@ def assign_traffic_signals_to_road(
     # TODO: Stop lines are created and appended to the list for DEU and OpenDrive format.
     # This has been replicated for other countries but has not been tested with a test case
     # Stop lines have a signal type of 294 and are handled differently in the CommonRoad format
-
+    
     for signal in road.signals:
         lanes = (
             (0, 0) if signal.validity_from is None else (signal.validity_from, signal.validity_to)
@@ -168,6 +168,7 @@ def assign_traffic_signals_to_road(
                 position=position,
                 virtual=False,
             )
+            traffic_sign.zOffset = signal.zOffset if signal.zOffset is not None else 0.0
 
             road.add_traffic_sign((traffic_sign, lanes, signal.s))
             traffic_signs.append(traffic_sign)

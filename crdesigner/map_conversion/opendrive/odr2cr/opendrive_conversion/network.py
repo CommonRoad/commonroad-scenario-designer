@@ -531,7 +531,8 @@ class Network:
 
         self.relate_crosswalks_to_intersection(lanelet_network)
 
-        '''if transformer is not None:
+        '''
+        if transformer is not None:
             # Apply the transformer to traffic controls
             for xs in [
                 self._traffic_lights,
@@ -541,8 +542,9 @@ class Network:
                     x.position = np.array(transformer.transform(*x.position))
             for x in self._stop_lines:
                 x.start = np.array(transformer.transform(*x.start))
-                x.end = np.array(transformer.transform(*x.end))'''
-        self.assign_traffic_sign_heights_from_surface()
+                x.end = np.array(transformer.transform(*x.end))
+        '''
+        
         if transformer is  not None:
             for xs in [self._traffic_lights, self._traffic_signs]:
                 for x in xs:
@@ -564,7 +566,7 @@ class Network:
                 end_x_proj, end_y_proj = transformer.transform(end_x_ellipsoid, end_y_ellipsoid)
                 end_z_orthometric = convert_height_ellipsoid_to_orthometric(end_x_ellipsoid, end_y_ellipsoid, end_z_ellipsoid)
                 x.end = np.array([end_x_proj, end_y_proj, end_z_orthometric])
-
+        self.assign_traffic_sign_heights_from_surface()
         # Assign traffic signals, lights and stop lines to lanelet network
         lanelet_network.add_traffic_lights_to_network(self._traffic_lights)
         lanelet_network.add_traffic_signs_to_network(self._traffic_signs)
