@@ -7,6 +7,7 @@ from crdesigner.verification_repairing.verification.formula_ids import (
     GeneralFormulaID,
     IntersectionFormulaID,
     LaneletFormulaID,
+    LaneletFormulaID3D, 
     TrafficLightFormulaID,
     TrafficSignFormulaID,
 )
@@ -29,6 +30,10 @@ class GroupsHandler:
                 formulas=[
                     LaneletFormulaID.LEFT_RIGHT_BOUNDARY_ASSIGNMENT,
                     GeneralFormulaID.UNIQUE_ID,
+                    LaneletFormulaID3D.POLYLINES_INTERSECTION_3D,
+                    LaneletFormulaID3D.LEFT_SELF_INTERSECTION_3D,
+                    LaneletFormulaID3D.RIGHT_SELF_INTERSECTION_3D,
+                    LaneletFormulaID3D.LANELET_VERTICAL_CLEARANCE,
                 ],
             ),
             SpecificationGroup(
@@ -37,6 +42,10 @@ class GroupsHandler:
                     LaneletFormulaID.POLYLINES_INTERSECTION,
                     LaneletFormulaID.LEFT_SELF_INTERSECTION,
                     LaneletFormulaID.RIGHT_SELF_INTERSECTION,
+                    LaneletFormulaID3D.VERTICAL_CLEARANCE_STACKED,
+                    LaneletFormulaID3D.GRADE_WITHIN_LIMIT,
+                    LaneletFormulaID3D.PREDECESSOR_VERTICAL_STEP,
+                    LaneletFormulaID3D.TUNNEL_DEPTH_VALID,
                 ],
             ),
             SpecificationGroup(

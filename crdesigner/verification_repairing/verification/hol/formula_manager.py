@@ -8,6 +8,7 @@ from crdesigner.verification_repairing.verification.hol.formula_collection impor
     LaneletFormulas,
     TrafficLightFormulas,
     TrafficSignFormulas,
+    LaneletFormulas3D
 )
 from crdesigner.verification_repairing.verification.hol.parser.parser import Parser
 
@@ -17,7 +18,7 @@ class FormulaManager:
     Class representing the management of formulas.
     """
 
-    def __init__(self):
+    def __init__(self,lanelet_network=None):
         """
         Constructor.
         """
@@ -72,7 +73,8 @@ class FormulaManager:
             TrafficSignFormulas,
             IntersectionFormulas,
             LaneletFormulas,
-            GeneralFormulas,
+            LaneletFormulas3D,
+            GeneralFormulas
         ]:
             for formula_id, formula in collection.formulas.items():
                 for subformula_id, subformula in collection.subformulas.items():

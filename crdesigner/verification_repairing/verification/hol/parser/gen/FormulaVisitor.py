@@ -1,6 +1,6 @@
 # Generated from Formula.g4 by ANTLR 4.9.3
 from antlr4 import *
-
+import numpy as np
 from ...expression_tree.atomic.bool import Bool
 from ...expression_tree.atomic.predicate import Predicate
 from ...expression_tree.binary.bool.equivalence import Equivalence
@@ -201,7 +201,34 @@ class FormulaVisitor(ParseTreeVisitor):
 
     def visitBrackets(self, ctx: FormulaParser.BracketsContext):
         return self.visit(ctx.content)
+    # ─────────────────────────  3‑D 扩展  ─────────────────────────
+    # (x,y,z) / (x,y) 元组文字
+    def visitTupleConst(self, ctx: FormulaParser.TupleConstContext):
+        """
+        将语法树中的 (x,y,z) 或 (x,y) 转为 numpy.array([x,y,z]).
+        子项已经由 visit(term) 解析为 Constant / float / int。
+        """
+        scalars = [self._as_float(self.visit(t)) for t in ctx.term()]
+        return np.array(scalars, dtype=float)
 
+    # [(x1,y1,z1), (x2,y2,z2), …] 列表文字
+    def visitListConst(self, ctx: FormulaParser.ListConstContext):
+        tuples = [self.visit(tpl) for tpl in ctx.tuple_const()]
+        return np.vstack(tuples) if tuples else np.empty((0, 0))
+
+    # 与 const 等价的 term 变体（ANTLR 会分配不同标签）
+    visitTupleTerm = visitTupleConst
+    visitListTerm  = visitListConst
+
+    # ──────────────────────── 内部工具函数 ────────────────────────
+    @staticmethod
+    def _as_float(val):
+        """
+        将 Constant / str / int / float 统一转为 float，便于构造 ndarray。
+        """
+        if isinstance(val, Constant):
+            val = val.value
+        return float(val)
     def visitTrueBoolean(self, _):
         return Bool(True)
 

@@ -1,5 +1,20 @@
 from typing import Dict
 
+class LaneletFormulas3D: 
+    formulas:Dict[str, str] = {
+    # ────────── upgraded legacy rules ──────────
+    "polylines_intersection_3d": "!(Is_polylines_intersection(left_polyline(l), right_polyline(l), 0.25)) || l in L",
+    "left_self_intersection_3d": "!(Is_polyline_self_intersection(left_polyline(l), 0.25)) || l in L",
+    "right_self_intersection_3d": "!(Is_polyline_self_intersection(right_polyline(l), 0.25)) || l in L",
+    "lanelet_vertical_clearance": "!(Are_intersected_lanelets(l1, l2, 4.5)) || l1, l2 in L",
+    # ────────── new 3-D-only checks ──────────
+    "vertical_clearance_stacked": "Is_vertical_clearance_sufficient(l1, l2, 4.5) || l1, l2 in L",
+    "grade_within_limit": "Is_grade_within_limit(l, 8.0) || l in L",
+    "predecessor_vertical_step": "(Has_predecessor(l1, l2)) -> Is_vertical_step_reasonable(l2, l1, 0.5) || l1, l2 in L",
+    "tunnel_depth_valid": "(Is_tunnel(l)) -> Is_tunnel_depth_valid(l, 0.0, -5.0) || l in L",
+    }
+    domains: Dict[str, str] = {}
+    subformulas: Dict[str, str] = {}
 
 class GeneralFormulas:
     formulas: Dict[str, str] = {

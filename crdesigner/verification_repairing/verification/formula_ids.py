@@ -4,7 +4,16 @@ from typing import List, Union
 # All supported formulas are listed here. The formulas are divided into different types depending on the
 # type of the CommonRoad element.
 
-
+@enum.unique
+class LaneletFormulaID3D(enum.Enum):
+    POLYLINES_INTERSECTION_3D   = "polylines_intersection_3d"
+    LEFT_SELF_INTERSECTION_3D   = "left_self_intersection_3d"
+    RIGHT_SELF_INTERSECTION_3D  = "right_self_intersection_3d"
+    LANELET_VERTICAL_CLEARANCE  = "lanelet_vertical_clearance"
+    VERTICAL_CLEARANCE_STACKED  = "vertical_clearance_stacked"
+    GRADE_WITHIN_LIMIT          = "grade_within_limit"
+    PREDECESSOR_VERTICAL_STEP   = "predecessor_vertical_step"
+    TUNNEL_DEPTH_VALID          = "tunnel_depth_valid"
 @enum.unique
 class GeneralFormulaID(enum.Enum):
     """The IDs of formulas that describe the properties of all types of elements."""
@@ -103,6 +112,7 @@ class IntersectionFormulaID(enum.Enum):
 
 FormulaID = Union[
     LaneletFormulaID,
+    LaneletFormulaID3D,
     TrafficSignFormulaID,
     TrafficLightFormulaID,
     IntersectionFormulaID,
@@ -110,6 +120,7 @@ FormulaID = Union[
 ]
 FormulaTypes = [
     LaneletFormulaID,
+    LaneletFormulaID3D,
     TrafficSignFormulaID,
     TrafficLightFormulaID,
     IntersectionFormulaID,

@@ -4,6 +4,12 @@ from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
 
+from .geom3d_predicates import (
+     is_vertical_clearance_sufficient as Is_vertical_clearance_sufficient,
+     is_grade_within_limit           as Is_grade_within_limit,
+     is_vertical_step_reasonable     as Is_vertical_step_reasonable,
+     is_tunnel_depth_valid           as Is_tunnel_depth_valid,
+ )
 
 def equal(val_0: Any, val_1: Any) -> bool:
     """
