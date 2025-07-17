@@ -1,5 +1,6 @@
 import itertools
 import logging
+import warnings
 from collections import Counter
 from typing import List, Set
 
@@ -218,12 +219,14 @@ def _wrong_left_right_boundary_side(
 ) -> bool:
     """Detect whether left/right boundaries are swapped."""
     left, right = None, None
+
     center_vertices = chaikins_corner_cutting(
         center_vertices, config.chaikins_initial_refinements
     )
     center_vertices = resample_polyline(
         center_vertices, config.resampling_initial_step
     )
+
     for eps, max_polyline_resampling_step in itertools.product(
         config.eps2_values, config.max_polyline_resampling_step_values
     ):
@@ -244,18 +247,12 @@ def _wrong_left_right_boundary_side(
             )
             ccs = CurvilinearCoordinateSystem(center_vertices, cpar, False)
             left = np.array(
-                [
-                    ccs.convert_to_curvilinear_coords(v[0], v[1])[1]
-                    for v in left_vertices
-                ]
+                [ccs.convert_to_curvilinear_coords(v[0], v[1])[1] for v in left_vertices]
             )
             right = np.array(
-                [
-                    ccs.convert_to_curvilinear_coords(v[0], v[1])[1]
-                    for v in right_vertices
-                ]
+                [ccs.convert_to_curvilinear_coords(v[0], v[1])[1] for v in right_vertices]
             )
-            break
+            break  # 成功投影，跳出循环
         except Exception:
             center_vertices = chaikins_corner_cutting(
                 center_vertices, config.chaikins_repeated_refinements
@@ -264,7 +261,18 @@ def _wrong_left_right_boundary_side(
                 center_vertices, config.resampling_repeated_step
             )
             continue
-    return sum(left - right >= 0) / len(left) < config.perc_vert_wrong_side
+
+    # ---- 兜底处理 ----
+    if left is None or right is None:
+        warnings.warn(
+            "Could not project lanelet boundaries to the curvilinear "
+            "coordinate system – treating assignment as WRONG."
+        )
+        return True  # 表示检测到“可能交换”，交给上层处理
+
+    # 原有判定逻辑
+    return (sum(left - right >= 0) / len(left)) < config.perc_vert_wrong_side
+
 
 
 # ────────────────────── topology predicates ───────────────────────────
@@ -357,7 +365,15 @@ def are_equal_vertices(
         return xy_close
     return xy_close and abs(vertex_0[2] - vertex_1[2]) < tol_z
 
-
+from shapely.validation import make_valid     # shapely>=2
+from shapely.errors import GEOSException
+def _clean_poly(poly):
+    if not poly.is_valid:
+        try:
+            return make_valid(poly)           # 优先尝试
+        except Exception:
+            return poly.buffer(0)             # 经典救火方案
+    return poly
 def are_intersected_lanelets(
     lanelet_0: Lanelet,
     lanelet_1: Lanelet,
@@ -368,12 +384,17 @@ def are_intersected_lanelets(
     Returns **True** if the lanelets *do not* geometrically clash in
     an invalid way (legacy semantics preserved).
     """
-    result = lanelet_0.polygon.shapely_object.intersection(
-        lanelet_1.polygon.shapely_object
-    )
-    if result.is_empty:
-        return True
+    p0 = _clean_poly(lanelet_0.polygon.shapely_object)
+    p1 = _clean_poly(lanelet_1.polygon.shapely_object)
 
+    try:
+        result = p0.intersection(p1, grid_size=0.05)  # 给定栅格可减小精度问题
+    except GEOSException as e:
+        logging.warning(
+            "GEOSException between lanelet %s and %s: %s – treating as 'intersected' so that validator flags it.",
+            lanelet_0.lanelet_id, lanelet_1.lanelet_id, e)
+        return True      # 让验证器认为“相交”以便后续 repair
+    
     if (
         min_clearance > 0
         and lanelet_0.center_vertices.shape[1] == 3
@@ -382,8 +403,9 @@ def are_intersected_lanelets(
         z0 = np.mean(lanelet_0.center_vertices[:, 2])
         z1 = np.mean(lanelet_1.center_vertices[:, 2])
         if abs(z0 - z1) >= min_clearance:
-            return True
-    return False
+            return True          # 垂直间隔足够大，视为“不冲突”
+
+    return not result.is_empty
 
 
 def has_stop_line(lanelet: Lanelet):

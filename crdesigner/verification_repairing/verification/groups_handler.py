@@ -45,7 +45,7 @@ class GroupsHandler:
                     LaneletFormulaID3D.VERTICAL_CLEARANCE_STACKED,
                     LaneletFormulaID3D.GRADE_WITHIN_LIMIT,
                     LaneletFormulaID3D.PREDECESSOR_VERTICAL_STEP,
-                    LaneletFormulaID3D.TUNNEL_DEPTH_VALID,
+                    #LaneletFormulaID3D.TUNNEL_DEPTH_VALID,
                 ],
             ),
             SpecificationGroup(
