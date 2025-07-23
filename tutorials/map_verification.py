@@ -21,9 +21,10 @@ logging.basicConfig(level=logging.INFO)
 
 # path to one single file
 file = os.path.join(
-    os.getcwd(), "tests/map_verification/test_maps/merging_lanelets_utm_3d.xml"
+    #os.getcwd(), "tests/map_verification/test_maps/merging_lanelets_utm_3d.xml"
     #os.getcwd(), "tests/map_verification/test_maps/Town15CrdWithZ.xml"
     #os.getcwd(), "tests/map_verification/test_maps/paper_test_maps/DEU_BadEssen-3_1_T-1.xml"
+    os.getcwd(), "/home/yu/Desktop/commonroad-scenario-designer/example_files/opendrive/opendrive-1.xml"
 
 )
 # reading that (.pb) file.

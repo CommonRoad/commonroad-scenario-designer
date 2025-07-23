@@ -1,4 +1,5 @@
 from typing import Union
+import warnings
 
 
 class Signal:
@@ -310,11 +311,19 @@ class SignalReference:
     @property
     def zOffset(self) -> float:
         """Z-offset of the signal."""
-        return self._zOffset
-    @zOffset.setter
+        return self._zOffset if self._zOffset is not None else 0.0
     
+    @zOffset.setter
     def zOffset(self, value):
-        self._zOffset = float(value)
+        if value is None or value == "":
+            self._zOffset = 0.0
+        else:
+            try:
+                self._zOffset = float(value)
+            except (ValueError, TypeError):
+                warnings.warn(f"Invalid zOffset '{value}', default 0.0 used.")
+                self._zOffset = 0.0
+        #self._zOffset = float(value)
 
 
     @property

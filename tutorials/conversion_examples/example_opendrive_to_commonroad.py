@@ -9,7 +9,7 @@ from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistin
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
 
 #input_path = Path.cwd().parent.parent / "tests/map_conversion/test_maps/odr2cr/opendrive-1.xodr"
-input_path = Path.cwd().parent.parent / "/home/mobilab/Desktop/CarlaNonDocker/CarlaUE4/Content/Carla/Maps/Town15/OpenDrive/Town15_split.xodr"
+input_path = Path.cwd().parent.parent / "/home/yu/Desktop/Carla/CarlaUE4/Content/Carla/Maps/OpenDrive/Town01.xodr"
 output_path = Path.cwd() / "example_files/opendrive/opendrive-1.xml"
 
 config = open_drive_config
