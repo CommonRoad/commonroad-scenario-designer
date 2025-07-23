@@ -201,30 +201,30 @@ class FormulaVisitor(ParseTreeVisitor):
 
     def visitBrackets(self, ctx: FormulaParser.BracketsContext):
         return self.visit(ctx.content)
-    # ─────────────────────────  3‑D 扩展  ─────────────────────────
-    # (x,y,z) / (x,y) 元组文字
+    # ─────────────────────────  3‑D expansion  ─────────────────────────
+    # (x,y,z) / (x,y) tuple 
     def visitTupleConst(self, ctx: FormulaParser.TupleConstContext):
         """
-        将语法树中的 (x,y,z) 或 (x,y) 转为 numpy.array([x,y,z]).
-        子项已经由 visit(term) 解析为 Constant / float / int。
+        convert (x,y,z) or (x,y) to numpy.array([x,y,z]).
+        Sub-items are already parsed to Constant / float / int by visit(term).
         """
         scalars = [self._as_float(self.visit(t)) for t in ctx.term()]
         return np.array(scalars, dtype=float)
 
-    # [(x1,y1,z1), (x2,y2,z2), …] 列表文字
+    # [(x1,y1,z1), (x2,y2,z2), …] list of tuples
     def visitListConst(self, ctx: FormulaParser.ListConstContext):
         tuples = [self.visit(tpl) for tpl in ctx.tuple_const()]
         return np.vstack(tuples) if tuples else np.empty((0, 0))
 
-    # 与 const 等价的 term 变体（ANTLR 会分配不同标签）
+    # equivalent to visitTupleConst / visitListConst (ANTLR assigns different labels)
     visitTupleTerm = visitTupleConst
     visitListTerm  = visitListConst
 
-    # ──────────────────────── 内部工具函数 ────────────────────────
+    # ──────────────────────── Internal utility functions ────────────────────────
     @staticmethod
     def _as_float(val):
         """
-        将 Constant / str / int / float 统一转为 float，便于构造 ndarray。
+        Convert Constant / str / int / float to float for easier ndarray construction.
         """
         if isinstance(val, Constant):
             val = val.value

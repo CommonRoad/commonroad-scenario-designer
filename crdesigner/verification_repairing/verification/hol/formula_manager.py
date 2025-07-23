@@ -27,7 +27,7 @@ class FormulaManager:
         :param lanelet_network: CommonRoad LaneletNetwork.  
                                Used only to detect whether 3‑D rules are required.
         """
-        # True ⇢ 至少有一个 lanelet 具有第三维 -> 启用 3‑D 规则
+        # True: # At least one lanelet has a third dimension -> enable 3D rules
         self._enable_3d: bool = (
             lanelet_network is not None
             and any(ll.center_vertices.shape[1] == 3 for ll in lanelet_network.lanelets)
@@ -85,7 +85,7 @@ class FormulaManager:
             GeneralFormulas,
         ]
         if self._enable_3d:
-            # 将 3‑D 公式放在最前，优先检测
+            # Place 3D formulas first, to detect them early
             collections.insert(0, LaneletFormulas3D)
 
         # 2. parse all formulas & merge sub‑formulas

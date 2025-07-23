@@ -8,7 +8,7 @@ class LaneletFormulas3D:
     "right_self_intersection_3d": "!(Is_polyline_self_intersection(right_polyline(l), 0.25)) || l in L",
     "lanelet_vertical_clearance": "!(Are_intersected_lanelets(l1, l2, 4.5)) || l1, l2 in L",
     # ────────── new 3-D-only checks ──────────
-    "vertical_clearance_stacked": "Is_vertical_clearance_sufficient(l1, l2, 4.5) || l1, l2 in L",
+    "vertical_clearance_stacked": "(l1 != l2) -> Is_vertical_clearance_sufficient(l1, l2, 4.5) || l1, l2 in L",
     "grade_within_limit": "Is_grade_within_limit(l, 8.0) || l in L",
     "predecessor_vertical_step": "(Has_predecessor(l1, l2)) -> Is_vertical_step_reasonable(l2, l1, 0.5) || l1, l2 in L",
     "tunnel_depth_valid": "(Is_tunnel(l)) -> Is_tunnel_depth_valid(l, 0.0, -5.0) || l in L",

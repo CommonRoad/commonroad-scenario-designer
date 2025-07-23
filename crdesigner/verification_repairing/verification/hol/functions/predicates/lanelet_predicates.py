@@ -252,7 +252,7 @@ def _wrong_left_right_boundary_side(
             right = np.array(
                 [ccs.convert_to_curvilinear_coords(v[0], v[1])[1] for v in right_vertices]
             )
-            break  # 成功投影，跳出循环
+            break  # jump out of the loop if successful
         except Exception:
             center_vertices = chaikins_corner_cutting(
                 center_vertices, config.chaikins_repeated_refinements
@@ -262,15 +262,15 @@ def _wrong_left_right_boundary_side(
             )
             continue
 
-    # ---- 兜底处理 ----
+    # ---- fallback handling ----
     if left is None or right is None:
         warnings.warn(
             "Could not project lanelet boundaries to the curvilinear "
             "coordinate system – treating assignment as WRONG."
         )
-        return True  # 表示检测到“可能交换”，交给上层处理
+        return True  # indicates "possible swap" detected, hand over to upper layer for processing
 
-    # 原有判定逻辑
+    # Original decision logic
     return (sum(left - right >= 0) / len(left)) < config.perc_vert_wrong_side
 
 
@@ -370,9 +370,9 @@ from shapely.errors import GEOSException
 def _clean_poly(poly):
     if not poly.is_valid:
         try:
-            return make_valid(poly)           # 优先尝试
+            return make_valid(poly)           # try to fix
         except Exception:
-            return poly.buffer(0)             # 经典救火方案
+            return poly.buffer(0)             # classic fallback
     return poly
 def are_intersected_lanelets(
     lanelet_0: Lanelet,
@@ -388,12 +388,12 @@ def are_intersected_lanelets(
     p1 = _clean_poly(lanelet_1.polygon.shapely_object)
 
     try:
-        result = p0.intersection(p1, grid_size=0.05)  # 给定栅格可减小精度问题
+        result = p0.intersection(p1, grid_size=0.05)  # given grid size can reduce precision issues
     except GEOSException as e:
         logging.warning(
             "GEOSException between lanelet %s and %s: %s – treating as 'intersected' so that validator flags it.",
             lanelet_0.lanelet_id, lanelet_1.lanelet_id, e)
-        return True      # 让验证器认为“相交”以便后续 repair
+        return True      # let validator think "intersected" so that it flags it for later repair
     
     if (
         min_clearance > 0
@@ -403,7 +403,7 @@ def are_intersected_lanelets(
         z0 = np.mean(lanelet_0.center_vertices[:, 2])
         z1 = np.mean(lanelet_1.center_vertices[:, 2])
         if abs(z0 - z1) >= min_clearance:
-            return True          # 垂直间隔足够大，视为“不冲突”
+            return True          # vertical clearance is sufficient, consider as "not intersected"
 
     return not result.is_empty
 
