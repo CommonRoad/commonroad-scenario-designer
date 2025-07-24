@@ -20,7 +20,8 @@ from crdesigner.map_conversion.common.utils import (
     convert_to_new_lanelet_id,
     generate_unique_id,
 )
-
+from crdesigner.map_conversion.common.geom_utils import as_xy, as_xyz, dist
+from crdesigner.common.config.opendrive_config import open_drive_config
 
 class ConversionLaneletNetwork(LaneletNetwork):
     """
@@ -924,41 +925,41 @@ class ConversionLaneletNetwork(LaneletNetwork):
         :param traffic_lights: List of all the traffic lights in the lanelet network.
         """
         incoming_lanelet_ids = self.map_inc_lanelets_to_intersections.keys()
+        #use_3d = open_drive_config.general_use_elevation_type_activ 
+        use_3d = getattr(open_drive_config, "general_use_elevation_type_activ", False)
         for traffic_light in traffic_lights:
             id_for_adding = set()
+
+            # 先处理已经挂在 lanelet 上的情况（保持原逻辑）
             for lanelet in self.lanelets:
-                if (
-                    traffic_light.traffic_light_id in lanelet.traffic_lights
-                    and lanelet.lanelet_id in incoming_lanelet_ids
-                ):
-                    id_for_adding.add(lanelet.lanelet_id)
-                elif (
-                    traffic_light.traffic_light_id in lanelet.traffic_lights
-                    and lanelet.lanelet_id not in incoming_lanelet_ids
-                ):
-                    lanelet.traffic_lights = set()
-                    for pre in lanelet.predecessor:
-                        if pre in incoming_lanelet_ids:
-                            id_for_adding.add(pre)
-            if len(id_for_adding) == 0:
-                min_distance = float("inf")
-                for lanelet in incoming_lanelet_ids:
-                    lane = self.find_lanelet_by_id(lanelet)
-                    # Lanelet cannot have more traffic lights than number of successors
+                if traffic_light.traffic_light_id in lanelet.traffic_lights:
+                    if lanelet.lanelet_id in incoming_lanelet_ids:
+                        id_for_adding.add(lanelet.lanelet_id)
+                    else:
+                        # 清掉错误挂载并尝试挂到它的前驱（原逻辑）
+                        lanelet.traffic_lights = set()
+                        for pre in lanelet.predecessor:
+                            if pre in incoming_lanelet_ids:
+                                id_for_adding.add(pre)
+
+            # 如果还没找到，找最近的“入口” lanelet
+            if not id_for_adding:
+                min_d = float("inf")
+                for lanelet_id in incoming_lanelet_ids:
+                    lane = self.find_lanelet_by_id(lanelet_id)
+
+                    # Lanelet 不能比 successor 数量多灯（原逻辑）
                     if len(lane.successor) > len(lane.traffic_lights):
-                        pos_1 = traffic_light.position
-                        pos_2 = lane.center_vertices[-1]
-                        if pos_2.shape == (3,):
-                            pos_2 = pos_2[:2]
-                        dist = np.linalg.norm(pos_1 - pos_2)
-                        if dist < min_distance:
-                            min_distance = dist
-                            id_for_adding.add(lanelet)
-            if len(id_for_adding) == 0:
+                        p1 = traffic_light.position
+                        p2 = lane.center_vertices[-1]  # 可能是 2D 或 3D
+                        d = dist(p1, p2, use_3d)
+                        if d < min_d:
+                            min_d = d
+                            id_for_adding = {lanelet_id}
+
+            if not id_for_adding:
                 warnings.warn(
-                    "For traffic light with ID {} no referencing lanelet was found!".format(
-                        traffic_light.traffic_light_id
-                    )
+                    f"For traffic light with ID {traffic_light.traffic_light_id} no referencing lanelet was found!"
                 )
                 self.add_traffic_light(traffic_light, set())
             else:

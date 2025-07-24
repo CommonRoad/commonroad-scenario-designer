@@ -689,75 +689,136 @@ class ParametricLane:
         return inner_lane    
     
 
-    def calc_shape(self, s_pos, t_to_ref_line):
+    # def calc_shape(self, s_pos, t_to_ref_line):
 
-        def get_lateralprofile_from_shape(t_to_ref_line, piecewise_crosssection):
-            if piecewise_crosssection is None: 
-                return 0.0
+    #     def get_lateralprofile_from_shape(t_to_ref_line, piecewise_crosssection):
+    #         if piecewise_crosssection is None: 
+    #             return 0.0
             
-            start_pos_t_list = [shape.start_pos_t for shape in piecewise_crosssection]
-            idx_t = find_open_interval_index(start_pos_t_list, t_to_ref_line)
-            if idx_t == None:
-                return 0.0  
+    #         start_pos_t_list = [shape.start_pos_t for shape in piecewise_crosssection]
+    #         idx_t = find_open_interval_index(start_pos_t_list, t_to_ref_line)
+    #         if idx_t == None:
+    #             return 0.0  
             
-            selected_shape_profile = next(
-                (shape for shape in piecewise_crosssection if shape.start_pos_t == start_pos_t_list[idx_t]),
-                None
-            )
+    #         selected_shape_profile = next(
+    #             (shape for shape in piecewise_crosssection if shape.start_pos_t == start_pos_t_list[idx_t]),
+    #             None
+    #         )
 
-            if selected_shape_profile is None:
-                return 0.0
+    #         if selected_shape_profile is None:
+    #             return 0.0
             
-            a, b, c, d = selected_shape_profile.polynomial_coefficients
-            t = t_to_ref_line - selected_shape_profile.start_pos_t
+    #         a, b, c, d = selected_shape_profile.polynomial_coefficients
+    #         t = t_to_ref_line - selected_shape_profile.start_pos_t
 
-            return a + b * t + c * t**2 + d * t**3
+    #         return a + b * t + c * t**2 + d * t**3
         
-        # self.shape contains the info from <shape> for the whole road instead the scope of the current parametriclane
-        # front means standing on the s and facing the positive s-direction, back is the opposite
-        if self.shape is None:
-            return 0.0
-        start_pos_s_list = list(dict.fromkeys([shape.start_pos for shape in self.shape]))
+    #     # self.shape contains the info from <shape> for the whole road instead the scope of the current parametriclane
+    #     # front means standing on the s and facing the positive s-direction, back is the opposite
+    #     if self.shape is None:
+    #         return 0.0
+    #     start_pos_s_list = list(dict.fromkeys([shape.start_pos for shape in self.shape]))
     
         
-        back_shapes, front_shapes = [], []
+    #     back_shapes, front_shapes = [], []
+    #     idx = bisect.bisect_right(start_pos_s_list, s_pos)
+
+    #     # a <shape> defined cross section, only effects the height profile from its s_pos until next 
+    #     # <shape> defined cross section.
+    #     # if there is no next <shape> defined cross section, use the default, that is height profile = 0
+    #     no_back_shape = idx <= 0
+    #     no_front_shape = idx >= len(start_pos_s_list)
+
+    #     if no_back_shape:  
+    #         # front has a <shape> defined cross section, back side is the beginning of the road
+    #         back_shapes = []
+    #         back_s = 0.0
+    #         front_s = start_pos_s_list[idx]
+    #         front_shapes = [shape for shape in self.shape if shape.start_pos == front_s]
+    #         return 0.0
+        
+    #     elif no_front_shape:
+    #         # front is the end of the road, back side has a <shape> defined cross section
+    #         # so the height 
+    #         front_shapes = []
+    #         front_s = 0.0
+    #         back_s = start_pos_s_list[idx - 1]
+    #         back_shapes = [shape for shape in self.shape if shape.start_pos == back_s]
+    #         back_height = get_lateralprofile_from_shape(t_to_ref_line, back_shapes)
+
+    #         full_road_length = self.length + self.offset_lanesection + self.offset_width
+    #         return np.interp(s_pos, [back_s, full_road_length], [back_height, 0.0])
+        
+    #     else:
+    #         back_s = start_pos_s_list[idx - 1]
+    #         front_s = start_pos_s_list[idx]
+
+    #         back_shapes = [shape for shape in self.shape if shape.start_pos == back_s]
+    #         front_shapes = [shape for shape in self.shape if shape.start_pos == front_s]
+        
+    #         back_height = get_lateralprofile_from_shape(t_to_ref_line, back_shapes)
+    #         front_height = get_lateralprofile_from_shape(t_to_ref_line, front_shapes)
+                
+    #         return np.interp(s_pos, [back_s, front_s], [back_height, front_height])
+
+    def calc_shape(self, s_pos: float, t_to_ref_line: float) -> float:
+        """Return height contribution from <shape> at (s_pos, t_to_ref_line)."""
+
+        def get_lateralprofile_from_shape(t_to_ref_line: float, piecewise_crosssection):
+            if not piecewise_crosssection:
+                return 0.0
+
+            start_pos_t_list = [sh.start_pos_t for sh in piecewise_crosssection]
+            idx_t = find_open_interval_index(start_pos_t_list, t_to_ref_line)
+            if idx_t is None:
+                return 0.0
+
+            prof = next((sh for sh in piecewise_crosssection
+                        if sh.start_pos_t == start_pos_t_list[idx_t]), None)
+            if prof is None:
+                return 0.0
+
+            a, b, c, d = prof.polynomial_coefficients
+            dt = t_to_ref_line - prof.start_pos_t
+            return a + b*dt + c*dt**2 + d*dt**3
+
+        # ---------- guard 无 shape ----------
+        if not self.shape:
+            return 0.0
+
+        # 排序并去重
+        start_pos_s_list = sorted({sh.start_pos for sh in self.shape})
+        if not start_pos_s_list:
+            return 0.0
+
+        # idx 指向第一个 > s_pos 的位置
         idx = bisect.bisect_right(start_pos_s_list, s_pos)
 
-        # a <shape> defined cross section, only effects the height profile from its s_pos until next 
-        # <shape> defined cross section.
-        # if there is no next <shape> defined cross section, use the default, that is height profile = 0
-        no_back_shape = idx <= 0
-        no_front_shape = idx >= len(start_pos_s_list)
+        no_back_shape  = (idx == 0)
+        no_front_shape = (idx == len(start_pos_s_list))
 
-        if no_back_shape:  
-            # front has a <shape> defined cross section, back side is the beginning of the road
-            back_shapes = []
-            back_s = 0.0
-            front_s = start_pos_s_list[idx]
-            front_shapes = [shape for shape in self.shape if shape.start_pos == front_s]
+        # 只有“后段” shape：s 在第一个定义之前 -> 默认 0，高度不需插值
+        if no_back_shape:
+            # 无需 front_s 索引，直接返回 0
             return 0.0
-        
-        elif no_front_shape:
-            # front is the end of the road, back side has a <shape> defined cross section
-            # so the height 
-            front_shapes = []
-            front_s = 0.0
-            back_s = start_pos_s_list[idx - 1]
-            back_shapes = [shape for shape in self.shape if shape.start_pos == back_s]
-            back_height = get_lateralprofile_from_shape(t_to_ref_line, back_shapes)
 
-            full_road_length = self.length + self.offset_lanesection + self.offset_width
-            return np.interp(s_pos, [back_s, full_road_length], [back_height, 0.0])
-        
-        else:
-            back_s = start_pos_s_list[idx - 1]
-            front_s = start_pos_s_list[idx]
+        # 只有“前段” shape：s 超过最后一个定义，向道路结尾线性衰减到 0
+        if no_front_shape:
+            back_s = start_pos_s_list[-1]
+            back_shapes = [sh for sh in self.shape if sh.start_pos == back_s]
+            back_h = get_lateralprofile_from_shape(t_to_ref_line, back_shapes)
 
-            back_shapes = [shape for shape in self.shape if shape.start_pos == back_s]
-            front_shapes = [shape for shape in self.shape if shape.start_pos == front_s]
-        
-            back_height = get_lateralprofile_from_shape(t_to_ref_line, back_shapes)
-            front_height = get_lateralprofile_from_shape(t_to_ref_line, front_shapes)
-                
-            return np.interp(s_pos, [back_s, front_s], [back_height, front_height])
+            full_len = self.length + self.offset_lanesection + self.offset_width
+            return np.interp(s_pos, [back_s, full_len], [back_h, 0.0])
 
+        # 中间区间：两端都有 shape，做线性插值
+        back_s  = start_pos_s_list[idx-1]
+        front_s = start_pos_s_list[idx]
+
+        back_shapes  = [sh for sh in self.shape if sh.start_pos == back_s]
+        front_shapes = [sh for sh in self.shape if sh.start_pos == front_s]
+
+        back_h  = get_lateralprofile_from_shape(t_to_ref_line, back_shapes)
+        front_h = get_lateralprofile_from_shape(t_to_ref_line, front_shapes)
+
+        return np.interp(s_pos, [back_s, front_s], [back_h, front_h])
