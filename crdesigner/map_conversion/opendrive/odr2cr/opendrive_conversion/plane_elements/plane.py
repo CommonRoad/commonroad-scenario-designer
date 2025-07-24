@@ -561,6 +561,8 @@ class ParametricLane:
 
         a, b, c, d = profile.polynomial_coefficients
         cs_pos = s_pos - profile.start_pos
+        print(f"[elev] s={s_pos:.3f} use rec.start={profile.start_pos:.3f}, a,b,c,d={profile.polynomial_coefficients}")
+        print(f"      ds={cs_pos:.3f}, z={a + b*cs_pos + c*cs_pos**2 + d*cs_pos**3}")
         return a + b * cs_pos + c * cs_pos**2 + d * cs_pos**3
     
     def calc_superelevation(self, s_pos):
@@ -629,27 +631,34 @@ class ParametricLane:
             # lateral Profile: <shape> and <superelevation>
             superelevation = self.calc_superelevation(s_to_road)
             shape_profile = self.calc_shape(s_to_road, lateral_distance_to_centerline)
-            
+            print(f"[sup/shape] sup={superelevation:.5f}, shape={shape_profile:.3f}, lat={lateral_distance_to_centerline:.3f}")
             height_to_ref_line, x_new, y_new = correction_due_to_superelevation(x_old, y_old, plane_curve_hdg, \
                                                                                 superelevation, \
                                                                                 shape_profile, \
                                                                                 lateral_distance_to_centerline)
+            print(f"[proj] h_sup+shape={height_to_ref_line:.3f}")
         final_height = height_to_ref_line * side_coeff + self.calc_elevation_central(s_to_road)
-         # —— 新增：把 lane‐local height（<height> inner/outer）叠加到 final_height
-            # 确保 records 按 sOffset 升序
-        records = sorted(self.lane_height_records, key=lambda rec: rec.sOffset)
-        lane_offset = 0.0
-        for rec in records:
-            if rec.sOffset <= s_to_parametriclane:
-                # 每遇到一个新的高度记录，就更新 offset
-                lane_offset = rec.inner if border == "inner" else rec.outer
-            else:
-                # 一旦超过了当前 s，就可以退出循环
-                break
+        # ---------------- lane height ----------------
+        s_rel = s_to_road - self.offset_lanesection              # laneSection 局部 s
+        lane_offset = self._lane_height_at(border, s_rel)
         final_height += lane_offset
-        print(f"s={s_to_parametriclane}, records={self.lane_height_records}")
+        #print(f"s_lane={s_rel:.3f}, lane_offset={lane_offset:.3f}, base={final_height:.3f}")
+        print(f"[lane {self.id_}] s_to_road={s_to_road:.3f}, sec_start={self.offset_lanesection:.3f}, "
+      f"s_rel={s_rel:.3f}, base_no_lane={final_height-lane_offset:.3f}, lane_off={lane_offset:.3f}")
+
+
 
         return final_height, x_new, y_new
+    
+    def _lane_height_at(self, border: str, s_rel: float) -> float:
+        recs = getattr(self, "lane_height_records", [])
+        if not recs:
+            return 0.0
+        recs = sorted(recs, key=lambda r: r.sOffset)
+        xs = [r.sOffset for r in recs]
+        ys = [r.inner if border == "inner" else r.outer for r in recs]
+        return float(np.interp(s_rel, xs, ys))
+
     
     def calc_lateral_distance_from_inner_to_centerline(self, s_to_parametriclane, s_to_lane_inner):
         # accumulate the width of the inner parametric lane to get the t lateral coordinate

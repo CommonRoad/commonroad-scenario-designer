@@ -275,41 +275,41 @@ class Network:
                     road.cr_stop_lines,
                     road.driving_direction,
                 )
-            # 2) 注入每个 ParametricLane 对应的 height 列表
-            for group in parametric_lane_groups:
-                for pl in group.parametric_lanes:
-                    parts = pl.id_.split('.')
-                    if len(parts) < 4:
-                        pl.lane_height_records = []
-                        continue
+                # 2) 注入每个 ParametricLane 对应的 height 列表
+                for group in parametric_lane_groups:
+                    for pl in group.parametric_lanes:
+                        parts = pl.id_.split('.')
+                        if len(parts) < 4:
+                            pl.lane_height_records = []
+                            continue
 
-                    side    = int(parts[2])  # lane_id
-                    # 找到 origlane
-                    if side < 0:
-                        origlane = next(
-                            (l for l in lane_section.right_lanes if int(l.id) == side),
-                            None
-                        )
-                    else:
-                        origlane = next(
-                            (l for l in lane_section.left_lanes  if int(l.id) == side),
-                            None
-                        )
+                        side    = int(parts[2])  # lane_id
+                        # 找到 origlane
+                        if side < 0:
+                            origlane = next(
+                                (l for l in lane_section.right_lanes if int(l.id) == side),
+                                None
+                            )
+                        else:
+                            origlane = next(
+                                (l for l in lane_section.left_lanes  if int(l.id) == side),
+                                None
+                            )
 
-                    if origlane and origlane.height:
-                        pl.lane_height_records = origlane.height.copy()
-                    else:
-                        pl.lane_height_records = []
-                    print(f"PL {pl.id_} → origlane: {origlane}, height: {pl.lane_height_records}")
+                        if origlane and origlane.height:
+                            pl.lane_height_records = origlane.height.copy()
+                        else:
+                            pl.lane_height_records = []
+                        print(f"PL {pl.id_} → origlane: {origlane}, height: {pl.lane_height_records}")
 
-                    lane_id = int(pl.id_.split(".")[2])
-                    if lane_id < 0:
-                        origlane = next((l for l in lane_section.right_lanes if int(l.id)==lane_id), None)
-                    else:
-                        origlane = next((l for l in lane_section.left_lanes  if int(l.id)==lane_id), None)
+                        lane_id = int(pl.id_.split(".")[2])
+                        if lane_id < 0:
+                            origlane = next((l for l in lane_section.right_lanes if int(l.id)==lane_id), None)
+                        else:
+                            origlane = next((l for l in lane_section.left_lanes  if int(l.id)==lane_id), None)
 
-                        # 原始 new_lane.level 是 "true" 或 "false"
-                    pl.level = (origlane.level == "true") if origlane is not None else False
+                            # 原始 new_lane.level 是 "true" 或 "false"
+                        pl.level = (origlane.level == "true") if origlane is not None else False
 
                 lane_section_elevations = []
                 if len(road.elevation_profile.elevations) > 1:
