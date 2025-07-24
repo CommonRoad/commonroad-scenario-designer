@@ -1,0 +1,1136 @@
+ 
+diff --git a/crdesigner/common/config/opendrive_config.py b/crdesigner/common/config/opendrive_config.py
+index a172294a..388ed392 100644
+--- a/crdesigner/common/config/opendrive_config.py
++++ b/crdesigner/common/config/opendrive_config.py
+@@ -35,6 +35,13 @@ class OpenDriveConfig(BaseConfig):
+         "Activates whether certain lanelet type should be added to all lanelets",
+     )
+ 
++    general_use_elevation_type_activ = Attribute(
++        True,
++        "General use elevation type active",
++        "Activates whether certain use elevation info should be added to all lanelets",
++    )
++
++
+     general_lanelet_type = Attribute(
+         "urban",
+         "General lanelet type",
+diff --git a/crdesigner/common/file_writer.py b/crdesigner/common/file_writer.py
+index 7c924177..58180817 100644
+--- a/crdesigner/common/file_writer.py
++++ b/crdesigner/common/file_writer.py
+@@ -11,7 +11,11 @@ from crdesigner.verification_repairing.config import MapVerParams
+ from crdesigner.verification_repairing.map_verification_repairing import (
+     verify_and_repair_scenario,
+ )
++from crdesigner.common.config.opendrive_config import open_drive_config
++'''from crdesigner.common.traffic_sign_node_elevation import TrafficSignXMLNodeElevation'''
+ 
++from crdesigner.common.traffic_sign_node_elevation import replace_create_node_with_z
++from commonroad.common.writer import file_writer_xml
+ 
+ class CRDesignerFileWriter(CommonRoadFileWriter):
+     def __init__(
+@@ -54,6 +58,9 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
+         )
+         # map verification parameters
+         self._mapver_params = MapVerParams()
++        if open_drive_config.general_use_elevation_type_activ is True:
++            '''file_writer_xml.TrafficSignXMLNode = TrafficSignXMLNodeElevation'''
++            replace_create_node_with_z()
+ 
+     @property
+     def mapver_params(self) -> MapVerParams:
+diff --git a/crdesigner/common/traffic_sign_node_elevation.py b/crdesigner/common/traffic_sign_node_elevation.py
+new file mode 100644
+index 00000000..fc5862f5
+--- /dev/null
++++ b/crdesigner/common/traffic_sign_node_elevation.py
+@@ -0,0 +1,32 @@
++from commonroad.common.writer.file_writer_xml import TrafficSignXMLNode as OrigNode, Point as OrigPoint
++
++def replace_create_node_with_z():
++    """
++    Monkey-patch OrigNode.create_node，往 position/point 下追加 <z> 节点。
++    """
++    original_create = OrigNode.create_node
++
++    def create_node_with_z(traffic_sign):
++        # 调用原方法，拿到已经包含 id、elements、2D position、virtual 的节点
++        node = original_create(traffic_sign)
++
++        # 拿到 traffic_sign.position 的 z
++        pos = traffic_sign.position
++        if pos is not None and len(pos) == 3:
++            x, y, z = pos
++
++            # 找到 position/point 节点
++            pos_node = node.find("position")
++            point_node = pos_node.find("point")
++
++            # 用三维数据重建一个 point 节点
++            new_point = OrigPoint(x, y, z).create_node()
++
++            # 替换
++            pos_node.remove(point_node)
++            pos_node.append(new_point)
++
++        return node
++
++    # 真正地替换类方法
++    OrigNode.create_node = staticmethod(create_node_with_z)
+\ No newline at end of file
+diff --git a/crdesigner/map_conversion/common/conversion_lanelet_network.py b/crdesigner/map_conversion/common/conversion_lanelet_network.py
+index 674c5943..cd88dd11 100644
+--- a/crdesigner/map_conversion/common/conversion_lanelet_network.py
++++ b/crdesigner/map_conversion/common/conversion_lanelet_network.py
+@@ -20,7 +20,8 @@ from crdesigner.map_conversion.common.utils import (
+     convert_to_new_lanelet_id,
+     generate_unique_id,
+ )
+-
++from crdesigner.map_conversion.common.geom_utils import as_xy, as_xyz, dist
++from crdesigner.common.config.opendrive_config import open_drive_config
+ 
+ class ConversionLaneletNetwork(LaneletNetwork):
+     """
+@@ -924,41 +925,41 @@ class ConversionLaneletNetwork(LaneletNetwork):
+         :param traffic_lights: List of all the traffic lights in the lanelet network.
+         """
+         incoming_lanelet_ids = self.map_inc_lanelets_to_intersections.keys()
++        #use_3d = open_drive_config.general_use_elevation_type_activ 
++        use_3d = getattr(open_drive_config, "general_use_elevation_type_activ", False)
+         for traffic_light in traffic_lights:
+             id_for_adding = set()
++
++            # 先处理已经挂在 lanelet 上的情况（保持原逻辑）
+             for lanelet in self.lanelets:
+-                if (
+-                    traffic_light.traffic_light_id in lanelet.traffic_lights
+-                    and lanelet.lanelet_id in incoming_lanelet_ids
+-                ):
+-                    id_for_adding.add(lanelet.lanelet_id)
+-                elif (
+-                    traffic_light.traffic_light_id in lanelet.traffic_lights
+-                    and lanelet.lanelet_id not in incoming_lanelet_ids
+-                ):
+-                    lanelet.traffic_lights = set()
+-                    for pre in lanelet.predecessor:
+-                        if pre in incoming_lanelet_ids:
+-                            id_for_adding.add(pre)
+-            if len(id_for_adding) == 0:
+-                min_distance = float("inf")
+-                for lanelet in incoming_lanelet_ids:
+-                    lane = self.find_lanelet_by_id(lanelet)
+-                    # Lanelet cannot have more traffic lights than number of successors
++                if traffic_light.traffic_light_id in lanelet.traffic_lights:
++                    if lanelet.lanelet_id in incoming_lanelet_ids:
++                        id_for_adding.add(lanelet.lanelet_id)
++                    else:
++                        # 清掉错误挂载并尝试挂到它的前驱（原逻辑）
++                        lanelet.traffic_lights = set()
++                        for pre in lanelet.predecessor:
++                            if pre in incoming_lanelet_ids:
++                                id_for_adding.add(pre)
++
++            # 如果还没找到，找最近的“入口” lanelet
++            if not id_for_adding:
++                min_d = float("inf")
++                for lanelet_id in incoming_lanelet_ids:
++                    lane = self.find_lanelet_by_id(lanelet_id)
++
++                    # Lanelet 不能比 successor 数量多灯（原逻辑）
+                     if len(lane.successor) > len(lane.traffic_lights):
+-                        pos_1 = traffic_light.position
+-                        pos_2 = lane.center_vertices[-1]
+-                        if pos_2.shape == (3,):
+-                            pos_2 = pos_2[:2]
+-                        dist = np.linalg.norm(pos_1 - pos_2)
+-                        if dist < min_distance:
+-                            min_distance = dist
+-                            id_for_adding.add(lanelet)
+-            if len(id_for_adding) == 0:
++                        p1 = traffic_light.position
++                        p2 = lane.center_vertices[-1]  # 可能是 2D 或 3D
++                        d = dist(p1, p2, use_3d)
++                        if d < min_d:
++                            min_d = d
++                            id_for_adding = {lanelet_id}
++
++            if not id_for_adding:
+                 warnings.warn(
+-                    "For traffic light with ID {} no referencing lanelet was found!".format(
+-                        traffic_light.traffic_light_id
+-                    )
++                    f"For traffic light with ID {traffic_light.traffic_light_id} no referencing lanelet was found!"
+                 )
+                 self.add_traffic_light(traffic_light, set())
+             else:
+diff --git a/crdesigner/map_conversion/common/geom_utils.py b/crdesigner/map_conversion/common/geom_utils.py
+new file mode 100644
+index 00000000..c2c91530
+--- /dev/null
++++ b/crdesigner/map_conversion/common/geom_utils.py
+@@ -0,0 +1,19 @@
++import numpy as np
++
++def as_xy(p):
++    p = np.asarray(p)
++    return p[:2] if p.shape[-1] >= 2 else p
++
++def as_xyz(p):
++    p = np.asarray(p)
++    if p.shape[-1] == 3:
++        return p
++    if p.shape[-1] == 2:
++        return np.array([p[0], p[1], 0.0])
++    raise ValueError("Point must have at least 2 dims")
++
++def dist(p1, p2, use_3d: bool):
++    if use_3d:
++        return np.linalg.norm(as_xyz(p1) - as_xyz(p2))
++    else:
++        return np.linalg.norm(as_xy(p1) - as_xy(p2))
+diff --git a/crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py b/crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py
+index 6854a125..a246841b 100644
+--- a/crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py
++++ b/crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py
+@@ -63,7 +63,10 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.opendr
+ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road import (
+     Road,
+ )
+-
++from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.utils import (
++    convert_height_ellipsoid_to_orthometric,
++)
++from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import height as HeightRecord
+ 
+ def get_all_adjacent_lanelets(lanelet_network, incoming_lanelet_id):
+     """
+@@ -272,6 +275,41 @@ class Network:
+                     road.cr_stop_lines,
+                     road.driving_direction,
+                 )
++            # 2) 注入每个 ParametricLane 对应的 height 列表
++            for group in parametric_lane_groups:
++                for pl in group.parametric_lanes:
++                    parts = pl.id_.split('.')
++                    if len(parts) < 4:
++                        pl.lane_height_records = []
++                        continue
++
++                    side    = int(parts[2])  # lane_id
++                    # 找到 origlane
++                    if side < 0:
++                        origlane = next(
++                            (l for l in lane_section.right_lanes if int(l.id) == side),
++                            None
++                        )
++                    else:
++                        origlane = next(
++                            (l for l in lane_section.left_lanes  if int(l.id) == side),
++                            None
++                        )
++
++                    if origlane and origlane.height:
++                        pl.lane_height_records = origlane.height.copy()
++                    else:
++                        pl.lane_height_records = []
++                    print(f"PL {pl.id_} → origlane: {origlane}, height: {pl.lane_height_records}")
++
++                    lane_id = int(pl.id_.split(".")[2])
++                    if lane_id < 0:
++                        origlane = next((l for l in lane_section.right_lanes if int(l.id)==lane_id), None)
++                    else:
++                        origlane = next((l for l in lane_section.left_lanes  if int(l.id)==lane_id), None)
++
++                        # 原始 new_lane.level 是 "true" 或 "false"
++                    pl.level = (origlane.level == "true") if origlane is not None else False
+ 
+                 lane_section_elevations = []
+                 if len(road.elevation_profile.elevations) > 1:
+@@ -493,6 +531,7 @@ class Network:
+ 
+         self.relate_crosswalks_to_intersection(lanelet_network)
+ 
++        '''
+         if transformer is not None:
+             # Apply the transformer to traffic controls
+             for xs in [
+@@ -504,7 +543,47 @@ class Network:
+             for x in self._stop_lines:
+                 x.start = np.array(transformer.transform(*x.start))
+                 x.end = np.array(transformer.transform(*x.end))
++        '''
++        '''
++        if transformer is  not None:
++            for xs in [self._traffic_lights, self._traffic_signs]:
++                for x in xs:
++                    x_ellipsoid, y_ellipsoid, z_ellipsoid = x.position
++                    x_proj, y_proj = transformer.transform(x_ellipsoid, y_ellipsoid)
++                    # convert_height_ellipsoid_to_orthometric returns z_orthometric only
++                    z_orthometric = convert_height_ellipsoid_to_orthometric(x_ellipsoid, y_ellipsoid, z_ellipsoid)
+ 
++                    x.position = np.array([x_proj, y_proj, z_orthometric])
++
++            for x in self._stop_lines:
++                start_x_ellipsoid, start_y_ellipsoid, start_z_ellipsoid = x.start
++                start_x_proj, start_y_proj = transformer.transform(start_x_ellipsoid, start_y_ellipsoid)
++                start_z_orthometric = convert_height_ellipsoid_to_orthometric(start_x_ellipsoid, start_y_ellipsoid, start_z_ellipsoid)
++                x.start = np.array([start_x_proj, start_y_proj, start_z_orthometric])
++                
++                #
++                end_x_ellipsoid, end_y_ellipsoid, end_z_ellipsoid = x.end
++                end_x_proj, end_y_proj = transformer.transform(end_x_ellipsoid, end_y_ellipsoid)
++                end_z_orthometric = convert_height_ellipsoid_to_orthometric(end_x_ellipsoid, end_y_ellipsoid, end_z_ellipsoid)
++                x.end = np.array([end_x_proj, end_y_proj, end_z_orthometric])
++        '''
++        if transformer is  not None:
++            for xs in [self._traffic_lights, self._traffic_signs]:
++                for x in xs:
++                    x_temp, y_temp, z_temp = x.position
++                    x_proj, y_proj = transformer.transform(x_temp, y_temp)
++                    x.position = np.array([x_proj, y_proj, z_temp])
++
++            for x in self._stop_lines:
++                start_x_temp, start_y_temp, start_z_temp = x.start
++                start_x_proj, start_y_proj = transformer.transform(start_x_temp, start_y_temp)
++                x.start = np.array([start_x_proj, start_y_proj, start_z_temp])
++                
++                #
++                end_x_temp, end_y_temp, end_z_temp = x.end
++                end_x_proj, end_y_proj = transformer.transform(end_x_temp, end_y_temp)
++                x.end = np.array([end_x_proj, end_y_proj, end_z_temp])
++        self.assign_traffic_sign_heights_from_surface()
+         # Assign traffic signals, lights and stop lines to lanelet network
+         lanelet_network.add_traffic_lights_to_network(self._traffic_lights)
+         lanelet_network.add_traffic_signs_to_network(self._traffic_signs)
+@@ -547,7 +626,38 @@ class Network:
+         self.find_lane_speed_changes(drivable_lanelets, lanelet_network)
+         self.reference_traffic_signs_with_equal_speed(drivable_lanelets, lanelet_network)
+         lanelet_network = update_line_markings(lanelet_network)
++
++        
+         return convert_to_base_lanelet_network(lanelet_network)
++    
++
++    def assign_traffic_sign_heights_from_surface(self):
++        from scipy.spatial import cKDTree
++        import numpy as np
++        surface_points = []
++
++        for pl_group in self._planes:
++            # 遍历每个 PlaneGroup 里的 parametric_lanes
++            for pl in getattr(pl_group, "parametric_lanes", []):
++                if hasattr(pl, "_all_surface_points") and pl._all_surface_points is not None:
++                    surface_points.append(pl._all_surface_points)
++
++        if not surface_points:
++            print("there are no surface points to assign traffic sign heights from")
++            return
++        surface_points = np.vstack(surface_points)
++        tree = cKDTree(surface_points[:, :2])
++
++        for ts in self._traffic_signs:
++            # 支持2d/3d输入
++            pos = ts.position
++            x, y = pos[:2]
++            z_offset = getattr(ts, 'zOffset', 0.0)
++            dist, idx = tree.query([x, y])
++            z_surface = surface_points[idx, 2]
++            z_final = z_surface + z_offset
++            ts.position = np.array([x, y, z_final])
++
+ 
+     def relate_crosswalks_to_intersection(self, lanelet_network: ConversionLaneletNetwork):
+         """
+diff --git a/crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py b/crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py
+index 24cf328c..53704329 100644
+--- a/crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py
++++ b/crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py
+@@ -98,6 +98,7 @@ class ParametricLaneBorderGroup:
+         # TODO: expand implementation to consider border offset record
+         return self.outer_border.get_next_width_coeffs(self.outer_border_offset)
+ 
++from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import height as HeightRecord
+ 
+ class ParametricLane:
+     """A lane defines a part of a road along a
+@@ -147,6 +148,7 @@ class ParametricLane:
+         # The offset of its associated ParametricLane within the ParametricLaneGroup due to its width.
+         self.offset_width = 0.0 
+         self.shape = None 
++        self.lane_height_records: List[HeightRecord] = []
+ 
+     def set_elevation_profile(self, elevation_profile):
+         self.elevation_profile = elevation_profile
+@@ -446,13 +448,7 @@ class ParametricLane:
+         """
+         left_vertices = []
+         right_vertices = []
+-        # calculate left and right vertices of lanelet
+-        # s = 0
+-        # check_3 = True
+ 
+-        # old version from opendrive2lanelet start
+-        # no sampling of s and "distance" between two consecutive s is similar
+-        #
+         if self.length < 0:
+             return np.array(left_vertices), np.array(right_vertices)
+         
+@@ -460,13 +456,7 @@ class ParametricLane:
+         poses = np.linspace(0, self.length, num_steps)
+ 
+         for s in poses:
+-            #----------------------------------------------------------------------------------------------------
+-            #
+-            # old version end
+ 
+-            # version with sampling
+-            # while s <= self.length:
+-            # s_cache = s + 0.0
+             inner_pos, result_tang, curvature, max_geometry_length = self.calc_border("inner", s)
+             outer_pos, result_tang_outer, _, _ = self.calc_border("outer", s, compute_curvature=False)
+             elevation_inner, new_inner_x, new_inner_y = self.calc_border_height("inner", s, inner_pos[0], inner_pos[1], result_tang)
+@@ -476,32 +466,19 @@ class ParametricLane:
+             height_outer = convert_height_ellipsoid_to_orthometric(outer_pos[0], outer_pos[1], elevation_outer)
+ 
+             if transformer is not None:
+-                # left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
+-                # right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
++
+                 left_vertices.append(transformer.transform(new_inner_x, new_inner_y, height_inner))
+                 right_vertices.append(transformer.transform(new_outer_x, new_outer_y, height_outer))
+             else:
+                 left_vertices.append([inner_pos[0], inner_pos[1], elevation_inner])
+                 right_vertices.append([outer_pos[0], outer_pos[1], elevation_outer])
++                
++        self._all_surface_points = np.vstack([
++            np.array(left_vertices),
++            np.array(right_vertices),
++            np.array([( (l[0]+r[0])/2, (l[1]+r[1])/2, (l[2]+r[2])/2 ) for l, r in zip(left_vertices, right_vertices)])
++        ])
+ 
+-            # version with sampling
+-            # if s >= self.length:
+-            #     break
+-            #
+-            # if s == max_geometry_length:
+-            #     s += min_delta_s
+-            # else:
+-            #     s = calc_next_s(s, curvature, error_tolerance=error_tolerance, min_delta_s=min_delta_s,
+-            #                     s_max=max_geometry_length)
+-            #
+-            # # ensure total road length is not exceeded
+-            # s = min(self.length, s)
+-            # # ensure lanelet has >= 3 vertices
+-            # if check_3 and s >= self.length:
+-            #     s = (s_cache + self.length) * 0.5
+-            #
+-            # check_3 = False
+-        # assert len(left_vertices) >= 3, f"Not enough vertices, len: {len(left_vertices)}"
+         return np.array(left_vertices), np.array(right_vertices)
+ 
+     def zero_width_change_positions(self) -> float:
+@@ -644,16 +621,33 @@ class ParametricLane:
+                                          else lateral_distance_from_inner_to_centerline + \
+                                          self.calc_width(s_to_parametriclane)
+ 
+-
+-        # lateral Profile: <shape> and <superelevation>
+-        superelevation = self.calc_superelevation(s_to_road)
+-        shape_profile = self.calc_shape(s_to_road, lateral_distance_to_centerline)
+-        
+-        height_to_ref_line, x_new, y_new = correction_due_to_superelevation(x_old, y_old, plane_curve_hdg, \
+-                                                                            superelevation, \
+-                                                                            shape_profile, \
+-                                                                            lateral_distance_to_centerline)
++        #Decide whether to apply superelevation/shape, for lane height
++        if getattr(self, "level", False):
++            height_to_ref_line = 0.0
++            x_new, y_new = x_old, y_old
++        else:
++            # lateral Profile: <shape> and <superelevation>
++            superelevation = self.calc_superelevation(s_to_road)
++            shape_profile = self.calc_shape(s_to_road, lateral_distance_to_centerline)
++            
++            height_to_ref_line, x_new, y_new = correction_due_to_superelevation(x_old, y_old, plane_curve_hdg, \
++                                                                                superelevation, \
++                                                                                shape_profile, \
++                                                                                lateral_distance_to_centerline)
+         final_height = height_to_ref_line * side_coeff + self.calc_elevation_central(s_to_road)
++         # —— 新增：把 lane‐local height（<height> inner/outer）叠加到 final_height
++            # 确保 records 按 sOffset 升序
++        records = sorted(self.lane_height_records, key=lambda rec: rec.sOffset)
++        lane_offset = 0.0
++        for rec in records:
++            if rec.sOffset <= s_to_parametriclane:
++                # 每遇到一个新的高度记录，就更新 offset
++                lane_offset = rec.inner if border == "inner" else rec.outer
++            else:
++                # 一旦超过了当前 s，就可以退出循环
++                break
++        final_height += lane_offset
++        print(f"s={s_to_parametriclane}, records={self.lane_height_records}")
+ 
+         return final_height, x_new, y_new
+     
+@@ -695,75 +689,136 @@ class ParametricLane:
+         return inner_lane    
+     
+ 
+-    def calc_shape(self, s_pos, t_to_ref_line):
++    # def calc_shape(self, s_pos, t_to_ref_line):
+ 
+-        def get_lateralprofile_from_shape(t_to_ref_line, piecewise_crosssection):
+-            if piecewise_crosssection is None: 
+-                return 0.0
++    #     def get_lateralprofile_from_shape(t_to_ref_line, piecewise_crosssection):
++    #         if piecewise_crosssection is None: 
++    #             return 0.0
+             
+-            start_pos_t_list = [shape.start_pos_t for shape in piecewise_crosssection]
+-            idx_t = find_open_interval_index(start_pos_t_list, t_to_ref_line)
+-            if idx_t == None:
+-                return 0.0  
++    #         start_pos_t_list = [shape.start_pos_t for shape in piecewise_crosssection]
++    #         idx_t = find_open_interval_index(start_pos_t_list, t_to_ref_line)
++    #         if idx_t == None:
++    #             return 0.0  
+             
+-            selected_shape_profile = next(
+-                (shape for shape in piecewise_crosssection if shape.start_pos_t == start_pos_t_list[idx_t]),
+-                None
+-            )
++    #         selected_shape_profile = next(
++    #             (shape for shape in piecewise_crosssection if shape.start_pos_t == start_pos_t_list[idx_t]),
++    #             None
++    #         )
+ 
+-            if selected_shape_profile is None:
+-                return 0.0
++    #         if selected_shape_profile is None:
++    #             return 0.0
+             
+-            a, b, c, d = selected_shape_profile.polynomial_coefficients
+-            t = t_to_ref_line - selected_shape_profile.start_pos_t
++    #         a, b, c, d = selected_shape_profile.polynomial_coefficients
++    #         t = t_to_ref_line - selected_shape_profile.start_pos_t
+ 
+-            return a + b * t + c * t**2 + d * t**3
++    #         return a + b * t + c * t**2 + d * t**3
+         
+-        # self.shape contains the info from <shape> for the whole road instead the scope of the current parametriclane
+-        # front means standing on the s and facing the positive s-direction, back is the opposite
+-        if self.shape is None:
+-            return 0.0
+-        start_pos_s_list = list(dict.fromkeys([shape.start_pos for shape in self.shape]))
++    #     # self.shape contains the info from <shape> for the whole road instead the scope of the current parametriclane
++    #     # front means standing on the s and facing the positive s-direction, back is the opposite
++    #     if self.shape is None:
++    #         return 0.0
++    #     start_pos_s_list = list(dict.fromkeys([shape.start_pos for shape in self.shape]))
+     
+         
+-        back_shapes, front_shapes = [], []
+-        idx = bisect.bisect_right(start_pos_s_list, s_pos)
+-
+-        # a <shape> defined cross section, only effects the height profile from its s_pos until next 
+-        # <shape> defined cross section.
+-        # if there is no next <shape> defined cross section, use the default, that is height profile = 0
+-        no_back_shape = idx <= 0
+-        no_front_shape = idx >= len(start_pos_s_list)
+-
+-        if no_back_shape:  
+-            # front has a <shape> defined cross section, back side is the beginning of the road
+-            back_shapes = []
+-            back_s = 0.0
+-            front_s = start_pos_s_list[idx]
+-            front_shapes = [shape for shape in self.shape if shape.start_pos == front_s]
+-            return 0.0
++    #     back_shapes, front_shapes = [], []
++    #     idx = bisect.bisect_right(start_pos_s_list, s_pos)
++
++    #     # a <shape> defined cross section, only effects the height profile from its s_pos until next 
++    #     # <shape> defined cross section.
++    #     # if there is no next <shape> defined cross section, use the default, that is height profile = 0
++    #     no_back_shape = idx <= 0
++    #     no_front_shape = idx >= len(start_pos_s_list)
++
++    #     if no_back_shape:  
++    #         # front has a <shape> defined cross section, back side is the beginning of the road
++    #         back_shapes = []
++    #         back_s = 0.0
++    #         front_s = start_pos_s_list[idx]
++    #         front_shapes = [shape for shape in self.shape if shape.start_pos == front_s]
++    #         return 0.0
+         
+-        elif no_front_shape:
+-            # front is the end of the road, back side has a <shape> defined cross section
+-            # so the height 
+-            front_shapes = []
+-            front_s = 0.0
+-            back_s = start_pos_s_list[idx - 1]
+-            back_shapes = [shape for shape in self.shape if shape.start_pos == back_s]
+-            back_height = get_lateralprofile_from_shape(t_to_ref_line, back_shapes)
+-
+-            full_road_length = self.length + self.offset_lanesection + self.offset_width
+-            return np.interp(s_pos, [back_s, full_road_length], [back_height, 0.0])
++    #     elif no_front_shape:
++    #         # front is the end of the road, back side has a <shape> defined cross section
++    #         # so the height 
++    #         front_shapes = []
++    #         front_s = 0.0
++    #         back_s = start_pos_s_list[idx - 1]
++    #         back_shapes = [shape for shape in self.shape if shape.start_pos == back_s]
++    #         back_height = get_lateralprofile_from_shape(t_to_ref_line, back_shapes)
++
++    #         full_road_length = self.length + self.offset_lanesection + self.offset_width
++    #         return np.interp(s_pos, [back_s, full_road_length], [back_height, 0.0])
+         
+-        else:
+-            back_s = start_pos_s_list[idx - 1]
+-            front_s = start_pos_s_list[idx]
++    #     else:
++    #         back_s = start_pos_s_list[idx - 1]
++    #         front_s = start_pos_s_list[idx]
+ 
+-            back_shapes = [shape for shape in self.shape if shape.start_pos == back_s]
+-            front_shapes = [shape for shape in self.shape if shape.start_pos == front_s]
++    #         back_shapes = [shape for shape in self.shape if shape.start_pos == back_s]
++    #         front_shapes = [shape for shape in self.shape if shape.start_pos == front_s]
+         
+-            back_height = get_lateralprofile_from_shape(t_to_ref_line, back_shapes)
+-            front_height = get_lateralprofile_from_shape(t_to_ref_line, front_shapes)
++    #         back_height = get_lateralprofile_from_shape(t_to_ref_line, back_shapes)
++    #         front_height = get_lateralprofile_from_shape(t_to_ref_line, front_shapes)
+                 
+-            return np.interp(s_pos, [back_s, front_s], [back_height, front_height])
++    #         return np.interp(s_pos, [back_s, front_s], [back_height, front_height])
++
++    def calc_shape(self, s_pos: float, t_to_ref_line: float) -> float:
++        """Return height contribution from <shape> at (s_pos, t_to_ref_line)."""
++
++        def get_lateralprofile_from_shape(t_to_ref_line: float, piecewise_crosssection):
++            if not piecewise_crosssection:
++                return 0.0
++
++            start_pos_t_list = [sh.start_pos_t for sh in piecewise_crosssection]
++            idx_t = find_open_interval_index(start_pos_t_list, t_to_ref_line)
++            if idx_t is None:
++                return 0.0
++
++            prof = next((sh for sh in piecewise_crosssection
++                        if sh.start_pos_t == start_pos_t_list[idx_t]), None)
++            if prof is None:
++                return 0.0
++
++            a, b, c, d = prof.polynomial_coefficients
++            dt = t_to_ref_line - prof.start_pos_t
++            return a + b*dt + c*dt**2 + d*dt**3
++
++        # ---------- guard 无 shape ----------
++        if not self.shape:
++            return 0.0
++
++        # 排序并去重
++        start_pos_s_list = sorted({sh.start_pos for sh in self.shape})
++        if not start_pos_s_list:
++            return 0.0
++
++        # idx 指向第一个 > s_pos 的位置
++        idx = bisect.bisect_right(start_pos_s_list, s_pos)
++
++        no_back_shape  = (idx == 0)
++        no_front_shape = (idx == len(start_pos_s_list))
++
++        # 只有“后段” shape：s 在第一个定义之前 -> 默认 0，高度不需插值
++        if no_back_shape:
++            # 无需 front_s 索引，直接返回 0
++            return 0.0
++
++        # 只有“前段” shape：s 超过最后一个定义，向道路结尾线性衰减到 0
++        if no_front_shape:
++            back_s = start_pos_s_list[-1]
++            back_shapes = [sh for sh in self.shape if sh.start_pos == back_s]
++            back_h = get_lateralprofile_from_shape(t_to_ref_line, back_shapes)
++
++            full_len = self.length + self.offset_lanesection + self.offset_width
++            return np.interp(s_pos, [back_s, full_len], [back_h, 0.0])
++
++        # 中间区间：两端都有 shape，做线性插值
++        back_s  = start_pos_s_list[idx-1]
++        front_s = start_pos_s_list[idx]
++
++        back_shapes  = [sh for sh in self.shape if sh.start_pos == back_s]
++        front_shapes = [sh for sh in self.shape if sh.start_pos == front_s]
++
++        back_h  = get_lateralprofile_from_shape(t_to_ref_line, back_shapes)
++        front_h = get_lateralprofile_from_shape(t_to_ref_line, front_shapes)
+ 
++        return np.interp(s_pos, [back_s, front_s], [back_h, front_h])
+diff --git a/crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py b/crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py
+index 532c8d2e..23411cb6 100644
+--- a/crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py
++++ b/crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py
+@@ -27,6 +27,7 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadSi
+     Signal,
+ )
+ 
++import bisect
+ 
+ def extract_traffic_element_id(
+     signal_type: str, signal_subtype: str, traffic_sign_enum: enum
+@@ -81,15 +82,37 @@ def assign_traffic_signals_to_road(
+     # TODO: Stop lines are created and appended to the list for DEU and OpenDrive format.
+     # This has been replicated for other countries but has not been tested with a test case
+     # Stop lines have a signal type of 294 and are handled differently in the CommonRoad format
++    
+     for signal in road.signals:
+         lanes = (
+             (0, 0) if signal.validity_from is None else (signal.validity_from, signal.validity_to)
+         )
++        """
++        # ——— ①：先计算参考线在 s 处的平面坐标和切线角度 ———
++        ref_pos, tangent, _, _ = road.plan_view.calc(
++            signal.s, compute_curvature=False
++        )
++        # 把信号沿正交方向偏移到 (x_t, y_t)
++        x_t = ref_pos[0] + signal.t * np.cos(tangent + np.pi/2)
++        y_t = ref_pos[1] + signal.t * np.sin(tangent + np.pi/2)
++
++        # ——— ②：调用下面写好的 calculate_road_surface_height —— 
++        z_surface = calculate_road_surface_height(road, signal.s, signal.t)
++
++        # ——— ③：再加上信号自身的 zOffset 得到最终 Z ———
++        z_t = z_surface + signal.zOffset
++
++        position = np.array([x_t, y_t, z_t])
++        """
++        
+         position, tangent, _, _ = road.plan_view.calc(signal.s, compute_curvature=False)
++        #elevation = calculate_elevation(road.elevation_profile, signal.s)#here elevation = z coordinate
+         position = np.array(
+             [
+                 position[0] + signal.t * np.cos(tangent + np.pi / 2),
+                 position[1] + signal.t * np.sin(tangent + np.pi / 2),
++                0,
++                #elevation + signal.zOffset,#build xyz coordinate with zOffset
+             ]
+         )
+         if signal.dynamic == "no":
+@@ -145,6 +168,7 @@ def assign_traffic_signals_to_road(
+                 position=position,
+                 virtual=False,
+             )
++            traffic_sign.zOffset = signal.zOffset if signal.zOffset is not None else 0.0
+ 
+             road.add_traffic_sign((traffic_sign, lanes, signal.s))
+             traffic_signs.append(traffic_sign)
+@@ -253,3 +277,168 @@ def get_traffic_signal_references(
+                 )
+             else:
+                 traffic_light_lanes[signal.signal_id] = (signal.validity_to, signal.validity_from)
++
++def evaluate_center_elevation(elev_records, s: float) -> float:
++    """
++    根据 elevation_profile.elevations 列表（记录按 start_pos 升序），
++    找到 s 落在哪段多项式里，并对该段多项式做插值，返回中心线高度。
++    与 ParametricLane.calc_elevation_central 完全等价。
++    :param elev_records: List of ElevationRecord（每个有 .start_pos 和 .polynomial_coefficients）
++    :param s: 当前参考线纵向坐标
++    :return: 中心线高度 z_center
++    """
++    if not elev_records:
++        return 0.0
++
++    # 找出最后一个 start_pos <= s 的索引
++    starts = [rec.start_pos for rec in elev_records]
++    idx = bisect.bisect_right(starts, s) - 1
++    if idx < 0:
++        # s 比第一段还要小，直接取第一段多项式在 ds = 0 时的 a 值
++        rec = elev_records[0]
++    else:
++        rec = elev_records[idx]
++
++    # rec.polynomial_coefficients = [a, b, c, d]
++    a, b, c, d = rec.polynomial_coefficients
++    ds = s - rec.start_pos
++    return a + b * ds + c * ds * ds + d * ds * ds * ds
++
++
++def evaluate_superelevation(sup_records, s: float) -> float:
++    """
++    根据 lateral_profile.superelevations 列表，找到 s 落在哪段 superelevation 上，
++    用该段 [a,b,c,d] 在 (s - start_pos) 处做多项式插值，返回 superelevation（单位：弧度）。
++    与 ParametricLane.calc_superelevation 等价。
++    :param sup_records: List of SuperelevationRecord（每个有 .start_pos 和 .polynomial_coefficients）
++    :param s: 参考线纵向坐标
++    :return: superelevation（弧度）
++    """
++    if not sup_records:
++        return 0.0
++
++    starts = [rec.start_pos for rec in sup_records]
++    idx = bisect.bisect_right(starts, s) - 1
++    if idx < 0:
++        rec = sup_records[0]
++    else:
++        rec = sup_records[idx]
++
++    a, b, c, d = rec.polynomial_coefficients
++    ds = s - rec.start_pos
++    return a + b * ds + c * (ds**2) + d * (ds**3)
++
++
++def evaluate_shape_offset(shape_records, s: float, lateral_dist: float) -> float:
++    """
++    根据 lateral_profile.shapes 列表，每条记录代表在某个 start_pos 上开始生效的“横断面形状”多项式，
++    将 lateral_dist 这个横向距离投入到对应的 Shape 多项式里，再根据 s 在两段 shape 之间插值。
++    完全等价于 ParametricLane.calc_shape。
++    :param shape_records: List of ShapeCrossSectionRecord（每个有 .start_pos, .start_pos_t, .polynomial_coefficients）
++                             其中 .start_pos 表示此断面在哪个 s 开始生效，
++                             .start_pos_t 表示“此横断面里”多项式的起始横向 t 值。
++    :param s: 当前参考线纵向坐标
++    :param lateral_dist: 从参考线（中心线）到当前要计算点的横向距离 |t|
++    :return: 该 (s, lateral_dist) 处的 shape 高度值
++    """
++    if not shape_records:
++        return 0.0
++
++    # 1) 找出在 s 处，前一段以及后一段的 shape 断面
++    s_list = sorted({rec.start_pos for rec in shape_records})
++    idx_s = bisect.bisect_right(s_list, s) - 1
++
++    # 如果 s 比第一个断面 start_pos 还要小，视为没有 back 断面；如果 s 大于最后一个，视为没有 front 断面
++    if idx_s < 0:
++        back_s = None
++        back_shapes = []
++        front_s = s_list[0]
++        front_shapes = [rec for rec in shape_records if rec.start_pos == front_s]
++    elif idx_s >= len(s_list) - 1:
++        # s 在最后一个断面之后
++        back_s = s_list[-1]
++        back_shapes = [rec for rec in shape_records if rec.start_pos == back_s]
++        front_shapes = []
++    else:
++        back_s = s_list[idx_s]
++        front_s = s_list[idx_s + 1]
++        back_shapes = [rec for rec in shape_records if rec.start_pos == back_s]
++        front_shapes = [rec for rec in shape_records if rec.start_pos == front_s]
++
++    def lateral_polynomial_value(lateral, recs_at_same_s):
++        """
++        对于同一个 start_pos 上可能有多个 shape 断面数据（不同的 start_pos_t），
++        先在这些 recs_at_same_s 中，找出落在哪一段横向区间 [start_pos_t_i, start_pos_t_{i+1})，
++        然后用对应多项式对 lateral_dist 做插值。
++        """
++        # 1) 先按 rec.start_pos_t 升序
++        recs_at_same_s = sorted(recs_at_same_s, key=lambda r: r.start_pos_t)
++        t_list = [r.start_pos_t for r in recs_at_same_s]
++        # 找到最后一个 t_start <= lateral 的段
++        idx_t = bisect.bisect_right(t_list, lateral) - 1
++        if idx_t < 0:
++            # 横向坐标比第一个 t_start 还小，返回 0
++            return 0.0
++        if idx_t >= len(recs_at_same_s) - 1:
++            rec = recs_at_same_s[-1]
++        else:
++            # 如果 lateral < 下一条 rec.start_pos_t，就用当前 rec；否则也用当前 rec
++            rec = recs_at_same_s[idx_t]
++
++        a, b, c, d = rec.polynomial_coefficients
++        dt = lateral - rec.start_pos_t
++        return a + b * dt + c * (dt**2) + d * (dt**3)
++
++    # 2) 计算 back 和 front 的 shape 高度值
++    if back_s is None:
++        back_height = 0.0
++    else:
++        back_height = lateral_polynomial_value(lateral_dist, back_shapes)
++
++    if not front_shapes:  # 没有 front，则此处 0
++        front_height = 0.0
++        front_s = back_s
++    else:
++        front_height = lateral_polynomial_value(lateral_dist, front_shapes)
++
++    # 3) 如果在同一个断面之内（back_s == front_s），直接返回该值
++    if back_s == front_s or front_s is None:
++        return back_height
++
++    # 4) 否则，在 [back_s, front_s] 间线性插值
++    # 当 s 变化时，shape 断面从 back_shapes 平滑过渡到 front_shapes
++    return float(np.interp(s, [back_s, front_s], [back_height, front_height]))
++
++def calculate_road_surface_height(road: Road, s: float, t: float) -> float:
++    """
++    返回道路在纵向 s、横向偏移 t 处的道路表面高度（不含某一具体物体的 zOffset），
++    等价于 ParametricLane.calc_border_height("inner", s, …)[0] 里“不要加 lane‐local <height>”那部分。
++
++    :param road: Road 对象，具有 elevation_profile 和 lateral_profile
++    :param s:   参考线上的纵向坐标
++    :param t:   横向偏移，右侧常为负，左侧常为正
++    :return:    z_surface = 中心线高程 + superelevation/shape 投影
++    """
++    # 1) 中心线基准高程（多项式插值）
++    z_center = evaluate_center_elevation(road.elevation_profile.elevations, s)
++
++    # 2) superelevation 部分
++    sup = evaluate_superelevation(road.lateral_profile.superelevations, s)
++
++    # 3) 计算对应 shape 偏移
++    #    先计算横向距离线，到中心线上 (abs(t))
++    lateral_dist = abs(t)
++    #    shape 投影高度
++    z_shape = evaluate_shape_offset(road.lateral_profile.shapes, s, lateral_dist)
++
++    # 4) 把 superelevation 和 shape 投影到高度： 
++    #    投影方式与 ParametricLane.calc_border_height 中的 correction_due_to_superelevation 完全一致：
++    proj_sup = np.sin(sup) * (lateral_dist - np.tan(sup) * z_shape)
++    proj_shape = z_shape / np.cos(sup) if np.cos(sup) != 0.0 else 0.0
++    height_to_ref_line = proj_sup + proj_shape
++
++    # 5) 左侧 t>0 取正，右侧 t<0 取负
++    side_coeff = 1.0 if t >= 0.0 else -1.0
++
++    # 6) 最终道路表面高度
++    return z_center + height_to_ref_line * side_coeff
+diff --git a/crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/elements/roadLanes.py b/crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/elements/roadLanes.py
+index e28adde2..02747ab7 100644
+--- a/crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/elements/roadLanes.py
++++ b/crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/elements/roadLanes.py
+@@ -193,6 +193,7 @@ class Lane:
+         self._road_mark = []
+         self.speed = None
+         self.access = []
++        self._height = []
+         # TODO material -> see parser.py
+         # TODO speed limit -> see parser.py
+         # TODO height -> see parser.py
+@@ -302,6 +303,18 @@ class Lane:
+             return num_widths - 1
+ 
+         return 0
++    @property
++    def height(self) -> List[height]:
++        """
++        Describes the height of the lane.
++
++        :getter: returns height
++        :setter: sets height
++        """
++        return self._height
++    @height.setter
++    def height(self, value: List[height]):
++        self._height = value
+ 
+     @property
+     def borders(self) -> List[LaneBorder]:
+@@ -534,7 +547,87 @@ class LaneBorder(LaneWidth):
+     and methods.
+     """
+ 
++class height:
++    """
++    Lane height 
++    Lane height may be used to elevate a lane independent from the road elevation.
++    Lane height is used to implement small-scale elevation, such as raising pedestrian walkways. 
++    Lane height is specified as offset from the road (including elevation, superelevation, shape, cross section surface) in h-direction.
++    """
++    def __init__(self):
++        self._sOffset = None
++        self._inner = None
++        self._outer = None
++
++    @property
++    def sOffset(self) -> float:
++        """
++        s-coordinate of start position, 
++        relative to the position of the preceding <laneSection> element
++
++
++        :getter: returns sOffset
++        :setter: sets sOffset
++        """
++        return self._sOffset
++    
++    @sOffset.setter
++    def sOffset(self, value: float):
++        """
++        Setter of the s-coordinate of the start position
++        relative to the position of the preceding <laneSection> element
++        :param value: value the sOffset is set to
++        """
++        if value is None:
++            warnings.warn(
++                "Parser could not find value for height.sOffset, 0 is used per default."
++            )
++            value = 0
++        self._sOffset = float(value)
+ 
++    @property
++    def inner(self) -> float:
++        """
++        Inner offset from road level
++
++        :getter: returns inner height
++        :setter: sets inner height
++        """
++        return self._inner
++    @inner.setter
++    def inner(self, value: float):
++        """
++        Setter of the inner offset from road level
++        :param value: value the inner height is set to
++        """
++        if value is None:
++            warnings.warn(
++                "Parser could not find value for height.inner, 0 is used per default."
++            )
++            value = 0
++        self._inner = float(value)
++
++    @property
++    def outer(self) -> float:
++        """
++        Outer offset from road level
++
++        :getter: returns outer height
++        :setter: sets outer height
++        """
++        return self._outer
++    @outer.setter
++    def outer(self, value: float):
++        """
++        Setter of the outer offset from road level
++        :param value: value the outer height is set to
++        """
++        if value is None:
++            warnings.warn(
++                "Parser could not find value for height.outer, 0 is used per default."
++            )
++            value = 0
++        self._outer = float(value)
+ class RoadMark:
+     """
+     Lanes on roads can have different lane markings, for example lines of different colors and styles.
+diff --git a/crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/elements/roadSignal.py b/crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/elements/roadSignal.py
+index d7a71bec..0c5dd267 100644
+--- a/crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/elements/roadSignal.py
++++ b/crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/elements/roadSignal.py
+@@ -1,4 +1,5 @@
+ from typing import Union
++import warnings
+ 
+ 
+ class Signal:
+@@ -17,6 +18,7 @@ class Signal:
+     :ivar _signal_value: value of the signal
+     :ivar _unit: unit of the signal value (mandatory if signal value is given)
+     :ivar _text: additional text associated with the signal
++    :ivar _zoffset: z-offset of the signal
+     """
+ 
+     def __init__(self):
+@@ -32,6 +34,7 @@ class Signal:
+         self._signal_value = None
+         self._unit = None
+         self._text = None
++        self._zOffset = None
+         self._validity_from = None
+         self._validity_to = None
+         self._signal_id = None
+@@ -261,6 +264,20 @@ class Signal:
+     def signal_id(self, value: str):
+         self._signal_id = str(value)
+ 
++    @property
++    def zOffset(self) -> float:
++        """
++        Z-offset of the signal.
++
++        :getter: returns z-offset
++        :setter: sets z-offset
++        """
++        return self._zOffset
++
++    @zOffset.setter
++    def zOffset(self, value):
++        self._zOffset = float(value)
++
+ 
+ class SignalReference:
+     """
+@@ -289,6 +306,25 @@ class SignalReference:
+         self._validity_to = None
+         self._signal_id = None
+         self._turn_relation = None
++        self._zOffset = None
++
++    @property
++    def zOffset(self) -> float:
++        """Z-offset of the signal."""
++        return self._zOffset if self._zOffset is not None else 0.0
++    
++    @zOffset.setter
++    def zOffset(self, value):
++        if value is None or value == "":
++            self._zOffset = 0.0
++        else:
++            try:
++                self._zOffset = float(value)
++            except (ValueError, TypeError):
++                warnings.warn(f"Invalid zOffset '{value}', default 0.0 used.")
++                self._zOffset = 0.0
++        #self._zOffset = float(value)
++
+ 
+     @property
+     def s(self) -> float:
+diff --git a/crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/parser.py b/crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/parser.py
+index 88360a8b..8230e1f2 100644
+--- a/crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/parser.py
++++ b/crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/parser.py
+@@ -48,6 +48,9 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLa
+ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
+     RoadMark as RoadLaneRoadMark,
+ )
++from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
++    height as RoadLaneHeight,
++)
+ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLateralProfile import (
+     Crossfall as RoadLateralProfileCrossfall,
+ )
+@@ -482,7 +485,12 @@ def parse_opendrive_road_lane_section(
+                     ]
+                 ]
+             # Lane Height
+-            # TODO implementation
++            for height in lane.findall("height"):
++                lane_height = RoadLaneHeight()
++                lane_height.sOffset = height.get("sOffset")
++                lane_height.inner = height.get("inner")
++                lane_height.outer = height.get("outer")
++                new_lane.height.append(lane_height)
+ 
+             newSideLanes.append(new_lane)
+ 
+@@ -509,6 +517,7 @@ def parse_opendrive_road_signal(new_road: Road, road_signal: etree.ElementTree):
+     new_signal.signal_value = road_signal.get("value")
+     new_signal.unit = road_signal.get("unit")
+     new_signal.text = road_signal.get("text")
++    new_signal.zOffset = road_signal.get("zOffset")
+     if road_signal.find("validity") is not None:
+         new_signal.validity_from = road_signal.find("validity").get("fromLane")
+         new_signal.validity_to = road_signal.find("validity").get("toLane")
+@@ -536,6 +545,7 @@ def parse_opendrive_road_signal_reference(new_road: Road, road_signal_reference:
+     new_signal_reference.t = road_signal_reference.get(
+         "t"
+     )  # position away from the reference curve
++    new_signal_reference.zOffset = road_signal_reference.get("zOffset")
+     new_signal_reference.orientation = road_signal_reference.get("orientation")
+     if road_signal_reference.find("validity") is not None:
+         new_signal_reference.validity_from = road_signal_reference.find("validity").get("fromLane")
