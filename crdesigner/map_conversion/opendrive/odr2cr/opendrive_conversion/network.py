@@ -66,6 +66,9 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.road i
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.utils import (
     convert_height_ellipsoid_to_orthometric,
 )
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.traffic_signals import (
+    calculate_road_surface_height,
+)
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import height as HeightRecord
 
 def get_all_adjacent_lanelets(lanelet_network, incoming_lanelet_id):
@@ -410,58 +413,90 @@ class Network:
                                     if centerLane.speed is None:
                                         centerLane.speed = max_speed
 
+    # def _stop_lines_from_road(self, road: Road):
+    #     """
+    #     Extracts stop lines from road.
+
+    #     :param road: Road to extract stop lines from.
+    #     """
+    #     for road_object in road.objects:
+    #         if road_object.name == "StopLine":
+    #             position, tangent, _, _ = road.plan_view.calc(
+    #                 road_object.s, compute_curvature=False
+    #             )
+    #             position = np.array(
+    #                 [
+    #                     position[0] + road_object.t * np.cos(tangent + np.pi / 2),
+    #                     position[1] + road_object.t * np.sin(tangent + np.pi / 2),
+    #                 ]
+    #             )
+
+    #             angle = road_object.hdg + tangent
+    #             # check if stop line is orthogonal to reference line
+    #             if np.round(tangent) == 0:
+    #                 angle = np.pi / 2
+    #             # check orientation of stop line
+    #             if road_object.orientation == "+":
+    #                 position_1 = np.array(
+    #                     [
+    #                         position[0] - 0.5 * road_object.validLength * np.cos(angle),
+    #                         position[1] - 0.5 * road_object.validLength * np.sin(angle),
+    #                     ]
+    #                 )
+    #                 position_2 = np.array(
+    #                     [
+    #                         position[0] + 0.5 * road_object.validLength * np.cos(angle),
+    #                         position[1] + 0.5 * road_object.validLength * np.sin(angle),
+    #                     ]
+    #                 )
+    #             else:
+    #                 position_1 = np.array(
+    #                     [
+    #                         position[0] + 0.5 * road_object.validLength * np.cos(angle),
+    #                         position[1] + 0.5 * road_object.validLength * np.sin(angle),
+    #                     ]
+    #                 )
+    #                 position_2 = np.array(
+    #                     [
+    #                         position[0] - 0.5 * road_object.validLength * np.cos(angle),
+    #                         position[1] - 0.5 * road_object.validLength * np.sin(angle),
+    #                     ]
+    #                 )
+
+    #             stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
+    #             self._stop_lines.append(stop_line)
+    
     def _stop_lines_from_road(self, road: Road):
         """
-        Extracts stop lines from road.
-
-        :param road: Road to extract stop lines from.
+        parse stop lines from road objects.
         """
-        for road_object in road.objects:
-            if road_object.name == "StopLine":
-                position, tangent, _, _ = road.plan_view.calc(
-                    road_object.s, compute_curvature=False
-                )
-                position = np.array(
-                    [
-                        position[0] + road_object.t * np.cos(tangent + np.pi / 2),
-                        position[1] + road_object.t * np.sin(tangent + np.pi / 2),
-                    ]
-                )
+        for obj in road.objects:
+            if obj.name != "StopLine":
+                continue
 
-                angle = road_object.hdg + tangent
-                # check if stop line is orthogonal to reference line
-                if np.round(tangent) == 0:
-                    angle = np.pi / 2
-                # check orientation of stop line
-                if road_object.orientation == "+":
-                    position_1 = np.array(
-                        [
-                            position[0] - 0.5 * road_object.validLength * np.cos(angle),
-                            position[1] - 0.5 * road_object.validLength * np.sin(angle),
-                        ]
-                    )
-                    position_2 = np.array(
-                        [
-                            position[0] + 0.5 * road_object.validLength * np.cos(angle),
-                            position[1] + 0.5 * road_object.validLength * np.sin(angle),
-                        ]
-                    )
-                else:
-                    position_1 = np.array(
-                        [
-                            position[0] + 0.5 * road_object.validLength * np.cos(angle),
-                            position[1] + 0.5 * road_object.validLength * np.sin(angle),
-                        ]
-                    )
-                    position_2 = np.array(
-                        [
-                            position[0] - 0.5 * road_object.validLength * np.cos(angle),
-                            position[1] - 0.5 * road_object.validLength * np.sin(angle),
-                        ]
-                    )
+            
+            pos2d, hdg, *_ = road.plan_view.calc(obj.s, compute_curvature=False)
+            x_c = pos2d[0] + obj.t * np.cos(hdg + np.pi / 2)
+            y_c = pos2d[1] + obj.t * np.sin(hdg + np.pi / 2)
 
-                stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
-                self._stop_lines.append(stop_line)
+            # elevation + offset
+            z_base = calculate_road_surface_height(road, obj.s, obj.t)
+            z_val  = z_base + (obj.zOffset or 0.0)
+
+            angle     = hdg + obj.hdg
+            if np.isclose(np.round(hdg), 0):
+                angle = np.pi / 2
+            half_len  = 0.5 * obj.validLength
+            dx, dy    = half_len * np.cos(angle), half_len * np.sin(angle)
+
+            if obj.orientation == "+":
+                p1 = np.array([x_c - dx, y_c - dy, z_val])
+                p2 = np.array([x_c + dx, y_c + dy, z_val])
+            else:
+                p1 = np.array([x_c + dx, y_c + dy, z_val])
+                p2 = np.array([x_c - dx, y_c - dy, z_val])
+
+            self._stop_lines.append(StopLine(p1, p2, LineMarking.SOLID))
 
     def export_lanelet_network(
         self, transformer: Optional[Transformer], filter_types: Optional[List[str]] = None

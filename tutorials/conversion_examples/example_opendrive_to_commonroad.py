@@ -10,8 +10,8 @@ from crdesigner.map_conversion.map_conversion_interface import opendrive_to_comm
 
 #input_path = Path.cwd().parent.parent / "tests/map_conversion/test_maps/odr2cr/opendrive-1.xodr"
 #input_path = Path.cwd().parent.parent / "/home/yu/Desktop/Carla/CarlaUE4/Content/Carla/Maps/OpenDrive/Town01.xodr"
-#input_path = Path.cwd().parent.parent / "/home/yu/Desktop/Carla/CarlaUE4/Content/Carla/Maps/OpenDrive/Town07.xodr"
-input_path = Path.cwd().parent.parent / "/home/yu/Desktop/Carla/CarlaUE4/Content/Carla/Maps/OpenDrive/Town15_split.xodr"
+input_path = Path.cwd().parent.parent / "/home/yu/Desktop/Carla/CarlaUE4/Content/Carla/Maps/OpenDrive/Town04.xodr"
+#input_path = Path.cwd().parent.parent / "/home/yu/Desktop/Carla/CarlaUE4/Content/Carla/Maps/OpenDrive/Town15_split.xodr"
 #input_path = Path.cwd().parent.parent / "/home/yu/Desktop/Carla/CarlaUE4/Content/Carla/Maps/OpenDrive/OpenDrive/star.xodr"
 output_path = Path.cwd() / "example_files/opendrive/opendrive-1.xml"
 
