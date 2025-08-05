@@ -9,6 +9,7 @@
 - odr2cr traffic light direction assignment
 
 ### Changed
+- update required commonroad-drivability-checker version
 - use new CLCS instead of version in drivability-checker
 
 ## [0.8.4] - 2024-12-21
