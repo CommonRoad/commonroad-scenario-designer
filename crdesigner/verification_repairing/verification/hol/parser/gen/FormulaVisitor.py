@@ -18,13 +18,41 @@ from ...expression_tree.unary.first_order.counting import Counting
 from ...expression_tree.unary.first_order.existential import Existential
 from ...expression_tree.unary.first_order.universal import Universal
 
+import ast, re, numpy as np
 if __name__ is not None and "." in __name__:
     from .FormulaParser import FormulaParser
 else:
     from FormulaParser import FormulaParser
 
 # This class defines a complete generic visitor for a parse tree produced by FormulaParser.
+# ───────────────────────── internal helper ──────────────────────────
+# regex 
+_NUM_RE = re.compile(r'^-?\d+(\.\d+)?$')
 
+def _to_python_literal(txt: str):
+    """
+    Converts a string to a Python literal.
+    • "-12" / "3.14"               → int / float
+    • "(1,2,3)"                   → tuple
+    • "[(0,0,0),(10,0,1)]"        → np.ndarray(shape=(2,3))
+    • 其它                        → str
+    """
+    txt = txt.strip()
+    # 数字
+    if _NUM_RE.fullmatch(txt):
+        return float(txt) if '.' in txt else int(txt)
+
+    # tuple "(…, …, …)"
+    if txt.startswith('(') and txt.endswith(')'):
+        return tuple(ast.literal_eval(txt))
+
+    # list of tuples "[ (...), (...)]"  → ndarray
+    if txt.startswith('[') and txt.endswith(']'):
+        arr = ast.literal_eval(txt)  # → list[list/tuple]
+        return np.array(arr, dtype=float)
+
+    # 默认：字符串
+    return txt
 
 class FormulaVisitor(ParseTreeVisitor):
     def visitFormula(self, ctx: FormulaParser.FormulaContext):
@@ -188,7 +216,10 @@ class FormulaVisitor(ParseTreeVisitor):
         return DynamicDomain(name, func)
 
     def visitStringConst(self, ctx: FormulaParser.StringConstContext):
-        return Constant(ctx.val.text.replace('"', ""))
+        #return Constant(ctx.val.text.replace('"', ""))
+        # to get rid of the quotes
+        py_val = _to_python_literal(ctx.val.text.strip('"'))
+        return Constant(py_val)
 
     def visitIntConst(self, ctx: FormulaParser.IntConstContext):
         return Constant(int(ctx.val.text))
@@ -201,34 +232,7 @@ class FormulaVisitor(ParseTreeVisitor):
 
     def visitBrackets(self, ctx: FormulaParser.BracketsContext):
         return self.visit(ctx.content)
-    # ─────────────────────────  3‑D expansion  ─────────────────────────
-    # (x,y,z) / (x,y) tuple 
-    def visitTupleConst(self, ctx: FormulaParser.TupleConstContext):
-        """
-        convert (x,y,z) or (x,y) to numpy.array([x,y,z]).
-        Sub-items are already parsed to Constant / float / int by visit(term).
-        """
-        scalars = [self._as_float(self.visit(t)) for t in ctx.term()]
-        return np.array(scalars, dtype=float)
-
-    # [(x1,y1,z1), (x2,y2,z2), …] list of tuples
-    def visitListConst(self, ctx: FormulaParser.ListConstContext):
-        tuples = [self.visit(tpl) for tpl in ctx.tuple_const()]
-        return np.vstack(tuples) if tuples else np.empty((0, 0))
-
-    # equivalent to visitTupleConst / visitListConst (ANTLR assigns different labels)
-    visitTupleTerm = visitTupleConst
-    visitListTerm  = visitListConst
-
-    # ──────────────────────── Internal utility functions ────────────────────────
-    @staticmethod
-    def _as_float(val):
-        """
-        Convert Constant / str / int / float to float for easier ndarray construction.
-        """
-        if isinstance(val, Constant):
-            val = val.value
-        return float(val)
+    
     def visitTrueBoolean(self, _):
         return Bool(True)
 
