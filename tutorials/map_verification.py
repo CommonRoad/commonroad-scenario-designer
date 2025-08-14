@@ -29,7 +29,7 @@ file = os.path.join(
 )
 # reading that (.pb) file.
 scenario, _ = CRDesignerFileReader(file).open()
-fm = FormulaManager(lanelet_network=scenario.lanelet_network)  
+fm = FormulaManager()  
 
 # ────────────────── create  ──────────────────
 cfg = MapVerParams()                    # get default config

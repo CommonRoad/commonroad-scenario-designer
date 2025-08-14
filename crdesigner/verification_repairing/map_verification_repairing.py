@@ -21,7 +21,6 @@ from crdesigner.verification_repairing.verification.formula_ids import (
     FormulaID,
     GeneralFormulaID,
     extract_formula_ids,
-    LaneletFormulaID3D,
 )
 from crdesigner.verification_repairing.verification.groups_handler import GroupsHandler
 from crdesigner.verification_repairing.verification.map_verifier import MapVerifier
@@ -93,9 +92,15 @@ def _is_3d_network(network: LaneletNetwork) -> bool:
 
 
 def _filter_3d_formulas(formulas: List[FormulaID]) -> List[FormulaID]:
-    """去掉所有 3D 相关公式"""
-    three_d_ids: Set[FormulaID] = set(LaneletFormulaID3D)  # Enum 可直接转 set
-    return [f for f in formulas if f not in three_d_ids]
+    """remove 3D formulas from the list of formulas"""
+    suffixes = (
+        "_3d",
+        "VERTICAL_CLEARANCE_STACKED",
+        "GRADE_WITHIN_LIMIT",
+        "PREDECESSOR_VERTICAL_STEP",
+        "LANELET_VERTICAL_CLEARANCE",
+    )
+    return [f for f in formulas if not any(str(f).endswith(s) for s in suffixes)]
 
 def verify_and_repair_map(
     network: LaneletNetwork,

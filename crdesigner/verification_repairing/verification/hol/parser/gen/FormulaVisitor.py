@@ -24,35 +24,6 @@ if __name__ is not None and "." in __name__:
 else:
     from FormulaParser import FormulaParser
 
-# This class defines a complete generic visitor for a parse tree produced by FormulaParser.
-# ───────────────────────── internal helper ──────────────────────────
-# regex 
-_NUM_RE = re.compile(r'^-?\d+(\.\d+)?$')
-
-def _to_python_literal(txt: str):
-    """
-    Converts a string to a Python literal.
-    • "-12" / "3.14"               → int / float
-    • "(1,2,3)"                   → tuple
-    • "[(0,0,0),(10,0,1)]"        → np.ndarray(shape=(2,3))
-    • 其它                        → str
-    """
-    txt = txt.strip()
-    # 数字
-    if _NUM_RE.fullmatch(txt):
-        return float(txt) if '.' in txt else int(txt)
-
-    # tuple "(…, …, …)"
-    if txt.startswith('(') and txt.endswith(')'):
-        return tuple(ast.literal_eval(txt))
-
-    # list of tuples "[ (...), (...)]"  → ndarray
-    if txt.startswith('[') and txt.endswith(']'):
-        arr = ast.literal_eval(txt)  # → list[list/tuple]
-        return np.array(arr, dtype=float)
-
-    # 默认：字符串
-    return txt
 
 class FormulaVisitor(ParseTreeVisitor):
     def visitFormula(self, ctx: FormulaParser.FormulaContext):
@@ -216,10 +187,7 @@ class FormulaVisitor(ParseTreeVisitor):
         return DynamicDomain(name, func)
 
     def visitStringConst(self, ctx: FormulaParser.StringConstContext):
-        #return Constant(ctx.val.text.replace('"', ""))
-        # to get rid of the quotes
-        py_val = _to_python_literal(ctx.val.text.strip('"'))
-        return Constant(py_val)
+        return Constant(ctx.val.text.replace('"', ""))
 
     def visitIntConst(self, ctx: FormulaParser.IntConstContext):
         return Constant(int(ctx.val.text))
