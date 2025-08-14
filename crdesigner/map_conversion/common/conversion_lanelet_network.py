@@ -1003,6 +1003,23 @@ class ConversionLaneletNetwork(LaneletNetwork):
         :param stop_lines: List of all the stop lines
         """
         # Assign stop lines to lanelets
+        from math import hypot
+        def _p2(p):  # get 2D point from 3D
+            p = np.asarray(p)
+            return p[:2] if p.shape[-1] >= 2 else p
+
+        def _center_end_2d(lane):
+            # et 2d for all temporary lanelets
+            c = np.asarray(lane.center_vertices)
+            if c.size == 0:
+                # if there's no centerline then average it
+                L = np.asarray(lane.left_vertices); R = np.asarray(lane.right_vertices)
+                c = (L + R) * 0.5
+            return _p2(c[-1])
+
+        def _dist2(a, b):
+            a = _p2(a); b = _p2(b)
+            return hypot(a[0]-b[0], a[1]-b[1])
 
         for stop_line in stop_lines:
             min_start = float("inf")
@@ -1017,16 +1034,30 @@ class ConversionLaneletNetwork(LaneletNetwork):
                         stop_line_position_end = stop_line.start
                         stop_line_position_start = stop_line.end
                         if (
-                            np.linalg.norm(lanelet_position_right - stop_line_position_start)
-                            < min_start
-                            and np.linalg.norm(lanelet_position_left - stop_line_position_end)
-                            < min_end
+                            np.linalg.norm(_p2(lanelet_position_right) - _p2(stop_line_position_start)) < min_start
+                            and np.linalg.norm(_p2(lanelet_position_left)  - _p2(stop_line_position_end))   < min_end
                         ):
                             lane_to_add_stop_line = lane
-                            min_start = np.linalg.norm(
-                                lanelet_position_right - stop_line_position_start
-                            )
-                            min_end = np.linalg.norm(lanelet_position_left - stop_line_position_end)
+                            min_start = np.linalg.norm(_p2(lanelet_position_right) - _p2(stop_line_position_start))
+                            min_end   = np.linalg.norm(_p2(lanelet_position_left)  - _p2(stop_line_position_end))
+
+
+            #search for the closest end of the lanelet to the center of the stop line
+            if lane_to_add_stop_line is None:
+                mid = (np.asarray(stop_line.start) + np.asarray(stop_line.end)) * 0.5
+                best_d = float("inf"); best_lane = None
+
+                for lane in self.lanelets:
+                    # a typical stop line is at the end of the incoming lanelet, so we prioritize lanes with successors or in intersections
+                    end_pt = _center_end_2d(lane)
+                    d = _dist2(end_pt, mid)
+                    if d < best_d:
+                        best_d, best_lane = d, lane
+
+                # threshold to avoid adding stop lines to far away lanes
+                if best_lane is not None and best_d < 20.0:
+                    lane_to_add_stop_line = best_lane
+
             if lane_to_add_stop_line is None:
                 warnings.warn("No lanelet was matched with a stop line")
                 continue

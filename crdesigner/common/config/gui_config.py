@@ -19,6 +19,7 @@ from crdesigner.common.config.config_base import Attribute, BaseConfig
 
 # projects the lane-network in a way that aligns well with aerial images
 pseudo_mercator = "EPSG:3857"
+#pseudo_mercator = "CDATA[+proj=tmerc +lat_0=0 +lon_0=9 +k=0.9996 +x_0=-101000 +y_0=-5787000 +datum=WGS84 +units=m +no_defs"
 utm_default = "+proj=utm +zone=32 +ellps=WGS84"
 lanelet2_default = "ETRF89"
 

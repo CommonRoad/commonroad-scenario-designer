@@ -465,36 +465,196 @@ class Network:
 
     #             stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
     #             self._stop_lines.append(stop_line)
+    @staticmethod
+    def _is_stopline_obj(o):
+        name = (getattr(o, "name", "") or "").casefold()
+        typ  = (getattr(o, "type", "") or "").casefold()
+        sub  = (getattr(o, "subtype", "") or "").casefold()
+        return (
+            name == "StopLine" or
+            (typ in ("roadmark", "road_mark") and sub in ("stopline", "stop_line"))
+        )
+    @staticmethod
+    def _outline_length_or_none(o):
+        try:
+            outlines = getattr(o, "outlines", None) or getattr(o, "outline", None)
+            corners = []
+            if outlines is None:
+                return None
+
+            for out in (outlines if isinstance(outlines, (list, tuple)) else [outlines]):
+                for c in getattr(out, "corners", []) or getattr(out, "cornerLocal", []):
+                    v = getattr(c, "v", None)
+                    if v is not None:
+                        corners.append(float(v))
+            if len(corners) >= 2:
+                return max(corners) - min(corners)
+        except Exception:
+            pass
+        return None
+    # @staticmethod
+    # def _w_s_offset(w) -> float:
+
+    #     return float(
+    #         getattr(w, "sOffset", None)
+    #         or getattr(w, "s_offset", None)
+    #         or getattr(w, "start_pos", 0.0)
+    #         or 0.0
+    #     )
+
+    # @staticmethod
+    # def _w_coeffs(w):
+    #     #uses getattr to get the coefficients of the polynomial,if not found, it will use a,b,c,d
+    #     coeffs = getattr(w, "polynomial_coefficients", None)
+    #     if coeffs is None:
+    #         a = float(getattr(w, "a", 0.0))
+    #         b = float(getattr(w, "b", 0.0))
+    #         c = float(getattr(w, "c", 0.0))
+    #         d = float(getattr(w, "d", 0.0))
+    #         coeffs = (a, b, c, d)
+    #     return coeffs
     
-    def _stop_lines_from_road(self, road: Road):
-        """
-        parse stop lines from road objects.
-        """
-        for obj in road.objects:
-            if obj.name != "StopLine":
+    @staticmethod
+    def _s_of_width(w):
+
+        for attr in ("sOffset", "s", "soffset"):
+            if hasattr(w, attr):
+                try:
+                    return float(getattr(w, attr))
+                except Exception:
+                    pass
+        return 0.0
+
+    @staticmethod
+    def _poly_coeffs(w):
+        a, b, c, d = w.polynomial_coefficients  
+        return float(a), float(b), float(c), float(d)
+
+    def _estimate_total_driving_width(self, road, s_abs: float) -> float:
+        DRIVABLE = {"driving", "onRamp", "offRamp", "entry", "exit"}
+        lane_sections = road.lanes.lane_sections
+        if not lane_sections:
+            return 0.0
+
+        ls = None
+        for i, sec in enumerate(lane_sections):
+            s0 = sec.sPos
+            s1 = lane_sections[i+1].sPos if i+1 < len(lane_sections) else float("inf")
+            if s0 <= s_abs < s1 or (i == len(lane_sections)-1 and np.isclose(s_abs, s1)):
+                ls = sec
+                break
+        if ls is None:
+            return 0.0
+
+        s_rel = float(s_abs - ls.sPos)
+        total = 0.0
+
+        for lane in ls.all_lanes:
+            if lane.id == 0 or (getattr(lane, "type", "") not in DRIVABLE):
+                continue
+            widths = getattr(lane, "widths", []) or []
+            if not widths:
                 continue
 
-            
+
+            chosen = None
+            widths_sorted = sorted(widths, key=Network._s_of_width)
+            for w in widths_sorted:
+                if Network._s_of_width(w) <= s_rel:
+                    chosen = w
+                else:
+                    break
+            if chosen is None:
+                chosen = widths_sorted[0]
+
+            a, b, c, d = Network._poly_coeffs(chosen)
+
+            if not np.isfinite([a,b,c,d]).all():
+                continue
+
+            ds = max(0.0, s_rel - Network._s_of_width(chosen))
+            w_val = a + b*ds + c*ds*ds + d*ds*ds*ds
+
+            if np.isfinite(w_val) and w_val > 0:
+                total += w_val
+
+
+        if not np.isfinite(total) or total < 0:
+            total = 0.0
+        total = float(np.clip(total, 0.0, 100.0))
+        return total
+
+    
+    def _safe_stopline_length(self, road, obj) -> float:
+    # try validLength and length first
+        for attr in ("validLength", "length"):
+            if hasattr(obj, attr):
+                try:
+                    L = float(getattr(obj, attr) or 0.0)
+                    if np.isfinite(L) and L > 0:
+                        return float(np.clip(L, 0.05, 100.0))
+                except Exception:
+                    pass
+
+        # then try outline length
+        L = self._outline_length_or_none(obj)
+        if L and np.isfinite(L) and L > 0:
+            return float(np.clip(L, 0.05, 100.0))
+
+        # at last, try to estimate from road width
+        L = self._estimate_total_driving_width(road, float(getattr(obj, "s", 0.0) or 0.0))
+        if np.isfinite(L) and L > 0:
+            return float(np.clip(L, 0.05, 100.0))
+
+        # fallback
+        return 3.0  # avoid p1==p2 / inf
+    @staticmethod
+    def _finite_xy(arr):
+        arr = np.asarray(arr, dtype=float)
+        return np.isfinite(arr[0]) and np.isfinite(arr[1])
+    @staticmethod
+    def _project_xy_safe(transformer, x, y):
+        try:
+            X, Y = transformer.transform(float(x), float(y))
+            if np.isfinite(X) and np.isfinite(Y):
+                return X, Y
+        except Exception:
+            pass
+        # if projection fails, return original values
+        return float(x), float(y)
+
+    def _stop_lines_from_road(self, road):
+        for obj in road.objects:
+            if not self._is_stopline_obj(obj):
+                continue
+
             pos2d, hdg, *_ = road.plan_view.calc(obj.s, compute_curvature=False)
-            x_c = pos2d[0] + obj.t * np.cos(hdg + np.pi / 2)
-            y_c = pos2d[1] + obj.t * np.sin(hdg + np.pi / 2)
+            x_c = pos2d[0] + obj.t * np.cos(hdg + np.pi/2)
+            y_c = pos2d[1] + obj.t * np.sin(hdg + np.pi/2)
 
-            # elevation + offset
-            z_base = calculate_road_surface_height(road, obj.s, obj.t)
-            z_val  = z_base + (obj.zOffset or 0.0)
+            z = calculate_road_surface_height(road, obj.s, obj.t) + (getattr(obj, "zOffset", 0.0) or 0.0)
 
-            angle     = hdg + obj.hdg
-            if np.isclose(np.round(hdg), 0):
-                angle = np.pi / 2
-            half_len  = 0.5 * obj.validLength
-            dx, dy    = half_len * np.cos(angle), half_len * np.sin(angle)
+            L = self._safe_stopline_length(road, obj)
+            half = 0.5 * L
 
-            if obj.orientation == "+":
-                p1 = np.array([x_c - dx, y_c - dy, z_val])
-                p2 = np.array([x_c + dx, y_c + dy, z_val])
-            else:
-                p1 = np.array([x_c + dx, y_c + dy, z_val])
-                p2 = np.array([x_c - dx, y_c - dy, z_val])
+            ang = hdg + np.pi/2
+
+            dx, dy = half * np.cos(ang), half * np.sin(ang)
+
+            p1 = np.array([x_c - dx, y_c - dy, z], dtype=float)
+            p2 = np.array([x_c + dx, y_c + dy, z], dtype=float)
+
+            if not (Network._finite_xy(p1) and Network._finite_xy(p2)):
+                L = max(0.5, min(L, 10.0))
+                half = 0.5 * L
+                dx, dy = half * np.cos(ang), half * np.sin(ang)
+                p1 = np.array([x_c - dx, y_c - dy, z], dtype=float)
+                p2 = np.array([x_c + dx, y_c + dy, z], dtype=float)
+
+            if not Network._finite_xy(p1):
+                p1[:2] = [x_c, y_c]
+            if not Network._finite_xy(p2):
+                p2[:2] = [x_c, y_c] + 0.2 * np.array([np.cos(ang), np.sin(ang)])
 
             self._stop_lines.append(StopLine(p1, p2, LineMarking.SOLID))
 
@@ -566,59 +726,40 @@ class Network:
 
         self.relate_crosswalks_to_intersection(lanelet_network)
 
-        '''
+
+        def _xyz3(p, default_z=0.0):
+            '''unify point to (x,y,z). p can be list/ndarray/tuple, length 2 or 3 is ok.'''
+            a = np.asarray(p, dtype=float).ravel()
+            if a.size >= 3:
+                return float(a[0]), float(a[1]), float(a[2])
+            elif a.size == 2:
+                return float(a[0]), float(a[1]), float(default_z)
+            else:
+                # extreme case: empty or 1d array
+                x = float(a[0]) if a.size >= 1 else 0.0
+                y = float(a[1]) if a.size >= 2 else 0.0
+                return x, y, default_z
         if transformer is not None:
-            # Apply the transformer to traffic controls
-            for xs in [
-                self._traffic_lights,
-                self._traffic_signs,
-            ]:
-                for x in xs:
-                    x.position = np.array(transformer.transform(*x.position))
-            for x in self._stop_lines:
-                x.start = np.array(transformer.transform(*x.start))
-                x.end = np.array(transformer.transform(*x.end))
-        '''
-        '''
-        if transformer is  not None:
+            # XY projection
             for xs in [self._traffic_lights, self._traffic_signs]:
                 for x in xs:
-                    x_ellipsoid, y_ellipsoid, z_ellipsoid = x.position
-                    x_proj, y_proj = transformer.transform(x_ellipsoid, y_ellipsoid)
-                    # convert_height_ellipsoid_to_orthometric returns z_orthometric only
-                    z_orthometric = convert_height_ellipsoid_to_orthometric(x_ellipsoid, y_ellipsoid, z_ellipsoid)
+                    x_proj, y_proj = transformer.transform(x.position[0], x.position[1])
+                    z_tmp = float(x.position[2]) if x.position.shape[-1] == 3 else 0.0
+                    x.position = np.array([x_proj, y_proj, z_tmp])
 
-                    x.position = np.array([x_proj, y_proj, z_orthometric])
+            for sl in self._stop_lines:
 
-            for x in self._stop_lines:
-                start_x_ellipsoid, start_y_ellipsoid, start_z_ellipsoid = x.start
-                start_x_proj, start_y_proj = transformer.transform(start_x_ellipsoid, start_y_ellipsoid)
-                start_z_orthometric = convert_height_ellipsoid_to_orthometric(start_x_ellipsoid, start_y_ellipsoid, start_z_ellipsoid)
-                x.start = np.array([start_x_proj, start_y_proj, start_z_orthometric])
-                
-                #
-                end_x_ellipsoid, end_y_ellipsoid, end_z_ellipsoid = x.end
-                end_x_proj, end_y_proj = transformer.transform(end_x_ellipsoid, end_y_ellipsoid)
-                end_z_orthometric = convert_height_ellipsoid_to_orthometric(end_x_ellipsoid, end_y_ellipsoid, end_z_ellipsoid)
-                x.end = np.array([end_x_proj, end_y_proj, end_z_orthometric])
-        '''
-        if transformer is  not None:
-            for xs in [self._traffic_lights, self._traffic_signs]:
-                for x in xs:
-                    x_temp, y_temp, z_temp = x.position
-                    x_proj, y_proj = transformer.transform(x_temp, y_temp)
-                    x.position = np.array([x_proj, y_proj, z_temp])
+                sx, sy, sz = _xyz3(sl.start, default_z=np.nan)   # Along with NaN support
+                ex, ey, ez = _xyz3(sl.end,   default_z=np.nan)
 
-            for x in self._stop_lines:
-                start_x_temp, start_y_temp, start_z_temp = x.start
-                start_x_proj, start_y_proj = transformer.transform(start_x_temp, start_y_temp)
-                x.start = np.array([start_x_proj, start_y_proj, start_z_temp])
-                
-                #
-                end_x_temp, end_y_temp, end_z_temp = x.end
-                end_x_proj, end_y_proj = transformer.transform(end_x_temp, end_y_temp)
-                x.end = np.array([end_x_proj, end_y_proj, end_z_temp])
-        self.assign_traffic_sign_heights_from_surface()
+                sxp, syp = transformer.transform(sx, sy)
+                exp, eyp = transformer.transform(ex, ey)
+
+                # replace with road surface z later, right now it probably has NaN
+                sl.start = np.array([sxp, syp, sz], dtype=float)
+                sl.end   = np.array([exp, eyp, ez], dtype=float)
+
+        self.assign_control_heights_from_surface()
         # Assign traffic signals, lights and stop lines to lanelet network
         lanelet_network.add_traffic_lights_to_network(self._traffic_lights)
         lanelet_network.add_traffic_signs_to_network(self._traffic_signs)
@@ -692,6 +833,104 @@ class Network:
             z_surface = surface_points[idx, 2]
             z_final = z_surface + z_offset
             ts.position = np.array([x, y, z_final])
+
+
+    def assign_control_heights_from_surface(self):
+        from scipy.spatial import cKDTree
+        import numpy as np
+
+        # collect all surface points from parametric lanes
+        surface_chunks = []
+        for plg in self._planes:
+            for pl in getattr(plg, "parametric_lanes", []):
+                pts = getattr(pl, "_all_surface_points", None)
+                if pts is not None:
+                    surface_chunks.append(pts)
+
+        if not surface_chunks:
+            print("assign_control_heights_from_surface: no surface points")
+            return
+
+        surface_points = np.vstack(surface_chunks).astype(float)
+        mask = np.isfinite(surface_points).all(axis=1)
+        surface_points = surface_points[mask]
+        if surface_points.size == 0:
+            print("assign_control_heights_from_surface: all surface points invalid")
+            return
+
+        tree = cKDTree(surface_points[:, :2])
+
+        def _finite2(p):
+            p = np.asarray(p, dtype=float).ravel()
+            return p.size >= 2 and np.isfinite(p[0]) and np.isfinite(p[1])
+
+        def _as2(p):
+            p = np.asarray(p, dtype=float).ravel()
+            return float(p[0]), float(p[1])
+
+        # ------- signs -------
+        for ts in self._traffic_signs:
+            pos = np.asarray(ts.position, dtype=float).ravel()
+            if not _finite2(pos):
+                continue
+            x, y = _as2(pos)
+            z_off = float(getattr(ts, "zOffset", 0.0) or 0.0)
+            _, idx = tree.query([x, y])
+            ts.position = np.array([x, y, surface_points[idx, 2] + z_off], dtype=float)
+
+        # ------- lights -------
+        for tl in self._traffic_lights:
+            pos = np.asarray(tl.position, dtype=float).ravel()
+            if not _finite2(pos):
+                continue
+            x, y = _as2(pos)
+            z_off = float(getattr(tl, "zOffset", 0.0) or 0.0)
+            _, idx = tree.query([x, y])
+            tl.position = np.array([x, y, surface_points[idx, 2] + z_off], dtype=float)
+
+        # ------- stop lines -------
+        def _finite2(p):
+            p = np.asarray(p, dtype=float).ravel()
+            return p.size >= 2 and np.isfinite(p[0]) and np.isfinite(p[1])
+
+        def _as2(p):
+            p = np.asarray(p, dtype=float).ravel()
+            return float(p[0]), float(p[1])
+
+        # ------- stop lines：use road surface z -------
+        cleaned_xy = 0
+        skipped = 0
+        for sl in self._stop_lines:
+            s = np.asarray(sl.start, dtype=float).ravel()
+            e = np.asarray(sl.end,   dtype=float).ravel()
+
+            s_ok = _finite2(s)
+            e_ok = _finite2(e)
+
+            #if XY of one end is not finite, use the other end XY to fix it; if both ends are bad, skip
+            if not s_ok and e_ok:
+                sx, sy = _as2(e); s = np.array([sx, sy], dtype=float); cleaned_xy += 1
+            elif not e_ok and s_ok:
+                ex, ey = _as2(s); e = np.array([ex, ey], dtype=float); cleaned_xy += 1
+            elif not s_ok and not e_ok:
+                skipped += 1
+                continue
+
+            #now s/e has at least XY. Get the nearest surface z (height) for each
+            if _finite2(s):
+                sx, sy = _as2(s)
+                _, idx_s = tree.query([sx, sy])
+                z_s = float(surface_points[idx_s, 2])
+                sl.start = np.array([sx, sy, z_s], dtype=float)
+
+            if _finite2(e):
+                ex, ey = _as2(e)
+                _, idx_e = tree.query([ex, ey])
+                z_e = float(surface_points[idx_e, 2])
+                sl.end   = np.array([ex, ey, z_e], dtype=float)
+
+        if cleaned_xy or skipped:
+            print(f"[assign_control_heights_from_surface] stop-lines repaired_xy={cleaned_xy}, skipped={skipped}")
 
 
     def relate_crosswalks_to_intersection(self, lanelet_network: ConversionLaneletNetwork):

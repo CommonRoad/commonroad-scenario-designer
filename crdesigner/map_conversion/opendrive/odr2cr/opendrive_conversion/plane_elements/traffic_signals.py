@@ -207,6 +207,7 @@ def assign_traffic_signals_to_road(
                     traffic_light_cycle=get_default_cycle(),
                     direction=tdir,
                 )  # TODO remove for new CR-Format
+                traffic_light.zOffset = signal.zOffset if signal.zOffset is not None else 0.0
                 road.add_traffic_light((traffic_light, lanes, signal.s))
                 traffic_lights.append(traffic_light)
             else:
