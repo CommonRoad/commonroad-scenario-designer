@@ -1312,4 +1312,4 @@ class Lanelet2CRConverter:
             new_ele = round(start_node_f[2] + (end_node_f[2] - start_node_f[2]) * i / (n + 1), 11)
             new_node = Node(new_id, new_lat, new_lon, new_ele)
             self.osm.add_node(new_node)
-            shorter_way.nodes.insert(mid, new_node.id_)
+            shorter_way.nodes.insert(mid + (n-i), new_node.id_)
