@@ -73,6 +73,9 @@ def main(
     force_overwrite: Annotated[
         bool, typer.Option(help="Overwrite existing CommonRoad file")
     ] = False,
+    projection: Annotated[
+        Optional[str], typer.Option(help="Projection string for coordinate transformation")
+    ] = None,
     author: Annotated[str, typer.Option(..., help="Your name")] = "",
     affiliation: Annotated[
         str,
@@ -85,6 +88,10 @@ def main(
     elif ctx.invoked_subcommand is None and input_file is None:
         start_gui()
     else:
+        # Set projection if provided
+        if projection is not None:
+            general_config.proj_string_cr = projection
+        
         # copied from commonroad-dataset-converter
         frame = inspect.currentframe()
         assert frame is not None
