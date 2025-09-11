@@ -576,7 +576,7 @@ class Lanelet2CRConverter:
                     wr_lanelets.add(new_lanelet_ids[wr])
 
                     if self._config.autoware:
-                        # assign the stop line to the lanelet
+                        # for autoware, convert the ref_line of the traffic light
                         regulatory_element = self.osm.find_regulatory_element_by_id(re)
                         for line in regulatory_element.ref_line:
                             # extract geometrical features
@@ -584,7 +584,7 @@ class Lanelet2CRConverter:
                             line_way_vertices = self._convert_way_to_vertices(line_way)
                             start = line_way_vertices[0]
                             end = line_way_vertices[-1]
-                            # initialize stop line
+                            # create stop line
                             stop_line = StopLine(start=start, end=end, traffic_light_ref={re},
                                                  line_marking=LineMarking.SOLID)
                             # add stop line to the lanelet
