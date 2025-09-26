@@ -31,7 +31,7 @@ build_and_test_python:
   stage: test
   parallel :
     matrix :
-      - PYTHON_VERSIONS : [ "3.9", "3.10"]
+      - PYTHON_VERSIONS : [ "3.10" ]
   variables:
     QT_QPA_PLATFORM : "offscreen"
   script:
@@ -43,7 +43,7 @@ build_and_update_packages_debian:
   stage: test
   parallel :
     matrix :
-      - PYTHON_VERSIONS : [ "3.9", "3.10", "3.11" ]
+      - PYTHON_VERSIONS : [ "3.10", "3.11" ]
   script:
     - poetry update
     - poetry install

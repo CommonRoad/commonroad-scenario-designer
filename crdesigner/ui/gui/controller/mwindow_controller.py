@@ -8,7 +8,6 @@ from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 from crdesigner.common.config.gui_config import gui_config
 from crdesigner.common.logging import logger
-from crdesigner.common.sumo_available import SUMO_AVAILABLE
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
 from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_wrapper_controller import (
     AnimatedViewerWrapperController,
@@ -199,9 +198,8 @@ class MWindowController:
     def update_toolbox_scenarios_service_layer(self):
         # TODO: Update to scenario_model
         scenario = self.mwindow_ui.animated_viewer_wrapper.cr_viewer.current_scenario
-        if SUMO_AVAILABLE:
-            self.mwindow_ui.obstacle_toolbox.sumo_simulation.scenario = scenario
-            self.mwindow_ui.map_converter_toolbox.sumo_simulation.scenario = scenario
+        self.mwindow_ui.obstacle_toolbox.sumo_simulation.scenario = scenario
+        self.mwindow_ui.map_converter_toolbox.sumo_simulation.scenario = scenario
 
     def store_scenario(self):
         """Redirect to the service layer."""

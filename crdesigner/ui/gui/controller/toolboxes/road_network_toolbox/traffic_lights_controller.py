@@ -8,9 +8,9 @@ from commonroad.scenario.traffic_light import (
     TrafficLightDirection,
     TrafficLightState,
 )
+from commonroad_sumo.cr2sumo import CR2SumoMapConverter
 
 from crdesigner.common.logging import logger
-from crdesigner.common.sumo_available import SUMO_AVAILABLE
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import (
     RoadNetworkToolboxUI,
@@ -18,10 +18,6 @@ from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.traffic_lights_ui import (
     AddTrafficLightsUI,
 )
-
-if SUMO_AVAILABLE:
-    from crdesigner.map_conversion.map_conversion_interface import SumoConfig
-    from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
 
 
 class AddTrafficLightsController:
@@ -235,9 +231,6 @@ class AddTrafficLightsController:
             self.road_network_controller.text_browser.append("Please stop the animation first.")
             return
 
-        if not SUMO_AVAILABLE:
-            self.road_network_controller.text_browser.append("SUMO is not installed correctly!")
-            return
         lanelet_ids = [
             int(lanelet_id)
             for lanelet_id in self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items()
@@ -247,7 +240,6 @@ class AddTrafficLightsController:
         self.road_network_toolbox_ui.referenced_lanelets_traffic_light.clear()
         converter = CR2SumoMapConverter(
             self.scenario_model.get_current_scenario(),
-            SumoConfig.from_scenario(self.scenario_model.get_current_scenario()),
         )
         converter.create_sumo_files(self.road_network_controller.tmp_folder)
         oks = []
