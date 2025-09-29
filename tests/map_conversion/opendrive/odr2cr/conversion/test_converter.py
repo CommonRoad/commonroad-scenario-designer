@@ -175,7 +175,7 @@ class TestConverter(unittest.TestCase):
             ),
         )
 
-        self.assertEquals(5.4, plane_groups_mark[2].parametric_lanes[0].line_marking.SOffset)
+        self.assertEqual(5.4, plane_groups_mark[2].parametric_lanes[0].line_marking.SOffset)
 
         # check the inner line markings
         self.assertEqual(plane_groups[0].inner_linemarking.type, "solid solid")  # id -1
@@ -267,10 +267,10 @@ class TestConverter(unittest.TestCase):
             parametric_lane.border_group.outer_border.width_coefficients,
         )
         # test properties of lane and lane group
-        self.assertEquals("100.0.-1.0.0", parametric_lane.id_)
-        self.assertEquals(lane.type, parametric_lane.type_)
-        self.assertEquals(side, parametric_lane.side)
-        self.assertEquals(40, parametric_lane.speed)
+        self.assertEqual("100.0.-1.0.0", parametric_lane.id_)
+        self.assertEqual(lane.type, parametric_lane.type_)
+        self.assertEqual(side, parametric_lane.side)
+        self.assertEqual(40, parametric_lane.speed)
 
     def test_create_outer_lane_border(self):
         road = Road()
