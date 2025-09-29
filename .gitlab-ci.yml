@@ -4,7 +4,7 @@ stages:
     - deploy
 
 default:
-  image: python:3.10
+  image: python:3.13
   before_script:
     - apt-get update && apt-get install -y cmake build-essential git pkg-config ca-certificates wget libomp-dev libeigen3-dev libboost-all-dev uuid-dev libcgal-dev
     - pip install poetry
@@ -31,7 +31,7 @@ build_and_test_python:
   stage: test
   parallel :
     matrix :
-      - PYTHON_VERSIONS : [ "3.9", "3.10"]
+      - PYTHON_VERSIONS : [ "3.10", "3.11", "3.12", "3.13" ]
   variables:
     QT_QPA_PLATFORM : "offscreen"
   script:
@@ -43,7 +43,7 @@ build_and_update_packages_debian:
   stage: test
   parallel :
     matrix :
-      - PYTHON_VERSIONS : [ "3.9", "3.10", "3.11" ]
+      - PYTHON_VERSIONS : [ "3.10", "3.11", "3.12", "3.13" ]
   script:
     - poetry update
     - poetry install
@@ -51,7 +51,7 @@ build_and_update_packages_debian:
 
 build_and_test_with_coverage:
   stage : test
-  image: python:3.11
+  image: python:3.13
   variables :
     QT_QPA_PLATFORM : "offscreen"
   script :

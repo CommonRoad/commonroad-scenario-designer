@@ -24,7 +24,7 @@ CommonRoad maps and scenarios.
 |    CR Scenario Designer GUI    |                 `crdesigner/ui/gui`                  |    Multi-functional GUI for map conversion and scenario creation/editing.    |
 
 ## Prerequisites and Installation
-We have tested the toolbox with Python 3.9, 3.10, and 3.11.
+We have tested the toolbox with Python 3.10, 3.11, 3.12, and 3.13.
 The toolbox works under Linux.
 Below we present two ways of installing the CommonRoad Scenario Designer:
 - Only using the CommonRoad Scenario Designer, e.g.,the GUI or integrating the scenario designer APIs into your code
@@ -166,7 +166,7 @@ The full documentation of the API and introducing examples can also be found [he
 A detailed overview about the changes in each version is provided in the [Changelog](https://github.com/CommonRoad/commonroad-scenario-designer/blob/master/CHANGELOG.md).
 
 ## Bug and feature reporting
-This release (v0.9.3) is still a BETA version.
+This release (v0.8.5) is still a BETA version.
 In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://github.com/CommonRoad/commonroad-scenario-designer/discussions).
 If you want to contribute to the toolbox, you can also post it in the [forum](https://github.com/CommonRoad/commonroad-scenario-designer/discussions).
 

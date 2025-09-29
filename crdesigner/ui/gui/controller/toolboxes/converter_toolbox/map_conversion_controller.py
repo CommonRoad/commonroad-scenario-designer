@@ -2,13 +2,13 @@ import logging
 from pathlib import Path
 from typing import Callable, Optional
 
+from commonroad_sumo.cr2sumo import CR2SumoMapConverter
 from lxml import etree
 from PyQt6.QtCore import Q_ARG, QMetaObject, QRunnable, Qt, QThreadPool, pyqtSlot
 from PyQt6.QtWidgets import QDockWidget, QFileDialog, QMainWindow, QMessageBox
 
 from crdesigner.common.config.osm_config import osm_config
 from crdesigner.common.logging import logger
-from crdesigner.common.sumo_available import SUMO_AVAILABLE
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
@@ -32,17 +32,13 @@ from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_gr
 from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloader import (
     download_around_map,
 )
+from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.util import select_local_file
 from crdesigner.ui.gui.utilities.waitingspinnerwidget import QtWaitingSpinner
 from crdesigner.ui.gui.view.toolboxes.converter_toolbox.converter_toolbox_ui import (
     MapConversionToolboxUI,
 )
-
-if SUMO_AVAILABLE:
-    from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
-    from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMOSimulation
-    from crdesigner.ui.gui.utilities.sumo_settings import SUMOSettings
 
 
 class RequestRunnable(QRunnable):
@@ -77,11 +73,6 @@ class MapConversionToolboxController(QDockWidget):
         self.adjust_ui()
         self.osm_edit_window = QMainWindow(self)
         self.connect_gui_elements()
-
-        if SUMO_AVAILABLE:
-            self.sumo_simulation = SUMOSimulation(tmp_folder=mwindow.tmp_folder)
-        else:
-            self.sumo_simulation = None
 
         self.lanelet2_to_cr_converter = Lanelet2CRConverter()
         self.lanelet2_file = None
@@ -502,18 +493,12 @@ class MapConversionToolboxController(QDockWidget):
             self.text_browser.append("Please stop the animation first.")
             return
 
-        if SUMO_AVAILABLE:
-            self.path_sumo_file = select_local_file(self, "SUMO", "net.xml")
+        self.path_sumo_file = select_local_file(self, "SUMO", "net.xml")
 
-            if not self.path_sumo_file:
-                return
+        if not self.path_sumo_file:
+            return
 
-            self.convert_sumo_to_cr()
-        else:
-            logging.warning(
-                "Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
-                "The GUI and other map conversions should work."
-            )
+        self.convert_sumo_to_cr()
 
     @logger.log
     def convert_cr_to_sumo(self):
@@ -524,46 +509,37 @@ class MapConversionToolboxController(QDockWidget):
             self.text_browser.append("Please stop the animation first.")
             return
 
-        if SUMO_AVAILABLE:
-            directory = QFileDialog.getExistingDirectory(
-                self, "Dir", options=QFileDialog.Option.ShowDirsOnly
-            )
-            if not directory:
-                return
-            self.sumo_simulation.convert(directory)
-        else:
-            logging.warning(
-                "Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
-                "The GUI and other map conversions should work."
-            )
+        directory = QFileDialog.getExistingDirectory(
+            self, "Dir", options=QFileDialog.Option.ShowDirsOnly
+        )
+        if not directory:
+            return
 
-    def open_sumo_settings(self):
-        if SUMO_AVAILABLE:
-            SUMOSettings(self, config=self.sumo_simulation.config)
-        else:
-            logging.warning(
-                "Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
-                "The GUI and other map conversions should work."
+        cr2sumo_converter = CR2SumoMapConverter(self.scenario_model.get_current_scenario())
+        conversion_succesful = cr2sumo_converter.create_sumo_files(Path(directory))
+        if not conversion_succesful:
+            QMessageBox.warning(
+                self,
+                "Internal Error",
+                "There was an error during the conversion of the CommonRoad Scenario to SUMO.\n\nSee the debug log for more information.",
+                QMessageBox.StandardButton.Ok,
             )
+            return
+        self.text_browser.append("Conversion from CommonRoad to SUMO finished.")
 
     def convert_sumo_to_cr(self):
         """
         Starts the SUMO to CommonRoad conversion process.
         """
-        if SUMO_AVAILABLE:
-            try:
-                scenario = convert_net_to_cr(self.path_sumo_file)
-                self.scenario_model.set_scenario(scenario)
-            except Exception as e:
-                QMessageBox.warning(
-                    self,
-                    "Internal Error",
-                    "There was an error during the processing of the graph.\n\n{}".format(e),
-                    QMessageBox.StandardButton.Ok,
-                )
-                return
-        else:
-            logging.warning(
-                "Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
-                "The GUI and other map conversions should work."
+        try:
+            scenario = convert_net_to_cr(self.path_sumo_file)
+            self.scenario_model.set_scenario(scenario)
+        except Exception as e:
+            QMessageBox.warning(
+                self,
+                "Internal Error",
+                "There was an error during the processing of the graph.\n\n{}".format(e),
+                QMessageBox.StandardButton.Ok,
             )
+            return
+        self.text_browser.append("Conversion from SUMO to CommonRoad finished.")

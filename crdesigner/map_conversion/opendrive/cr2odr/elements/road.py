@@ -6,7 +6,7 @@ from typing import Dict, List, Union
 import numpy as np
 from commonroad.geometry.polyline_util import compute_polyline_lengths  # type: ignore
 from commonroad.scenario.lanelet import Lanelet  # type: ignore
-from commonroad_dc.geometry.util import (
+from commonroad_clcs.util import (
     compute_curvature_from_polyline,
     compute_pathlength_from_polyline,
 )
@@ -75,9 +75,6 @@ class Road:
         :param root: OpenDRIVE etree element
         :param junction_id: id of junction
         """
-        # Supress RankWarning in polyfit
-        warnings.simplefilter("ignore", np.RankWarning)
-
         Road.counting += 1
         Road.roads[Road.counting] = self
         Road.lane_2_lane_link[Road.counting] = {config.SUCC_TAG: {}, config.PRED_TAG: {}}

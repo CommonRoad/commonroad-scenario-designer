@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.8.5] - 2025-09-29
+
+### Added
+- support for Python 3.12 and 3.13
+
+### Fixed
+- settings window empty
+- github actions static code evaluation and python versions
+- odr2cr tagging intersection lanelet type
+- odr2cr traffic light direction assignment
+
+### Changed
+- update required commonroad-drivability-checker version
+- use new CLCS instead of version in drivability-checker
+
+### Removed
+
+- Support for Python 3.9
+- SUMO conversion logic from repo and moved to commonroad-sumo
+
 ## [0.8.4] - 2024-12-21
 
 ### Changed
