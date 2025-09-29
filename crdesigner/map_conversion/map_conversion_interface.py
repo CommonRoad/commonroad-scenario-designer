@@ -6,13 +6,14 @@ from pathlib import Path
 from typing import Optional, Union
 
 from commonroad.scenario.scenario import Scenario
+from commonroad_sumo.cr2sumo import CR2SumoMapConverter
+from commonroad_sumo.helpers import SumoApplication, execute_sumo_application
 from lxml import etree
 
 from crdesigner.common.config.general_config import general_config
 from crdesigner.common.config.lanelet2_config import lanelet2_config
 from crdesigner.common.config.opendrive_config import open_drive_config
 from crdesigner.common.file_reader import CRDesignerFileReader
-from crdesigner.common.sumo_available import SUMO_AVAILABLE
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
@@ -23,16 +24,11 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.network imp
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import (
     parse_opendrive,
 )
-
-if SUMO_AVAILABLE:
-    from crdesigner.map_conversion.sumo_map.config import SumoConfig
-    from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
-    from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
-
 from crdesigner.map_conversion.osm2cr.converter_modules.converter import GraphScenario
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import (
     convert_to_scenario,
 )
+from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 
 Path_T = Union[str, Path]
 
@@ -116,10 +112,7 @@ def sumo_to_commonroad(input_file: Path_T) -> Scenario:
     :param input_file: Path to SUMO net file
     :return: CommonRoad scenario
     """
-    if SUMO_AVAILABLE:
-        return convert_net_to_cr(str(input_file))
-    else:
-        logging.error("Cannot import SUMO. SUMO simulation cannot be offered.")
+    return convert_net_to_cr(str(input_file))
 
 
 def commonroad_to_sumo(input_file: Path_T, output_file: Path_T):
@@ -130,24 +123,10 @@ def commonroad_to_sumo(input_file: Path_T, output_file: Path_T):
     :param output_file: Path where files should be stored
     :return: CommonRoad scenario
     """
-    try:
-        crdesigner_reader = CRDesignerFileReader(input_file)
-        scenario, _ = crdesigner_reader.open()
-    except etree.XMLSyntaxError as xml_error:
-        logging.error(
-            f"SyntaxError: {xml_error}.\n"
-            f"There was an error during the loading of the selected CommonRoad file."
-        )
-        return
 
-    if SUMO_AVAILABLE:
-        config = SumoConfig.from_scenario_name(str(uuid.uuid4()))
-        path, file_name = os.path.split(output_file)
-        config.scenario_name = file_name.partition(".")[0]
-        converter = CR2SumoMapConverter(scenario, config)
-        converter.create_sumo_files(path)
-    else:
-        logging.error("Cannot import SUMO. SUMO simulation cannot be offered.")
+    path, _ = os.path.split(output_file)
+    converter = CR2SumoMapConverter.from_file(input_file)
+    converter.create_sumo_files(Path(path))
 
 
 def osm_to_commonroad(input_file: Path_T) -> Scenario:
@@ -175,24 +154,26 @@ def osm_to_commonroad_using_sumo(input_file: Path_T) -> Optional[Scenario]:
     """
     if isinstance(input_file, str):
         input_file_pth = Path(input_file)
+    else:
+        input_file_pth = input_file
     scenario_name = str(input_file_pth.name)
     opendrive_file = str(input_file_pth.parent / f"{scenario_name}.xodr")
+
     # convert to OpenDRIVE file using netconvert
-    try:
-        subprocess.check_output(
-            [
-                "netconvert",
-                "--osm-files",
-                input_file,
-                "--opendrive-output",
-                opendrive_file,
-                "--junctions.scurve-stretch",
-                "1.0",
-            ]
-        )
-    except Exception as e:
-        logging.error(format(e))
+    netconvert_succesful = execute_sumo_application(
+        SumoApplication.NETCONVERT,
+        [
+            "--osm-files",
+            str(input_file),
+            "--opendrive-output",
+            opendrive_file,
+            "--junctions.scurve-stretch",
+            "1.0",
+        ],
+    )
+    if netconvert_succesful is None:
         return None
+
     return opendrive_to_commonroad(Path(opendrive_file))
 
 

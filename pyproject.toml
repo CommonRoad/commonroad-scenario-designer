@@ -32,10 +32,11 @@ build-backend = "poetry.core.masonry.api"
 crdesigner = 'crdesigner.ui.command_line:cli'
 
 [tool.poetry.dependencies]
-python = "^3.9,<3.12"
+python = "^3.10,<3.12"
 commonroad-io = ">=2024.2, <=2024.3"
 commonroad-clcs = ">=2025.1"
 commonroad-drivability-checker = "^2025.1"
+commonroad-sumo = ">=2025.1.3"
 pyqt6 = ">=6.6.0"
 matplotlib = ">=3.6.0"
 numpy = "^1.26.4,<2.0"
@@ -46,7 +47,6 @@ utm = "^0.7.0"
 mgrs = ">=1.4.5"
 shapely = ">=2.0.1"
 ordered-set = "^4.1.0"
-sumocr = "^2024.1"
 iso3166 = "^2.1.1"
 networkx = "^3.0"
 omegaconf = "^2.3.0"
@@ -62,7 +62,6 @@ similaritymeasures = ">=0.4.4"
 kdtree = "^0.16"
 pandas = "^2.0.2"
 requests = "^2.31.0 "
-eclipse-sumo = "^1.19.0"
 pyclothoids = "^0.1.5"
 # asam-qc-opendrive = { version = "^1.0", python = "^3.10" }
 
