@@ -569,15 +569,15 @@ class Lanelet2CRConverter:
         # now go through the lanelets and find the relation, which would match the traffic light and the lanelet
         wr_lanelets = set()
         for wr in self.osm.way_relations:
-            for re in self.osm.way_relations[wr].regulatory_elements:
-                if re in traffic_light_relations:
+            for reg_elem in self.osm.way_relations[wr].regulatory_elements:
+                if reg_elem in traffic_light_relations:
                     # found the wr, now need to match it with corresponding lanelet
                     # for that the "new_lanelet_ids" dict is used that is sent to this function
                     wr_lanelets.add(new_lanelet_ids[wr])
 
                     if self._config.autoware:
                         # for autoware, convert the ref_line of the traffic light
-                        regulatory_element = self.osm.find_regulatory_element_by_id(re)
+                        regulatory_element = self.osm.find_regulatory_element_by_id(reg_elem)
                         for line in regulatory_element.ref_line:
                             # extract geometrical features
                             line_way = self.osm.find_way_by_id(line)
@@ -585,8 +585,12 @@ class Lanelet2CRConverter:
                             start = line_way_vertices[0]
                             end = line_way_vertices[-1]
                             # create stop line
-                            stop_line = StopLine(start=start, end=end, traffic_light_ref={re},
-                                                 line_marking=LineMarking.SOLID)
+                            stop_line = StopLine(
+                                start=start,
+                                end=end,
+                                traffic_light_ref={reg_elem},
+                                line_marking=LineMarking.SOLID,
+                            )
                             # add stop line to the lanelet
                             lanelet = self.lanelet_network.find_lanelet_by_id(new_lanelet_ids[wr])
                             lanelet.stop_line = stop_line
