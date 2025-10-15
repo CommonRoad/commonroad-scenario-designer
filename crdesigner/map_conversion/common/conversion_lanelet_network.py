@@ -930,25 +930,25 @@ class ConversionLaneletNetwork(LaneletNetwork):
         for traffic_light in traffic_lights:
             id_for_adding = set()
 
-            #eng: First handle the case where it is already hung on the lanelet (keep the original logic)
+            # First handle the case where it is already hung on the lanelet (keep the original logic)
             for lanelet in self.lanelets:
                 if traffic_light.traffic_light_id in lanelet.traffic_lights:
                     if lanelet.lanelet_id in incoming_lanelet_ids:
                         id_for_adding.add(lanelet.lanelet_id)
                     else:
-                        #eng: Clear the wrong mounting and try to hang it on its predecessor (original logic)
+                        # Clear the wrong mounting and try to hang it on its predecessor (original logic)
                         lanelet.traffic_lights = set()
                         for pre in lanelet.predecessor:
                             if pre in incoming_lanelet_ids:
                                 id_for_adding.add(pre)
 
-            #eng: If no lanelet found yet, find the closest incoming lanelet
+            # If no lanelet found yet, find the closest incoming lanelet
             if not id_for_adding:
                 min_d = float("inf")
                 for lanelet_id in incoming_lanelet_ids:
                     lane = self.find_lanelet_by_id(lanelet_id)
 
-                    #eng: A lanelet cannot have more traffic lights than successors (original logic)
+                    # A lanelet cannot have more traffic lights than successors (original logic)
                     if len(lane.successor) > len(lane.traffic_lights):
                         p1 = traffic_light.position
                         p2 = lane.center_vertices[-1]  #maybe 2d or 3d

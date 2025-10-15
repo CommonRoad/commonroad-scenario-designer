@@ -795,24 +795,24 @@ class ParametricLane:
         if not self.shape:
             return 0.0
 
-        #eng:sorted and remove duplicate
+        #sorted and remove duplicate
         start_pos_s_list = sorted({sh.start_pos for sh in self.shape})
         if not start_pos_s_list:
             return 0.0
 
-        #eng: find the index of the first element greater than s_pos
+        # find the index of the first element greater than s_pos
         idx = bisect.bisect_right(start_pos_s_list, s_pos)
 
         no_back_shape  = (idx == 0)
         no_front_shape = (idx == len(start_pos_s_list))
 
-        #eng: before the first defined shape, return 0
+        # before the first defined shape, return 0
         if no_back_shape:
 
-            #eng: no need to find front_s index, just return 0
+            # no need to find front_s index, just return 0
             return 0.0
 
-        #eng: only "front" shape: s exceeds the last definition, linearly decays to 0 towards the end of the road
+        # only "front" shape: s exceeds the last definition, linearly decays to 0 towards the end of the road
         if no_front_shape:
             back_s = start_pos_s_list[-1]
             back_shapes = [sh for sh in self.shape if sh.start_pos == back_s]
@@ -821,7 +821,7 @@ class ParametricLane:
             full_len = self.length + self.offset_lanesection + self.offset_width
             return np.interp(s_pos, [back_s, full_len], [back_h, 0.0])
 
-        #eng: middle section: both ends have shape, perform linear interpolation
+        # middle section: both ends have shape, perform linear interpolation
         back_s  = start_pos_s_list[idx-1]
         front_s = start_pos_s_list[idx]
 

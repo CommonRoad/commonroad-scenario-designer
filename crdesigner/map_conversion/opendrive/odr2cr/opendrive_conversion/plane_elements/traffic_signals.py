@@ -281,7 +281,7 @@ def get_traffic_signal_references(
 
 def evaluate_center_elevation(elev_records, s: float) -> float:
     """
-    eng:
+    
     according to the elevation_profile.elevations list (records are in ascending order of start_pos),
     find which segment polynomial s falls into, interpolate the polynomial of that segment, and return the centerline height.
     It is completely equivalent to ParametricLane.calc_elevation_central.
@@ -292,11 +292,11 @@ def evaluate_center_elevation(elev_records, s: float) -> float:
     if not elev_records:
         return 0.0
 
-    #eng: find the index of the last element less than or equal to s
+    # find the index of the last element less than or equal to s
     starts = [rec.start_pos for rec in elev_records]
     idx = bisect.bisect_right(starts, s) - 1
     if idx < 0:
-        #eng: If s is smaller than the first segment, take the a value of the first segment's polynomial at ds = 0
+        # If s is smaller than the first segment, take the a value of the first segment's polynomial at ds = 0
         rec = elev_records[0]
     else:
         rec = elev_records[idx]
@@ -309,7 +309,7 @@ def evaluate_center_elevation(elev_records, s: float) -> float:
 
 def evaluate_superelevation(sup_records, s: float) -> float:
     """
-    eng:
+    
     according to the lateral_profile.superelevations list (records are in ascending order of start_pos),
     find which segment polynomial s falls into, interpolate the polynomial of that segment, and return the superelevation (in radians).
     It is completely equivalent to ParametricLane.calc_superelevation.
@@ -334,7 +334,7 @@ def evaluate_superelevation(sup_records, s: float) -> float:
 
 def evaluate_shape_offset(shape_records, s: float, lateral_dist: float) -> float:
     """
-    eng:
+    
     according to the lateral_profile.shapes list, each record represents a "cross-sectional shape" polynomial that takes effect at a certain start_pos,
     input the lateral_dist lateral distance into the corresponding Shape polynomial, and then interpolate according to s between the two shape segments.
     It is completely equivalent to ParametricLane.calc_shape.
@@ -348,18 +348,18 @@ def evaluate_shape_offset(shape_records, s: float, lateral_dist: float) -> float
     if not shape_records:
         return 0.0
 
-    #eng: find the shape sections before and after s
+    # find the shape sections before and after s
     s_list = sorted({rec.start_pos for rec in shape_records})
     idx_s = bisect.bisect_right(s_list, s) - 1
 
-    #eng: if s is smaller than the first start_pos, there is no back section; if s is greater than the last, there is no front section
+    # if s is smaller than the first start_pos, there is no back section; if s is greater than the last, there is no front section
     if idx_s < 0:
         back_s = None
         back_shapes = []
         front_s = s_list[0]
         front_shapes = [rec for rec in shape_records if rec.start_pos == front_s]
     elif idx_s >= len(s_list) - 1:
-        #eng: s is after the last section
+        # s is after the last section
         back_s = s_list[-1]
         back_shapes = [rec for rec in shape_records if rec.start_pos == back_s]
         front_shapes = []
@@ -371,30 +371,30 @@ def evaluate_shape_offset(shape_records, s: float, lateral_dist: float) -> float
 
     def lateral_polynomial_value(lateral, recs_at_same_s):
         """
-        eng:
+        
         For multiple shape cross-sections at the same start_pos (with different start_pos_t),
         first find which lateral interval [start_pos_t_i, start_pos_t_{i+1}) the lateral_dist falls into,
         then use the corresponding polynomial to interpolate the lateral_dist.
         """
-        #eng: first sort by rec.start_pos_t in ascending order
+        # first sort by rec.start_pos_t in ascending order
         recs_at_same_s = sorted(recs_at_same_s, key=lambda r: r.start_pos_t)
         t_list = [r.start_pos_t for r in recs_at_same_s]
-        #eng: find the index of the last element less than or equal to lateral
+        # find the index of the last element less than or equal to lateral
         idx_t = bisect.bisect_right(t_list, lateral) - 1
         if idx_t < 0:
-            #eng: If the lateral coordinate is smaller than the first t_start, return 0
+            # If the lateral coordinate is smaller than the first t_start, return 0
             return 0.0
         if idx_t >= len(recs_at_same_s) - 1:
             rec = recs_at_same_s[-1]
         else:
-            #eng:if lateral < next rec.start_pos_t, use current rec; otherwise also use current rec
+            #if lateral < next rec.start_pos_t, use current rec; otherwise also use current rec
             rec = recs_at_same_s[idx_t]
 
         a, b, c, d = rec.polynomial_coefficients
         dt = lateral - rec.start_pos_t
         return a + b * dt + c * (dt**2) + d * (dt**3)
 
-    #eng:calculate the shape height values of back and front
+    #calculate the shape height values of back and front
     if back_s is None:
         back_height = 0.0
     else:
@@ -406,17 +406,17 @@ def evaluate_shape_offset(shape_records, s: float, lateral_dist: float) -> float
     else:
         front_height = lateral_polynomial_value(lateral_dist, front_shapes)
 
-    #eng: if within the same section (back_s == front_s), directly return that value
+    # if within the same section (back_s == front_s), directly return that value
     if back_s == front_s or front_s is None:
         return back_height
 
-    #eng: or do a linear interpolation between back_s and front_s
-    #eng:when s changes, the shape cross-section smoothly transitions from back_shapes to front_shapes
+    # or do a linear interpolation between back_s and front_s
+    #when s changes, the shape cross-section smoothly transitions from back_shapes to front_shapes
     return float(np.interp(s, [back_s, front_s], [back_height, front_height]))
 
 def calculate_road_surface_height(road: Road, s: float, t: float) -> float:
     """
-    eng:
+    
     Return the road surface height at longitudinal s and lateral offset t (excluding the zOffset of
     a specific object),
     equivalent to the part in ParametricLane.calc_border_height("inner", s, …)[0] that "does not add lane‐local <height>".  
@@ -425,26 +425,26 @@ def calculate_road_surface_height(road: Road, s: float, t: float) -> float:
     :param t:   Lateral offset, usually negative on the right side and positive on the left side
     :return:    z_surface = centerline elevation + superelevation/shape projection
     """
-    #eng: centerline elevation (polynomial interpolation)
+    # centerline elevation (polynomial interpolation)
     z_center = evaluate_center_elevation(road.elevation_profile.elevations, s)
 
-    #eng: superelevation (polynomial interpolation)
+    # superelevation (polynomial interpolation)
     sup = evaluate_superelevation(road.lateral_profile.superelevations, s)
 
-    #eng: calculate the corresponding shape offset
-    #eng: lateral distance from reference line to the point to be calculated
+    # calculate the corresponding shape offset
+    # lateral distance from reference line to the point to be calculated
     lateral_dist = abs(t)
-    #eng: shape height value at (s, lateral_dist)
+    # shape height value at (s, lateral_dist)
     z_shape = evaluate_shape_offset(road.lateral_profile.shapes, s, lateral_dist)
 
-    #eng: project superelevation and shape to height:
-    #eng: project method is exactly the same as correction_due_to_superelevation in ParametricLane.calc_border_height:
+    # project superelevation and shape to height:
+    # project method is exactly the same as correction_due_to_superelevation in ParametricLane.calc_border_height:
     proj_sup = np.sin(sup) * (lateral_dist - np.tan(sup) * z_shape)
     proj_shape = z_shape / np.cos(sup) if np.cos(sup) != 0.0 else 0.0
     height_to_ref_line = proj_sup + proj_shape
 
-    #eng: left side t>0 take positive, right side t<0 take negative
+    # left side t>0 take positive, right side t<0 take negative
     side_coeff = 1.0 if t >= 0.0 else -1.0
 
-    #eng: final road surface height
+    # final road surface height
     return z_center + height_to_ref_line * side_coeff

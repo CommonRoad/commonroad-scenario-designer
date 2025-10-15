@@ -278,7 +278,7 @@ class Network:
                     road.cr_stop_lines,
                     road.driving_direction,
                 )
-                #eng: Inject the height list corresponding to each ParametricLane
+                # Inject the height list corresponding to each ParametricLane
                 for group in parametric_lane_groups:
                     for pl in group.parametric_lanes:
                         parts = pl.id_.split('.')
@@ -287,7 +287,7 @@ class Network:
                             continue
 
                         side    = int(parts[2])  # lane_id
-                        #eng: Find the origlane
+                        # Find the origlane
                         if side < 0:
                             origlane = next(
                                 (l for l in lane_section.right_lanes if int(l.id) == side),
@@ -311,7 +311,7 @@ class Network:
                         else:
                             origlane = next((l for l in lane_section.left_lanes  if int(l.id)==lane_id), None)
 
-                            #eng: The original new_lane.level is "true" or "false"
+                            # The original new_lane.level is "true" or "false"
                         pl.level = (origlane.level == "true") if origlane is not None else False
 
                 lane_section_elevations = []
@@ -325,7 +325,7 @@ class Network:
                                     lane_section_elevations.append(elevations)
                             else:
 
-                                #eng: Last one
+                                # Last one
                                 lane_section_elevations.append(elevations)
                 else:
                     if len(road.elevation_profile.elevations) > 0:
@@ -814,7 +814,7 @@ class Network:
         surface_points = []
 
         for pl_group in self._planes:
-            #eng: gather all surface points from parametric lanes
+            # gather all surface points from parametric lanes
             for pl in getattr(pl_group, "parametric_lanes", []):
                 if hasattr(pl, "_all_surface_points") and pl._all_surface_points is not None:
                     surface_points.append(pl._all_surface_points)
@@ -827,7 +827,7 @@ class Network:
 
         for ts in self._traffic_signs:
 
-            #eng: support 2d/3d input
+            # support 2d/3d input
             pos = ts.position
             x, y = pos[:2]
             z_offset = getattr(ts, 'zOffset', 0.0)
