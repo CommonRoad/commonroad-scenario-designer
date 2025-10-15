@@ -803,6 +803,23 @@ class Network:
         self.find_lane_speed_changes(drivable_lanelets, lanelet_network)
         self.reference_traffic_signs_with_equal_speed(drivable_lanelets, lanelet_network)
         lanelet_network = update_line_markings(lanelet_network)
+        use_3d = getattr(open_drive_config, "general_use_elevation_type_activ", False)
+        if not use_3d:
+            #downgrade lanelets to 2D
+            for ll in lanelet_network.lanelets:
+                ll.convert_to_2d()  # CommonRoad-IO original method
+
+            #make sure controls are also 2D (patch does not write z when False, this is double insurance)
+            for tl in self._traffic_lights:
+                tl.convert_to_2d()
+            for ts in self._traffic_signs:
+                ts.convert_to_2d()
+            for sl in self._stop_lines:
+                #stopLine does not have a unified convert_to_2d, manually cut off z
+                if sl.start is not None:
+                    sl.start = np.asarray(sl.start, dtype=float)[:2]
+                if sl.end is not None:
+                    sl.end = np.asarray(sl.end, dtype=float)[:2]
 
         
         return convert_to_base_lanelet_network(lanelet_network)
