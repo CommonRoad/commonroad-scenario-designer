@@ -278,7 +278,7 @@ class Network:
                     road.cr_stop_lines,
                     road.driving_direction,
                 )
-                # 2) 注入每个 ParametricLane 对应的 height 列表
+                #eng: Inject the height list corresponding to each ParametricLane
                 for group in parametric_lane_groups:
                     for pl in group.parametric_lanes:
                         parts = pl.id_.split('.')
@@ -287,7 +287,7 @@ class Network:
                             continue
 
                         side    = int(parts[2])  # lane_id
-                        # 找到 origlane
+                        #eng: Find the origlane
                         if side < 0:
                             origlane = next(
                                 (l for l in lane_section.right_lanes if int(l.id) == side),
@@ -311,7 +311,7 @@ class Network:
                         else:
                             origlane = next((l for l in lane_section.left_lanes  if int(l.id)==lane_id), None)
 
-                            # 原始 new_lane.level 是 "true" 或 "false"
+                            #eng: The original new_lane.level is "true" or "false"
                         pl.level = (origlane.level == "true") if origlane is not None else False
 
                 lane_section_elevations = []
@@ -324,7 +324,8 @@ class Network:
                                 if road.elevation_profile.elevations[i + 1].start_pos >= lane_section.sPos:
                                     lane_section_elevations.append(elevations)
                             else:
-                                # 最后一个
+
+                                #eng: Last one
                                 lane_section_elevations.append(elevations)
                 else:
                     if len(road.elevation_profile.elevations) > 0:
@@ -342,7 +343,7 @@ class Network:
                                 if road.lateral_profile.superelevations[i + 1].start_pos >= lane_section.sPos:
                                     lane_section_superelevations.append(superelevations)
                             else:
-                                # 最后一个
+
                                 lane_section_superelevations.append(superelevations)
                 else:
                     if len(road.lateral_profile.superelevations) > 0:
@@ -813,7 +814,7 @@ class Network:
         surface_points = []
 
         for pl_group in self._planes:
-            # 遍历每个 PlaneGroup 里的 parametric_lanes
+            #eng: gather all surface points from parametric lanes
             for pl in getattr(pl_group, "parametric_lanes", []):
                 if hasattr(pl, "_all_surface_points") and pl._all_surface_points is not None:
                     surface_points.append(pl._all_surface_points)
@@ -825,7 +826,8 @@ class Network:
         tree = cKDTree(surface_points[:, :2])
 
         for ts in self._traffic_signs:
-            # 支持2d/3d输入
+
+            #eng: support 2d/3d input
             pos = ts.position
             x, y = pos[:2]
             z_offset = getattr(ts, 'zOffset', 0.0)
@@ -897,7 +899,7 @@ class Network:
             p = np.asarray(p, dtype=float).ravel()
             return float(p[0]), float(p[1])
 
-        # ------- stop lines：use road surface z -------
+        # ------- stop lines: use road surface z -------
         cleaned_xy = 0
         skipped = 0
         for sl in self._stop_lines:

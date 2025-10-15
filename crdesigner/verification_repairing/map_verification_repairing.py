@@ -84,7 +84,9 @@ def verify_and_repair_scenario(
     ) == 0
 
 def _is_3d_network(network: LaneletNetwork) -> bool:
-    """粗略判断网络是否包含有效的 Z 轴信息"""
+    """
+    eng: Roughly determine whether the network contains valid Z-axis information
+    """
     for ll in network.lanelets:
         if ll.center_vertices.shape[1] >= 3 and not np.allclose(ll.center_vertices[:, 2], 0.0):
             return True

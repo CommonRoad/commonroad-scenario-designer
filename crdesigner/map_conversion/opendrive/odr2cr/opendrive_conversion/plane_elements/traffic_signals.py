@@ -281,21 +281,22 @@ def get_traffic_signal_references(
 
 def evaluate_center_elevation(elev_records, s: float) -> float:
     """
-    根据 elevation_profile.elevations 列表（记录按 start_pos 升序），
-    找到 s 落在哪段多项式里，并对该段多项式做插值，返回中心线高度。
-    与 ParametricLane.calc_elevation_central 完全等价。
-    :param elev_records: List of ElevationRecord（每个有 .start_pos 和 .polynomial_coefficients）
-    :param s: 当前参考线纵向坐标
-    :return: 中心线高度 z_center
+    eng:
+    according to the elevation_profile.elevations list (records are in ascending order of start_pos),
+    find which segment polynomial s falls into, interpolate the polynomial of that segment, and return the centerline height.
+    It is completely equivalent to ParametricLane.calc_elevation_central.
+    :param elev_records: List of ElevationRecord (each has .start_pos and .polynomial_coefficients)
+    :param s: Current longitudinal coordinate of the reference line
+    :return: Centerline height z_center
     """
     if not elev_records:
         return 0.0
 
-    # 找出最后一个 start_pos <= s 的索引
+    #eng: find the index of the last element less than or equal to s
     starts = [rec.start_pos for rec in elev_records]
     idx = bisect.bisect_right(starts, s) - 1
     if idx < 0:
-        # s 比第一段还要小，直接取第一段多项式在 ds = 0 时的 a 值
+        #eng: If s is smaller than the first segment, take the a value of the first segment's polynomial at ds = 0
         rec = elev_records[0]
     else:
         rec = elev_records[idx]
@@ -308,12 +309,13 @@ def evaluate_center_elevation(elev_records, s: float) -> float:
 
 def evaluate_superelevation(sup_records, s: float) -> float:
     """
-    根据 lateral_profile.superelevations 列表，找到 s 落在哪段 superelevation 上，
-    用该段 [a,b,c,d] 在 (s - start_pos) 处做多项式插值，返回 superelevation（单位：弧度）。
-    与 ParametricLane.calc_superelevation 等价。
-    :param sup_records: List of SuperelevationRecord（每个有 .start_pos 和 .polynomial_coefficients）
-    :param s: 参考线纵向坐标
-    :return: superelevation（弧度）
+    eng:
+    according to the lateral_profile.superelevations list (records are in ascending order of start_pos),
+    find which segment polynomial s falls into, interpolate the polynomial of that segment, and return the superelevation (in radians).
+    It is completely equivalent to ParametricLane.calc_superelevation.
+    :param sup_records: List of SuperelevationRecord (each has .start_pos and .polynomial_coefficients)
+    :param s: Current longitudinal coordinate of the reference line
+    :return: superelevation (in radians)
     """
     if not sup_records:
         return 0.0
@@ -332,31 +334,32 @@ def evaluate_superelevation(sup_records, s: float) -> float:
 
 def evaluate_shape_offset(shape_records, s: float, lateral_dist: float) -> float:
     """
-    根据 lateral_profile.shapes 列表，每条记录代表在某个 start_pos 上开始生效的“横断面形状”多项式，
-    将 lateral_dist 这个横向距离投入到对应的 Shape 多项式里，再根据 s 在两段 shape 之间插值。
-    完全等价于 ParametricLane.calc_shape。
-    :param shape_records: List of ShapeCrossSectionRecord（每个有 .start_pos, .start_pos_t, .polynomial_coefficients）
-                             其中 .start_pos 表示此断面在哪个 s 开始生效，
-                             .start_pos_t 表示“此横断面里”多项式的起始横向 t 值。
-    :param s: 当前参考线纵向坐标
-    :param lateral_dist: 从参考线（中心线）到当前要计算点的横向距离 |t|
-    :return: 该 (s, lateral_dist) 处的 shape 高度值
+    eng:
+    according to the lateral_profile.shapes list, each record represents a "cross-sectional shape" polynomial that takes effect at a certain start_pos,
+    input the lateral_dist lateral distance into the corresponding Shape polynomial, and then interpolate according to s between the two shape segments.
+    It is completely equivalent to ParametricLane.calc_shape.
+    :param shape_records: List of ShapeCrossSectionRecord (each has .start_pos, .start_pos_t, .polynomial_coefficients)
+                             where .start_pos indicates the s at which this cross-section takes effect,
+                             .start_pos_t indicates the starting lateral t value of the polynomial "in this cross-section".
+    :param s: Current longitudinal coordinate of the reference line
+    :param lateral_dist: Lateral distance |t| from the reference line (centerline) to the current point to be calculated
+    :return: shape height value at (s,
     """
     if not shape_records:
         return 0.0
 
-    # 1) 找出在 s 处，前一段以及后一段的 shape 断面
+    #eng: find the shape sections before and after s
     s_list = sorted({rec.start_pos for rec in shape_records})
     idx_s = bisect.bisect_right(s_list, s) - 1
 
-    # 如果 s 比第一个断面 start_pos 还要小，视为没有 back 断面；如果 s 大于最后一个，视为没有 front 断面
+    #eng: if s is smaller than the first start_pos, there is no back section; if s is greater than the last, there is no front section
     if idx_s < 0:
         back_s = None
         back_shapes = []
         front_s = s_list[0]
         front_shapes = [rec for rec in shape_records if rec.start_pos == front_s]
     elif idx_s >= len(s_list) - 1:
-        # s 在最后一个断面之后
+        #eng: s is after the last section
         back_s = s_list[-1]
         back_shapes = [rec for rec in shape_records if rec.start_pos == back_s]
         front_shapes = []
@@ -368,78 +371,80 @@ def evaluate_shape_offset(shape_records, s: float, lateral_dist: float) -> float
 
     def lateral_polynomial_value(lateral, recs_at_same_s):
         """
-        对于同一个 start_pos 上可能有多个 shape 断面数据（不同的 start_pos_t），
-        先在这些 recs_at_same_s 中，找出落在哪一段横向区间 [start_pos_t_i, start_pos_t_{i+1})，
-        然后用对应多项式对 lateral_dist 做插值。
+        eng:
+        For multiple shape cross-sections at the same start_pos (with different start_pos_t),
+        first find which lateral interval [start_pos_t_i, start_pos_t_{i+1}) the lateral_dist falls into,
+        then use the corresponding polynomial to interpolate the lateral_dist.
         """
-        # 1) 先按 rec.start_pos_t 升序
+        #eng: first sort by rec.start_pos_t in ascending order
         recs_at_same_s = sorted(recs_at_same_s, key=lambda r: r.start_pos_t)
         t_list = [r.start_pos_t for r in recs_at_same_s]
-        # 找到最后一个 t_start <= lateral 的段
+        #eng: find the index of the last element less than or equal to lateral
         idx_t = bisect.bisect_right(t_list, lateral) - 1
         if idx_t < 0:
-            # 横向坐标比第一个 t_start 还小，返回 0
+            #eng: If the lateral coordinate is smaller than the first t_start, return 0
             return 0.0
         if idx_t >= len(recs_at_same_s) - 1:
             rec = recs_at_same_s[-1]
         else:
-            # 如果 lateral < 下一条 rec.start_pos_t，就用当前 rec；否则也用当前 rec
+            #eng:if lateral < next rec.start_pos_t, use current rec; otherwise also use current rec
             rec = recs_at_same_s[idx_t]
 
         a, b, c, d = rec.polynomial_coefficients
         dt = lateral - rec.start_pos_t
         return a + b * dt + c * (dt**2) + d * (dt**3)
 
-    # 2) 计算 back 和 front 的 shape 高度值
+    #eng:calculate the shape height values of back and front
     if back_s is None:
         back_height = 0.0
     else:
         back_height = lateral_polynomial_value(lateral_dist, back_shapes)
 
-    if not front_shapes:  # 没有 front，则此处 0
+    if not front_shapes:
         front_height = 0.0
         front_s = back_s
     else:
         front_height = lateral_polynomial_value(lateral_dist, front_shapes)
 
-    # 3) 如果在同一个断面之内（back_s == front_s），直接返回该值
+    #eng: if within the same section (back_s == front_s), directly return that value
     if back_s == front_s or front_s is None:
         return back_height
 
-    # 4) 否则，在 [back_s, front_s] 间线性插值
-    # 当 s 变化时，shape 断面从 back_shapes 平滑过渡到 front_shapes
+    #eng: or do a linear interpolation between back_s and front_s
+    #eng:when s changes, the shape cross-section smoothly transitions from back_shapes to front_shapes
     return float(np.interp(s, [back_s, front_s], [back_height, front_height]))
 
 def calculate_road_surface_height(road: Road, s: float, t: float) -> float:
     """
-    返回道路在纵向 s、横向偏移 t 处的道路表面高度（不含某一具体物体的 zOffset），
-    等价于 ParametricLane.calc_border_height("inner", s, …)[0] 里“不要加 lane‐local <height>”那部分。
-
-    :param road: Road 对象，具有 elevation_profile 和 lateral_profile
-    :param s:   参考线上的纵向坐标
-    :param t:   横向偏移，右侧常为负，左侧常为正
-    :return:    z_surface = 中心线高程 + superelevation/shape 投影
+    eng:
+    Return the road surface height at longitudinal s and lateral offset t (excluding the zOffset of
+    a specific object),
+    equivalent to the part in ParametricLane.calc_border_height("inner", s, …)[0] that "does not add lane‐local <height>".  
+    :param road: Road object with elevation_profile and lateral_profile
+    :param s:   Longitudinal coordinate on the reference line
+    :param t:   Lateral offset, usually negative on the right side and positive on the left side
+    :return:    z_surface = centerline elevation + superelevation/shape projection
     """
-    # 1) 中心线基准高程（多项式插值）
+    #eng: centerline elevation (polynomial interpolation)
     z_center = evaluate_center_elevation(road.elevation_profile.elevations, s)
 
-    # 2) superelevation 部分
+    #eng: superelevation (polynomial interpolation)
     sup = evaluate_superelevation(road.lateral_profile.superelevations, s)
 
-    # 3) 计算对应 shape 偏移
-    #    先计算横向距离线，到中心线上 (abs(t))
+    #eng: calculate the corresponding shape offset
+    #eng: lateral distance from reference line to the point to be calculated
     lateral_dist = abs(t)
-    #    shape 投影高度
+    #eng: shape height value at (s, lateral_dist)
     z_shape = evaluate_shape_offset(road.lateral_profile.shapes, s, lateral_dist)
 
-    # 4) 把 superelevation 和 shape 投影到高度： 
-    #    投影方式与 ParametricLane.calc_border_height 中的 correction_due_to_superelevation 完全一致：
+    #eng: project superelevation and shape to height:
+    #eng: project method is exactly the same as correction_due_to_superelevation in ParametricLane.calc_border_height:
     proj_sup = np.sin(sup) * (lateral_dist - np.tan(sup) * z_shape)
     proj_shape = z_shape / np.cos(sup) if np.cos(sup) != 0.0 else 0.0
     height_to_ref_line = proj_sup + proj_shape
 
-    # 5) 左侧 t>0 取正，右侧 t<0 取负
+    #eng: left side t>0 take positive, right side t<0 take negative
     side_coeff = 1.0 if t >= 0.0 else -1.0
 
-    # 6) 最终道路表面高度
+    #eng: final road surface height
     return z_center + height_to_ref_line * side_coeff

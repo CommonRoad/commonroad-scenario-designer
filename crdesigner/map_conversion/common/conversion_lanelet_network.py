@@ -930,28 +930,28 @@ class ConversionLaneletNetwork(LaneletNetwork):
         for traffic_light in traffic_lights:
             id_for_adding = set()
 
-            # 先处理已经挂在 lanelet 上的情况（保持原逻辑）
+            #eng: First handle the case where it is already hung on the lanelet (keep the original logic)
             for lanelet in self.lanelets:
                 if traffic_light.traffic_light_id in lanelet.traffic_lights:
                     if lanelet.lanelet_id in incoming_lanelet_ids:
                         id_for_adding.add(lanelet.lanelet_id)
                     else:
-                        # 清掉错误挂载并尝试挂到它的前驱（原逻辑）
+                        #eng: Clear the wrong mounting and try to hang it on its predecessor (original logic)
                         lanelet.traffic_lights = set()
                         for pre in lanelet.predecessor:
                             if pre in incoming_lanelet_ids:
                                 id_for_adding.add(pre)
 
-            # 如果还没找到，找最近的“入口” lanelet
+            #eng: If no lanelet found yet, find the closest incoming lanelet
             if not id_for_adding:
                 min_d = float("inf")
                 for lanelet_id in incoming_lanelet_ids:
                     lane = self.find_lanelet_by_id(lanelet_id)
 
-                    # Lanelet 不能比 successor 数量多灯（原逻辑）
+                    #eng: A lanelet cannot have more traffic lights than successors (original logic)
                     if len(lane.successor) > len(lane.traffic_lights):
                         p1 = traffic_light.position
-                        p2 = lane.center_vertices[-1]  # 可能是 2D 或 3D
+                        p2 = lane.center_vertices[-1]  #maybe 2d or 3d
                         d = dist(p1, p2, use_3d)
                         if d < min_d:
                             min_d = d

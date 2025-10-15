@@ -639,7 +639,7 @@ class ParametricLane:
             print(f"[proj] h_sup+shape={height_to_ref_line:.3f}")
         final_height = height_to_ref_line * side_coeff + self.calc_elevation_central(s_to_road)
         # ---------------- lane height ----------------
-        s_rel = s_to_road - self.offset_lanesection              # laneSection 局部 s
+        s_rel = s_to_road - self.offset_lanesection              # laneSection local s
         lane_offset = self._lane_height_at(border, s_rel)
         final_height += lane_offset
         #print(f"s_lane={s_rel:.3f}, lane_offset={lane_offset:.3f}, base={final_height:.3f}")
@@ -791,27 +791,28 @@ class ParametricLane:
             dt = t_to_ref_line - prof.start_pos_t
             return a + b*dt + c*dt**2 + d*dt**3
 
-        # ---------- guard 无 shape ----------
+        # ---------- guard without shape ----------
         if not self.shape:
             return 0.0
 
-        # 排序并去重
+        #eng:sorted and remove duplicate
         start_pos_s_list = sorted({sh.start_pos for sh in self.shape})
         if not start_pos_s_list:
             return 0.0
 
-        # idx 指向第一个 > s_pos 的位置
+        #eng: find the index of the first element greater than s_pos
         idx = bisect.bisect_right(start_pos_s_list, s_pos)
 
         no_back_shape  = (idx == 0)
         no_front_shape = (idx == len(start_pos_s_list))
 
-        # 只有“后段” shape：s 在第一个定义之前 -> 默认 0，高度不需插值
+        #eng: before the first defined shape, return 0
         if no_back_shape:
-            # 无需 front_s 索引，直接返回 0
+
+            #eng: no need to find front_s index, just return 0
             return 0.0
 
-        # 只有“前段” shape：s 超过最后一个定义，向道路结尾线性衰减到 0
+        #eng: only "front" shape: s exceeds the last definition, linearly decays to 0 towards the end of the road
         if no_front_shape:
             back_s = start_pos_s_list[-1]
             back_shapes = [sh for sh in self.shape if sh.start_pos == back_s]
@@ -820,7 +821,7 @@ class ParametricLane:
             full_len = self.length + self.offset_lanesection + self.offset_width
             return np.interp(s_pos, [back_s, full_len], [back_h, 0.0])
 
-        # 中间区间：两端都有 shape，做线性插值
+        #eng: middle section: both ends have shape, perform linear interpolation
         back_s  = start_pos_s_list[idx-1]
         front_s = start_pos_s_list[idx]
 
