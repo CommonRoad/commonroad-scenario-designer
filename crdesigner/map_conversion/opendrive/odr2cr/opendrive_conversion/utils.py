@@ -1,5 +1,5 @@
 from typing import Type, Union
-
+from pyproj import CRS, Transformer
 import iso3166
 from commonroad.scenario.traffic_sign import (
     TrafficSignIDArgentina,
@@ -17,6 +17,29 @@ from commonroad.scenario.traffic_sign import (
     TrafficSignIDZamunda,
 )
 
+CRS_ellipsoid= CRS.from_proj4(
+    "+proj=tmerc +lat_0=50.0 +lon_0=8.0 +datum=WGS84 +units=m "
+    "+geoidgrids=egm96_15.gtx +vunits=m +no_defs"
+)
+
+CRS_orthometric= CRS.from_epsg(7915)  # ETRF89 + EVRF2007 
+
+height_transformer = Transformer.from_crs(
+    CRS_ellipsoid, CRS_orthometric, always_xy=True
+)
+
+def convert_height_ellipsoid_to_orthometric(x: float, y: float, z_ellipsoid: float) -> float:
+    """Convert height from ellipsoid to orthometric.
+
+    :param x: x coordinate.
+    :param y: y coordinate.
+    :param z: height above ellipsoid.
+    :return: height above orthometric.
+    """
+    _, _, z_orthometric = height_transformer.transform(x, y, z_ellipsoid)
+    return z_orthometric
+
+        
 
 def encode_road_section_lane_width_id(
     road_id: int, section_id: int, lane_id: int, width_id: int

@@ -29,6 +29,10 @@ class GroupsHandler:
                 formulas=[
                     LaneletFormulaID.LEFT_RIGHT_BOUNDARY_ASSIGNMENT,
                     GeneralFormulaID.UNIQUE_ID,
+                    LaneletFormulaID.POLYLINES_INTERSECTION_3D,
+                    LaneletFormulaID.LEFT_SELF_INTERSECTION_3D,
+                    LaneletFormulaID.RIGHT_SELF_INTERSECTION_3D,
+                    LaneletFormulaID.LANELET_VERTICAL_CLEARANCE,
                 ],
             ),
             SpecificationGroup(
@@ -37,6 +41,10 @@ class GroupsHandler:
                     LaneletFormulaID.POLYLINES_INTERSECTION,
                     LaneletFormulaID.LEFT_SELF_INTERSECTION,
                     LaneletFormulaID.RIGHT_SELF_INTERSECTION,
+                    LaneletFormulaID.VERTICAL_CLEARANCE_STACKED,
+                    LaneletFormulaID.GRADE_WITHIN_LIMIT,
+                    LaneletFormulaID.PREDECESSOR_VERTICAL_STEP,
+                    #LaneletFormulaID3D.TUNNEL_DEPTH_VALID,
                 ],
             ),
             SpecificationGroup(

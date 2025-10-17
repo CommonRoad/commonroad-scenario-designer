@@ -20,7 +20,8 @@ from crdesigner.map_conversion.common.utils import (
     convert_to_new_lanelet_id,
     generate_unique_id,
 )
-
+from crdesigner.map_conversion.common.geom_utils import as_xy, as_xyz, dist
+from crdesigner.common.config.opendrive_config import open_drive_config
 
 class ConversionLaneletNetwork(LaneletNetwork):
     """
@@ -924,39 +925,39 @@ class ConversionLaneletNetwork(LaneletNetwork):
         :param traffic_lights: List of all the traffic lights in the lanelet network.
         """
         incoming_lanelet_ids = self.map_inc_lanelets_to_intersections.keys()
+        #use_3d = open_drive_config.general_use_elevation_type_activ 
+        use_3d = getattr(open_drive_config, "general_use_elevation_type_activ", False)
         for traffic_light in traffic_lights:
             id_for_adding = set()
             for lanelet in self.lanelets:
-                if (
-                    traffic_light.traffic_light_id in lanelet.traffic_lights
-                    and lanelet.lanelet_id in incoming_lanelet_ids
-                ):
-                    id_for_adding.add(lanelet.lanelet_id)
-                elif (
-                    traffic_light.traffic_light_id in lanelet.traffic_lights
-                    and lanelet.lanelet_id not in incoming_lanelet_ids
-                ):
-                    lanelet.traffic_lights = set()
-                    for pre in lanelet.predecessor:
-                        if pre in incoming_lanelet_ids:
-                            id_for_adding.add(pre)
-            if len(id_for_adding) == 0:
-                min_distance = float("inf")
-                for lanelet in incoming_lanelet_ids:
-                    lane = self.find_lanelet_by_id(lanelet)
-                    # Lanelet cannot have more traffic lights than number of successors
+                if traffic_light.traffic_light_id in lanelet.traffic_lights:
+                    if lanelet.lanelet_id in incoming_lanelet_ids:
+                        id_for_adding.add(lanelet.lanelet_id)
+                    else:
+                        # Clear the wrong mounting and try to hang it on its predecessor (original logic)
+                        lanelet.traffic_lights = set()
+                        for pre in lanelet.predecessor:
+                            if pre in incoming_lanelet_ids:
+                                id_for_adding.add(pre)
+
+            # If no lanelet found yet, find the closest incoming lanelet
+            if not id_for_adding:
+                min_d = float("inf")
+                for lanelet_id in incoming_lanelet_ids:
+                    lane = self.find_lanelet_by_id(lanelet_id)
+
+                    # A lanelet cannot have more traffic lights than successors (original logic)
                     if len(lane.successor) > len(lane.traffic_lights):
-                        pos_1 = traffic_light.position
-                        pos_2 = lane.center_vertices[-1]
-                        dist = np.linalg.norm(pos_1 - pos_2)
-                        if dist < min_distance:
-                            min_distance = dist
-                            id_for_adding.add(lanelet)
-            if len(id_for_adding) == 0:
+                        p1 = traffic_light.position
+                        p2 = lane.center_vertices[-1]  #maybe 2d or 3d
+                        d = dist(p1, p2, use_3d)
+                        if d < min_d:
+                            min_d = d
+                            id_for_adding = {lanelet_id}
+
+            if not id_for_adding:
                 warnings.warn(
-                    "For traffic light with ID {} no referencing lanelet was found!".format(
-                        traffic_light.traffic_light_id
-                    )
+                    f"For traffic light with ID {traffic_light.traffic_light_id} no referencing lanelet was found!"
                 )
                 self.add_traffic_light(traffic_light, set())
             else:
@@ -978,7 +979,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 # Find closest lanelet to traffic signal
                 pos_1 = traffic_sign.position
                 pos_2 = lanelet.center_vertices[0]
-                dist = np.linalg.norm(pos_1 - pos_2)
+                dist = np.linalg.norm(pos_1[:2] - pos_2[:2])
                 if dist < min_distance:
                     min_distance = dist
                     id_for_adding = lanelet.lanelet_id
@@ -1000,6 +1001,23 @@ class ConversionLaneletNetwork(LaneletNetwork):
         :param stop_lines: List of all the stop lines
         """
         # Assign stop lines to lanelets
+        from math import hypot
+        def _p2(p):  # get 2D point from 3D
+            p = np.asarray(p)
+            return p[:2] if p.shape[-1] >= 2 else p
+
+        def _center_end_2d(lane):
+            # et 2d for all temporary lanelets
+            c = np.asarray(lane.center_vertices)
+            if c.size == 0:
+                # if there's no centerline then average it
+                L = np.asarray(lane.left_vertices); R = np.asarray(lane.right_vertices)
+                c = (L + R) * 0.5
+            return _p2(c[-1])
+
+        def _dist2(a, b):
+            a = _p2(a); b = _p2(b)
+            return hypot(a[0]-b[0], a[1]-b[1])
 
         for stop_line in stop_lines:
             min_start = float("inf")
@@ -1014,16 +1032,30 @@ class ConversionLaneletNetwork(LaneletNetwork):
                         stop_line_position_end = stop_line.start
                         stop_line_position_start = stop_line.end
                         if (
-                            np.linalg.norm(lanelet_position_right - stop_line_position_start)
-                            < min_start
-                            and np.linalg.norm(lanelet_position_left - stop_line_position_end)
-                            < min_end
+                            np.linalg.norm(_p2(lanelet_position_right) - _p2(stop_line_position_start)) < min_start
+                            and np.linalg.norm(_p2(lanelet_position_left)  - _p2(stop_line_position_end))   < min_end
                         ):
                             lane_to_add_stop_line = lane
-                            min_start = np.linalg.norm(
-                                lanelet_position_right - stop_line_position_start
-                            )
-                            min_end = np.linalg.norm(lanelet_position_left - stop_line_position_end)
+                            min_start = np.linalg.norm(_p2(lanelet_position_right) - _p2(stop_line_position_start))
+                            min_end   = np.linalg.norm(_p2(lanelet_position_left)  - _p2(stop_line_position_end))
+
+
+            #search for the closest end of the lanelet to the center of the stop line
+            if lane_to_add_stop_line is None:
+                mid = (np.asarray(stop_line.start) + np.asarray(stop_line.end)) * 0.5
+                best_d = float("inf"); best_lane = None
+
+                for lane in self.lanelets:
+                    # a typical stop line is at the end of the incoming lanelet, so we prioritize lanes with successors or in intersections
+                    end_pt = _center_end_2d(lane)
+                    d = _dist2(end_pt, mid)
+                    if d < best_d:
+                        best_d, best_lane = d, lane
+
+                # threshold to avoid adding stop lines to far away lanes
+                if best_lane is not None and best_d < 20.0:
+                    lane_to_add_stop_line = best_lane
+
             if lane_to_add_stop_line is None:
                 warnings.warn("No lanelet was matched with a stop line")
                 continue
@@ -1228,6 +1260,7 @@ class _JoinSplitTarget:
         lanelet_split = self._js_pairs[0].move_border(
             width=[start_width_split, self.change_width[0]],
             linking_side=self.linking_side,
+            transformer=self._transformer
         )
         left_vertices = lanelet_split.left_vertices
         right_vertices = lanelet_split.right_vertices
@@ -1236,6 +1269,7 @@ class _JoinSplitTarget:
         self._js_pairs[1].move_border(
             width=[self.change_width[1], start_width_join],
             linking_side=self.linking_side,
+            transformer=self._transformer
         )
 
         # take first half of lanelet which does the split

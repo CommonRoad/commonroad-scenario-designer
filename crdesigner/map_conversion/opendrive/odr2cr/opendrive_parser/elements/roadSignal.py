@@ -1,4 +1,5 @@
 from typing import Union
+import warnings
 
 
 class Signal:
@@ -17,6 +18,7 @@ class Signal:
     :ivar _signal_value: value of the signal
     :ivar _unit: unit of the signal value (mandatory if signal value is given)
     :ivar _text: additional text associated with the signal
+    :ivar _zoffset: z-offset of the signal
     """
 
     def __init__(self):
@@ -32,6 +34,7 @@ class Signal:
         self._signal_value = None
         self._unit = None
         self._text = None
+        self._zOffset = None
         self._validity_from = None
         self._validity_to = None
         self._signal_id = None
@@ -261,6 +264,20 @@ class Signal:
     def signal_id(self, value: str):
         self._signal_id = str(value)
 
+    @property
+    def zOffset(self) -> float:
+        """
+        Z-offset of the signal.
+
+        :getter: returns z-offset
+        :setter: sets z-offset
+        """
+        return self._zOffset
+
+    @zOffset.setter
+    def zOffset(self, value):
+        self._zOffset = float(value)
+
 
 class SignalReference:
     """
@@ -289,6 +306,25 @@ class SignalReference:
         self._validity_to = None
         self._signal_id = None
         self._turn_relation = None
+        self._zOffset = None
+
+    @property
+    def zOffset(self) -> float:
+        """Z-offset of the signal."""
+        return self._zOffset if self._zOffset is not None else 0.0
+    
+    @zOffset.setter
+    def zOffset(self, value):
+        if value is None or value == "":
+            self._zOffset = 0.0
+        else:
+            try:
+                self._zOffset = float(value)
+            except (ValueError, TypeError):
+                warnings.warn(f"Invalid zOffset '{value}', default 0.0 used.")
+                self._zOffset = 0.0
+        #self._zOffset = float(value)
+
 
     @property
     def s(self) -> float:

@@ -48,6 +48,9 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLa
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     RoadMark as RoadLaneRoadMark,
 )
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
+    height as RoadLaneHeight,
+)
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLateralProfile import (
     Crossfall as RoadLateralProfileCrossfall,
 )
@@ -482,7 +485,12 @@ def parse_opendrive_road_lane_section(
                     ]
                 ]
             # Lane Height
-            # TODO implementation
+            for height in lane.findall("height"):
+                lane_height = RoadLaneHeight()
+                lane_height.sOffset = height.get("sOffset")
+                lane_height.inner = height.get("inner")
+                lane_height.outer = height.get("outer")
+                new_lane.height.append(lane_height)
 
             newSideLanes.append(new_lane)
 
@@ -509,6 +517,7 @@ def parse_opendrive_road_signal(new_road: Road, road_signal: etree.ElementTree):
     new_signal.signal_value = road_signal.get("value")
     new_signal.unit = road_signal.get("unit")
     new_signal.text = road_signal.get("text")
+    new_signal.zOffset = road_signal.get("zOffset")
     if road_signal.find("validity") is not None:
         new_signal.validity_from = road_signal.find("validity").get("fromLane")
         new_signal.validity_to = road_signal.find("validity").get("toLane")
@@ -536,6 +545,7 @@ def parse_opendrive_road_signal_reference(new_road: Road, road_signal_reference:
     new_signal_reference.t = road_signal_reference.get(
         "t"
     )  # position away from the reference curve
+    new_signal_reference.zOffset = road_signal_reference.get("zOffset")
     new_signal_reference.orientation = road_signal_reference.get("orientation")
     if road_signal_reference.find("validity") is not None:
         new_signal_reference.validity_from = road_signal_reference.find("validity").get("fromLane")

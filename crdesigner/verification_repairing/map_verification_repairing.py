@@ -4,8 +4,9 @@ import time
 from copy import deepcopy
 from os.path import join
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict, Set
 
+import numpy as np
 from commonroad.common.file_reader import CommonRoadFileReader, FileFormat
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.lanelet import LaneletNetwork
@@ -82,6 +83,26 @@ def verify_and_repair_scenario(
         result.map_verifications[0].map_verification_result.invalid_states
     ) == 0
 
+def _is_3d_network(network: LaneletNetwork) -> bool:
+    """
+     Roughly determine whether the network contains valid Z-axis information
+    """
+    for ll in network.lanelets:
+        if ll.center_vertices.shape[1] >= 3 and not np.allclose(ll.center_vertices[:, 2], 0.0):
+            return True
+    return False
+
+
+def _filter_3d_formulas(formulas: List[FormulaID]) -> List[FormulaID]:
+    """remove 3D formulas from the list of formulas"""
+    suffixes = (
+        "_3d",
+        "VERTICAL_CLEARANCE_STACKED",
+        "GRADE_WITHIN_LIMIT",
+        "PREDECESSOR_VERTICAL_STEP",
+        "LANELET_VERTICAL_CLEARANCE",
+    )
+    return [f for f in formulas if not any(str(f).endswith(s) for s in suffixes)]
 
 def verify_and_repair_map(
     network: LaneletNetwork,
@@ -122,6 +143,14 @@ def verify_and_repair_map(
     if config.verification.formulas is None or config.verification.formulas == []:
         config.verification.formulas = extract_formula_ids()
 
+    # check 3D map or not
+    is_3d = _is_3d_network(network)
+    do_repair = not is_3d  # not repairing 3D maps
+
+    # if is a 2d map, filter out 3D formulas
+    if not is_3d:
+        config.verification.formulas = _filter_3d_formulas(config.verification.formulas)
+
     drawer = (
         InvalidStatesDrawer(network, scenario_id)
         if config.evaluation.invalid_states_draw_dir
@@ -143,8 +172,8 @@ def verify_and_repair_map(
 
     groups_handler = GroupsHandler()
 
-    initial_invalid_states = {}
-    final_errors = set()
+    initial_invalid_states: Dict[FormulaID, List[Tuple[int, int]]] = {}
+    final_errors: Set[Tuple[FormulaID, Tuple[int, int]]] = set()
 
     map_repairer = MapRepairer(network)
 
@@ -154,24 +183,28 @@ def verify_and_repair_map(
     while groups_handler.is_next_group():
         group = groups_handler.next_group()
         logging.debug(f"Verifying group number {group_i}")
+
+        # fitler 2d/3d again according to the current group
+        if not is_3d:
+            group = _filter_3d_formulas(group)
+
         final_formulas = list(set(org_config.verification.formulas).intersection(set(group)))
         if not final_formulas:
+            group_i += 1
             continue
         else:
             config.verification.formulas = final_formulas
 
+        # ---- validate
         start = time.time()
         map_verifier = MapVerifier(network, config)
         invalid_states = map_verifier.verify()
         end = time.time()
         verification_time += end - start
 
+        # record initial invalid states
         for formula_id, locations in invalid_states.items():
-            pre_locations = (
-                initial_invalid_states[formula_id]
-                if formula_id in initial_invalid_states.keys()
-                else []
-            )
+            pre_locations = initial_invalid_states.get(formula_id, [])
             initial_invalid_states[formula_id] = pre_locations + locations
 
         if drawer is not None:
@@ -182,68 +215,76 @@ def verify_and_repair_map(
                 file_format=config.evaluation.file_format,
             )
 
-        f_id: FormulaID = GeneralFormulaID.UNIQUE_ID
-        loc: Tuple[int, int] = (0, 0)
-        for formula_id, locations in invalid_states.items():
-            for location in locations:
-                iter_i = 0
-                errors = {(formula_id, location)}
-                while errors and iter_i < config.verification.max_iterations:
-                    if iter_i > 0:
-                        logging.error(
-                            f"Repairing was not successful at first attempt with map {complete_map_name} "
-                            f"using specification {f_id} and error {loc}."
-                        )
-                    f_id, loc = errors.pop()
-                    element_id = loc[0]
+        # reparing is only done if the map is 2D and do_repair is True
+        if do_repair:
+            f_id: FormulaID = GeneralFormulaID.UNIQUE_ID
+            loc: Tuple[int, int] = (0, 0)
+            for formula_id, locations in invalid_states.items():
+                for location in locations:
+                    iter_i = 0
+                    errors = {(formula_id, location)}
+                    while errors and iter_i < config.verification.max_iterations:
+                        if iter_i > 0:
+                            logging.error(
+                                f"Repairing was not successful at first attempt with map {complete_map_name} "
+                                f"using specification {f_id} and error {loc}."
+                            )
+                        f_id, loc = errors.pop()
+                        element_id = loc[0]
 
-                    start = time.time()
-                    map_repairer.repair_map({f_id: [loc]})
-                    end = time.time()
-                    repairing_time += end - start
 
-                    sub_map = SubMap(network)
-                    sub_map.extract_from_element(element_id)
-                    sub_network = sub_map.create_subnetwork()
-                    start = time.time()
-                    config_tmp = copy.deepcopy(config)
-                    config_tmp.verification.formulas = [f_id]
-                    map_verifier = MapVerifier(sub_network, config_tmp)
-                    invalid_states_tmp = map_verifier.verify()
-                    end = time.time()
-                    verification_time += end - start
+                        start = time.time()
+                        map_repairer.repair_map({f_id: [loc]})
+                        end = time.time()
+                        repairing_time += end - start
 
-                    if drawer is not None:
-                        drawer.save_invalid_states_drawing(
-                            invalid_states,
-                            config.evaluation.invalid_states_draw_dir,
-                            file_name=f"group_{group_i}_iteration_{iter_i}_" f"{complete_map_name}",
-                            file_format=config.evaluation.file_format,
-                        )
 
-                    if invalid_states_tmp.get(f_id) is not None and loc in invalid_states_tmp.get(
-                        f_id
-                    ):
-                        errors.add((f_id, loc))
+                        sub_map = SubMap(network)
+                        sub_map.extract_from_element(element_id)
+                        sub_network = sub_map.create_subnetwork()
+                        start = time.time()
+                        config_tmp = copy.deepcopy(config)
+                        config_tmp.verification.formulas = [f_id]
+                        map_verifier = MapVerifier(sub_network, config_tmp)
+                        invalid_states_tmp = map_verifier.verify()
+                        end = time.time()
+                        verification_time += end - start
 
-                    iter_i += 1
-                else:
-                    if errors and iter_i >= config.verification.max_iterations:
-                        raise RuntimeError(
-                            f"Repairing was not successful with map {complete_map_name} with "
-                            f"specification {f_id} and error {loc}."
-                        )
+                        if drawer is not None:
+                            drawer.save_invalid_states_drawing(
+                                invalid_states,
+                                config.evaluation.invalid_states_draw_dir,
+                                file_name=f"group_{group_i}_iteration_{iter_i}_{complete_map_name}",
+                                file_format=config.evaluation.file_format,
+                            )
 
-                final_errors = final_errors.union(errors)
+                        if invalid_states_tmp.get(f_id) is not None and loc in invalid_states_tmp.get(
+                            f_id
+                        ):
+                            errors.add((f_id, loc))
+
+                        iter_i += 1
+                    else:
+                        if errors and iter_i >= config.verification.max_iterations:
+
+                            raise RuntimeError(
+                                f"Repairing was not successful with map {complete_map_name} with "
+                                f"specification {f_id} and error {loc}."
+                            )
+
+                    final_errors = final_errors.union(errors)
+        else:
+            # not repairing, but add all invalid states to final_errors
+            for formula_id, locations in invalid_states.items():
+                for loc in locations:
+                    final_errors.add((formula_id, loc))
 
         group_i += 1
 
+    # summarize final errors
     invalid_states = {}
     for formula_id, location in final_errors:
-        if formula_id in invalid_states.keys():
-            invalid_states[formula_id].append(location)
-        else:
-            invalid_states[formula_id] = [location]
+        invalid_states.setdefault(formula_id, []).append(location)
 
     update_map_verification(
         map_verification, verification_time, repairing_time, initial_invalid_states

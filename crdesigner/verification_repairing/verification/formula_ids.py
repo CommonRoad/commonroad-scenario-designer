@@ -63,6 +63,14 @@ class LaneletFormulaID(enum.Enum):
     CONFLICTING_LANELET_DIRECTIONS = "conflicting_lanelet_directions"
     LEFT_RIGHT_BOUNDARY_ASSIGNMENT = "left_right_boundary_assignment"
 
+    POLYLINES_INTERSECTION_3D   = "polylines_intersection_3d"
+    LEFT_SELF_INTERSECTION_3D   = "left_self_intersection_3d"
+    RIGHT_SELF_INTERSECTION_3D  = "right_self_intersection_3d"
+    LANELET_VERTICAL_CLEARANCE  = "lanelet_vertical_clearance"
+    VERTICAL_CLEARANCE_STACKED  = "vertical_clearance_stacked"
+    GRADE_WITHIN_LIMIT          = "grade_within_limit"
+    PREDECESSOR_VERTICAL_STEP   = "predecessor_vertical_step"
+
 
 @enum.unique
 class TrafficSignFormulaID(enum.Enum):

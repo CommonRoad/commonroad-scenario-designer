@@ -49,6 +49,9 @@ poetry shell
 poetry install --with tests,docs,tutorials
 ```
 We recommend to use PyCharm (Professional) as IDE.
+To use 3D map convertion, download the file `egm96_15.gtx` from [here](https://github.com/OSGeo/proj-datumgrid/blob/master/egm96_15.gtx)
+And put this file to `your poetry virtual environments folder/lib/python3.10/site-packages/pyproj/proj_dir/share/proj/egm96_15.gtx` to make pyproj working properly
+(for example: /home/username/.cache/pypoetry/virtualenvs/commonroad-scenario-designer-ORgy8xcx-py3.10/lib/python3.10/site-packages/pyproj/proj_dir/share/proj/egm96_15.gtx)
 
 ### Common Errors during installation
 

@@ -11,7 +11,12 @@ from crdesigner.verification_repairing.config import MapVerParams
 from crdesigner.verification_repairing.map_verification_repairing import (
     verify_and_repair_scenario,
 )
+from crdesigner.common.config.opendrive_config import open_drive_config
+'''from crdesigner.common.traffic_sign_node_elevation import TrafficSignXMLNodeElevation'''
 
+
+from crdesigner.common.traffic_sign_node_elevation import patch_controls_write_3d
+from commonroad.common.writer import file_writer_xml
 
 class CRDesignerFileWriter(CommonRoadFileWriter):
     def __init__(
@@ -54,6 +59,10 @@ class CRDesignerFileWriter(CommonRoadFileWriter):
         )
         # map verification parameters
         self._mapver_params = MapVerParams()
+        if open_drive_config.general_use_elevation_type_activ is True:
+            '''file_writer_xml.TrafficSignXMLNode = TrafficSignXMLNodeElevation'''
+            #replace_create_node_with_z()
+            patch_controls_write_3d()
 
     @property
     def mapver_params(self) -> MapVerParams:
