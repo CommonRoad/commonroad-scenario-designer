@@ -74,6 +74,9 @@ def main(
     force_overwrite: Annotated[
         bool, typer.Option(help="Overwrite existing CommonRoad file")
     ] = False,
+    projection: Annotated[
+        Optional[str], typer.Option(help="Projection string for coordinate transformation")
+    ] = None,
     author: Annotated[str, typer.Option(..., help="Your name")] = "",
     affiliation: Annotated[
         str,
@@ -86,6 +89,10 @@ def main(
     elif ctx.invoked_subcommand is None and input_file is None:
         start_gui()
     else:
+        # Set projection if provided
+        if projection is not None:
+            general_config.proj_string_cr = projection
+
         # copied from commonroad-dataset-converter
         frame = inspect.currentframe()
         assert frame is not None
@@ -147,9 +154,6 @@ def odrcr(ctx: typer.Context):
 @cli.command()
 def lanelet2cr(
     ctx: typer.Context,
-    proj: Annotated[
-        Optional[str], typer.Option(..., help="Overwrite existing CommonRoad file")
-    ] = None,
     adjacencies: Annotated[
         bool,
         typer.Option(
@@ -167,8 +171,6 @@ def lanelet2cr(
     ] = False,
 ):
     config_lanelet2 = lanelet2_config
-    if proj is not None:
-        general_config.proj_string_cr = proj
     config_lanelet2.adjacencies = adjacencies
     config_lanelet2.left_driving = left_driving
     scenario = lanelet_to_commonroad(ctx.obj["input_file"], lanelet2_conf=config_lanelet2)
@@ -185,17 +187,12 @@ def lanelet2cr(
 @cli.command()
 def crlanelet2(
     ctx: typer.Context,
-    proj: Annotated[
-        Optional[str], typer.Option(..., help="Overwrite existing CommonRoad file")
-    ] = None,
     autoware: Annotated[bool, typer.Option(..., help="Overwrite existing CommonRoad file")] = False,
     local_coordinates: Annotated[
         bool, typer.Option(..., help="Overwrite existing CommonRoad file")
     ] = False,
 ):
     config = lanelet2_config
-    if proj is not None:
-        general_config.proj_string_cr = proj
     config.autoware = autoware
     config.use_local_coordinates = local_coordinates
     commonroad_to_lanelet(ctx.obj["input_file"], ctx.obj["output_file"], config=config)

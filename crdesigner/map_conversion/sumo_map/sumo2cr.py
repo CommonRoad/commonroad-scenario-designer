@@ -1,7 +1,7 @@
 import os
-import subprocess
 
 from commonroad.scenario.scenario import Scenario
+from commonroad_sumo.helpers import SumoApplication, execute_sumo_application
 from lxml import etree
 
 try:
@@ -42,17 +42,22 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
     opendrive_file = os.path.join(out_folder_tmp, scenario_name + ".xodr")
 
     # convert to OpenDRIVE file using netconvert
-    subprocess.check_output(
+    netconvert_successful = execute_sumo_application(
+        SumoApplication.NETCONVERT,
         [
-            "netconvert",
             "-s",
             net_file,
             "--opendrive-output",
             opendrive_file,
             "--junctions.scurve-stretch",
             "1.0",
-        ]
+        ],
     )
+    if netconvert_successful is None:
+        raise RuntimeError(
+            f"Failed to convert SUMO network {net_file} to OpenDrive. See debug log for more information."
+        )
+
     if verbose:
         print("converted to OpenDrive (.xodr)")
 

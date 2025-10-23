@@ -3,21 +3,15 @@ from typing import List, Optional
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
+from matplotlib.animation import FuncAnimation
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
 from crdesigner.common.config.gui_config import gui_config
-from crdesigner.common.sumo_available import SUMO_AVAILABLE
 from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import (
     DynamicCanvasController,
 )
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.utilities.helper import draw_lanelet_polygon
-
-if SUMO_AVAILABLE:
-    from crdesigner.map_conversion.sumo_map.config import SumoConfig
-
-from matplotlib.animation import FuncAnimation
-
 from crdesigner.ui.gui.utilities.util import Observable
 from crdesigner.ui.gui.view.animated_viewer.animated_viewer_ui import AnimatedViewerUI
 
@@ -69,8 +63,6 @@ class AnimatedViewerController:
         self.original_lanelet_network = None
         self.update_window()
 
-        # sumo config giving dt etc
-        self._config: SumoConfig = None
         self.min_time_step = 0
         self.max_time_step = 0
         # current time step
@@ -80,11 +72,10 @@ class AnimatedViewerController:
         # if playing or not
         self.playing = False
 
-    def open_scenario(self, config: Observable = None, new_file_added: bool = None):
+    def open_scenario(self, new_file_added: bool = None):
         """[summary]
         Open a scenario, setup any configuration.
         :param new_file_added: if a new cr file was created or added
-        :param config: [description], defaults to None
         :param planning_problem_set: des,
         """
         self.dynamic.initial_parameter_config_done = (
@@ -95,17 +86,6 @@ class AnimatedViewerController:
         self.original_lanelet_network = LaneletNetwork.create_from_lanelet_network(
             lanelet_network=self.scenario_model.get_lanelet_network()
         )
-
-        # if we have not subscribed already, subscribe now
-        if config is not None:
-            if not self._config:
-
-                def set_config(conf):
-                    self._config = conf
-                    self._calc_max_timestep()
-
-                config.subscribe(set_config)
-            self._config = config.value
 
         plot_limits = extract_plot_limits(self.scenario_model.get_lanelet_network())
 
@@ -131,10 +111,7 @@ class AnimatedViewerController:
 
         start = self.min_time_step
         end = self.max_timestep
-        if self._config is not None:
-            dt = self._config.dt
-        else:
-            dt = 0
+        dt = self.scenario_model.get_current_scenario().dt
         # ps = 25
         # dpi = 120
         # ln, = self.dynamic.ax.plot([], [], animated=True)

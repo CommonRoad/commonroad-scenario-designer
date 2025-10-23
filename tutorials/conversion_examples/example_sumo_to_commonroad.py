@@ -4,11 +4,8 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 
 from crdesigner.common.file_writer import CRDesignerFileWriter, OverwriteExistingFile
-from crdesigner.common.sumo_available import SUMO_AVAILABLE
 from crdesigner.map_conversion.map_conversion_interface import sumo_to_commonroad
-
-if SUMO_AVAILABLE:
-    from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
+from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 
 input_file = ""  # replace empty string
 

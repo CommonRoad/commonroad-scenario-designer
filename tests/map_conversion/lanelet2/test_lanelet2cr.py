@@ -515,29 +515,29 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         l2cr(custom_osm)
 
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
             l2cr.lanelet_network.lanelets[0].right_vertices[0][0], 767483.16786767, 6
         )
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
             l2cr.lanelet_network.lanelets[0].right_vertices[0][1], 6620349.05142523, 6
         )
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
             l2cr.lanelet_network.lanelets[0].right_vertices[1][0], 767466.72597888, 6
         )
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
             l2cr.lanelet_network.lanelets[0].right_vertices[1][1], 6620373.72455713, 6
         )
 
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
             l2cr.lanelet_network.lanelets[0].left_vertices[0][0], 767483.16786767, 6
         )
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
             l2cr.lanelet_network.lanelets[0].left_vertices[0][1], 6620349.05142523, 6
         )
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
             l2cr.lanelet_network.lanelets[0].left_vertices[1][0], 767463.93185966, 6
         )
-        self.assertAlmostEquals(
+        self.assertAlmostEqual(
             l2cr.lanelet_network.lanelets[0].left_vertices[1][1], 6620372.39804278, 6
         )
 

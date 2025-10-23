@@ -75,9 +75,6 @@ class Road:
         :param root: OpenDRIVE etree element
         :param junction_id: id of junction
         """
-        # Supress RankWarning in polyfit
-        warnings.simplefilter("ignore", np.RankWarning)
-
         Road.counting += 1
         Road.roads[Road.counting] = self
         Road.lane_2_lane_link[Road.counting] = {config.SUCC_TAG: {}, config.PRED_TAG: {}}
