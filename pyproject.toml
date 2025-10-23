@@ -7,9 +7,10 @@ license = "GPL-3.0"
 readme = "README.md"
 keywords= ["autonomous", "automated", "vehicles", "driving", "motion", "planning", "simulation", "map", "scenario"]
 classifiers = [
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: POSIX :: Linux",
 #    "Operating System :: MacOS",
@@ -32,13 +33,13 @@ build-backend = "poetry.core.masonry.api"
 crdesigner = 'crdesigner.ui.command_line:cli'
 
 [tool.poetry.dependencies]
-python = "^3.9,<3.12"
+python = "^3.10,<3.14"
 commonroad-io = {git = "https://github.com/commonroad/commonroad-io", rev = "feature/new-format"}
 commonroad-clcs = "^2025.1"
 commonroad-drivability-checker = "^2025.1"
 pyqt6 = ">=6.6.0"
 matplotlib = ">=3.6.0"
-numpy = "^1.26.4,<2.0"
+numpy = ">=2.0.0"
 scipy = "^1.11.3"
 lxml = "^4.9.2"
 pyproj = "^3.4.1"
@@ -46,7 +47,7 @@ utm = "^0.7.0"
 mgrs = ">=1.4.5"
 shapely = ">=2.0.1"
 ordered-set = "^4.1.0"
-sumocr = "^2024.1"
+commonroad-sumo = "2025.1.4"
 iso3166 = "^2.1.1"
 networkx = "^3.0"
 omegaconf = "^2.3.0"
