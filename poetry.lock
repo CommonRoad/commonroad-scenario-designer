@@ -566,12 +566,10 @@ name = "commonroad-io"
 version = "2024.3"
 description = "Python tool to read, write, and visualize CommonRoad scenarios and solutions for automated vehicles."
 optional = false
-python-versions = "<4.0,>=3.9"
+python-versions = "^3.9"
 groups = ["main"]
-files = [
-    {file = "commonroad_io-2024.3-py3-none-any.whl", hash = "sha256:2994cda71550903ca93834c472ab14bd7f5f8aadbded8576a02055f0e01b1530"},
-    {file = "commonroad_io-2024.3.tar.gz", hash = "sha256:9561464469e83e518675cfc8e1a782eaff535aeda93803cc7facf62237b11ff3"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 commonroad-vehicle-models = ">=2.0.0"
@@ -585,25 +583,31 @@ numpy = [
 ]
 omegaconf = ">=2.0"
 pillow = ">=10.4.0"
-protobuf = "3.20.2"
+protobuf = "==3.20.2"
 rtree = ">=0.8.3"
 scipy = [
     {version = ">=1.11.3", markers = "python_version < \"3.13\""},
     {version = ">=1.13.0", markers = "python_version >= \"3.13\""},
 ]
-shapely = ">=2.0.1,<3.0.0"
+shapely = "^2.0.1"
 tqdm = ">=4.64"
+
+[package.source]
+type = "git"
+url = "https://github.com/commonroad/commonroad-io"
+reference = "feature/new-format"
+resolved_reference = "f5f83646d1d82265c44bf2193fc67460d58a98cd"
 
 [[package]]
 name = "commonroad-sumo"
-version = "2025.1.3"
+version = "2025.1.4"
 description = "Interface between CommonRoad and the SUMO traffic simulator"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "commonroad_sumo-2025.1.3-py3-none-any.whl", hash = "sha256:b17191195ea8e4ee5dbf6703070017803b2f0216ad326cf1cb54e307e42b9fc5"},
-    {file = "commonroad_sumo-2025.1.3.tar.gz", hash = "sha256:a00af4e7b264e7e79fdc26a38eeeeae4bd05a5fc5d30525a028306e58f7e3e41"},
+    {file = "commonroad_sumo-2025.1.4-py3-none-any.whl", hash = "sha256:0f749209677cdbbf0167bf89562c1c506af8b861956d3a6daab9b7615c43f871"},
+    {file = "commonroad_sumo-2025.1.4.tar.gz", hash = "sha256:4887fb89999e6815b3985b35734a8289165df812dbf52076c9d6548fc4fd4626"},
 ]
 
 [package.dependencies]
@@ -612,7 +616,7 @@ ffmpeg = ">=1.4,<2.0.0"
 libsumo = ">=1.24.0,<2.0.0"
 matplotlib = ">=3.0.0,<4.0.0"
 numpy = [
-    {version = ">=1.26.1,<2.0.0", markers = "python_version < \"3.13\""},
+    {version = ">=1.26.1", markers = "python_version < \"3.13\""},
     {version = ">=2.1.0", markers = "python_version >= \"3.13\""},
 ]
 shapely = ">=2.0.0,<3.0.0"
@@ -2871,7 +2875,7 @@ description = "Fundamental package for array computing in Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "python_version < \"3.13\""
+markers = "python_version < \"3.11\""
 files = [
     {file = "numpy-1.26.4-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:9ff0f4f29c51e2803569d7a51c2304de5554655a60c5d776e35b4a41413830d0"},
     {file = "numpy-1.26.4-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:2e4ee3380d6de9c9ec04745830fd9e2eccb3e6cf790d39d7b98ffd19b0dd754a"},
@@ -2918,7 +2922,7 @@ description = "Fundamental package for array computing in Python"
 optional = false
 python-versions = ">=3.11"
 groups = ["main"]
-markers = "python_version >= \"3.13\""
+markers = "python_version >= \"3.11\""
 files = [
     {file = "numpy-2.3.3-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:0ffc4f5caba7dfcbe944ed674b7eef683c7e94874046454bb79ed7ee0236f59d"},
     {file = "numpy-2.3.3-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:e7e946c7170858a0295f79a60214424caac2ffdb0063d4d79cb681f9aa0aa569"},
@@ -5395,4 +5399,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10,<3.14"
-content-hash = "ac5fb54ac5e29ce21aa187bacb267f725d410f4052ecc41408c36f92fb3ff1d4"
+content-hash = "3155b62180fc17b038c2cdbdbbcce6f47ed62430ec8a4aab66a80d285fea86a8"
