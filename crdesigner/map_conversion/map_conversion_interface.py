@@ -1,7 +1,5 @@
 import logging
 import os
-import subprocess
-import uuid
 from pathlib import Path
 from typing import Optional, Union
 
@@ -24,13 +22,6 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.network imp
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.parser import (
     parse_opendrive,
 )
-from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
-
-if SUMO_AVAILABLE:
-    from crdesigner.map_conversion.sumo_map.config import SumoConfig
-    from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
-    from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
-
 from crdesigner.map_conversion.osm2cr.converter_modules.converter import GraphScenario
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import (
     convert_to_scenario,
