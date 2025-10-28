@@ -307,14 +307,15 @@ class ParametricLaneGroup:
 
     def calc_border(
         self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature: bool = True
-    ) -> Tuple[Tuple[float, float], float, float, float]:
+    ) -> Tuple[Tuple[float, float], float, float, float, float]:
         """Calc vertices point of inner or outer Border.
 
         :param border: Which border to calculate (inner or outer)
         :param s_pos: Position of parameter ds where to calc the cartesian coordinates
         :param width_offset: Offset to add to calculated width in reference to the reference border. Default is 0.0.
         :param compute_curvature: Whether to computer curvature. Default is True.
-        :return: Cartesian coordinates of point on inner border and tangential direction.
+        :return: Cartesian coordinates of point on inner border, tangential direction, curvature,
+                 max geometry length, and elevation.
         """
         try:
             # get index of geometry which is at s_pos

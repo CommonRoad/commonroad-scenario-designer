@@ -18,6 +18,7 @@ class Border:
         self.width_coefficients = []
 
         self.reference = None
+        self.elevation_profile = None
 
     def _get_width_index(self, s_pos: float, is_last_pos: bool) -> float:
         """Get the index of the width which applies at position s_pos.
@@ -55,7 +56,7 @@ class Border:
         is_last_pos: bool = False,
         reverse=False,
         compute_curvature=True,
-    ) -> Tuple[Optional[Any], Any, Any, Any]:
+    ) -> Tuple[Optional[Any], Any, Any, Any, Any]:
         """Calculate the Cartesian coordinates and the tangential direction of
         the border by calculating position of reference border at s_pos
         and then adding the width in orthogonal direction to the reference position.
@@ -67,7 +68,7 @@ class Border:
         :param reverse: Whether to calculate positions in a reverse order, default is False
         :param compute_curvature: Whether to computer curvature, default is True
         :return: coord: (x,y) tuple of cartesian coordinates, tangential at s_pos, curvature at s_pos,
-        and maximum length of the geometry
+        maximum length of the geometry, and elevation at s_pos
         """
         # Last reference has to be a reference geometry (PlanView)
         # Offset of all inner lanes (Border)
@@ -76,18 +77,24 @@ class Border:
             s_pos = 0
 
         try:
-            ref_coord, tang_angle, curv, max_geometry_length = self.reference.calc(
+            result = self.reference.calc(
                 self.ref_offset + s_pos,
                 is_last_pos=is_last_pos,
                 reverse=reverse,
                 compute_curvature=compute_curvature,
             )
         except TypeError:
-            ref_coord, tang_angle, curv, max_geometry_length = self.reference.calc(
+            result = self.reference.calc(
                 np.round(self.ref_offset + s_pos, 3),
                 reverse=reverse,
                 compute_curvature=compute_curvature,
             )
+
+        # Handle both 4-value (PlanView) and 5-value (Border) returns
+        if len(result) == 5:
+            ref_coord, tang_angle, curv, max_geometry_length, _ = result
+        else:
+            ref_coord, tang_angle, curv, max_geometry_length = result
 
         if not self.width_coefficients or not self.width_coefficient_offsets:
             raise Exception("No entries for width definitions.")
@@ -109,4 +116,9 @@ class Border:
         ortho = tang_angle + np.pi / 2
         coord = ref_coord + np.array([distance * math.cos(ortho), distance * math.sin(ortho)])
 
-        return coord, tang_angle, curv, max_geometry_length
+        # Calculate elevation at this position
+        elevation = 0.0
+        if self.elevation_profile is not None:
+            elevation = self.elevation_profile.calc_elevation(self.ref_offset + s_pos)
+
+        return coord, tang_angle, curv, max_geometry_length, elevation

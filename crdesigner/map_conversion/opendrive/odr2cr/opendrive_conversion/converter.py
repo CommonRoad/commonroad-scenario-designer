@@ -19,6 +19,9 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.utils impor
     encode_mark_lane_width_id,
     encode_road_section_lane_width_id,
 )
+from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadElevationProfile import (
+    ElevationProfile,
+)
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import (
     Lane,
     LaneOffset,
@@ -34,7 +37,9 @@ class OpenDriveConverter:
     """Class for static methods to convert lane_sections to parametric_lanes."""
 
     @staticmethod
-    def create_reference_border(plan_view: PlanView, lane_offsets: List[LaneOffset]) -> Border:
+    def create_reference_border(
+        plan_view: PlanView, lane_offsets: List[LaneOffset], elevation_profile: ElevationProfile = None
+    ) -> Border:
         """Create the most inner border from a PlanView.
         This border is used as a reference for other
         borders which rely on the PlanView.
@@ -43,6 +48,7 @@ class OpenDriveConverter:
             of the reference path.
         :param lane_offsets: Object which contains information about width offset of reference
             path the plain_view path.
+        :param elevation_profile: ElevationProfile object containing elevation data for the road.
          :return: The reference border on which all other borders in this lane section are based upon.
         """
 
@@ -50,6 +56,7 @@ class OpenDriveConverter:
 
         # Set reference to plan view
         reference_border.reference = plan_view
+        reference_border.elevation_profile = elevation_profile
 
         # Lane offsets will be coeffs
         # this has to be done if the reference path has the laneoffset attribute
@@ -282,6 +289,9 @@ class OpenDriveConverter:
             border.reference = lane_borders[0]
         else:
             border.reference = lane_borders[-1]
+
+        # Propagate elevation profile from reference border
+        border.elevation_profile = lane_borders[0].elevation_profile
 
         for width in lane.widths:
             border.width_coefficient_offsets.append(width.start_offset)

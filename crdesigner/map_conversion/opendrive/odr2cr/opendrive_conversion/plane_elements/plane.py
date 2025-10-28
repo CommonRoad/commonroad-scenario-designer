@@ -45,7 +45,7 @@ class ParametricLaneBorderGroup:
         is_last_pos: bool = False,
         reverse=False,
         compute_curvature: bool = True,
-    ) -> Tuple[Tuple[float, float], float]:
+    ) -> Tuple[Tuple[float, float], float, float, float, float]:
         """Calc vertices point of inner or outer Border.
 
         :param border: Which border to calculate (inner or outer)
@@ -54,7 +54,8 @@ class ParametricLaneBorderGroup:
         :param is_last_pos: Whether it's the last position, default is False
         :param reverse: Whether to calculate in reverse order
         :param compute_curvature: Whether to computer curvature, default is True
-        :return: Cartesian coordinates of point on inner border and tangential direction.
+        :return: Cartesian coordinates of point on inner border, tangential direction, curvature,
+                 max geometry length, and elevation.
         """
         if border not in ("inner", "outer"):
             raise ValueError("Border specified must be 'inner' or 'outer'!")
@@ -121,14 +122,15 @@ class ParametricLane:
 
     def calc_border(
         self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature: bool = True
-    ) -> Tuple[Tuple[float, float], float, float, float]:
+    ) -> Tuple[Tuple[float, float], float, float, float, float]:
         """Calc vertices point of inner or outer Border.
 
         :param border: Which border to calculate (inner or outer).
         :param s_pos: Position of parameter ds where to calc the cartesian coordinates
         :param width_offset: Offset to add to calculated width in reference to the reference border. Default is 0.0.
         :param compute_curvature: Whether to computer curvature. Default is True.
-        :return: Cartesian coordinates of point on inner border and tangential direction.
+        :return: Cartesian coordinates of point on inner border, tangential direction, curvature,
+                 max geometry length, and elevation.
         """
         if self.reverse:
             border_pos = self.length - s_pos
@@ -136,7 +138,7 @@ class ParametricLane:
             border_pos = s_pos
 
         is_last_pos = np.isclose(self.length, border_pos)
-        r1, r2, r3, la = self.border_group.calc_border_position(
+        r1, r2, r3, la, elev = self.border_group.calc_border_position(
             border,
             border_pos,
             width_offset,
@@ -144,7 +146,7 @@ class ParametricLane:
             self.reverse,
             compute_curvature=compute_curvature,
         )
-        return r1, r2, r3, la
+        return r1, r2, r3, la, elev
 
     def calc_width(self, s_pos: float) -> float:
         """Calc width of border at position s_pos.
@@ -275,7 +277,7 @@ class ParametricLane:
         :param error_tolerance: Max. error between reference geometry and polyline of vertices.
         :param min_delta_s: Min. step length between two sampling positions on the reference geometry
         :param transformer: Coordinate transformer/projection.
-        :return: left and right vertices of the created Lanelet
+        :return: left and right vertices of the created Lanelet (now with elevation as z-coordinate)
         """
         left_vertices = []
         right_vertices = []
@@ -297,14 +299,16 @@ class ParametricLane:
             # version with sampling
             # while s <= self.length:
             # s_cache = s + 0.0
-            inner_pos, _, curvature, max_geometry_length = self.calc_border("inner", s)
-            outer_pos = self.calc_border("outer", s, compute_curvature=False)[0]
+            inner_pos, _, curvature, max_geometry_length, inner_elev = self.calc_border("inner", s)
+            outer_pos, _, _, _, outer_elev = self.calc_border("outer", s, compute_curvature=False)
             if transformer is not None:
-                left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
-                right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
+                transformed_inner = transformer.transform(inner_pos[0], inner_pos[1])
+                transformed_outer = transformer.transform(outer_pos[0], outer_pos[1])
+                left_vertices.append([transformed_inner[0], transformed_inner[1], inner_elev])
+                right_vertices.append([transformed_outer[0], transformed_outer[1], outer_elev])
             else:
-                left_vertices.append(inner_pos)
-                right_vertices.append(outer_pos)
+                left_vertices.append([inner_pos[0], inner_pos[1], inner_elev])
+                right_vertices.append([outer_pos[0], outer_pos[1], outer_elev])
 
             # version with sampling
             # if s >= self.length:

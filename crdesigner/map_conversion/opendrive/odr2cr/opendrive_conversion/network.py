@@ -244,7 +244,7 @@ class Network:
 
             # The reference border is the baseline for the whole road
             reference_border = OpenDriveConverter.create_reference_border(
-                road.plan_view, road.lanes.lane_offsets
+                road.plan_view, road.lanes.lane_offsets, road.elevation_profile
             )
 
             # Extracting signals, signs and stop lines from each road
