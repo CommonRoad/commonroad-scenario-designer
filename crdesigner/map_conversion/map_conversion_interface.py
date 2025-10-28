@@ -28,7 +28,6 @@ from crdesigner.map_conversion.osm2cr.converter_modules.converter import GraphSc
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import (
     convert_to_scenario,
 )
-from crdesigner.map_conversion.osm2cr.cr2osm import commonroad_to_osm as _cr_to_osm
 from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 
 Path_T = Union[str, Path]
@@ -139,31 +138,6 @@ def osm_to_commonroad(input_file: Path_T) -> Scenario:
     """
     osm_graph = GraphScenario(str(input_file)).graph
     return convert_to_scenario(osm_graph)
-
-
-def commonroad_to_osm(
-    scenario: Scenario,
-    output_file: Optional[Path_T] = None,
-) -> Optional[bytes]:
-    """
-    Converts CommonRoad scenario to OpenStreetMap format.
-
-    Creates OSM ways representing road centerlines from CommonRoad lanelets.
-    Preserves elevation data if present in 3D vertices.
-
-    :param scenario: CommonRoad scenario to convert
-    :param output_file: Optional path to save OSM XML file. If None, returns XML bytes.
-    :return: OSM XML as bytes if output_file is None, otherwise None
-    """
-    osm_xml = _cr_to_osm(scenario)
-
-    if output_file is not None:
-        with open(output_file, "wb") as f:
-            f.write(osm_xml)
-        logging.info(f"OSM file saved to: {output_file}")
-        return None
-    else:
-        return osm_xml
 
 
 def osm_to_commonroad_using_sumo(input_file: Path_T) -> Optional[Scenario]:
