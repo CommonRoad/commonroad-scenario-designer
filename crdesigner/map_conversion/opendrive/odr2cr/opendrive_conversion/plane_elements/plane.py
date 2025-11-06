@@ -4,6 +4,7 @@ import numpy as np
 import bisect
 from numpy.polynomial import polynomial
 from pyproj import Transformer
+from crdesigner.common.config.opendrive_config import open_drive_config
 
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_elements.border import (
     Border,
@@ -560,8 +561,9 @@ class ParametricLane:
 
         a, b, c, d = profile.polynomial_coefficients
         cs_pos = s_pos - profile.start_pos
-        print(f"[elev] s={s_pos:.3f} use rec.start={profile.start_pos:.3f}, a,b,c,d={profile.polynomial_coefficients}")
-        print(f"      ds={cs_pos:.3f}, z={a + b*cs_pos + c*cs_pos**2 + d*cs_pos**3}")
+        if getattr(open_drive_config, "general_3d_debug_logs", False):
+            print(f"[elev] s={s_pos:.3f} use rec.start={profile.start_pos:.3f}, a,b,c,d={profile.polynomial_coefficients}")
+            print(f"      ds={cs_pos:.3f}, z={a + b*cs_pos + c*cs_pos**2 + d*cs_pos**3}")
         return a + b * cs_pos + c * cs_pos**2 + d * cs_pos**3
     
     def calc_superelevation(self, s_pos):
@@ -630,20 +632,23 @@ class ParametricLane:
             # lateral Profile: <shape> and <superelevation>
             superelevation = self.calc_superelevation(s_to_road)
             shape_profile = self.calc_shape(s_to_road, lateral_distance_to_centerline)
-            print(f"[sup/shape] sup={superelevation:.5f}, shape={shape_profile:.3f}, lat={lateral_distance_to_centerline:.3f}")
+            if getattr(open_drive_config, "general_3d_debug_logs", False):
+                print(f"[sup/shape] sup={superelevation:.5f}, shape={shape_profile:.3f}, lat={lateral_distance_to_centerline:.3f}")
             height_to_ref_line, x_new, y_new = correction_due_to_superelevation(x_old, y_old, plane_curve_hdg, \
                                                                                 superelevation, \
                                                                                 shape_profile, \
                                                                                 lateral_distance_to_centerline)
-            print(f"[proj] h_sup+shape={height_to_ref_line:.3f}")
+            if getattr(open_drive_config, "general_3d_debug_logs", False):
+                print(f"[proj] h_sup+shape={height_to_ref_line:.3f}")
         final_height = height_to_ref_line * side_coeff + self.calc_elevation_central(s_to_road)
         # ---------------- lane height ----------------
         s_rel = s_to_road - self.offset_lanesection              # laneSection local s
         lane_offset = self._lane_height_at(border, s_rel)
         final_height += lane_offset
         #print(f"s_lane={s_rel:.3f}, lane_offset={lane_offset:.3f}, base={final_height:.3f}")
-        print(f"[lane {self.id_}] s_to_road={s_to_road:.3f}, sec_start={self.offset_lanesection:.3f}, "
-      f"s_rel={s_rel:.3f}, base_no_lane={final_height-lane_offset:.3f}, lane_off={lane_offset:.3f}")
+        if getattr(open_drive_config, "general_3d_debug_logs", False):
+            print(f"[lane {self.id_}] s_to_road={s_to_road:.3f}, sec_start={self.offset_lanesection:.3f}, "
+                  f"s_rel={s_rel:.3f}, base_no_lane={final_height-lane_offset:.3f}, lane_off={lane_offset:.3f}")
 
 
 

@@ -41,6 +41,13 @@ class OpenDriveConfig(BaseConfig):
         "Activates whether certain use elevation info should be added to all lanelets",
     )
 
+    # Debug/logging control for 3D pipeline
+    general_3d_debug_logs = Attribute(
+        False,
+        "3D debug logs",
+        "Print detailed 3D elevation/superelevation/shape debug logs to console",
+    )
+
 
     general_lanelet_type = Attribute(
         "urban",
@@ -128,6 +135,8 @@ class OpenDriveConfig(BaseConfig):
             "Intersection and Lane Segment Parameters",
             intersection_straight_threshold,
             lane_segment_angle,
+            general_use_elevation_type_activ,
+            general_3d_debug_logs,
         ],
         [
             "Lanelet Type Configuration odr2cr",

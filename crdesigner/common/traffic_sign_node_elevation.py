@@ -6,6 +6,7 @@ from commonroad.common.writer.file_writer_xml import (
     Point as _Point,
 )
 from lxml import etree 
+from crdesigner.common.config.opendrive_config import open_drive_config
 def _patch_sign_writer():
     orig_create = _TSNode.create_node
     def create_with_z(ts):
@@ -56,7 +57,8 @@ def _patch_stopline_writer():
                     start_node.remove(old_pt)
                 start_node.append(new_pt)
 
-                print("SL xml:", ET.tostring(node, encoding="unicode"))
+                if getattr(open_drive_config, "general_3d_debug_logs", False):
+                    print("SL xml:", ET.tostring(node, encoding="unicode"))
         # end
         if hasattr(sl, "end") and len(sl.end) == 3:
             ex, ey, ez = map(float, sl.end)
@@ -68,7 +70,8 @@ def _patch_stopline_writer():
                     end_node.remove(old_pt)
                 end_node.append(new_pt)
                 
-                print("SL xml:", ET.tostring(node, encoding="unicode"))
+                if getattr(open_drive_config, "general_3d_debug_logs", False):
+                    print("SL xml:", ET.tostring(node, encoding="unicode"))
         return node
     _SLNode.create_node = staticmethod(create_with_z)
     

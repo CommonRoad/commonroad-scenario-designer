@@ -70,6 +70,7 @@ from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.plane_eleme
     calculate_road_surface_height,
 )
 from crdesigner.map_conversion.opendrive.odr2cr.opendrive_parser.elements.roadLanes import height as HeightRecord
+from crdesigner.common.config.opendrive_config import open_drive_config
 
 def get_all_adjacent_lanelets(lanelet_network, incoming_lanelet_id):
     """
@@ -303,7 +304,8 @@ class Network:
                             pl.lane_height_records = origlane.height.copy()
                         else:
                             pl.lane_height_records = []
-                        print(f"PL {pl.id_} → origlane: {origlane}, height: {pl.lane_height_records}")
+                        if getattr(open_drive_config, "general_3d_debug_logs", False):
+                            print(f"PL {pl.id_} → origlane: {origlane}, height: {pl.lane_height_records}")
 
                         lane_id = int(pl.id_.split(".")[2])
                         if lane_id < 0:
@@ -837,7 +839,8 @@ class Network:
                     surface_points.append(pl._all_surface_points)
 
         if not surface_points:
-            print("there are no surface points to assign traffic sign heights from")
+            if getattr(open_drive_config, "general_3d_debug_logs", False):
+                print("there are no surface points to assign traffic sign heights from")
             return
         surface_points = np.vstack(surface_points)
         tree = cKDTree(surface_points[:, :2])
@@ -867,14 +870,16 @@ class Network:
                     surface_chunks.append(pts)
 
         if not surface_chunks:
-            print("assign_control_heights_from_surface: no surface points")
+            if getattr(open_drive_config, "general_3d_debug_logs", False):
+                print("assign_control_heights_from_surface: no surface points")
             return
 
         surface_points = np.vstack(surface_chunks).astype(float)
         mask = np.isfinite(surface_points).all(axis=1)
         surface_points = surface_points[mask]
         if surface_points.size == 0:
-            print("assign_control_heights_from_surface: all surface points invalid")
+            if getattr(open_drive_config, "general_3d_debug_logs", False):
+                print("assign_control_heights_from_surface: all surface points invalid")
             return
 
         tree = cKDTree(surface_points[:, :2])
@@ -949,7 +954,8 @@ class Network:
                 sl.end   = np.array([ex, ey, z_e], dtype=float)
 
         if cleaned_xy or skipped:
-            print(f"[assign_control_heights_from_surface] stop-lines repaired_xy={cleaned_xy}, skipped={skipped}")
+            if getattr(open_drive_config, "general_3d_debug_logs", False):
+                print(f"[assign_control_heights_from_surface] stop-lines repaired_xy={cleaned_xy}, skipped={skipped}")
 
 
     def relate_crosswalks_to_intersection(self, lanelet_network: ConversionLaneletNetwork):
