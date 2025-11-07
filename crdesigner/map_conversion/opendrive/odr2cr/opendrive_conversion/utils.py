@@ -16,11 +16,9 @@ from commonroad.scenario.traffic_sign import (
     TrafficSignIDUsa,
     TrafficSignIDZamunda,
 )
+from crdesigner.common.config.lanelet2_config import lanelet2_config
 
-CRS_ellipsoid= CRS.from_proj4(
-    "+proj=tmerc +lat_0=50.0 +lon_0=8.0 +datum=WGS84 +units=m "
-    "+geoidgrids=egm96_15.gtx +vunits=m +no_defs"
-)
+CRS_ellipsoid = CRS.from_proj4(lanelet2_config.height_geoid_proj4)
 
 CRS_orthometric= CRS.from_epsg(7915)  # ETRF89 + EVRF2007 
 
