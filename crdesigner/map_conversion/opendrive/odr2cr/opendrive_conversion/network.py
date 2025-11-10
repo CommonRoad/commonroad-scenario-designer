@@ -899,13 +899,13 @@ class Network:
 
         tree = cKDTree(surface_points[:, :2])
 
-        # def _finite2(p):
-        #     p = np.asarray(p, dtype=float).ravel()
-        #     return p.size >= 2 and np.isfinite(p[0]) and np.isfinite(p[1])
+        def _finite2(p):
+            p = np.asarray(p, dtype=float).ravel()
+            return p.size >= 2 and np.isfinite(p[0]) and np.isfinite(p[1])
 
-        # def _as2(p):
-        #     p = np.asarray(p, dtype=float).ravel()
-        #     return float(p[0]), float(p[1])
+        def _as2(p):
+            p = np.asarray(p, dtype=float).ravel()
+            return float(p[0]), float(p[1])
 
         # ------- signs -------
         for ts in self._traffic_signs:
@@ -928,13 +928,13 @@ class Network:
             tl.position = np.array([x, y, surface_points[idx, 2] + z_off], dtype=float)
 
         # ------- stop lines -------
-        def _finite2(p):
-            p = np.asarray(p, dtype=float).ravel()
-            return p.size >= 2 and np.isfinite(p[0]) and np.isfinite(p[1])
+        # def _finite2(p):
+        #     p = np.asarray(p, dtype=float).ravel()
+        #     return p.size >= 2 and np.isfinite(p[0]) and np.isfinite(p[1])
 
-        def _as2(p):
-            p = np.asarray(p, dtype=float).ravel()
-            return float(p[0]), float(p[1])
+        # def _as2(p):
+        #     p = np.asarray(p, dtype=float).ravel()
+        #     return float(p[0]), float(p[1])
 
         # ------- stop lines: use road surface z -------
         cleaned_xy = 0

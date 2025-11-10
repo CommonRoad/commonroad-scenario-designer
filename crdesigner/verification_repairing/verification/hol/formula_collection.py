@@ -162,15 +162,6 @@ class LaneletFormulas:
         "|| l1, l2 in L",
         "left_right_boundary_assignment": "Is_correct_left_right_boundary_assignment(l) "
         "|| l in L",
-        # ────────── upgraded legacy rules ──────────
-        "polylines_intersection_3d": "!(Is_polylines_intersection(left_polyline(l), right_polyline(l))) || l in L",
-        "left_self_intersection_3d": "!(Is_polyline_self_intersection(left_polyline(l))) || l in L",
-        "right_self_intersection_3d": "!(Is_polyline_self_intersection(right_polyline(l))) || l in L",
-        "lanelet_vertical_clearance": "!(Are_intersected_lanelets(l1, l2)) || l1, l2 in L",
-        # ────────── new 3-D-only checks ──────────
-        "vertical_clearance_stacked": "(l1 != l2) -> Is_vertical_clearance_sufficient(l1, l2) || l1, l2 in L",
-        "grade_within_limit": "Is_grade_within_limit(l) || l in L",
-        "predecessor_vertical_step": "(Has_predecessor(l1, l2)) -> Is_vertical_step_reasonable(l2, l1) || l1, l2 in L"
     }
     domains: Dict[str, str] = {}
     subformulas: Dict[str, str] = {

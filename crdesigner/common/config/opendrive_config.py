@@ -41,6 +41,13 @@ class OpenDriveConfig(BaseConfig):
         "Activates whether certain use elevation info should be added to all lanelets",
     )
 
+    # Toggle for orthometric height conversion (ellipsoid -> orthometric via geoid grids)
+    enable_orthometric_height_conversion = Attribute(
+        False,
+        "Orthometric height conversion",
+        "Convert ellipsoidal heights to orthometric using geoid grids (EGM96/EVRF).",
+    )
+
     # Debug/logging control for 3D pipeline
     general_3d_debug_logs = Attribute(
         True,
@@ -50,14 +57,14 @@ class OpenDriveConfig(BaseConfig):
 
     # Sidewalk handling in 3D
     sidewalk_no_xy_bank = Attribute(
-        True,
+        False,
         "Sidewalk ignore XY banking",
         "Keep sidewalks/borders from applying superelevation XY projection (height still follows surface).",
     )
 
     # Drop sidewalks that merge into driving lanes at their ends
     sidewalk_drop_merging = Attribute(
-        True,
+        False,
         "Drop merging sidewalks",
         "If a sidewalk/border merges into a driving lane at one end, skip converting it.",
     )
@@ -156,6 +163,7 @@ class OpenDriveConfig(BaseConfig):
             intersection_straight_threshold,
             lane_segment_angle,
             general_use_elevation_type_activ,
+            enable_orthometric_height_conversion,
             general_3d_debug_logs,
             sidewalk_no_xy_bank,
             sidewalk_drop_merging,

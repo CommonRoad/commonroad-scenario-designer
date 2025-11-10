@@ -17,6 +17,7 @@ from commonroad.scenario.traffic_sign import (
     TrafficSignIDZamunda,
 )
 from crdesigner.common.config.lanelet2_config import lanelet2_config
+from crdesigner.common.config.opendrive_config import open_drive_config
 
 # Target orthometric CRS (ETRF89 + EVRF2007)
 CRS_orthometric = CRS.from_epsg(7915)
@@ -31,6 +32,10 @@ def init_height_transformer_from_georef(proj4_str: str) -> None:
     Falls back to `lanelet2_config.height_geoid_proj4` if input is empty.
     """
     global _height_transformer
+    # Honor global toggle: disable initialization when orthometric conversion is off
+    if not getattr(open_drive_config, "enable_orthometric_height_conversion", True):
+        _height_transformer = None
+        return
     proj = (proj4_str or "").replace("\n", "").strip()
     if not proj:
         proj = lanelet2_config.height_geoid_proj4
@@ -48,13 +53,21 @@ def convert_height_ellipsoid_to_orthometric(x: float, y: float, z_ellipsoid: flo
     :param z: height above ellipsoid.
     :return: height above orthometric.
     """
+    # Fast path: if disabled, just return the input ellipsoidal height unchanged
+    if not getattr(open_drive_config, "enable_orthometric_height_conversion", True):
+        return z_ellipsoid
+
     # Initialize transformer on first use if not already done, using default config.
     global _height_transformer
     if _height_transformer is None:
         init_height_transformer_from_georef(lanelet2_config.height_geoid_proj4)
 
-    _, _, z_orthometric = _height_transformer.transform(x, y, z_ellipsoid)
-    return z_orthometric
+    try:
+        _, _, z_orthometric = _height_transformer.transform(x, y, z_ellipsoid)
+        return z_orthometric
+    except Exception:
+        # Fallback to original height on any failure
+        return z_ellipsoid
 
         
 
