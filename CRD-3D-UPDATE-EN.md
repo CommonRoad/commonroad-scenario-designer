@@ -47,9 +47,6 @@ This release introduces a complete 3D elevation pipeline: it reads elevation/sup
 - Geometry utilities (`geom_utils.py`)
   - `as_xy/as_xyz/dist`: unified 2D/3D point and distance handling.
 
-- Height datum conversion (`utils.py`)
-  - `convert_height_ellipsoid_to_orthometric(x,y,z_ellipsoid)`: ellipsoidal height → orthometric height (depends on EGM96 grid + pyproj).
-
 ## Usage
 
 1) Enable/disable 3D export
@@ -65,9 +62,6 @@ open_drive_config.general_use_elevation_type_activ = True  # enable 3D (default)
 - When 3D is enabled, TrafficSign/TrafficLight/StopLine nodes in XML include `<z>`.
 - When 3D is disabled, the pipeline forces 2D (both lanelets and controls).
 
-3) Dependencies
-
-- Orthometric height conversion depends on pyproj and the EGM96 grid file (`egm96_15.gtx`). If not present, either keep ellipsoidal height or install the grid file in your environment.
 
 ## Behavioral Changes and Compatibility
 
@@ -80,16 +74,12 @@ open_drive_config.general_use_elevation_type_activ = True  # enable 3D (default)
 
 ## XODR Processing Checklist (New/Enhanced)
 
-| Semantic element | XODR element/attribute | Code entry (partial) |
+| Semantic element | XODR element/attribute | Code entry (primary) |
 |---|---|---|
-| | `<signal zOffset=` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/parser.py:520; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py:161; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py:200; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:901; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:911; crdesigner/common/traffic_sign_node_elevation.py:132 |
-| `<signal zOffset=` (StopLine type 294) | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:638; crdesigner/common/traffic_sign_node_elevation.py:132 |
-| `<cornerLocal v=`, `<object validLength=`, `<object length=` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:481; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:591; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:536 |
-| `<height sOffset=`, `<height inner=`, `<height outer=` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/parser.py:488; crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/elements/roadLanes.py:550; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:657 |
-| `<road>-<lanes>-<lanesections>-<right/left/>-<height sOffset="aaaa" inner="aaaa" outer="aaaa"/>` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:317; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:628 |
-| `<elevation ` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:546; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py:272 |
-| `<superelevation ` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:569; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py:300 |
-| `<shape> ` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:777; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py:325 |
+| Traffic Light; Traffic Sign; Stopline| ` <OpenDRIVE> <road> <signals> <signal zOffset="..."/> </signal> </signals> </road> <OpenDRIVE> ` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:875; `assign_control_heights_from_surface()`|
+| Road height| `<OpenDRIVE> <road> <elevationProfile> <elevation s="..." a="..." b="..." c="..." d="..."/> </elevationProfile> </road> <OpenDRIVE>` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:439; `calc_vertices_3d()`; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:590; `calc_border_height()` |
+| Road lateral height | `<OpenDRIVE> <road> <lateralProfile> <superelevation s="..." a="..." b="..." c="..." d="..."/> <shapes s="..." t="..." a="..." b="..." c="..." d="..."/> /lateralProfile> </road> <OpenDRIVE>`  | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:596; `correction_due_to_superelevation()` |
+| Lane shoulder height | `<OpenDRIVE> <road> <lanes> <left / right> <lane> <height sOffset="..." inner="..." outer="..."/> </lane> </ left/right>  </lanes> </road> <OpenDRIVE>` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:284 |
 
 Line numbers point to the exact code locations at the time of this update.
 
@@ -109,7 +99,3 @@ Line numbers point to the exact code locations at the time of this update.
 - 3D/2D distance
   - `geom_utils.dist(p1, p2, use_3d: bool)` for unified distance handling.
 
-## Caveats
-
-- Orthometric height conversion relies on the EGM96 grid file (`egm96_15.gtx`). Without it, precise ellipsoidal→orthometric conversion is unavailable; either keep ellipsoidal height or install the grid.
-- StopLine nearest‑end association and length fallback parameters (e.g., 20.0 m threshold) are practice‑driven and may be tuned for specific datasets.
