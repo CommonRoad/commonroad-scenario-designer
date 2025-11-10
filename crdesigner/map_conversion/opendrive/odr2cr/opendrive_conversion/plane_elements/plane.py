@@ -462,8 +462,9 @@ class ParametricLane:
             elevation_inner, new_inner_x, new_inner_y = self.calc_border_height("inner", s, inner_pos[0], inner_pos[1], result_tang)
             elevation_outer, new_outer_x, new_outer_y = self.calc_border_height("outer", s, outer_pos[0], outer_pos[1], result_tang_outer)
 
-            height_inner = convert_height_ellipsoid_to_orthometric(inner_pos[0], inner_pos[1], elevation_inner)
-            height_outer = convert_height_ellipsoid_to_orthometric(outer_pos[0], outer_pos[1], elevation_outer)
+            # Convert to orthometric height using the XY at which the point will be placed
+            height_inner = convert_height_ellipsoid_to_orthometric(new_inner_x, new_inner_y, elevation_inner)
+            height_outer = convert_height_ellipsoid_to_orthometric(new_outer_x, new_outer_y, elevation_outer)
 
             if transformer is not None:
 
@@ -640,6 +641,16 @@ class ParametricLane:
                                                                                 lateral_distance_to_centerline)
             if getattr(open_drive_config, "general_3d_debug_logs", False):
                 print(f"[proj] h_sup+shape={height_to_ref_line:.3f}")
+
+            # Optional: keep sidewalks/borders from shifting in XY due to banking (avoid merging into driving lanes)
+            try:
+                if getattr(open_drive_config, "sidewalk_no_xy_bank", True) and self.type_ in ("sidewalk", "border"):
+                    x_new, y_new = x_old, y_old
+                    if getattr(open_drive_config, "general_3d_debug_logs", False):
+                        print("[proj] sidewalk/border: skip XY banking; keep XY, apply Z only")
+            except Exception:
+                # be robust even if config/type not present
+                pass
         final_height = height_to_ref_line * side_coeff + self.calc_elevation_central(s_to_road)
         # ---------------- lane height ----------------
         s_rel = s_to_road - self.offset_lanesection              # laneSection local s

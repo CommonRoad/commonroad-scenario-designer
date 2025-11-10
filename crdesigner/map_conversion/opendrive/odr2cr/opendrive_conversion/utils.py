@@ -1,4 +1,4 @@
-from typing import Type, Union
+from typing import Optional, Type, Union
 from pyproj import CRS, Transformer
 import iso3166
 from commonroad.scenario.traffic_sign import (
@@ -18,13 +18,27 @@ from commonroad.scenario.traffic_sign import (
 )
 from crdesigner.common.config.lanelet2_config import lanelet2_config
 
-CRS_ellipsoid = CRS.from_proj4(lanelet2_config.height_geoid_proj4)
+# Target orthometric CRS (ETRF89 + EVRF2007)
+CRS_orthometric = CRS.from_epsg(7915)
 
-CRS_orthometric= CRS.from_epsg(7915)  # ETRF89 + EVRF2007 
+# Lazily initialized global transformer for ellipsoidal -> orthometric conversion
+_height_transformer: Optional[Transformer] = None
 
-height_transformer = Transformer.from_crs(
-    CRS_ellipsoid, CRS_orthometric, always_xy=True
-)
+
+def init_height_transformer_from_georef(proj4_str: str) -> None:
+    """Initialize height transformer using a proj4 string (from OpenDRIVE geoReference).
+
+    Falls back to `lanelet2_config.height_geoid_proj4` if input is empty.
+    """
+    global _height_transformer
+    proj = (proj4_str or "").replace("\n", "").strip()
+    if not proj:
+        proj = lanelet2_config.height_geoid_proj4
+
+    crs_ellipsoid = CRS.from_proj4(proj)
+    _height_transformer = Transformer.from_crs(
+        crs_ellipsoid, CRS_orthometric, always_xy=True
+    )
 
 def convert_height_ellipsoid_to_orthometric(x: float, y: float, z_ellipsoid: float) -> float:
     """Convert height from ellipsoid to orthometric.
@@ -34,7 +48,12 @@ def convert_height_ellipsoid_to_orthometric(x: float, y: float, z_ellipsoid: flo
     :param z: height above ellipsoid.
     :return: height above orthometric.
     """
-    _, _, z_orthometric = height_transformer.transform(x, y, z_ellipsoid)
+    # Initialize transformer on first use if not already done, using default config.
+    global _height_transformer
+    if _height_transformer is None:
+        init_height_transformer_from_georef(lanelet2_config.height_geoid_proj4)
+
+    _, _, z_orthometric = _height_transformer.transform(x, y, z_ellipsoid)
     return z_orthometric
 
         

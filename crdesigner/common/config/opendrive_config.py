@@ -43,9 +43,29 @@ class OpenDriveConfig(BaseConfig):
 
     # Debug/logging control for 3D pipeline
     general_3d_debug_logs = Attribute(
-        False,
+        True,
         "3D debug logs",
         "Print detailed 3D elevation/superelevation/shape debug logs to console",
+    )
+
+    # Sidewalk handling in 3D
+    sidewalk_no_xy_bank = Attribute(
+        True,
+        "Sidewalk ignore XY banking",
+        "Keep sidewalks/borders from applying superelevation XY projection (height still follows surface).",
+    )
+
+    # Drop sidewalks that merge into driving lanes at their ends
+    sidewalk_drop_merging = Attribute(
+        True,
+        "Drop merging sidewalks",
+        "If a sidewalk/border merges into a driving lane at one end, skip converting it.",
+    )
+
+    sidewalk_merge_dist_thresh = Attribute(
+        1.0,
+        "Merging sidewalk distance (m)",
+        "Endpoint distance threshold to drivable polygon for merging detection.",
     )
 
 
@@ -137,6 +157,9 @@ class OpenDriveConfig(BaseConfig):
             lane_segment_angle,
             general_use_elevation_type_activ,
             general_3d_debug_logs,
+            sidewalk_no_xy_bank,
+            sidewalk_drop_merging,
+            sidewalk_merge_dist_thresh,
         ],
         [
             "Lanelet Type Configuration odr2cr",

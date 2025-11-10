@@ -235,6 +235,18 @@ class Network:
         self._geo_ref = opendrive.header.geo_reference
         self._offset = opendrive.header.offset
 
+        # Initialize height transformer using full geoReference (preserve geoidgrids if provided)
+        try:
+            from crdesigner.map_conversion.opendrive.odr2cr.opendrive_conversion.utils import (
+                init_height_transformer_from_georef,
+            )
+
+            full_georef = getattr(opendrive.header, "geo_reference_full", None)
+            init_height_transformer_from_georef(full_georef or self._geo_ref)
+        except Exception as e:
+            if getattr(open_drive_config, "general_3d_debug_logs", False):
+                print(f"Height transformer init failed: {e}")
+
         # Get country ID form signal data in openDrive and set it as attribute of the network object
         self.assign_country_id(Network.get_country_id_from_opendrive(opendrive.roads))
 
@@ -706,6 +718,9 @@ class Network:
 
         lanelet_network.convert_all_lanelet_ids()
         self._link_index.update_intersection_lane_id(lanelet_network.old_lanelet_ids())
+
+        # Optionally drop sidewalks/borders that merge into driving lanes at one end
+        self._drop_merging_sidewalks(lanelet_network)
         # self.traffic_signal_elements.update_traffic_signs_map_lane_id(lanelet_network.old_lanelet_ids())
 
         for crosswalk in self._crosswalks:
@@ -884,13 +899,13 @@ class Network:
 
         tree = cKDTree(surface_points[:, :2])
 
-        def _finite2(p):
-            p = np.asarray(p, dtype=float).ravel()
-            return p.size >= 2 and np.isfinite(p[0]) and np.isfinite(p[1])
+        # def _finite2(p):
+        #     p = np.asarray(p, dtype=float).ravel()
+        #     return p.size >= 2 and np.isfinite(p[0]) and np.isfinite(p[1])
 
-        def _as2(p):
-            p = np.asarray(p, dtype=float).ravel()
-            return float(p[0]), float(p[1])
+        # def _as2(p):
+        #     p = np.asarray(p, dtype=float).ravel()
+        #     return float(p[0]), float(p[1])
 
         # ------- signs -------
         for ts in self._traffic_signs:
@@ -956,6 +971,71 @@ class Network:
         if cleaned_xy or skipped:
             if getattr(open_drive_config, "general_3d_debug_logs", False):
                 print(f"[assign_control_heights_from_surface] stop-lines repaired_xy={cleaned_xy}, skipped={skipped}")
+
+
+    def _drop_merging_sidewalks(self, lanelet_network: ConversionLaneletNetwork):
+        """
+        Drop sidewalks/borders that merge into drivable lanes at exactly one end.
+        Heuristic: if exactly one endpoint of the sidewalk centerline lies inside or within
+        a small distance of a drivable lane polygon, we consider it a merging/disappearing
+        sidewalk and remove it from the network.
+
+        Controlled by config:
+          - open_drive_config.sidewalk_drop_merging (bool)
+          - open_drive_config.sidewalk_merge_dist_thresh (float meters)
+        """
+        if not getattr(open_drive_config, "sidewalk_drop_merging", False):
+            return
+
+        try:
+            from shapely.geometry import Point
+        except Exception:
+            # Shapely not available; skip safely
+            return
+
+        import numpy as np
+
+        thresh = float(getattr(open_drive_config, "sidewalk_merge_dist_thresh", 1.0) or 1.0)
+
+        def is_drivable(lanelet) -> bool:
+            lts = lanelet.lanelet_type
+            return not (
+                (LaneletType.SIDEWALK in lts)
+                or (LaneletType.BORDER in lts)
+                or (LaneletType.BICYCLE_LANE in lts)
+                or (LaneletType.CROSSWALK in lts)
+            )
+
+        drivable_polys = [ll.polygon.shapely_object for ll in lanelet_network.lanelets if is_drivable(ll)]
+        if not drivable_polys:
+            return
+
+        drop_ids = []
+        for ll in list(lanelet_network.lanelets):
+            ltypes = ll.lanelet_type
+            if not (LaneletType.SIDEWALK in ltypes or LaneletType.BORDER in ltypes):
+                continue
+
+            cv = np.asarray(ll.center_vertices, dtype=float)
+            if cv.size == 0:
+                drop_ids.append(ll.lanelet_id)
+                continue
+
+            p_start = Point(float(cv[0, 0]), float(cv[0, 1]))
+            p_end = Point(float(cv[-1, 0]), float(cv[-1, 1]))
+
+            near_start = any(poly.contains(p_start) or poly.distance(p_start) <= thresh for poly in drivable_polys)
+            near_end = any(poly.contains(p_end) or poly.distance(p_end) <= thresh for poly in drivable_polys)
+
+            # remove if exactly one end is close to/inside a drivable polygon
+            if near_start ^ near_end:
+                drop_ids.append(ll.lanelet_id)
+
+        for lid in drop_ids:
+            lanelet_network.remove_lanelet(lid, remove_references=True)
+
+        if drop_ids and getattr(open_drive_config, "general_3d_debug_logs", False):
+            print(f"[drop_merging_sidewalks] removed {len(drop_ids)} sidewalk/border lanelets: {drop_ids}")
 
 
     def relate_crosswalks_to_intersection(self, lanelet_network: ConversionLaneletNetwork):

@@ -80,16 +80,16 @@ open_drive_config.general_use_elevation_type_activ = True  # enable 3D (default)
 
 ## XODR Processing Checklist (New/Enhanced)
 
-| XODR element/attribute | Code entry (partial) |
-|---|---|
-| `<signal zOffset=` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/parser.py:520; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py:161; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py:200; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:901; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:911; crdesigner/common/traffic_sign_node_elevation.py:132 |
+| Semantic element | XODR element/attribute | Code entry (partial) |
+|---|---|---|
+| | `<signal zOffset=` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/parser.py:520; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py:161; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py:200; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:901; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:911; crdesigner/common/traffic_sign_node_elevation.py:132 |
 | `<signal zOffset=` (StopLine type 294) | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:638; crdesigner/common/traffic_sign_node_elevation.py:132 |
 | `<cornerLocal v=`, `<object validLength=`, `<object length=` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:481; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:591; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:536 |
 | `<height sOffset=`, `<height inner=`, `<height outer=` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/parser.py:488; crdesigner/map_conversion/opendrive/odr2cr/opendrive_parser/elements/roadLanes.py:550; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:657 |
-| `<lane level=` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:317; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:628 |
+| `<road>-<lanes>-<lanesections>-<right/left/>-<height sOffset="aaaa" inner="aaaa" outer="aaaa"/>` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/network.py:317; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:628 |
 | `<elevation ` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:546; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py:272 |
 | `<superelevation ` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:569; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py:300 |
-| `<shape ` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:777; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py:325 |
+| `<shape> ` | crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/plane.py:777; crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/plane_elements/traffic_signals.py:325 |
 
 Line numbers point to the exact code locations at the time of this update.
 

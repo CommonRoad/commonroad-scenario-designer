@@ -779,7 +779,12 @@ def parse_opendrive_header(opendrive: OpenDrive, header: etree.ElementTree):
 
     # Reference
     if header.find("geoReference") is not None:
-        parsed_header.geo_reference = clean_projection_string(header.find("geoReference").text)
+        raw_geo = header.find("geoReference").text
+        if raw_geo is not None:
+            # keep a raw copy (no projection clean-up, preserve geoidgrids etc.)
+            parsed_header.geo_reference_full = raw_geo.replace("\n", "").strip()
+            # keep existing cleaned version for other consumers
+            parsed_header.geo_reference = clean_projection_string(raw_geo)
 
     # offset {x: , y: , z: , hdg:}
     if header.find("offset") is not None:
