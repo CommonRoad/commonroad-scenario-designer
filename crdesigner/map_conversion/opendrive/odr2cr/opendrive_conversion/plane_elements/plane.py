@@ -366,9 +366,7 @@ class ParametricLane:
         #
         if self.length < 0:
             return np.array(left_vertices), np.array(right_vertices)
-        use_orthometric_height = getattr(
-            open_drive_config, "enable_orthometric_height_conversion", True
-        )
+
         num_steps = int(max(3, np.ceil(self.length / float(0.5))))
         poses = np.linspace(0, self.length, num_steps)
         for s in poses:
@@ -388,19 +386,6 @@ class ParametricLane:
             x_inner, y_inner = inner_pos[0], inner_pos[1]
             x_outer, y_outer = outer_pos[0], outer_pos[1]
 
-            if use_orthometric_height:
-                # Reference conversion for debugging/analysis only
-                HEIGHT_ellipsoid = 150
-                height_inner = convert_height_ellipsoid_to_orthometric(
-                    x_inner, y_inner, HEIGHT_ellipsoid
-                )
-                height_outer = convert_height_ellipsoid_to_orthometric(
-                    x_outer, y_outer, HEIGHT_ellipsoid
-                )
-                #debug:compare height before and after
-
-                height_diff_inner = height_inner - HEIGHT_ellipsoid
-                height_diff_outer = height_outer - HEIGHT_ellipsoid
 
             if transformer is not None:
                 #avoid the type error
