@@ -4,12 +4,13 @@ This release introduces a complete 3D elevation pipeline: it reads elevation/sup
 
 ## Overview
 
-- 3D geometry generation: Lanelet left/right boundaries are sampled as 3D points (considering longitudinal elevation, superelevation, and cross‑section shape), and per‑lane local height (lane/height) is supported.
+- 3D geometry generation: Lanelet left/right boundaries are sampled as 3D points (considering longitudinal elevation, superelevation, and cross-section shape), and per-lane local height (lane/height) is supported.
 - 3D controls: TrafficSign/TrafficLight/StopLine positions include Z; StopLine endpoints are also written with Z.
 - Elevation sources: centerline elevation + superelevation/shape projection + lane local height offset; controls add each object’s zOffset.
 - 3D/2D switch: controlled by `open_drive_config.general_use_elevation_type_activ`; when disabled, everything falls back to 2D.
-- Writer support: auto‑patch CommonRoad XML writer to write `<point>` with `<z>`.
-- More robust mapping: optional 3D nearest‑neighbor association, StopLine length fallback, etc.
+- Optional orthometric conversion: ellipsoidal heights can be converted to orthometric heights via the EGM96 geoid model when explicitly enabled.
+- Writer support: auto-patch CommonRoad XML writer to write `<point>` with `<z>`.
+
 
 ## New Variables and Capabilities
 
@@ -18,9 +19,14 @@ This release introduces a complete 3D elevation pipeline: it reads elevation/sup
   - Definition: `crdesigner/common/config/opendrive_config.py`
   - Effect: `crdesigner/common/file_writer.py` calls the 3D writer patch when True (see below).
 
+- Orthometric conversion toggle: `open_drive_config.enable_orthometric_height_conversion` (default False)
+  - Purpose: convert sampled ellipsoidal heights to orthometric heights using the EGM96 geoid grid (EPSG:7915 reference).
+  - Definition: `crdesigner/common/config/opendrive_config.py`
+  - Effect: `crdesigner/map_conversion/opendrive/odr2cr/opendrive_conversion/utils.py` initializes a PROJ transformer from the OpenDRIVE `<geoReference>` proj4 string (or `lanelet2_config.height_geoid_proj4` fallback) and runs `convert_height_ellipsoid_to_orthometric()` before elevations are stored in lane surfaces and control points.
+
 - Writer patch: `patch_controls_write_3d()`
   - Location: `crdesigner/common/traffic_sign_node_elevation.py`
-  - Effect: overrides CommonRoad‑IO XML writer `create_node()` for TrafficSign/TrafficLight/StopLine so `<position>/<point>` and `<stopLine>/<point>` include `<z>`.
+  - Effect: overrides CommonRoad-IO XML writer `create_node()` for TrafficSign/TrafficLight/StopLine so `<position>/<point>` and `<stopLine>/<point>` include `<z>`.
   - Trigger: called by `CRDesignerFileWriter` constructor when the 3D switch is True.
 
 - ParametricLane additions (for 3D) in `plane.py`
@@ -62,6 +68,26 @@ open_drive_config.general_use_elevation_type_activ = True  # enable 3D (default)
 - When 3D is enabled, TrafficSign/TrafficLight/StopLine nodes in XML include `<z>`.
 - When 3D is disabled, the pipeline forces 2D (both lanelets and controls).
 
+3) (Optional) Convert ellipsoidal heights to orthometric heights
+
+```python
+from crdesigner.common.config.opendrive_config import open_drive_config
+from crdesigner.common.config.lanelet2_config import lanelet2_config
+
+open_drive_config.enable_orthometric_height_conversion = True
+
+# Optional: override the fallback proj4 string if your OpenDRIVE geoReference does not
+# contain a geoid grid definition. The default expects the PROJ EGM96 grid (egm96_15.gtx).
+lanelet2_config.height_geoid_proj4 = (
+    "+proj=tmerc +lat_0=50.0 +lon_0=8.0 +datum=WGS84 +units=m "
+    "+geoidgrids=egm96_15.gtx +vunits=m +no_defs"
+)
+```
+
+- The transformer is initialized from the `<geoReference>` proj4 string if it carries a `geoidgrids=` entry; otherwise we fall back to `lanelet2_config.height_geoid_proj4`.
+- Ensure the referenced grid file (e.g., `egm96_15.gtx`) is installed in your local PROJ data directory; otherwise the conversion silently returns the original ellipsoidal heights.
+- When enabled, all sampled surface heights (centerline elevation, lane height records, control KD-tree queries) are converted before exporting the Lanelet/StopLine/TrafficLight/TrafficSign Z coordinates.
+
 
 ## Behavioral Changes and Compatibility
 
@@ -83,6 +109,14 @@ open_drive_config.general_use_elevation_type_activ = True  # enable 3D (default)
 
 Line numbers point to the exact code locations at the time of this update.
 
+## Height Reference Considerations
+
+We have implemented and verified the conversion between ellipsoidal and orthometric heights based on the EGM96 geoid model. However, the OpenDRIVE specification does not state whether the `<elevation>` profile is expressed in ellipsoidal or orthometric heights, and `<geoReference>` only provides optional, non-binding hints.
+
+Because of this ambiguity, different application contexts (GNSS alignment vs. DEM-based analysis, for example) might interpret the same file differently. Enabling the conversion path therefore introduces assumptions that go beyond what OpenDRIVE mandates and should only be done when you control the upstream height reference.
+
+The conversion module is included in this delivery for completeness and reference; the CommonRoad development team can decide to keep or remove it (or change the default) once project requirements and standard alignment are clarified.
+
 ## Developer Notes (Internal API)
 
 - `ParametricLane.calc_border_height(...)`
@@ -98,4 +132,3 @@ Line numbers point to the exact code locations at the time of this update.
 
 - 3D/2D distance
   - `geom_utils.dist(p1, p2, use_3d: bool)` for unified distance handling.
-
