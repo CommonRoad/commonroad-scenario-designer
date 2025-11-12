@@ -159,4 +159,7 @@ class Header:
         self.west = west
         self.vendor = vendor
         self.geo_reference = None
+        # Stores the full, unmodified geoReference string from the OpenDRIVE header
+        # (including parameters like `geoidgrids`).
+        self.geo_reference_full = None
         self.offset = {"x": "0.0", "y": "0.0", "z": "0.0", "hdg": "0.0"}
