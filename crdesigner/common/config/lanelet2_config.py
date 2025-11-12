@@ -81,7 +81,7 @@ class Lanelet2Config(BaseConfig):
     )
 
     translate = Attribute(
-        False,
+        True,
         "Translate",
         "Boolean indicating whether map should be translated by the location coordinate specified "
         "in the CommonRoad map",
@@ -136,6 +136,13 @@ class Lanelet2Config(BaseConfig):
         0.6,
         "Percentage Vertices Correct Direction",
         "Min. percentage of correctly assigned vertices to each polyline of lanelet.",
+    )
+
+    # CRS/proj4 string for ellipsoidal -> orthometric height conversion (EGM96)
+    height_geoid_proj4 = Attribute(
+        "+proj=tmerc +lat_0=50.0 +lon_0=8.0 +datum=WGS84 +units=m +geoidgrids=egm96_15.gtx +vunits=m +no_defs",
+        "Orthometric CRS (proj4)",
+        "Proj4 string used to create ellipsoidal CRS for height conversion via EGM96 grid.",
     )
 
     LAYOUT = [
