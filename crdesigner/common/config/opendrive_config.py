@@ -38,7 +38,7 @@ class OpenDriveConfig(BaseConfig):
     general_use_elevation_type_activ = Attribute(
         True,
         "General use elevation type active",
-        "Activates whether certain use elevation info should be added to all lanelets",
+        "Activates 3-D elevation support for OpenDRIVE to CommonRoad conversion",
     )
 
     # Toggle for orthometric height conversion (ellipsoid -> orthometric via geoid grids)
@@ -50,7 +50,7 @@ class OpenDriveConfig(BaseConfig):
 
     # Debug/logging control for 3D pipeline
     general_3d_debug_logs = Attribute(
-        True,
+        False,
         "3D debug logs",
         "Print detailed 3D elevation/superelevation/shape debug logs to console",
     )
