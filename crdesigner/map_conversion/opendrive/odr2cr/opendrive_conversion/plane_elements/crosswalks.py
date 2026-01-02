@@ -91,6 +91,8 @@ def get_crosswalks(road: Road) -> List[ConversionLanelet]:
                 else:
                     logging.warning("odr2cr crossing computation: case not supported yet.")
                     continue
+        if left_vertices.shape[0] == 0 or right_vertices.shape[0] == 0:
+            continue 
         center_vertices = (left_vertices + right_vertices) / 2
         # create ConversionLanelet
         lanelet = ConversionLanelet(

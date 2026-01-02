@@ -646,6 +646,9 @@ class Network:
         """
         transformer = None
         location_kwargs = {}
+        offset_x = float(self._offset.get("x", 0)) if self._offset else 0.0
+        offset_y = float(self._offset.get("y", 0)) if self._offset else 0.0
+
         if self._geo_ref is not None and self._config.proj_string_odr is not None:
             longitude, latitude = get_geo_reference(self._geo_ref)
             if longitude is not None and latitude is not None:
@@ -653,7 +656,24 @@ class Network:
 
             crs_from = CRS(self._geo_ref)
             crs_to = CRS(self._config.proj_string_odr)
-            transformer = Transformer.from_proj(crs_from, crs_to)
+            base_transformer = Transformer.from_proj(crs_from, crs_to)
+
+            # Fix offset handling: parser subtracts offset, but for positive offsets
+            # (SUMO default), we need to add it back. Negative offsets are already correct.
+            if offset_x > 0 or offset_y > 0:
+
+                class OffsetTransformer:
+                    def __init__(self, base_trans, off_x, off_y):
+                        self._base = base_trans
+                        self._offset_x = 2 * off_x  # Double to compensate for parser subtraction
+                        self._offset_y = 2 * off_y
+
+                    def transform(self, x, y):
+                        return self._base.transform(self._offset_x + x, self._offset_y + y)
+
+                transformer = OffsetTransformer(base_transformer, offset_x, offset_y)
+            else:
+                transformer = base_transformer
 
         location = Location(
             geo_transformation=(
