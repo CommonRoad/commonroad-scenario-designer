@@ -563,7 +563,7 @@ class Lanelet2CRConverter:
         node = self.osm.nodes[traffic_light_way.nodes[1]]
 
         # convert to CR space
-        x, y = self.transformer.transform(node.lon, node.lat)
+        x, y = self.transformer.transform(node.lat, node.lon)
         x -= self.origin_utm[0]
         y -= self.origin_utm[1]
 
