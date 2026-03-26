@@ -395,44 +395,17 @@ class ParametricLaneGroup:
                 adjacent_width = np.linalg.norm(adj_inner_pos - adj_outer_pos)
                 local_width_offset = distance_slope * pos + global_distance[0]
 
-                if mirror_border == "left":
-                    new_outer_pos = self.calc_border("inner", pos, local_width_offset)[0]
-                    modified_width = np.linalg.norm(new_outer_pos - inner_pos)
-
-                    # change width s.t. it does not mirror inner border but instead
-                    # outer border
-                    local_width_offset = (
-                        math.copysign(1, local_width_offset) * last_width_difference
-                    )
-                    if modified_width < original_width:
-                        new_vertex = self.calc_border("outer", pos, local_width_offset)[0]
-                        if transformer is not None:
-                            right_vertices.append(
-                                transformer.transform(new_vertex[0], new_vertex[1])
-                            )
-                        else:
-                            right_vertices.append(new_vertex)
-                    elif modified_width > original_width + adjacent_width:
-                        if transformer is not None:
-                            right_vertices.append(
-                                transformer.transform(adj_outer_pos[0], adj_outer_pos[1])
-                            )
-                        else:
-                            right_vertices.append(adj_outer_pos)
-                    else:
-                        if transformer is not None:
-                            right_vertices.append(
-                                transformer.transform(new_outer_pos[0], new_outer_pos[1])
-                            )
-                        else:
-                            right_vertices.append(new_outer_pos)
-                        last_width_difference = abs(modified_width - original_width)
-
-                    if transformer is not None:
-                        left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
-                    else:
-                        left_vertices.append(inner_pos)
-                elif mirror_border == "right":
+                # Both "left" and "right" mirror_border cases use the
+                # lanelet's own outer polynomial (which carries the width
+                # taper) to compute ``new_inner``, store it in
+                # ``left_vertices``, and keep ``right_vertices`` at the
+                # natural outer position. With a constant offset equal to
+                # adj_width, the varying polyval produces a constant-width
+                # overlap with the adjacent lane at the zero-width end. For
+                # LHT (reversed) lanes the physical-left / physical-right
+                # assignment is corrected by the swap pass in
+                # ``network.py`` after JOIN/SPLIT has run.
+                if mirror_border == "left" or mirror_border == "right":
                     new_inner_pos = self.calc_border("outer", pos, local_width_offset)[0]
                     modified_width = np.linalg.norm(new_inner_pos - outer_pos)
 

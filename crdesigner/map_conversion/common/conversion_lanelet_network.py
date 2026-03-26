@@ -538,7 +538,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 if adj_right.successor[0] != successor.adj_right:
                     return False
             else:
-                if not lanelet.has_unique_pred_succ_relation(-1, adj_right):
+                if not self.has_unique_pred_succ_relation(-1, adj_right):
                     return False
                 if adj_right.predecessor[0] != successor.adj_right:
                     return False

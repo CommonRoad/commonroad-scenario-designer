@@ -421,6 +421,26 @@ class Network:
         # Perform lane splits and joins
         lanelet_network.join_and_split_possible_lanes()
 
+        # LHT fix-up: calc_vertices and join_and_split both use the OpenDrive
+        # inner/outer convention (inner -> left_vertices, outer -> right_vertices).
+        # By reflection symmetry that matches physical-left / physical-right for
+        # RHT lanes but is reversed for LHT lanes. Swap them here, after
+        # join_and_split has run, so its RHT-centric geometry computation is
+        # preserved. adj_left / adj_right pointers are set with LHT awareness in
+        # ParametricLaneGroup._set_adjacent_lanes and do not need to be touched.
+        for lanelet in lanelet_network.lanelets:
+            plg = getattr(lanelet, "parametric_lane_group", None)
+            if plg is None or plg.driving_direction:
+                continue
+            lanelet.left_vertices, lanelet.right_vertices = (
+                lanelet.right_vertices,
+                lanelet.left_vertices,
+            )
+            lanelet.line_marking_left_vertices, lanelet.line_marking_right_vertices = (
+                lanelet.line_marking_right_vertices,
+                lanelet.line_marking_left_vertices,
+            )
+
         lanelet_network.convert_all_lanelet_ids()
         self._link_index.update_intersection_lane_id(lanelet_network.old_lanelet_ids())
         # self.traffic_signal_elements.update_traffic_signs_map_lane_id(lanelet_network.old_lanelet_ids())
