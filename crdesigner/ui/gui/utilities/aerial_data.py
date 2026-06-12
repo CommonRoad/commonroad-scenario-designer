@@ -26,9 +26,6 @@ IMAGE_RESOLUTION = 256
 
 bing_maps_api_response = None
 
-os.makedirs(config.IMAGE_SAVE_PATH, exist_ok=True)
-
-
 def store_tile(quadkey: str, image: JpegImageFile) -> None:
     """
     This is useful for low internet connection speeds.
@@ -37,6 +34,7 @@ def store_tile(quadkey: str, image: JpegImageFile) -> None:
     :param image: the image
     :return: None
     """
+    os.makedirs(config.IMAGE_SAVE_PATH, exist_ok=True)
     file = config.IMAGE_SAVE_PATH + quadkey + ".jpeg"
     image.save(file, "JPEG")
     return
