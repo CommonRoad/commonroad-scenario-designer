@@ -26,6 +26,7 @@ IMAGE_RESOLUTION = 256
 
 bing_maps_api_response = None
 
+
 def store_tile(quadkey: str, image: JpegImageFile) -> None:
     """
     This is useful for low internet connection speeds.
